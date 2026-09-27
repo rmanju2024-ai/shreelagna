@@ -1,0 +1,858 @@
+"use server";
+
+import { ensureAppUser } from "@/lib/auth/session";
+import { findOwnProfile } from "@/lib/profile/own-profile";
+import { isUniqueViolation, missingPayloadColumn, saveErrorMessage } from "@/lib/profile/db-errors";
+import { displayFirstName, toDbCreatorRelationship } from "@/lib/profile/options";
+import {
+  isProfileComplete,
+  nextReviewStatus,
+  smsOtpRequiredFromEnv,
+  type CompletenessInput,
+} from "@/lib/profile/completeness";
+import { formList } from "@/lib/profile/multi-values";
+import { loadFormLists } from "@/lib/profile/load-form-lists";
+import { ABOUT_MAX, ABOUT_MIN, aboutPlainText } from "@/lib/profile/about-html";
+import { contactViewedCopy, interestReceivedCopy } from "@/lib/match/alert-copy";
+import { canAlertInterest } from "@/lib/match/profile-settings";
+import { effectiveInterestStatus, openInterestBlocksSend } from "@/lib/match/interest-status";
+import { parseProfileForm } from "@/lib/validation/profile";
+import { isProfileEditSection, pickSectionRecord, SECTION_FORM_KEYS } from "@/lib/profile/sections";
+import { buildProfileSaveRow, pickSaveRow } from "@/lib/profile/save-payload";
+import { canEditMemberProfile, isStaffRole } from "@/lib/desk/access";
+import { contentFlags, MEMBER_CONTACT_WARNING } from "@/lib/moderation/content-flags";
+import { writeAudit } from "@/lib/desk/audit";
+import { notifyInterestReceived } from "@/lib/notify/dispatch";
+import { whatsappFailFlag } from "@/lib/notify/whatsapp";
+import { digitsOnly } from "@/lib/notify/phone";
+import { complimentaryPaidProfileAccess, pairPlanLive } from "@/lib/membership/access";
+import { loadInterestQuota, loadMembership } from "@/lib/membership/load";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { readSessionFromCookies, restInsertProfile } from "@/lib/supabase/user-rest";
+import { writeFile } from "node:fs/promises";
+import path from "node:path";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+
+async function requireMember() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login?next=/app");
+  const cookieSession = await readSessionFromCookies();
+  if (cookieSession) {
+    await supabase.auth.setSession(cookieSession);
+  }
+  const me = await ensureAppUser(supabase, user);
+  if (!me) redirect("/login?error=account");
+  const accessToken =
+    cookieSession?.access_token ?? (await supabase.auth.getSession()).data.session?.access_token;
+  const admin = createServiceClient();
+  return { supabase: admin ?? supabase, user, me, accessToken, usingService: Boolean(admin) };
+}
+
+async function loadEditableProfile(
+  supabase: { from: (table: string) => any },
+  me: { id: string; role?: string | null },
+  profileId: string,
+) {
+  const { data } = await supabase.from("profiles").select("id, created_by").eq("id", profileId).maybeSingle();
+  if (!data) return null;
+  if (data.created_by === me.id) return data;
+  if (!isStaffRole(me.role)) return null;
+  const { data: owner } = await supabase.from("app_users").select("role").eq("id", data.created_by).maybeSingle();
+  if (!canEditMemberProfile(me, { id: data.created_by, role: owner?.role })) return null;
+  return data;
+}
+
+async function recordSaveError(error: { message?: string; code?: string; details?: string; hint?: string } | null) {
+  try {
+    await writeFile(
+      path.join(process.cwd(), ".next", "save-last-error.json"),
+      JSON.stringify(
+        {
+          at: new Date().toISOString(),
+          code: error?.code ?? null,
+          message: error?.message ?? null,
+          details: error?.details ?? null,
+          hint: error?.hint ?? null,
+        },
+        null,
+        2,
+      ),
+    );
+  } catch {
+    /* ignore */
+  }
+}
+
+function toCompleteInput(
+  row: {
+    subject_full_name: string | null;
+    surname?: string | null;
+    date_of_birth: string | null;
+    current_city: string | null;
+    native_country?: string | null;
+    current_country?: string | null;
+    height_cm: number | null;
+    marital_status: string | null;
+    qualification: string | null;
+    occupation: string | null;
+    employed_in?: string | null;
+    income_band?: string | null;
+    employer_name?: string | null;
+    pref_notes?: string | null;
+    pref_age_min?: number | null;
+    pref_age_max?: number | null;
+    birth_city?: string | null;
+    birth_time?: string | null;
+    college_name?: string | null;
+    hobbies?: string | null;
+    brothers_count?: number | null;
+    sisters_count?: number | null;
+    father_name?: string | null;
+    father_occupation?: string | null;
+    mother_name?: string | null;
+    mother_occupation?: string | null;
+    family_status?: string | null;
+    living_arrangement?: string | null;
+    family_location?: string | null;
+    physical_status?: string | null;
+    about: string | null;
+    community_id: string | null;
+    prefer_not_community: boolean;
+    subject_mobile: string | null;
+    phone_otp_verified_at: string | null;
+  },
+  extras: {
+    hasApprovedPhoto: boolean;
+    emailOtpVerified: boolean;
+    hasVideo?: boolean;
+    hasAudio?: boolean;
+  },
+): CompletenessInput {
+  return {
+    subjectFullName: row.subject_full_name,
+    surname: row.surname ?? null,
+    dateOfBirth: row.date_of_birth,
+    currentCity: row.current_city,
+    nativeCountry: row.native_country ?? null,
+    currentCountry: row.current_country ?? null,
+    heightCm: row.height_cm,
+    maritalStatus: row.marital_status,
+    qualification: row.qualification,
+    occupation: row.occupation,
+    incomeBand: row.income_band,
+    employedIn: row.employed_in,
+    employerName: row.employer_name,
+    prefNotes: row.pref_notes,
+    prefAgeMin: row.pref_age_min,
+    prefAgeMax: row.pref_age_max,
+    birthCity: row.birth_city,
+    birthTime: row.birth_time,
+    collegeName: row.college_name,
+    hobbies: row.hobbies,
+    brothersCount: row.brothers_count,
+    sistersCount: row.sisters_count,
+    fatherOccupation: row.father_occupation,
+    motherOccupation: row.mother_occupation,
+    familyStatus: row.family_status,
+    familyLocation: row.family_location,
+    physicalStatus: row.physical_status,
+    livingArrangement: row.living_arrangement ?? null,
+    about: row.about,
+    communityId: row.community_id,
+    preferNotCommunity: row.prefer_not_community,
+    hasApprovedPhoto: extras.hasApprovedPhoto,
+    hasVideo: extras.hasVideo,
+    hasAudio: extras.hasAudio,
+    emailOtpVerified: extras.emailOtpVerified,
+    subjectMobile: row.subject_mobile,
+    phoneOtpVerified: Boolean(row.phone_otp_verified_at),
+    smsOtpRequired: smsOtpRequiredFromEnv(),
+  };
+}
+
+async function writeCompleteness(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  profileId: string,
+  emailOtpVerified: boolean,
+  opts?: { contentChanged?: boolean },
+) {
+  const { data: photos } = await supabase
+    .from("media")
+    .select("id")
+    .eq("profile_id", profileId)
+    .eq("kind", "photo")
+    .eq("status", "approved")
+    .limit(1);
+
+  const { data: intros } = await supabase
+    .from("media")
+    .select("kind")
+    .eq("profile_id", profileId)
+    .in("kind", ["video", "audio"])
+    .eq("status", "approved");
+
+  const { data: saved } = await supabase
+    .from("profiles")
+    .select(
+      "status, subject_full_name, surname, date_of_birth, current_city, height_cm, marital_status, qualification, occupation, income_band, employed_in, pref_age_min, pref_age_max, about, community_id, prefer_not_community, subject_mobile, phone_otp_verified_at, birth_city, birth_time, college_name, hobbies, brothers_count, sisters_count, father_occupation, mother_occupation, family_status, family_location, physical_status, living_arrangement",
+    )
+    .eq("id", profileId)
+    .maybeSingle();
+
+  if (!saved) return;
+  const complete = isProfileComplete(
+    toCompleteInput(saved, {
+      hasApprovedPhoto: Boolean(photos?.length),
+      hasVideo: Boolean(intros?.some((row) => row.kind === "video")),
+      hasAudio: Boolean(intros?.some((row) => row.kind === "audio")),
+      emailOtpVerified,
+    }),
+  );
+  await supabase
+    .from("profiles")
+    .update({
+      is_complete: complete,
+      status: nextReviewStatus(typeof saved.status === "string" ? saved.status : null, complete, opts),
+    })
+    .eq("id", profileId);
+}
+
+async function insertOwnProfile(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  payload: Record<string, unknown>,
+  userId: string,
+  accessToken?: string,
+): Promise<{ id: string | null; error: { message?: string; code?: string; details?: string; hint?: string } | null }> {
+  let current: Record<string, unknown> = { ...payload };
+  let lastError: { message?: string; code?: string; details?: string; hint?: string } | null = null;
+  const attempts = Math.min(12, Math.max(4, Object.keys(current).length));
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    let id: string | null = null;
+    let error: { message?: string; code?: string; details?: string; hint?: string } | null = null;
+
+    if (accessToken) {
+      const viaRest = await restInsertProfile(accessToken, current);
+      id = viaRest.id;
+      error = viaRest.error;
+    } else {
+      const viaClient = await supabase.from("profiles").insert(current).select("id").maybeSingle();
+      id = viaClient.data?.id ?? null;
+      error = viaClient.error;
+    }
+
+    if (id) return { id, error: null };
+    if (!error) {
+      const row = await findOwnProfile(supabase, userId);
+      return { id: row?.id ?? null, error: null };
+    }
+    lastError = error;
+
+    const missing = missingPayloadColumn(error, current);
+    if (missing) {
+      delete current[missing];
+      continue;
+    }
+    const hay = `${error.code ?? ""} ${error.message ?? ""} ${error.details ?? ""}`.toLowerCase();
+    if (hay.includes("member_code") && (hay.includes("null") || hay.includes("not-null") || hay.includes("not null"))) {
+      const { allocateMemberCode } = await import("@/lib/profile/member-code");
+      current = { ...current, member_code: allocateMemberCode() };
+      continue;
+    }
+    if (isUniqueViolation(error) || error.code === "PGRST116" || hay.includes("0 rows")) {
+      const row = await findOwnProfile(supabase, userId);
+      if (row?.id) return { id: row.id, error: null };
+    }
+    await recordSaveError(error);
+    return { id: null, error };
+  }
+  await recordSaveError(lastError);
+  return { id: null, error: lastError ?? { message: "Could not save the profile." } };
+}
+
+export async function saveProfile(formData: FormData) {
+  const { supabase, me, accessToken, usingService } = await requireMember();
+  const lists = await loadFormLists();
+  const sectionRaw = String(formData.get("section") ?? "");
+  const section = isProfileEditSection(sectionRaw) ? sectionRaw : undefined;
+  const bounceId = String(formData.get("id") ?? "");
+
+  const raw: Record<string, unknown> = {
+    id: bounceId,
+    creator_relationship: String(formData.get("creator_relationship") ?? ""),
+    profile_type: String(formData.get("profile_type") ?? ""),
+    subject_full_name: String(formData.get("subject_full_name") ?? ""),
+    surname: String(formData.get("surname") ?? ""),
+    date_of_birth: String(formData.get("date_of_birth") ?? ""),
+    birth_time: String(formData.get("birth_time") ?? ""),
+    mother_tongue: String(formData.get("mother_tongue") ?? "") || undefined,
+    height_cm: formData.get("height_cm"),
+    marital_status: String(formData.get("marital_status") ?? ""),
+    diet: String(formData.get("diet") ?? "") || undefined,
+    native_country: String(formData.get("native_country") ?? ""),
+    native_state: String(formData.get("native_state") ?? "") || undefined,
+    native_city: String(formData.get("native_city") ?? ""),
+    current_city: String(formData.get("current_city") ?? ""),
+    current_state: String(formData.get("current_state") ?? "") || undefined,
+    qualification: String(formData.get("qualification") ?? ""),
+    occupation: String(formData.get("occupation") ?? ""),
+    employed_in: String(formData.get("employed_in") ?? ""),
+    income_band: String(formData.get("income_band") ?? ""),
+    employer_name: String(formData.get("employer_name") ?? ""),
+    settle_abroad: String(formData.get("settle_abroad") ?? ""),
+    future_ambition: String(formData.get("future_ambition") ?? ""),
+    family_type: String(formData.get("family_type") ?? ""),
+    birth_city: String(formData.get("birth_city") ?? ""),
+    living_arrangement: String(formData.get("living_arrangement") ?? ""),
+    college_name: String(formData.get("college_name") ?? ""),
+    hobbies: String(formData.get("hobbies") ?? ""),
+    brothers_count: formData.get("brothers_count"),
+    brothers_married_count: formData.get("brothers_married_count"),
+    sisters_count: formData.get("sisters_count"),
+    sisters_married_count: formData.get("sisters_married_count"),
+    father_name: String(formData.get("father_name") ?? ""),
+    father_occupation: String(formData.get("father_occupation") ?? ""),
+    mother_name: String(formData.get("mother_name") ?? ""),
+    mother_occupation: String(formData.get("mother_occupation") ?? ""),
+    siblings_note: String(formData.get("siblings_note") ?? ""),
+    family_status: String(formData.get("family_status") ?? ""),
+    family_location: String(formData.get("family_location") ?? ""),
+    physical_status: String(formData.get("physical_status") ?? ""),
+    health_notes: String(formData.get("health_notes") ?? ""),
+    sub_community: String(formData.get("sub_community") ?? ""),
+    blood_group: String(formData.get("blood_group") ?? ""),
+    grew_up_in: String(formData.get("grew_up_in") ?? ""),
+    gotra: String(formData.get("gotra") ?? ""),
+    rashi: String(formData.get("rashi") ?? ""),
+    lagna: String(formData.get("lagna") ?? ""),
+    nakshatra: String(formData.get("nakshatra") ?? ""),
+    nakshatra_pada: String(formData.get("nakshatra_pada") ?? ""),
+    gana: String(formData.get("gana") ?? ""),
+    yoni_animal: String(formData.get("yoni_animal") ?? ""),
+    manglik: String(formData.get("manglik") ?? ""),
+    citizenship: String(formData.get("citizenship") ?? ""),
+    current_country: String(formData.get("current_country") ?? ""),
+    hobby_list: formList(formData, "hobby_list"),
+    pref_age_min: formData.get("pref_age_min"),
+    pref_age_max: formData.get("pref_age_max"),
+    pref_maritals: formList(formData, "pref_maritals"),
+    pref_educations: formList(formData, "pref_educations"),
+    pref_occupations: formList(formData, "pref_occupations"),
+    pref_countries: formList(formData, "pref_countries"),
+    pref_notes: String(formData.get("pref_notes") ?? ""),
+    known_languages: formList(formData, "known_languages"),
+    pref_tongues: formList(formData, "pref_tongues"),
+    pref_religions: formList(formData, "pref_religions"),
+    pref_communities: formList(formData, "pref_communities"),
+    pref_states: formList(formData, "pref_states"),
+    pref_cities: formList(formData, "pref_cities"),
+    pref_height_min: formData.get("pref_height_min"),
+    pref_height_max: formData.get("pref_height_max"),
+    pref_diets: formList(formData, "pref_diets"),
+    pref_incomes: formList(formData, "pref_incomes"),
+    pref_employed: formList(formData, "pref_employed"),
+    pref_managed: formList(formData, "pref_managed"),
+    pref_horoscope: String(formData.get("pref_horoscope") ?? ""),
+    about: String(formData.get("about") ?? ""),
+    religion_id: String(formData.get("religion_id") ?? ""),
+    community_id: String(formData.get("community_id") ?? ""),
+    prefer_not_community: false,
+    subject_mobile: String(formData.get("subject_mobile") ?? "").replace(/\s+/g, ""),
+  };
+
+  const parsed = parseProfileForm(
+    section ? pickSectionRecord(raw, SECTION_FORM_KEYS[section]) : raw,
+    lists,
+    section,
+  );
+
+  if (!parsed.ok) {
+    const path = bounceId ? `/app/profiles/${bounceId}` : "/app/profiles/new";
+    const extra = bounceId && section ? `&edit=1&section=${section}` : bounceId ? "&edit=1" : "";
+    redirect(`${path}?error=${encodeURIComponent(parsed.error)}${extra}`);
+  }
+
+  const editingId = bounceId || parsed.data.id || null;
+  const mine = await findOwnProfile(supabase, me.id);
+  const memberCode = String(formData.get("member_code") ?? "").trim();
+  const houseEdit = Boolean(isStaffRole(me.role) && editingId && editingId !== mine?.id);
+  let target = mine;
+  let ownerId = me.id;
+
+  if (houseEdit && editingId) {
+    const { data: row } = await supabase
+      .from("profiles")
+      .select("id, created_by, creator_relationship, profile_type, member_code")
+      .eq("id", editingId)
+      .maybeSingle();
+    if (!row) redirect("/desk/profiles");
+    const { data: owner } = await supabase.from("app_users").select("id, role").eq("id", row.created_by).maybeSingle();
+    if (!canEditMemberProfile(me, { id: row.created_by, role: owner?.role })) {
+      redirect("/desk/profiles");
+    }
+    target = row;
+    ownerId = row.created_by;
+  } else {
+    if (mine && !editingId) {
+      redirect(`/app/profiles/${mine.id}`);
+    }
+    if (mine && editingId && editingId !== mine.id) {
+      redirect(`/app/profiles/${mine.id}`);
+    }
+    if (
+      editingId &&
+      memberCode &&
+      mine &&
+      "member_code" in mine &&
+      typeof mine.member_code === "string" &&
+      mine.member_code &&
+      memberCode !== mine.member_code
+    ) {
+      redirect(`/app/profiles/${mine.id}?error=${encodeURIComponent("This profile belongs to another member ID.")}&edit=1`);
+    }
+  }
+
+  const fullPayload = buildProfileSaveRow(parsed.data, {
+    createdBy: ownerId,
+    creatorRelationship:
+      editingId && target && typeof target.creator_relationship === "string" && target.creator_relationship
+        ? target.creator_relationship
+        : toDbCreatorRelationship(parsed.data.creator_relationship ?? "self"),
+    profileType:
+      editingId && target && "profile_type" in target && (target.profile_type === "vadhu" || target.profile_type === "vara")
+        ? target.profile_type
+        : parsed.data.profile_type === "vara"
+          ? "vara"
+          : "vadhu",
+  });
+  const payload = pickSaveRow(fullPayload, section, Boolean(editingId));
+
+  let profileId = editingId;
+  if (editingId && typeof payload.subject_mobile === "string") {
+    const { data: currentMobile } = await supabase
+      .from("profiles")
+      .select("subject_mobile")
+      .eq("id", editingId)
+      .maybeSingle();
+    if (digitsOnly(currentMobile?.subject_mobile) !== digitsOnly(payload.subject_mobile)) {
+      payload.phone_otp_verified_at = null;
+    }
+  }
+  if (editingId) {
+    let current: Record<string, unknown> = { ...payload };
+    let saved = false;
+    let lastError: { message?: string; code?: string; details?: string; hint?: string } | null = null;
+    const attempts = Math.min(12, Math.max(4, Object.keys(current).length));
+    for (let attempt = 0; attempt < attempts; attempt += 1) {
+      let update = supabase.from("profiles").update(current).eq("id", editingId);
+      if (!houseEdit) {
+        update = update.eq("created_by", me.id);
+        if (mine && "member_code" in mine && typeof mine.member_code === "string" && mine.member_code) {
+          update = update.eq("member_code", mine.member_code);
+        }
+      }
+      const { error } = await update;
+      if (!error) {
+        saved = true;
+        break;
+      }
+      lastError = error;
+      const missing = missingPayloadColumn(error, current);
+      if (missing) {
+        delete current[missing];
+        continue;
+      }
+      await recordSaveError(error);
+      redirect(
+        `/app/profiles/${editingId}?error=${encodeURIComponent(saveErrorMessage(error))}&edit=1${section ? `&section=${section}` : ""}`,
+      );
+    }
+    if (!saved) {
+      await recordSaveError(lastError);
+      redirect(
+        `/app/profiles/${editingId}?error=${encodeURIComponent(saveErrorMessage(lastError))}&edit=1${section ? `&section=${section}` : ""}`,
+      );
+    }
+  } else {
+    const inserted = await insertOwnProfile(
+      supabase,
+      payload,
+      me.id,
+      usingService ? undefined : accessToken,
+    );
+    if (!inserted.id) {
+      const again = await findOwnProfile(supabase, me.id);
+      if (again) {
+        redirect(`/app/profiles/${again.id}`);
+      }
+      redirect(`/app/profiles/new?error=${encodeURIComponent(saveErrorMessage(inserted.error))}`);
+    }
+    profileId = inserted.id;
+  }
+
+  await writeCompleteness(supabase, profileId!, Boolean(me.email_otp_verified_at), {
+    contentChanged: !houseEdit && section === "about",
+  });
+
+  if (!houseEdit && me.active_profile_id !== profileId) {
+    await supabase.from("app_users").update({ active_profile_id: profileId }).eq("id", me.id);
+  }
+  if (houseEdit && profileId) {
+    await writeAudit({
+      actorUserId: me.id,
+      actorRole: me.role,
+      action: "profile.edit",
+      entityType: "profile",
+      entityId: profileId,
+      metadata: { section: section ?? "full" },
+    });
+  }
+
+  revalidatePath(`/app/profiles/${profileId}`);
+  revalidatePath("/desk/profiles");
+  redirect(`/app/profiles/${profileId}?saved=1${section ? `&tab=${section}` : ""}`);
+}
+
+export async function setActiveProfile(formData: FormData) {
+  const { supabase, me } = await requireMember();
+  const id = String(formData.get("id") ?? "");
+  if (!id) redirect("/app");
+  const { data } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("id", id)
+    .eq("created_by", me.id)
+    .maybeSingle();
+  if (!data) redirect("/app");
+  await supabase.from("app_users").update({ active_profile_id: id }).eq("id", me.id);
+  revalidatePath("/app");
+  revalidatePath("/browse");
+  redirect("/app");
+}
+
+export async function sendInterest(formData: FormData) {
+  const { supabase, me } = await requireMember();
+  const toId = String(formData.get("to_profile_id") ?? "");
+  if (!toId || !me.active_profile_id) {
+    redirect("/browse?error=need_profile");
+  }
+
+  const { data: mine } = await supabase
+    .from("profiles")
+    .select("id, is_complete, status, subject_full_name")
+    .eq("id", me.active_profile_id)
+    .maybeSingle();
+
+  if (!mine?.is_complete || mine.status !== "active") {
+    redirect(`/browse/${toId}?error=incomplete`);
+  }
+
+  const access = await loadMembership(supabase, me);
+  if (!access.live) {
+    redirect(`/browse/${toId}?error=plan`);
+  }
+  const quota = await loadInterestQuota(supabase, me, access, [mine.id]);
+  if (!quota.canSend) {
+    redirect(`/browse/${toId}?error=quota`);
+  }
+
+  let { data: target } = await supabase
+    .from("profiles")
+    .select("id, status, created_by, subject_full_name, notify_interest, subject_mobile")
+    .eq("id", toId)
+    .maybeSingle();
+  if (!target) {
+    const retry = await supabase
+      .from("profiles")
+      .select("id, status, created_by, subject_full_name, subject_mobile")
+      .eq("id", toId)
+      .maybeSingle();
+    target = retry.data;
+  }
+  if (!target || target.status !== "active") {
+    redirect("/browse?error=unavailable");
+  }
+
+  const { data: existing } = await supabase
+    .from("interests")
+    .select("id, from_profile_id, to_profile_id, status, created_at")
+    .or(
+      `and(from_profile_id.eq.${mine.id},to_profile_id.eq.${toId}),and(from_profile_id.eq.${toId},to_profile_id.eq.${mine.id})`,
+    )
+    .limit(8);
+  const open = (existing ?? []).find((row) =>
+    openInterestBlocksSend(effectiveInterestStatus(row.status, row.created_at)),
+  );
+  if (open) {
+    redirect(`/browse/${toId}`);
+  }
+  const closedIds = (existing ?? [])
+    .filter((row) => !openInterestBlocksSend(effectiveInterestStatus(row.status, row.created_at)))
+    .map((row) => row.id);
+  if (closedIds.length) {
+    await supabase.from("interests").delete().in("id", closedIds);
+  }
+
+  const { error } = await supabase.from("interests").insert({
+    from_profile_id: mine.id,
+    to_profile_id: toId,
+  });
+  if (error && !error.message.toLowerCase().includes("duplicate")) {
+    redirect(`/browse/${toId}?error=could_not_send`);
+  }
+  if (!error && canAlertInterest(target)) {
+    const senderName = displayFirstName(mine.subject_full_name ?? "A member");
+    const viewerFirst = displayFirstName(target.subject_full_name ?? "there");
+    const copy = interestReceivedCopy(viewerFirst, senderName);
+    await supabase.from("notices").insert({
+      user_id: target.created_by,
+      kind: copy.kind,
+      title: copy.title,
+      body: copy.body,
+      href: "/app/interests",
+      match_profile_id: mine.id,
+    });
+    const wa = await notifyInterestReceived(
+      target.created_by,
+      senderName,
+      typeof target.subject_mobile === "string" ? target.subject_mobile : null,
+    );
+    revalidatePath(`/browse/${toId}`);
+    revalidatePath("/app/alerts");
+    revalidatePath("/app/interests");
+    revalidatePath("/", "layout");
+    redirect(`/browse/${toId}?sent=1${wa.ok ? "" : `&wa=${whatsappFailFlag(wa.error)}`}`);
+  }
+  revalidatePath(`/browse/${toId}`);
+  revalidatePath("/app/alerts");
+  revalidatePath("/app/interests");
+  revalidatePath("/", "layout");
+  redirect(`/browse/${toId}?sent=1`);
+}
+
+export async function cancelInterest(formData: FormData) {
+  const { supabase, me } = await requireMember();
+  const toId = String(formData.get("to_profile_id") ?? "");
+  const interestKey = String(formData.get("interest_id") ?? "");
+  if (!toId || !me.active_profile_id) redirect("/browse?error=need_profile");
+  const { data: row } = await supabase
+    .from("interests")
+    .select("id, from_profile_id, to_profile_id, status, created_at")
+    .eq("id", interestKey)
+    .maybeSingle();
+  if (!row || row.from_profile_id !== me.active_profile_id || row.to_profile_id !== toId) {
+    redirect(`/browse/${toId}`);
+  }
+  if (effectiveInterestStatus(row.status, row.created_at) !== "pending") {
+    redirect(`/browse/${toId}`);
+  }
+  await supabase.from("interests").delete().eq("id", row.id);
+  revalidatePath(`/browse/${toId}`);
+  revalidatePath("/app/interests");
+  revalidatePath("/app/alerts");
+  revalidatePath("/", "layout");
+  redirect(`/browse/${toId}`);
+}
+
+export async function viewContact(formData: FormData) {
+  const { supabase, me } = await requireMember();
+  const toId = String(formData.get("to_profile_id") ?? "");
+  if (!toId || !me.active_profile_id) redirect("/browse?error=need_profile");
+
+  const { data: mine } = await supabase
+    .from("profiles")
+    .select("id, is_complete, status, subject_full_name")
+    .eq("id", me.active_profile_id)
+    .maybeSingle();
+  if (!mine?.is_complete || mine.status !== "active") {
+    redirect(`/browse/${toId}?error=incomplete`);
+  }
+  if (mine.id === toId) redirect(`/browse/${toId}`);
+
+  const access = await loadMembership(supabase, me);
+  const db = createServiceClient() ?? supabase;
+  let guestPass = false;
+  if (access.kind === "none" || access.kind === "welcome") {
+    const { data: targetOwner } = await db.from("profiles").select("created_by").eq("id", toId).maybeSingle();
+    const ownerId = typeof targetOwner?.created_by === "string" ? targetOwner.created_by : "";
+    const { data: ownerRow } = ownerId
+      ? await db.from("app_users").select("id, role, welcome_started_at, welcome_days").eq("id", ownerId).maybeSingle()
+      : { data: null };
+    const targetAccess = ownerRow ? await loadMembership(db, ownerRow) : null;
+    const { data: links } = await db
+      .from("interests")
+      .select("status, created_at")
+      .or(
+        `and(from_profile_id.eq.${mine.id},to_profile_id.eq.${toId}),and(from_profile_id.eq.${toId},to_profile_id.eq.${mine.id})`,
+      )
+      .limit(8);
+    const interestOpen = (links ?? []).some((row) =>
+      openInterestBlocksSend(effectiveInterestStatus(row.status, row.created_at ?? "")),
+    );
+    guestPass = complimentaryPaidProfileAccess({
+      viewerKind: access.kind,
+      targetKind: targetAccess?.kind,
+      interestOpen,
+      pairLive: pairPlanLive(access.live, targetAccess?.live),
+    });
+  }
+  if (!access.live && !guestPass) redirect(`/browse/${toId}?error=plan`);
+  if (!guestPass) {
+    const quota = await loadInterestQuota(supabase, me, access, [mine.id]);
+    if (!quota.canSend) redirect(`/browse/${toId}?error=quota`);
+  }
+
+  const { data: target } = await db
+    .from("profiles")
+    .select("id, status, subject_mobile, created_by")
+    .eq("id", toId)
+    .maybeSingle();
+  if (!target || target.status !== "active") redirect("/browse?error=unavailable");
+  const { data: owner } = await db.from("app_users").select("email").eq("id", target.created_by).maybeSingle();
+  const mobile = typeof target.subject_mobile === "string" ? target.subject_mobile.trim() : "";
+  const email = typeof owner?.email === "string" ? owner.email.trim() : "";
+  if (!mobile && !email) redirect(`/browse/${toId}`);
+
+  const { error } = await supabase.from("contact_views").insert({
+    viewer_profile_id: mine.id,
+    viewed_profile_id: toId,
+  });
+  if (error) redirect(`/browse/${toId}?error=could_not_send`);
+
+  if (me.role !== "admin" && me.role !== "service") {
+    const copy = contactViewedCopy(displayFirstName(mine.subject_full_name ?? "A member"));
+    const now = new Date().toISOString();
+    const { data: existing } = await db
+      .from("notices")
+      .select("id")
+      .eq("user_id", target.created_by)
+      .eq("kind", "contact_view")
+      .eq("match_profile_id", mine.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (existing?.id) {
+      await db
+        .from("notices")
+        .update({
+          created_at: now,
+          read_at: null,
+          title: copy.title,
+          body: copy.body,
+          href: `/browse/${mine.id}`,
+        })
+        .eq("id", existing.id);
+    } else {
+      await db.from("notices").insert({
+        user_id: target.created_by,
+        kind: copy.kind,
+        title: copy.title,
+        body: copy.body,
+        href: `/browse/${mine.id}`,
+        match_profile_id: mine.id,
+      });
+    }
+  }
+
+  revalidatePath(`/browse/${toId}`);
+  revalidatePath("/app/plans");
+  revalidatePath("/app/alerts");
+  revalidatePath("/", "layout");
+  redirect(`/browse/${toId}?contact=1`);
+}
+
+export async function saveAboutIntro(
+  profileId: string,
+  about: string,
+): Promise<{ ok: true; warning?: string } | { ok: false; error: string }> {
+  const { supabase, me } = await requireMember();
+  const text = aboutPlainText(about);
+  if (text.length < ABOUT_MIN) {
+    return { ok: false, error: `Write at least ${ABOUT_MIN} characters.` };
+  }
+  if (text.length > ABOUT_MAX) {
+    return { ok: false, error: `Keep About under ${ABOUT_MAX} characters.` };
+  }
+  const mine = await loadEditableProfile(supabase, me, profileId);
+  if (!mine) return { ok: false, error: "This profile could not be saved just now." };
+  const payload: Record<string, unknown> = { about, intro_shown: "about" };
+  let { error } = await supabase.from("profiles").update(payload).eq("id", profileId);
+  if (error && missingPayloadColumn(error, payload)) {
+    delete payload.intro_shown;
+    const retry = await supabase.from("profiles").update(payload).eq("id", profileId);
+    error = retry.error;
+  }
+  if (error) return { ok: false, error: saveErrorMessage(error) };
+  await writeCompleteness(supabase, profileId, Boolean(me.email_otp_verified_at), {
+    contentChanged: !isStaffRole(me.role),
+  });
+  revalidatePath(`/app/profiles/${profileId}`);
+  revalidatePath("/desk/profiles");
+  const flagged = contentFlags(about);
+  return {
+    ok: true,
+    warning: !isStaffRole(me.role) && flagged.length ? MEMBER_CONTACT_WARNING : undefined,
+  };
+}
+
+export async function saveIntroChoice(
+  profileId: string,
+  shown: "video" | "audio",
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const { supabase, me } = await requireMember();
+  const mine = await loadEditableProfile(supabase, me, profileId);
+  if (!mine) return { ok: false, error: "This profile could not be saved just now." };
+  const { data: clips } = await supabase
+    .from("media")
+    .select("id")
+    .eq("profile_id", profileId)
+    .eq("kind", shown)
+    .limit(1);
+  if (!clips?.length) {
+    return {
+      ok: false,
+      error: shown === "video" ? "Add a video first, then Save." : "Add a voice note first, then Save.",
+    };
+  }
+  const { error } = await supabase
+    .from("profiles")
+    .update({ intro_shown: shown })
+    .eq("id", profileId);
+  if (error && !missingPayloadColumn(error, { intro_shown: shown })) {
+    return { ok: false, error: saveErrorMessage(error) };
+  }
+  await writeCompleteness(supabase, profileId, Boolean(me.email_otp_verified_at), {
+    contentChanged: !isStaffRole(me.role),
+  });
+  revalidatePath(`/app/profiles/${profileId}`);
+  revalidatePath("/desk/profiles");
+  return { ok: true };
+}
+
+export async function setIntroShown(profileId: string, shown: "about" | "video" | "audio") {
+  const { supabase, me } = await requireMember();
+  const data = await loadEditableProfile(supabase, me, profileId);
+  if (!data) return;
+  const { error } = await supabase
+    .from("profiles")
+    .update({ intro_shown: shown })
+    .eq("id", profileId);
+  if (error && missingPayloadColumn(error, { intro_shown: shown })) return;
+  revalidatePath("/app");
+  revalidatePath(`/app/profiles/${profileId}`);
+}
+
+export async function refreshProfileCompleteness(profileId: string) {
+  const { supabase, me } = await requireMember();
+  const data = await loadEditableProfile(supabase, me, profileId);
+  if (!data) return;
+  await writeCompleteness(supabase, profileId, Boolean(me.email_otp_verified_at), {
+    contentChanged: !isStaffRole(me.role),
+  });
+  revalidatePath("/app");
+  revalidatePath(`/app/profiles/${profileId}`);
+  revalidatePath("/desk/profiles");
+}

@@ -1,0 +1,255 @@
+export const PROFILE_EDIT_SECTIONS = ["about", "personal", "faith", "work", "family", "partner"] as const;
+
+export type ProfileEditSection = (typeof PROFILE_EDIT_SECTIONS)[number];
+
+export type ProfileEditTarget = ProfileEditSection | "album";
+
+export function isProfileEditSection(value: string): value is ProfileEditSection {
+  return (PROFILE_EDIT_SECTIONS as readonly string[]).includes(value);
+}
+
+export function isProfileEditTarget(value: string): value is ProfileEditTarget {
+  return value === "album" || isProfileEditSection(value);
+}
+
+export const SECTION_TITLES: Record<ProfileEditTarget, string> = {
+  about: "About",
+  personal: "Personal",
+  faith: "Religion & astronomy",
+  work: "Education & work",
+  family: "Family",
+  partner: "Partner Preference",
+  album: "Album",
+};
+
+export const SECTION_FORM_KEYS: Record<ProfileEditSection, readonly string[]> = {
+  about: ["about"],
+  personal: [
+    "profile_type",
+    "subject_full_name",
+    "surname",
+    "grew_up_in",
+    "blood_group",
+    "height_cm",
+    "mother_tongue",
+    "known_languages",
+    "hobbies",
+    "marital_status",
+    "diet",
+    "subject_mobile",
+    "native_country",
+    "native_state",
+    "native_city",
+    "current_country",
+    "current_state",
+    "current_city",
+    "citizenship",
+    "living_arrangement",
+    "physical_status",
+    "health_notes",
+    "hobby_list",
+  ],
+  faith: [
+    "date_of_birth",
+    "birth_time",
+    "birth_city",
+    "religion_id",
+    "community_id",
+    "sub_community",
+    "gotra",
+    "rashi",
+    "lagna",
+    "nakshatra",
+    "nakshatra_pada",
+    "gana",
+    "yoni_animal",
+    "manglik",
+  ],
+  work: [
+    "qualification",
+    "college_name",
+    "occupation",
+    "employed_in",
+    "employer_name",
+    "income_band",
+    "settle_abroad",
+    "future_ambition",
+  ],
+  family: [
+    "creator_relationship",
+    "family_type",
+    "family_status",
+    "family_location",
+    "brothers_count",
+    "brothers_married_count",
+    "sisters_count",
+    "sisters_married_count",
+    "father_name",
+    "father_occupation",
+    "mother_name",
+    "mother_occupation",
+    "siblings_note",
+  ],
+  partner: [
+    "pref_age_min",
+    "pref_age_max",
+    "pref_height_min",
+    "pref_height_max",
+    "pref_maritals",
+    "pref_tongues",
+    "pref_religions",
+    "pref_communities",
+    "pref_countries",
+    "pref_states",
+    "pref_cities",
+    "pref_horoscope",
+    "pref_educations",
+    "pref_occupations",
+    "pref_employed",
+    "pref_incomes",
+    "pref_diets",
+    "pref_managed",
+  ],
+};
+
+export const SECTION_PAYLOAD_KEYS: Record<ProfileEditSection, readonly string[]> = {
+  about: ["about", "intro_shown"],
+  personal: [
+    "subject_full_name",
+    "surname",
+    "grew_up_in",
+    "blood_group",
+    "height_cm",
+    "mother_tongue",
+    "known_languages",
+    "hobbies",
+    "marital_status",
+    "diet",
+    "subject_mobile",
+    "native_country",
+    "native_state",
+    "native_city",
+    "current_country",
+    "current_state",
+    "current_city",
+    "citizenship",
+    "living_arrangement",
+    "physical_status",
+    "health_notes",
+    "hobby_list",
+  ],
+  faith: [
+    "date_of_birth",
+    "birth_time",
+    "birth_city",
+    "religion_id",
+    "community_id",
+    "sub_community",
+    "gotra",
+    "rashi",
+    "lagna",
+    "nakshatra",
+    "nakshatra_pada",
+    "gana",
+    "yoni_animal",
+    "manglik",
+  ],
+  work: [
+    "qualification",
+    "college_name",
+    "occupation",
+    "employed_in",
+    "employer_name",
+    "income_band",
+    "settle_abroad",
+    "future_ambition",
+  ],
+  family: [
+    "family_type",
+    "family_status",
+    "family_location",
+    "brothers_count",
+    "brothers_married_count",
+    "sisters_count",
+    "sisters_married_count",
+    "father_name",
+    "father_occupation",
+    "mother_name",
+    "mother_occupation",
+    "siblings_note",
+  ],
+  partner: [
+    "pref_age_min",
+    "pref_age_max",
+    "pref_height_min",
+    "pref_height_max",
+    "pref_marital",
+    "pref_maritals",
+    "pref_tongues",
+    "pref_religions",
+    "pref_communities",
+    "pref_country",
+    "pref_countries",
+    "pref_state",
+    "pref_states",
+    "pref_cities",
+    "pref_horoscope",
+    "pref_education",
+    "pref_educations",
+    "pref_occupation",
+    "pref_occupations",
+    "pref_employed",
+    "pref_incomes",
+    "pref_diets",
+    "pref_managed",
+    "pref_community_mode",
+  ],
+};
+
+export const GAP_TO_SECTION: Record<string, ProfileEditTarget> = {
+  name: "personal",
+  surname: "personal",
+  dob: "faith",
+  city: "personal",
+  living: "personal",
+  height: "personal",
+  marital: "personal",
+  mobile: "personal",
+  birth_city: "faith",
+  birth_time: "faith",
+  health: "personal",
+  qualification: "work",
+  occupation: "work",
+  income: "work",
+  employed: "work",
+  company: "work",
+  college: "work",
+  about: "about",
+  intro: "about",
+  intro_conflict: "album",
+  photo: "album",
+  pref_age: "partner",
+  pref: "partner",
+  family_status: "family",
+  family_location: "family",
+  siblings: "family",
+  father: "family",
+  mother: "family",
+};
+
+export function pickSectionRecord<T extends Record<string, unknown>>(
+  record: T,
+  keys: readonly string[],
+): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const key of keys) {
+    if (key in record) out[key] = record[key];
+  }
+  return out;
+}
+
+export function portraitTabForSection(section: string | undefined): string | undefined {
+  if (section === "about" || section === "album") return "intro";
+  if (isProfileEditSection(section ?? "")) return section;
+  return undefined;
+}
