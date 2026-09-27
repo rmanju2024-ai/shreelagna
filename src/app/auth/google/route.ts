@@ -4,23 +4,19 @@ import { NextResponse, type NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
   try {
-    console.error("[auth/google] ===== ROUTE HIT =====");
-
     const origin = request.nextUrl.origin;
     const next = safeNextPath(request.nextUrl.searchParams.get("next"));
-    console.error("[auth/google] origin:", origin, "next:", next);
-
+    
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-    console.error("[auth/google] url set?:", !!url, "key set?:", !!key);
-
     if (!url || !key) {
-      console.error("[auth/google] Missing env, redirecting to config error");
-      return NextResponse.redirect(new URL("/login?error=config", origin));
+      return NextResponse.json(
+        { error: "Missing Supabase config", debug: { url: !!url, key: !!key } },
+        { status: 500 }
+      );
     }
 
-    console.error("[auth/google] Creating supabase client...");
     type AuthCookie = {
       name: string;
       value: string;
@@ -40,7 +36,6 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    console.error("[auth/google] Calling signInWithOAuth...");
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -50,14 +45,13 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    console.error("[auth/google] OAuth error?:", error?.message, "data.url?:", !!data?.url);
-
     if (error || !data.url) {
-      console.error("[auth/google] OAuth failed");
-      return NextResponse.redirect(new URL("/login?error=google", origin));
+      return NextResponse.json(
+        { error: "OAuth failed", debug: { errorMsg: error?.message, hasUrl: !!data?.url } },
+        { status: 500 }
+      );
     }
 
-    console.error("[auth/google] Redirecting to Google");
     const redirect = NextResponse.redirect(data.url);
     pending.forEach(({ name, value, options }) => {
       redirect.cookies.set(name, value, {
@@ -66,11 +60,17 @@ export async function GET(request: NextRequest) {
         sameSite: "lax",
       });
     });
-    console.error("[auth/google] Cookies set, returning redirect");
     return redirect;
   } catch (err) {
-    console.error("[auth/google] OUTER EXCEPTION:", err instanceof Error ? err.message : String(err));
-    console.error("[auth/google] Stack:", err instanceof Error ? err.stack : "no stack");
-    return NextResponse.json({ error: "Auth route error" }, { status: 500 });
+    return NextResponse.json(
+      { 
+        error: "Auth route exception", 
+        debug: { 
+          msg: err instanceof Error ? err.message : String(err),
+          stack: err instanceof Error ? err.stack : undefined
+        } 
+      },
+      { status: 500 }
+    );
   }
 }
