@@ -36,10 +36,12 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    // Use Supabase's callback URL (already registered with Google)
+    // Pass the 'next' redirect as a query param that Supabase will preserve
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        redirectTo: `${url}/auth/v1/callback?next=${encodeURIComponent(next)}`,
         skipBrowserRedirect: true,
         queryParams: { prompt: "select_account" },
       },
