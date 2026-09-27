@@ -1,13 +1,10 @@
 import { safeNextPath } from "@/lib/auth/safe-next";
-import { trustSystemCa } from "@/lib/node/trust-system-ca";
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
   try {
     console.error("[auth/google] ===== ROUTE HIT =====");
-    trustSystemCa();
-    console.error("[auth/google] trustSystemCa done");
 
     const origin = request.nextUrl.origin;
     const next = safeNextPath(request.nextUrl.searchParams.get("next"));
