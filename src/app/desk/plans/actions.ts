@@ -20,20 +20,31 @@ function addMonths(from: Date, months: number) {
   return next;
 }
 
-type Store = {
+type AnyDb = {
   from: (table: string) => {
-    update: (row: Record<string, unknown>) => {
-      eq: (
-        col: string,
-        value: string,
-      ) => PromiseLike<unknown> & { eq: (col: string, value: string) => PromiseLike<unknown> };
+    select: (cols: string) => {
+      eq: (col: string, value: string) => {
+        maybeSingle: () => Promise<{ data: Record<string, unknown> | null }>;
+      };
     };
-    neq?: (col: string, value: string) => PromiseLike<unknown>;
+    update: (row: Record<string, unknown>) => {
+      eq: (col: string, value: string) => PromiseLike<unknown> & {
+        eq: (col: string, value: string) => PromiseLike<unknown>;
+      };
+      neq: (col: string, value: string) => PromiseLike<unknown>;
+    };
+    insert: (row: Record<string, unknown>) => {
+      select: (cols: string) => { maybeSingle: () => Promise<{ data: Record<string, unknown> | null }> };
+    };
   };
 };
 
+function asDb(db: unknown): AnyDb {
+  return db as AnyDb;
+}
+
 async function activateRow(
-  db: Store,
+  db: AnyDb,
   row: { id: string; user_id: string; plan_code: string },
   actorId: string | undefined,
   months: number,
@@ -55,26 +66,29 @@ export async function confirmPlan(formData: FormData) {
   if (!desk.allowed) return;
   const id = String(formData.get("id") ?? "");
   if (!id) return;
-  const db = createServiceClient() ?? desk.supabase;
+  const db = asDb(createServiceClient() ?? desk.supabase);
   const { data: row } = await db
     .from("memberships")
     .select("id, user_id, plan_code, status")
     .eq("id", id)
     .maybeSingle();
   if (!row || row.status !== "pending") return;
-  const plan = await fetchPlanByCode(db, row.plan_code);
+  const planCode = String(row.plan_code ?? "");
+  const userId = String(row.user_id ?? "");
+  const rowId = String(row.id ?? "");
+  const plan = await fetchPlanByCode(db, planCode);
   const months = plan?.months ?? 3;
-  await activateRow(db as Store, row, desk.me?.id, months);
+  await activateRow(db, { id: rowId, user_id: userId, plan_code: planCode }, desk.me?.id, months);
   await writeAudit({
     actorUserId: desk.me?.id,
     actorRole: desk.me?.role,
     action: "membership.confirm",
     entityType: "membership",
-    entityId: row.id,
-    metadata: { plan: row.plan_code, user: row.user_id },
+    entityId: rowId,
+    metadata: { plan: planCode, user: userId },
   });
   const ends = addMonths(new Date(), months);
-  await notifyPlanActivated(row.user_id, plan?.name ?? row.plan_code, ends);
+  await notifyPlanActivated(userId, plan?.name ?? planCode, ends);
   refresh();
 }
 
@@ -83,7 +97,7 @@ export async function declinePlan(formData: FormData) {
   if (!desk.allowed) return;
   const id = String(formData.get("id") ?? "");
   if (!id) return;
-  const db = createServiceClient() ?? desk.supabase;
+  const db = asDb(createServiceClient() ?? desk.supabase);
   await db.from("memberships").update({ status: "cancelled" }).eq("id", id).eq("status", "pending");
   await writeAudit({
     actorUserId: desk.me?.id,
@@ -102,33 +116,39 @@ export async function grantPlan(formData: FormData) {
     .trim()
     .toLowerCase();
   const code = String(formData.get("plan") ?? "");
-  const db = createServiceClient() ?? desk.supabase;
+  const db = asDb(createServiceClient() ?? desk.supabase);
   const plan = isPlanCode(code) ? await fetchPlanByCode(db, code) : null;
   if (!email || !plan) return;
   const { data: member } = await db.from("app_users").select("id, role, email").eq("email", email).maybeSingle();
   if (!member || member.role === "admin") return;
-  await db.from("memberships").update({ status: "cancelled" }).eq("user_id", member.id).eq("status", "pending");
+  const memberId = String(member.id ?? "");
+  await db.from("memberships").update({ status: "cancelled" }).eq("user_id", memberId).eq("status", "pending");
   const { data: inserted } = await db
     .from("memberships")
     .insert({
-      user_id: member.id,
+      user_id: memberId,
       plan_code: code,
       source: "grant",
       status: "pending",
     })
     .select("id, user_id, plan_code")
     .maybeSingle();
-  if (!inserted) return;
-  await activateRow(db as Store, inserted, desk.me?.id, plan.months);
+  if (!inserted?.id) return;
+  await activateRow(
+    db,
+    { id: String(inserted.id), user_id: String(inserted.user_id ?? memberId), plan_code: String(inserted.plan_code ?? code) },
+    desk.me?.id,
+    plan.months,
+  );
   await writeAudit({
     actorUserId: desk.me?.id,
     actorRole: desk.me?.role,
     action: "membership.grant",
     entityType: "membership",
-    entityId: inserted.id,
-    metadata: { plan: code, email: member.email },
+    entityId: String(inserted.id),
+    metadata: { plan: code, email: String(member.email ?? "") },
   });
-  await notifyPlanActivated(member.id, plan.name, addMonths(new Date(), plan.months));
+  await notifyPlanActivated(memberId, plan.name, addMonths(new Date(), plan.months));
   refresh();
 }
 
@@ -161,7 +181,7 @@ export async function savePlan(formData: FormData) {
   if (!desk.allowed || !desk.admin) return;
   const plan = readPlanForm(formData, String(formData.get("code") ?? ""));
   if (!plan) return;
-  const db = createServiceClient() ?? desk.supabase;
+  const db = asDb(createServiceClient() ?? desk.supabase);
   if (plan.featured) {
     await db.from("member_plans").update({ featured: false }).neq("code", plan.code);
   }
@@ -182,7 +202,7 @@ export async function addPlan(formData: FormData) {
   if (!desk.allowed || !desk.admin) return;
   const plan = readPlanForm(formData);
   if (!plan) return;
-  const db = createServiceClient() ?? desk.supabase;
+  const db = asDb(createServiceClient() ?? desk.supabase);
   const { data: existing } = await db.from("member_plans").select("code").eq("code", plan.code).maybeSingle();
   if (existing) return;
   if (plan.featured) {
