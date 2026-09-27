@@ -6,7 +6,24 @@ const BASIC = "id, name, city, status, created_at, message, email, mobile, enqui
 
 type Db = { from: (table: string) => any };
 
-export async function fetchDeskTickets(supabase: Db, from = 0, to = 19) {
+export type DeskTicketRow = {
+  id: string;
+  name: string;
+  city?: string | null;
+  status?: string | null;
+  created_at?: string | null;
+  message?: string | null;
+  email?: string | null;
+  mobile?: string | null;
+  enquiry_type?: string | null;
+  resolution?: string | null;
+};
+
+export async function fetchDeskTickets(
+  supabase: Db,
+  from = 0,
+  to = 19,
+): Promise<{ rows: DeskTicketRow[]; count: number }> {
   const listed = await supabase
     .from("tickets")
     .select(FULL, { count: "exact" })
@@ -18,9 +35,9 @@ export async function fetchDeskTickets(supabase: Db, from = 0, to = 19) {
       .select(BASIC, { count: "exact" })
       .order("created_at", { ascending: false })
       .range(from, to);
-    return { rows: retry.data ?? [], count: retry.count ?? 0 };
+    return { rows: (retry.data ?? []) as DeskTicketRow[], count: retry.count ?? 0 };
   }
-  return { rows: listed.data ?? [], count: listed.count ?? 0 };
+  return { rows: (listed.data ?? []) as DeskTicketRow[], count: listed.count ?? 0 };
 }
 
 export async function fetchDeskTicket(supabase: Db, id: string) {

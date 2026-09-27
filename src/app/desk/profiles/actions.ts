@@ -56,7 +56,7 @@ async function loadDeskProfile(id: string) {
 
 export async function clearContactFlags(profileId: string): Promise<{ ok: true } | { ok: false; error: string }> {
   const loaded = await loadDeskProfile(profileId);
-  if ("error" in loaded) return { ok: false, error: loaded.error };
+  if ("error" in loaded) return { ok: false, error: String(loaded.error ?? "Not allowed.") };
   const { desk, db, profile } = loaded;
   const hash = contactTextHash(typeof profile.about === "string" ? profile.about : "");
   const payload = { contact_flags_cleared_hash: hash };
@@ -86,7 +86,7 @@ export async function translateProfileCopy(
   target: "en" | "kn" = "en",
 ): Promise<{ ok: true; lang: string; text: string } | { ok: false; error: string }> {
   const loaded = await loadDeskProfile(profileId);
-  if ("error" in loaded) return { ok: false, error: loaded.error };
+  if ("error" in loaded) return { ok: false, error: String(loaded.error ?? "Not allowed.") };
   const copy =
     field === "family"
       ? typeof loaded.profile.siblings_note === "string"

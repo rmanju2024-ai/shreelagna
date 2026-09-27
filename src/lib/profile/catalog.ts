@@ -1,4 +1,7 @@
+import { CITIES_BY_STATE } from "@/lib/profile/cities-by-state";
 import { INDIAN_STATES } from "@/lib/profile/options";
+
+export { CITIES_BY_STATE };
 
 export const EDUCATION_OPTIONS = [
   "No formal schooling",
@@ -80,8 +83,6 @@ export const OCCUPATION_OPTIONS = [
 ] as const;
 
 export const HEIGHT_CM_OPTIONS = Array.from({ length: 81 }, (_, i) => 140 + i);
-
-export { CITIES_BY_STATE } from "@/lib/profile/cities-by-state";
 
 export function citiesForState(state: string | null | undefined): readonly string[] {
   if (!state) return [];

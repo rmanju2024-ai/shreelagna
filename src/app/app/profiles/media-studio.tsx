@@ -8,7 +8,7 @@ import { MAX_INTRO_SECONDS } from "@/lib/profile/caps";
 import { btnGhost, btnPrimary, cardClass } from "@/lib/ui/classes";
 import { MediaMark } from "@/app/app/profiles/media-mark";
 
-type Clip = { id: string; storage_path: string };
+type Clip = { id: string; storage_path: string; kind?: string };
 
 function formatVoiceTime(seconds: number) {
   const s = Number.isFinite(seconds) && seconds > 0 ? seconds : 0;

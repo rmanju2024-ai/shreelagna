@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { compareLabel } from "@/lib/profile/form-lists";
+import { compareLabel, type FormLists } from "@/lib/profile/form-lists";
 
 export function MultiCheck({
   name,

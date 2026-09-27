@@ -57,7 +57,7 @@ async function notifyWith(
 ): Promise<NotifyResult> {
   const name = resolveAlertTemplate(specific);
   const target = await loadNotifyTarget(userId, name, mobileHint);
-  if ("error" in target) return { ok: false, error: target.error };
+  if ("error" in target) return { ok: false, error: String(target.error ?? "Could not send WhatsApp.") };
   return sendAlert(target, bodyParams);
 }
 

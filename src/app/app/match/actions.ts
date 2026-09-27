@@ -81,7 +81,7 @@ export async function respondInterest(formData: FormData) {
       .select("id, status, created_by, subject_full_name")
       .eq("id", row.from_profile_id)
       .maybeSingle();
-    other = retry.data;
+    other = retry.data as typeof other;
   }
   if (!other || other.status !== "active") redirect("/app/interests");
 

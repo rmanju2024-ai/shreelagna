@@ -570,7 +570,7 @@ export async function sendInterest(formData: FormData) {
       .select("id, status, created_by, subject_full_name, subject_mobile")
       .eq("id", toId)
       .maybeSingle();
-    target = retry.data;
+    target = retry.data as typeof target;
   }
   if (!target || target.status !== "active") {
     redirect("/browse?error=unavailable");

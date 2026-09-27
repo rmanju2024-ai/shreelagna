@@ -29,7 +29,8 @@ export const ensureAppUser = cache(async (
     await supabase.from("app_users").select(`${userCols}, last_seen_at`).eq("id", user.id).maybeSingle()
   ).data;
   if (!existing) {
-    existing = (await supabase.from("app_users").select(userCols).eq("id", user.id).maybeSingle()).data;
+    const retry = await supabase.from("app_users").select(userCols).eq("id", user.id).maybeSingle();
+    existing = retry.data ? { ...retry.data, last_seen_at: null } : retry.data;
   }
 
   const verifiedAt =

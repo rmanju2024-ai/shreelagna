@@ -8,23 +8,27 @@ import {
   type InterestQuota,
 } from "@/lib/membership/quota";
 
-type Filter = {
-  eq: (col: string, value: string) => Filter;
-  in: (col: string, value: string[]) => Filter & PromiseLike<{ data: unknown[] | null }>;
-  order: (col: string, opts: { ascending: boolean }) => Filter;
-  limit: (n: number) => Filter;
-  maybeSingle: () => PromiseLike<{ data: PaidRow | PlanRow | null }>;
+type Query = {
+  eq: (col: string, value: string) => Query;
+  in: (col: string, value: string[]) => Query & PromiseLike<{ data: unknown[] | null }>;
+  order: (col: string, opts: { ascending: boolean }) => Query;
+  limit: (n: number) => Query;
+  maybeSingle: () => PromiseLike<{ data: unknown }>;
 };
 
 type Db = {
   from: (table: string) => {
-    select: (cols: string) => Filter & PromiseLike<{ data: PlanRow[] | null }>;
+    select: (cols: string) => Query & PromiseLike<{ data: unknown[] | null }>;
   };
 };
 
-export async function fetchPaidMembership(db: Db, userId: string): Promise<PaidRow | null> {
+function asDb(db: unknown): Db {
+  return db as Db;
+}
+
+export async function fetchPaidMembership(db: unknown, userId: string): Promise<PaidRow | null> {
   try {
-    const { data } = await db
+    const { data } = await asDb(db)
       .from("memberships")
       .select("plan_code, status, starts_at, ends_at")
       .eq("user_id", userId)
@@ -32,15 +36,15 @@ export async function fetchPaidMembership(db: Db, userId: string): Promise<PaidR
       .order("ends_at", { ascending: false })
       .limit(1)
       .maybeSingle();
-    return data ?? null;
+    return (data as PaidRow | null) ?? null;
   } catch {
     return null;
   }
 }
 
-export async function fetchPendingPlanCode(db: Db, userId: string): Promise<string | null> {
+export async function fetchPendingPlanCode(db: unknown, userId: string): Promise<string | null> {
   try {
-    const { data } = await db
+    const { data } = await asDb(db)
       .from("memberships")
       .select("plan_code, status, starts_at, ends_at")
       .eq("user_id", userId)
@@ -48,18 +52,18 @@ export async function fetchPendingPlanCode(db: Db, userId: string): Promise<stri
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
-    return data?.plan_code ?? null;
+    return (data as PaidRow | null)?.plan_code ?? null;
   } catch {
     return null;
   }
 }
 
-export async function fetchPlans(db: Db): Promise<PlanCard[]> {
+export async function fetchPlans(db: unknown): Promise<PlanCard[]> {
   try {
-    const { data } = await db
+    const { data } = await asDb(db)
       .from("member_plans")
       .select("code, name, tagline, months, price_inr, featured, for_sale, sort_order, perks, interest_limit");
-    const rows = (data ?? [])
+    const rows = ((data ?? []) as PlanRow[])
       .map((row) => mapPlanRow(row))
       .filter((row): row is PlanCard => Boolean(row))
       .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name));
@@ -69,13 +73,13 @@ export async function fetchPlans(db: Db): Promise<PlanCard[]> {
   }
 }
 
-export async function fetchPlanByCode(db: Db, code: string): Promise<PlanCard | null> {
+export async function fetchPlanByCode(db: unknown, code: string): Promise<PlanCard | null> {
   const plans = await fetchPlans(db);
   return plans.find((plan) => plan.code === code) ?? null;
 }
 
 export async function loadInterestQuota(
-  db: Db,
+  db: unknown,
   me: { id: string; role?: string | null; welcome_started_at?: string | null; welcome_days?: number | null },
   access: Membership,
   profileIds: string[],
@@ -90,8 +94,8 @@ export async function loadInterestQuota(
     paidStartsAt: paid?.starts_at,
   });
   try {
-    const interests = await db.from("interests").select("from_profile_id, created_at").in("from_profile_id", profileIds);
-    const views = await db
+    const interests = await asDb(db).from("interests").select("from_profile_id, created_at").in("from_profile_id", profileIds);
+    const views = await asDb(db)
       .from("contact_views")
       .select("viewer_profile_id, created_at")
       .in("viewer_profile_id", profileIds);
@@ -109,7 +113,7 @@ export async function loadInterestQuota(
 }
 
 export async function loadMembership(
-  db: Db,
+  db: unknown,
   me: {
     id: string;
     role?: string | null;
@@ -137,12 +141,12 @@ const NO_PLAN: Membership = {
   planCode: null,
 };
 
-export async function loadMembershipForProfile(db: Db, profileId: string): Promise<Membership> {
+export async function loadMembershipForProfile(db: unknown, profileId: string): Promise<Membership> {
   try {
-    const { data: profile } = await db.from("profiles").select("created_by").eq("id", profileId).maybeSingle();
+    const { data: profile } = await asDb(db).from("profiles").select("created_by").eq("id", profileId).maybeSingle();
     const ownerId = String((profile as { created_by?: string | null } | null)?.created_by ?? "");
     if (!ownerId) return NO_PLAN;
-    const { data: owner } = await db
+    const { data: owner } = await asDb(db)
       .from("app_users")
       .select("id, role, welcome_started_at, welcome_days")
       .eq("id", ownerId)

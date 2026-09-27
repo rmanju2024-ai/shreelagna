@@ -130,8 +130,9 @@ export function formList(formData: FormData, key: string): string[] {
   return [...new Set([...fromJoined, ...many])];
 }
 
-export function languagesKnown(profile: { known_languages?: unknown; hobbies?: unknown } | null | undefined): string[] {
-  const fromLang = asStringList(profile?.known_languages);
+export function languagesKnown(profile: unknown): string[] {
+  const row = (profile ?? {}) as { known_languages?: unknown; hobbies?: unknown };
+  const fromLang = asStringList(row.known_languages);
   if (fromLang.length) return fromLang;
-  return asStringList(profile?.hobbies);
+  return asStringList(row.hobbies);
 }

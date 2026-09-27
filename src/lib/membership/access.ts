@@ -54,7 +54,7 @@ export function resolveMembership(input: {
 
   const paidUntil = parseInstant(input.paid?.ends_at ?? null);
   const paidLive =
-    input.paid?.status === "active" && Boolean(paidUntil) && paidUntil.getTime() > now.getTime();
+    input.paid?.status === "active" && paidUntil != null && paidUntil.getTime() > now.getTime();
   if (paidLive && paidUntil) {
     const plan = planByCode(input.paid?.plan_code ?? "");
     const name = input.planName || plan?.name;

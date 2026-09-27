@@ -26,7 +26,7 @@ async function memberDb() {
 
 export async function sendMobileOtp(profileId: string, mobileRaw: string): Promise<OtpActionResult> {
   const auth = await memberDb();
-  if ("error" in auth) return { ok: false, error: auth.error };
+  if ("error" in auth) return { ok: false, error: String(auth.error ?? "Sign in again.") };
   const { db, me } = auth;
   const { data: profile } = await db
     .from("profiles")
@@ -85,7 +85,7 @@ export async function verifyMobileOtp(
   codeRaw: string,
 ): Promise<OtpActionResult> {
   const auth = await memberDb();
-  if ("error" in auth) return { ok: false, error: auth.error };
+  if ("error" in auth) return { ok: false, error: String(auth.error ?? "Sign in again.") };
   const { db, me } = auth;
   const { data: profile } = await db
     .from("profiles")

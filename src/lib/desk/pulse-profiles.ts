@@ -27,11 +27,15 @@ export async function fetchPulseMedia(db: Db): Promise<{ profile_id?: string | n
   return result.error ? [] : result.data ?? [];
 }
 
+type PresenceResult = PromiseLike<{
+  data: { user_id?: string | null; day?: string | null }[] | null;
+  error: unknown;
+}>;
 type FilterDb = {
   from: (table: string) => {
     select: (cols: string) => {
       gte: (col: string, value: string) => {
-        lte: (col: string, value: string) => { limit: (n: number) => SelectResult };
+        lte: (col: string, value: string) => { limit: (n: number) => PresenceResult };
       };
     };
   };

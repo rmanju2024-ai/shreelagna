@@ -127,7 +127,7 @@ export default async function DeskProfilesPage({
   const page = deskPage(rawPage);
   const { from, to } = deskRange(page);
   const db = createServiceClient() ?? desk.supabase;
-  const adminIds = desk.admin ? new Set<string>() : await fetchAdminUserIds(db);
+  const adminIds = desk.admin ? new Set<string>() : await fetchAdminUserIds(db as never);
 
   let found: DeskProfile | null = null;
   let listed: DeskProfile[] = [];

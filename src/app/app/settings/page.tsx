@@ -32,7 +32,9 @@ export default async function SettingsPage() {
       .select("notify_match_email")
       .eq("id", me.id)
       .maybeSingle();
-    account = retry.data;
+    account = retry.data
+      ? { notify_whatsapp: true, ...retry.data }
+      : retry.data;
   }
 
   const scene = parseScene((await cookies()).get(SCENE_COOKIE)?.value);
