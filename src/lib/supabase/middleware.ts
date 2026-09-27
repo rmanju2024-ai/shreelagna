@@ -28,7 +28,7 @@ export async function updateSession(request: NextRequest) {
   });
 
   const path = request.nextUrl.pathname;
-  if (path.startsWith("/auth/callback")) {
+  if (path.startsWith("/auth/callback") || path.startsWith("/auth/google")) {
     return response;
   }
 

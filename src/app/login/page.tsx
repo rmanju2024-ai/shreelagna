@@ -46,6 +46,14 @@ export default async function LoginPage({
               <p className="mb-6 rounded-md border border-red-200 bg-white px-3 py-2 text-sm text-red-800">
                 Sign-in did not finish. Please try Gmail again in a moment.
               </p>
+            ) : error === "config" ? (
+              <p className="mb-6 rounded-md border border-red-200 bg-white px-3 py-2 text-sm text-red-800">
+                Sign-in is not ready on this site yet. Please try again shortly.
+              </p>
+            ) : error === "google" ? (
+              <p className="mb-6 rounded-md border border-red-200 bg-white px-3 py-2 text-sm text-red-800">
+                Google could not be opened. Please try Continue with Gmail again.
+              </p>
             ) : error ? (
               <p className="mb-6 rounded-md border border-red-200 bg-white px-3 py-2 text-sm text-red-800">
                 Sign-in did not finish. Please try Gmail again.

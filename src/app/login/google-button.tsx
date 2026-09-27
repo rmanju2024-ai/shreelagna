@@ -1,8 +1,4 @@
-"use client";
-
-import { useState } from "react";
-import { googleAuthHelp } from "@/lib/auth/google-errors";
-import { createClient } from "@/lib/supabase/client";
+import { safeNextPath } from "@/lib/auth/safe-next";
 
 function GmailMark() {
   return (
@@ -26,43 +22,16 @@ export function GoogleSignIn({
   size?: "md" | "lg";
   next?: string;
 }) {
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-
-  async function onClick() {
-    setBusy(true);
-    setError(null);
-    try {
-      const supabase = createClient();
-      const origin = window.location.origin;
-      const { error: err } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
-        },
-      });
-      if (err) {
-        setError(googleAuthHelp(err.message, err.status));
-        setBusy(false);
-      }
-    } catch {
-      setError("Sign-in is not available just now. Please try again shortly.");
-      setBusy(false);
-    }
-  }
-
+  const dest = safeNextPath(next);
   const className = [
     tone === "ivory" ? "btn-3d btn-3d-ivory" : "btn-3d btn-3d-maroon",
     size === "lg" ? "btn-3d-lg" : "",
   ].join(" ");
 
   return (
-    <div>
-      <button type="button" onClick={onClick} disabled={busy} className={className}>
-        <GmailMark />
-        {busy ? "Opening Google…" : label}
-      </button>
-      {error ? <p className="mt-3 max-w-md text-sm text-red-800">{error}</p> : null}
-    </div>
+    <a href={`/auth/google?next=${encodeURIComponent(dest)}`} className={className}>
+      <GmailMark />
+      {label}
+    </a>
   );
 }
