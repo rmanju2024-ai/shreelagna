@@ -8,6 +8,8 @@ import { ProfilePortrait } from "@/app/app/profiles/profile-portrait";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { kundaliScore } from "@/lib/match/kundali";
 import { photosVisible } from "@/lib/match/photo-privacy";
+import { publicMediaUrl } from "@/lib/match/inbox-card";
+import { lastOnlineLine } from "@/lib/profile/last-seen";
 import { effectiveInterestStatus, interestThreadState, openInterestBlocksSend, orderedProfilePair } from "@/lib/match/interest-status";
 import { matchSelfFromProfile } from "@/lib/profile/match-compare";
 import { canEditMemberProfile } from "@/lib/desk/access";
@@ -413,6 +415,9 @@ export async function BrowseProfileView({
             threadId: chatThreadId,
             notes: chatNotes,
             live: pairLive,
+            name: displayFirstName(typeof profile.subject_full_name === "string" ? profile.subject_full_name : "Match"),
+            photo: publicMediaUrl(photos[0]?.storage_path),
+            seen: hideLastSeen ? null : lastOnlineLine(typeof profile.last_seen_at === "string" ? profile.last_seen_at : null, asProfileType(profile.profile_type) ?? undefined),
           }}
         />
       ) : null}

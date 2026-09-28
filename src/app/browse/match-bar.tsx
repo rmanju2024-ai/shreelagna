@@ -1,8 +1,8 @@
-import { BirdDock, type PeekChatNote } from "@/app/browse/bird-dock";
+import type { PeekChatNote } from "@/app/browse/bird-dock";
 import type { KundaliScore } from "@/lib/match/kundali";
 import type { InterestThread } from "@/lib/match/interest-status";
 
-export type { PeekChatNote } from "@/app/browse/bird-dock";
+export type { PeekChatNote };
 
 export function MatchBar({
   profileId,

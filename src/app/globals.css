@@ -1793,136 +1793,207 @@ a.card-premium:hover,
   background: #6f1d1b;
 }
 
-.bird-dock-sheet {
-  width: min(19.5rem, calc(100vw - 1.6rem));
-  display: grid;
-  gap: 0.45rem;
-  padding: 0.7rem 0.75rem 0.8rem;
-  border-radius: 1.1rem;
-  color: #fff8e7;
-  background:
-    radial-gradient(circle at 12% 0%, rgba(232, 184, 74, 0.28), transparent 46%),
-    linear-gradient(165deg, #6f1d1b 0%, #9a3412 48%, #3f0e0d 100%);
-  border: 1px solid rgba(232, 184, 74, 0.45);
-  box-shadow: inset 0 1px 0 rgba(255, 248, 231, 0.18), 0 16px 28px rgba(63, 14, 13, 0.32);
-  font-family: Georgia, "Source Serif 4", serif;
+.bird-chirp {
+  max-width: 13.5rem;
+  margin: 0;
+  padding: 0.38rem 0.6rem;
+  border-radius: 0.85rem 0.85rem 0.2rem 0.85rem;
+  font-size: 0.72rem;
+  font-weight: 750;
+  line-height: 1.3;
+  color: #3f0e0d;
+  background: linear-gradient(180deg, #fff8e7, #f5c84c);
+  border: 1px solid #d4a017;
+  box-shadow: inset 0 1px 0 #fff, 0 3px 0 #8a5a12;
 }
 
-.bird-dock-sheet-head {
+.bird-wa {
+  width: min(22rem, calc(100vw - 1.5rem));
+  overflow: hidden;
+  border-radius: 1.15rem;
+  border: 1px solid rgba(184, 137, 76, 0.4);
+  box-shadow:
+    0 18px 36px rgba(63, 14, 13, 0.28),
+    inset 0 1px 0 rgba(255, 248, 231, 0.35);
+}
+
+.bird-wa-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
+  gap: 0.55rem;
+  padding: 0.55rem 0.65rem;
+  background: linear-gradient(180deg, #075e54 0%, #128c7e 100%);
+  color: #f8fafc;
 }
 
-.bird-dock-sheet-head p {
+.bird-wa-who {
+  min-width: 0;
+  flex: 1;
+}
+
+.bird-wa-who h2 {
   margin: 0;
-  font-family: "Trebuchet MS", sans-serif;
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: #f5c84c;
+  font-family: var(--font-source-serif), ui-serif, serif;
+  font-size: 0.98rem;
+  line-height: 1.15;
 }
 
-.bird-dock-sheet-head button {
+.bird-wa-who p {
+  margin: 0.1rem 0 0;
+  font-size: 0.68rem;
+  color: #d1fae5;
+}
+
+.bird-wa-close {
   border: 0;
   border-radius: 999px;
-  padding: 0.2rem 0.55rem;
-  font-size: 0.7rem;
+  padding: 0.28rem 0.6rem;
+  font-size: 0.68rem;
   font-weight: 800;
-  color: #3f0e0d;
-  background: #f5c84c;
+  color: #075e54;
+  background: #fef9c3;
 }
 
-.bird-dock-stream {
-  display: grid;
-  gap: 0.35rem;
-  margin: 0;
-  padding: 0.4rem;
-  list-style: none;
-  max-height: 9.5rem;
+.bird-wa-stage {
+  max-height: 14rem;
   overflow: auto;
-  border-radius: 0.7rem;
-  background: rgba(63, 14, 13, 0.28);
+  padding: 0.7rem 0.6rem 0.8rem;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(184, 137, 76, 0.12), transparent 36%),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0 10px, transparent 10px 20px),
+    #efeae2;
 }
 
-.bird-dock-empty {
-  margin: 0.35rem;
-  font-style: italic;
-  color: #fde68a;
-}
-
-.bird-dock-bubble {
-  max-width: 92%;
-  padding: 0.38rem 0.55rem 0.3rem;
-  border-radius: 0.85rem;
-}
-
-.bird-dock-bubble p {
+.bird-wa-stream {
+  display: grid;
+  gap: 0.45rem;
   margin: 0;
-  font-size: 0.82rem;
-  line-height: 1.35;
+  padding: 0;
+  list-style: none;
 }
 
-.bird-dock-bubble time {
+.bird-wa-row {
+  display: flex;
+  align-items: end;
+  gap: 0.35rem;
+  max-width: 92%;
+}
+
+.bird-wa-row.is-theirs {
+  justify-self: start;
+}
+
+.bird-wa-row.is-mine {
+  justify-self: end;
+  margin-left: auto;
+}
+
+.bird-wa-bubble {
+  padding: 0.38rem 0.55rem 0.28rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+}
+
+.bird-wa-row.is-theirs .bird-wa-bubble {
+  background: #fff;
+  border-top-left-radius: 0.2rem;
+  color: #111b21;
+}
+
+.bird-wa-row.is-mine .bird-wa-bubble {
+  background: #d9fdd3;
+  border-top-right-radius: 0.2rem;
+  color: #111b21;
+}
+
+.bird-wa-bubble p {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.35;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.bird-wa-bubble time {
   display: block;
   margin-top: 0.12rem;
-  font-family: "Trebuchet MS", sans-serif;
   font-size: 0.58rem;
-  opacity: 0.7;
+  text-align: right;
+  color: #667781;
 }
 
-.bird-dock-bubble.is-theirs {
-  justify-self: start;
-  color: #3f0e0d;
-  background: linear-gradient(180deg, #fff8e7, #e8b84a);
+.bird-wa-empty {
+  margin: 1rem 0.4rem;
+  text-align: center;
+  font-size: 0.78rem;
+  color: #667781;
 }
 
-.bird-dock-bubble.is-mine {
-  justify-self: end;
-  color: #fff8e7;
-  background: linear-gradient(180deg, #9a3412, #6f1d1b);
-}
-
-.bird-dock-lock {
+.bird-wa-lock {
   margin: 0;
+  padding: 0.45rem 0.7rem;
   font-size: 0.72rem;
+  background: #fff;
 }
 
-.bird-dock-lock a {
-  color: #f5c84c;
+.bird-wa-lock a {
+  color: #075e54;
 }
 
-.bird-dock-composer {
+.bird-wa-composer {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 0.35rem;
+  gap: 0.4rem;
+  align-items: end;
+  padding: 0.45rem 0.5rem 0.55rem;
+  background: #f0f2f5;
 }
 
-.bird-dock-composer textarea {
+.bird-wa-composer textarea {
   width: 100%;
-  min-height: 2.5rem;
+  min-height: 2.4rem;
+  max-height: 5.5rem;
   resize: none;
   border: 0;
-  border-radius: 0.7rem;
-  padding: 0.45rem 0.55rem;
-  font-family: Georgia, serif;
-  font-size: 0.82rem;
-  color: #3f0e0d;
-  background: #fff8e7;
+  border-radius: 1.2rem;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.88rem;
+  color: #111b21;
+  background: #fff;
 }
 
-.bird-dock-composer button {
+.bird-wa-send {
+  width: 2.45rem;
+  height: 2.45rem;
   border: 0;
-  border-radius: 0.7rem;
-  padding: 0 0.75rem;
-  font-family: "Trebuchet MS", sans-serif;
-  font-size: 0.78rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  color: #3f0e0d;
-  background: linear-gradient(180deg, #fff4d6, #e8b84a);
+  border-radius: 999px;
+  font-size: 1rem;
+  color: #fff;
+  background: linear-gradient(180deg, #25d366, #128c7e);
+  box-shadow: 0 3px 0 #075e54;
+}
+
+.bird-dock-chat.is-drop-in {
+  animation: bird-bubble-pop 0.55s ease;
+}
+
+.gold-bird-heart {
+  animation: bird-heart-pop 1s ease-out both;
+}
+
+@keyframes bird-heart-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(4px) scale(0.6);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-6px) scale(1.15);
+  }
+  100% {
+    opacity: 0.85;
+    transform: translateY(-10px) scale(1);
+  }
 }
 
 @keyframes bird-swoop {
@@ -2023,13 +2094,16 @@ a.card-premium:hover,
 }
 
 @media (max-width: 720px) {
-  .bird-dock-sheet {
+  .bird-wa {
     position: fixed;
     inset: auto 0 0;
     width: 100%;
-    max-height: min(70dvh, 28rem);
+    max-height: min(72dvh, 32rem);
     border-radius: 1.2rem 1.2rem 0 0;
-    padding-bottom: max(0.9rem, env(safe-area-inset-bottom));
+  }
+
+  .bird-wa-stage {
+    max-height: min(48dvh, 22rem);
   }
 }
 

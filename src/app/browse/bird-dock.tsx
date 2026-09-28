@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 import { cancelInterest, sendInterest } from "@/app/app/profiles/actions";
 import { sendChat } from "@/app/app/match/actions";
+import { ChatAvatar } from "@/app/app/chat/chat-avatar";
 import type { InterestThread } from "@/lib/match/interest-status";
 import { chatStamp } from "@/lib/match/chat-ui";
 import Link from "next/link";
@@ -16,6 +17,25 @@ export type PeekChatNote = {
 };
 
 type Phase = "enter" | "idle" | "peck" | "send" | "deliver";
+
+const CHIRPS: Record<string, string[]> = {
+  none: ["Don't just look. Spark it.", "Cute? Then say so.", "One tap. A whole story.", "Stars like this one."],
+  sent: ["They're thinking. Say hi.", "Interest is in. Don't go quiet.", "A short note goes far."],
+  received: ["They blinked first. Reply.", "Don't freeze. Write back."],
+  accepted: ["Green light. Talk now.", "Hearts are waiting."],
+  closed: ["Fresh start. Spark again."],
+  plan: ["Unlock, then spark."],
+  quota: ["More sparks on a plan."],
+  finish: ["Finish your profile. Then spark."],
+  peck: ["Tap me. I'm waiting."],
+};
+
+function chirpPool(thread: InterestThread, needPlan: boolean, needQuota: boolean, canSend: boolean) {
+  if (thread === "none" && needPlan) return CHIRPS.plan;
+  if (thread === "none" && needQuota) return CHIRPS.quota;
+  if (thread === "none" && !canSend) return CHIRPS.finish;
+  return CHIRPS[thread] ?? CHIRPS.none;
+}
 
 function GoldBird({ carry }: { carry?: "heart" | "mail" | null }) {
   return (
@@ -34,12 +54,16 @@ function GoldBird({ carry }: { carry?: "heart" | "mail" | null }) {
         <path d="M42 36 L43 44 L39 41 Z" fill="#7c2d12" />
       </g>
       {carry === "heart" ? (
-        <path className="gold-bird-heart" d="M12 14 C12 10 18 10 18 14 C18 10 24 10 24 14 C24 20 18 24 18 24 C18 24 12 20 12 14 Z" fill="#be123c" />
+        <path
+          className="gold-bird-heart"
+          d="M12 14 C12 10 18 10 18 14 C18 10 24 10 24 14 C24 20 18 24 18 24 C18 24 12 20 12 14 Z"
+          fill="#be123c"
+        />
       ) : null}
       {carry === "mail" ? (
         <g className="gold-bird-mail">
-          <rect x="8" y="6" width="16" height="11" rx="1.5" fill="#fff8e7" stroke="#b8894c" />
-          <path d="M8 6 L16 13 L24 6" fill="none" stroke="#6f1d1b" strokeWidth="1.4" />
+          <rect x="6" y="4" width="18" height="12" rx="1.6" fill="#fff8e7" stroke="#b8894c" />
+          <path d="M6 4 L15 12 L24 4" fill="none" stroke="#6f1d1b" strokeWidth="1.4" />
         </g>
       ) : null}
     </svg>
@@ -70,20 +94,37 @@ export function BirdDock({
     threadId: string | null;
     notes: PeekChatNote[];
     live: boolean;
+    name: string;
+    photo: string | null;
+    seen: string | null;
   };
 }) {
   const [mounted, setMounted] = useState(false);
   const [phase, setPhase] = useState<Phase>("enter");
   const [open, setOpen] = useState(false);
   const [badge, setBadge] = useState(0);
+  const [line, setLine] = useState(0);
   const acted = useRef(false);
   const inbound = useRef(0);
+  const endRef = useRef<HTMLLIElement | null>(null);
   const [, startTransition] = useTransition();
   const showChat = thread === "sent" || thread === "received" || thread === "accepted";
   const returnTo = `/browse/${profileId}`;
+  const pool = phase === "peck" ? CHIRPS.peck : chirpPool(thread, needPlan, needQuota, canSend);
+  const chirp = pool[line % pool.length];
+  const name = chat?.name ?? "Match";
 
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    setLine(0);
+  }, [thread, needPlan, needQuota, canSend]);
+
+  useEffect(() => {
+    const id = window.setInterval(() => setLine((n) => n + 1), 6500);
+    return () => window.clearInterval(id);
   }, []);
 
   useEffect(() => {
@@ -95,9 +136,9 @@ export function BirdDock({
       inbound.current = theirs;
       return () => window.clearTimeout(t);
     }
-    if (inbound.current === 0 && theirs) setBadge(theirs);
+    if (inbound.current === 0 && theirs && !open) setBadge(theirs);
     inbound.current = theirs;
-  }, [chat?.notes, chat?.myProfileId]);
+  }, [chat?.notes, chat?.myProfileId, open]);
 
   useEffect(() => {
     if (!mounted) return;
@@ -121,6 +162,10 @@ export function BirdDock({
     }, 17000);
     return () => window.clearInterval(tick);
   }, [phase, mounted]);
+
+  useEffect(() => {
+    if (open) endRef.current?.scrollIntoView({ block: "end" });
+  }, [open, chat?.notes]);
 
   function markActed() {
     acted.current = true;
@@ -157,60 +202,83 @@ export function BirdDock({
   }
 
   const perchLabel =
-    thread === "sent"
-      ? "Drop Interest"
-      : thread === "accepted"
-        ? "Interest sent"
-        : thread === "received"
-          ? "They reached first"
-          : needPlan
-            ? "Unlock & spark"
-            : needQuota
-              ? "More sparks"
-              : canSend
-                ? "Spark interest"
-                : "Finish profile";
+    phase === "send"
+      ? "Interest sent"
+      : thread === "sent"
+        ? "Cancel Interest"
+        : thread === "accepted"
+          ? "Interest sent"
+          : thread === "received"
+            ? "Reply now"
+            : needPlan
+              ? "Unlock & spark"
+              : needQuota
+                ? "More sparks"
+                : canSend
+                  ? "Spark interest"
+                  : "Finish profile";
 
   const dock = (
     <div className={`bird-dock${open ? " is-open" : ""}`} data-phase={phase} data-thread={thread}>
       {open && showChat ? (
-        <section className="bird-dock-sheet" aria-label="Private chat">
-          <header className="bird-dock-sheet-head">
-            <p>Private line</p>
-            <button type="button" onClick={() => setOpen(false)}>
+        <section className="bird-wa" aria-label="Chat">
+          <header className="bird-wa-head">
+            <ChatAvatar name={name} src={chat?.photo} size="sm" />
+            <div className="bird-wa-who">
+              <h2>{name}</h2>
+              <p>{chat?.seen ?? "Online on Shree Lagna"}</p>
+            </div>
+            <button type="button" className="bird-wa-close" onClick={() => setOpen(false)}>
               Close
             </button>
           </header>
-          <ul className="bird-dock-stream">
-            {(chat?.notes ?? []).length ? (
-              (chat?.notes ?? []).map((note) => (
-                <li
-                  key={note.id}
-                  className={`bird-dock-bubble ${note.sender_profile_id === chat?.myProfileId ? "is-mine" : "is-theirs"}`}
-                >
-                  <p>{note.body}</p>
-                  <time>{chatStamp(note.created_at)}</time>
-                </li>
-              ))
-            ) : (
-              <li className="bird-dock-empty">Say hi. Keep it warm and short.</li>
-            )}
-          </ul>
+          <div className="bird-wa-stage">
+            <ul className="bird-wa-stream">
+              {(chat?.notes ?? []).length ? (
+                (chat?.notes ?? []).map((note, index, all) => (
+                  <li
+                    key={note.id}
+                    className={`bird-wa-row ${note.sender_profile_id === chat?.myProfileId ? "is-mine" : "is-theirs"}`}
+                    ref={index === all.length - 1 ? endRef : undefined}
+                  >
+                    {note.sender_profile_id !== chat?.myProfileId ? (
+                      <ChatAvatar name={name} src={chat?.photo} size="sm" />
+                    ) : null}
+                    <div className="bird-wa-bubble">
+                      <p>{note.body}</p>
+                      <time>
+                        {chatStamp(note.created_at)}
+                        {note.sender_profile_id === chat?.myProfileId ? " ✓✓" : ""}
+                      </time>
+                    </div>
+                  </li>
+                ))
+              ) : (
+                <li className="bird-wa-empty">Say hi. Keep it warm and short.</li>
+              )}
+            </ul>
+          </div>
           {chat?.live === false ? (
-            <p className="bird-dock-lock">
-              A live plan keeps this line open. <Link href="/app/plans">Open plans</Link>
+            <p className="bird-wa-lock">
+              A live plan keeps this chat open. <Link href="/app/plans">Open plans</Link>
             </p>
           ) : (
-            <form action={sendChat} className="bird-dock-composer">
+            <form action={sendChat} className="bird-wa-composer">
               {chat?.threadId ? <input type="hidden" name="thread_id" value={chat.threadId} /> : null}
               <input type="hidden" name="to_profile_id" value={profileId} />
               <input type="hidden" name="next" value={returnTo} />
-              <textarea name="body" required maxLength={4000} rows={2} placeholder="Type a private note…" />
-              <button type="submit">Send</button>
+              <textarea name="body" required maxLength={4000} rows={1} placeholder="Message" />
+              <button type="submit" className="bird-wa-send" aria-label="Send">
+                ➤
+              </button>
             </form>
           )}
         </section>
       ) : null}
+
+      <p className="bird-chirp" aria-live="polite">
+        {chirp}
+      </p>
 
       <div className="bird-dock-stage">
         <span className="bird-dock-actor" aria-hidden>
@@ -221,7 +289,7 @@ export function BirdDock({
           <form action={sendInterest} onSubmit={onSpark}>
             <input type="hidden" name="to_profile_id" value={profileId} />
             <button type="submit" className="bird-dock-cta">
-              {phase === "send" ? "Interest sent" : perchLabel}
+              {perchLabel}
               {quotaLeft !== null && phase !== "send" ? ` · ${quotaLeft}` : ""}
             </button>
           </form>
@@ -249,7 +317,7 @@ export function BirdDock({
           <form action={sendInterest} onSubmit={onSpark}>
             <input type="hidden" name="to_profile_id" value={profileId} />
             <button type="submit" className="bird-dock-cta">
-              {phase === "send" ? "Interest sent" : "Spark interest"}
+              {perchLabel}
             </button>
           </form>
         ) : null}
@@ -260,7 +328,7 @@ export function BirdDock({
               <input type="hidden" name="to_profile_id" value={profileId} />
               <input type="hidden" name="interest_id" value={interestId} />
               <button type="submit" className="bird-dock-cta is-drop">
-                Drop Interest
+                Cancel Interest
               </button>
             </form>
           ) : (
@@ -278,14 +346,19 @@ export function BirdDock({
 
         {thread === "received" ? (
           <Link href="/app/interests" className="bird-dock-cta">
-            Reply now
+            {perchLabel}
           </Link>
         ) : null}
 
         {showChat ? (
-          <button type="button" className={`bird-dock-chat${badge ? " has-mail" : ""}`} onClick={openChat} aria-label="Open chat">
+          <button
+            type="button"
+            className={`bird-dock-chat${badge ? " has-mail" : ""}${phase === "deliver" ? " is-drop-in" : ""}`}
+            onClick={openChat}
+            aria-label="Open chat"
+          >
             <span className="bird-dock-chat-face" aria-hidden>
-              ✉
+              💬
             </span>
             {badge > 0 ? <i>{badge > 9 ? "9+" : badge}</i> : null}
           </button>
