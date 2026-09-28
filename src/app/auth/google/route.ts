@@ -6,18 +6,25 @@ import { join } from "path";
 
 const logFile = join(process.cwd(), ".oauth_debug.log");
 
-function log(msg: string, data?: any) {
+function log(msg: string | any, data?: any) {
   const timestamp = new Date().toISOString();
-  let fullMsg = `[${timestamp}] ${msg}`;
-  if (data) {
-    fullMsg += ` | ${JSON.stringify(data, null, 2)}`;
+  let fullMsg = `[${timestamp}] `;
+  
+  if (typeof msg === "string") {
+    fullMsg += msg;
+    if (data) {
+      fullMsg += ` | ${JSON.stringify(data, null, 2)}`;
+    }
+  } else {
+    fullMsg += JSON.stringify(msg, null, 2);
   }
+  
   try {
     appendFileSync(logFile, fullMsg + "\n");
   } catch (e) {
     console.error("Failed to write log", e);
   }
-  console.error(`[oauth-google] ${msg}`, data || "");
+  console.error(`[oauth-google]`, typeof msg === "string" ? msg : "", msg);
 }
 
 export async function GET(request: NextRequest) {
