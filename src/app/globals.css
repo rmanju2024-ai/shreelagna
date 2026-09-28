@@ -8555,10 +8555,34 @@ a.inbox-name.inbox-open:focus-visible {
 
 .browse-card-link {
   position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  overflow: hidden;
+  padding: 0;
 }
 
 .browse-card-photo-wrap {
   position: relative;
+}
+
+.browse-card-photo {
+  height: clamp(14rem, 38vw, 22rem);
+  width: 100%;
+  border: 0;
+  border-radius: 0.95rem 0.95rem 0 0;
+  box-shadow: none;
+}
+
+.browse-card-copy {
+  padding: 1.2rem 1.1rem 1rem;
+}
+
+.browse-score {
+  position: absolute;
+  right: 0.85rem;
+  top: 0.85rem;
+  z-index: 2;
 }
 
 .match-ring {
