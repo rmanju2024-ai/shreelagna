@@ -254,6 +254,11 @@ export function BirdDock({
     void markPeekRead(data);
   }
 
+  function closeChat() {
+    setOpen(false);
+    setWide(false);
+  }
+
   function onSend(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const text = draft.trim();
@@ -312,7 +317,7 @@ export function BirdDock({
               <button type="button" className="bird-wa-icon" onClick={() => setWide((on) => !on)} aria-label={wide ? "Restore" : "Maximize"}>
                 {wide ? "↙" : "↗"}
               </button>
-              <button type="button" className="bird-wa-icon" onClick={() => setOpen(false)} aria-label="Close">
+              <button type="button" className="bird-wa-icon" onClick={closeChat} aria-label="Close">
                 ✕
               </button>
             </div>
