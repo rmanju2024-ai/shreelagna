@@ -133,7 +133,6 @@ export function HeaderNav({
   overlay,
   user,
   staff,
-  houseStar,
   chatUnread = 0,
   alertUnread = 0,
 }: {
@@ -171,23 +170,11 @@ export function HeaderNav({
       <div className="site-nav-row">
         <NavChip item={{ href: "/", label: "Home", icon: "home" }} overlay={overlay} current={pathMatches(pathname, "/", tab)} />
         <NavChip item={{ href: "/browse", label: "Search", icon: "browse" }} overlay={overlay} current={pathMatches(pathname, "/browse", tab)} />
-        {staff ? (
-          <NavChip item={desk} overlay={overlay} current={pathMatches(pathname, desk.href, tab)} />
+        {user ? (
+          <NavChip item={{ href: "/app/interests", label: "Likes", icon: "inbox", badge: alertUnread }} overlay={overlay} current={inboxOn} />
         ) : null}
         {user ? (
-          <NavGroup label="Inbox" icon="inbox" overlay={overlay} current={inboxOn} badge={chatUnread + alertUnread}>
-            {inbox.map((item) => (
-              <MenuLink key={item.href} item={item} current={pathMatches(pathname, item.href, tab)} />
-            ))}
-          </NavGroup>
-        ) : null}
-        {user ? (
-          <NavGroup label="Account" icon="profile" overlay={overlay} current={accountOn} star={houseStar}>
-            {account.map((item) => (
-              <MenuLink key={item.href} item={item} current={pathMatches(pathname, item.href, tab)} />
-            ))}
-            <SignOutButton className="nav-menu-item" icon />
-          </NavGroup>
+          <NavChip item={{ href: "/app/chat", label: "Chat", icon: "chat", badge: chatUnread }} overlay={overlay} current={pathMatches(pathname, "/app/chat", tab)} />
         ) : (
           <Link href="/login" aria-current={registerHere ? "page" : undefined} className={`nav-3d${overlay ? " is-overlay" : ""}${registerHere ? " is-on" : ""}`}>
             <span className="nav-3d-ico">
@@ -196,10 +183,12 @@ export function HeaderNav({
             <span className="nav-3d-label">Sign in</span>
           </Link>
         )}
+        {user ? <NavChip item={{ href: "/app", label: "Profile", icon: "profile" }} overlay={overlay} current={accountOn} /> : null}
+        {staff ? <NavChip item={desk} overlay={overlay} current={pathMatches(pathname, desk.href, tab)} /> : null}
         <NavGroup label="More" icon="more" overlay={overlay} current={moreOn}>
-          {more.map((item) => (
-            <MenuLink key={item.href} item={item} current={pathMatches(pathname, item.href, tab)} />
-          ))}
+          {more.map((item) => <MenuLink key={item.href} item={item} current={pathMatches(pathname, item.href, tab)} />)}
+          {user ? account.filter((item) => item.href !== "/app").map((item) => <MenuLink key={item.href} item={item} current={pathMatches(pathname, item.href, tab)} />) : null}
+          {user ? <SignOutButton className="nav-menu-item" icon /> : null}
         </NavGroup>
       </div>
     </nav>

@@ -31,7 +31,15 @@ function chips(note: BrowseCardNote): string[] {
   ].filter(Boolean);
 }
 
+function matchPercent(score?: string | null): number {
+  const match = score?.match(/(\d+)\s*\/\s*(\d+)/);
+  if (!match) return 64;
+  const value = Math.round((Number(match[1]) / Number(match[2])) * 100);
+  return Math.max(1, Math.min(100, value));
+}
+
 export function BrowseCard({ note }: { note: BrowseCardNote }) {
+  const percent = matchPercent(note.score);
   const photo = note.photoUrl ? (
     // eslint-disable-next-line @next/next/no-img-element
     <img src={note.photoUrl} alt="" loading="lazy" decoding="async" />
@@ -39,9 +47,18 @@ export function BrowseCard({ note }: { note: BrowseCardNote }) {
     <span>{note.name.slice(0, 1)}</span>
   );
   return (
-    <li className="browse-card">
+    <li className="browse-card" style={{ "--match-dash": `${percent}` } as React.CSSProperties}>
       <Link href={note.href} className="browse-card-link">
-        <div className="browse-card-photo">{photo}</div>
+        <div className="browse-card-photo-wrap">
+          <div className="browse-card-photo">{photo}</div>
+          <div className="match-ring" aria-label={`${percent}% match`}>
+            <svg viewBox="0 0 40 40" aria-hidden>
+              <circle className="match-ring-track" cx="20" cy="20" r="16" />
+              <circle className="match-ring-fill" cx="20" cy="20" r="16" pathLength="100" />
+            </svg>
+            <strong>{percent}%</strong>
+          </div>
+        </div>
         <div className="browse-card-copy">
           <p className="browse-card-name">{note.name}</p>
           {note.lastOnline ? <p className="browse-card-seen">{note.lastOnline}</p> : null}

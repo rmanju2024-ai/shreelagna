@@ -20,15 +20,15 @@ type ViewItem = {
 const DEFAULT_VIEWS: ViewItem[] = [
   {
     id: "fits",
-    label: "Matching profiles",
-    short: "Matching",
+    label: "Best match",
+    short: "Best match",
     hint: "10/15 of your preference",
     empty: "No matching profiles here yet",
   },
   {
     id: "prefers",
-    label: "They prefer you",
-    short: "They prefer you",
+    label: "They like you",
+    short: "They like you",
     hint: "10/15 of their preference",
     empty: "No one has you on their preference yet",
   },
@@ -227,11 +227,8 @@ export function BrowseClient({
       ) : null}
 
       <div className="browse-board">
-        <nav className="browse-views" aria-label="Match lists">
-          <p className="browse-kicker">Default lists</p>
-          {DEFAULT_VIEWS.map(viewButton)}
-          <p className="browse-kicker">More lists</p>
-          {EXTRA_VIEWS.map(viewButton)}
+        <nav className="browse-views browse-chip-row" aria-label="Match lists">
+          {[...DEFAULT_VIEWS, ...EXTRA_VIEWS].map(viewButton)}
         </nav>
 
         {notice ? (
@@ -270,7 +267,7 @@ export function BrowseClient({
             {shown.length ? (
               <ul className="browse-list">
                 {shown.map((note) => (
-                  <BrowseCard key={note.id} note={note} />
+                  <BrowseCard key={`${view}-${note.id}`} note={note} />
                 ))}
               </ul>
             ) : (
