@@ -52,13 +52,40 @@ export async function fetchDeskTicket(supabase: Db, id: string) {
 
 export async function fetchTicketNotes(supabase: Db, ids: string[]) {
   if (!ids.length) return [] as TicketNote[];
-  const { data, error } = await supabase
+  const listed = await supabase
     .from("ticket_notes")
-    .select("id, ticket_id, body, created_at")
+    .select("id, ticket_id, body, created_at, created_by")
     .in("ticket_id", ids)
     .order("created_at");
-  if (error) return [];
-  return data ?? [];
+  const rows = listed.error
+    ? ((
+        await supabase.from("ticket_notes").select("id, ticket_id, body, created_at").in("ticket_id", ids).order("created_at")
+      ).data ?? [])
+    : (listed.data ?? []);
+  const actorIds = [
+    ...new Set(
+      rows
+        .map((row: { created_by?: string | null }) => row.created_by)
+        .filter((id: unknown): id is string => Boolean(id)),
+    ),
+  ];
+  const people = actorIds.length
+    ? ((await supabase.from("app_users").select("id, display_name, email, role").in("id", actorIds)).data ?? [])
+    : [];
+  const byId = new Map(
+    (people as { id: string; display_name?: string | null; email?: string | null; role?: string | null }[]).map((row) => [
+      row.id,
+      row,
+    ]),
+  );
+  return rows.map((row: TicketNote & { created_by?: string | null }) => {
+    const actor = row.created_by ? byId.get(row.created_by) : undefined;
+    return {
+      ...row,
+      actor_name: actor?.display_name || actor?.email || null,
+      actor_role: actor?.role ?? null,
+    } as TicketNote;
+  });
 }
 
 export function ticketPreview(message: unknown, max = 88): string {

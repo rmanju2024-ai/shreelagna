@@ -77,35 +77,60 @@ export async function addTicketNote(formData: FormData) {
   refreshDeskTickets(id);
 }
 
-export async function saveTicketDetails(formData: FormData) {
+export async function saveTicketWork(formData: FormData) {
   const desk = await requireDesk("/desk/tickets");
   if (!desk.allowed) return;
   const id = String(formData.get("id") ?? "");
   if (!id) return;
-  const payload: Record<string, unknown> = {
-    name: String(formData.get("name") ?? "").trim().slice(0, 120),
-    city: String(formData.get("city") ?? "").trim().slice(0, 80) || null,
-    email: String(formData.get("email") ?? "").trim().slice(0, 160) || null,
-    mobile: String(formData.get("mobile") ?? "").trim().slice(0, 40) || null,
-    message: String(formData.get("message") ?? "").trim().slice(0, 4000),
-  };
-  if (!payload.name) return;
+  const status = parseTicketStatus(formData.get("status"));
+  const body = trimTicketResolution(formData.get("body"));
   const db = deskDb(desk.supabase);
-  let { error } = await db.from("tickets").update(payload).eq("id", id);
-  while (error) {
-    const missing = missingPayloadColumn(error, payload);
-    if (!missing) break;
-    delete payload[missing];
-    ({ error } = await db.from("tickets").update(payload).eq("id", id));
+
+  if (status) {
+    const payload: Record<string, unknown> = {
+      status,
+      resolved_at: status === "done" ? new Date().toISOString() : null,
+    };
+    let { error } = await db.from("tickets").update(payload).eq("id", id);
+    while (error) {
+      const missing = missingPayloadColumn(error, payload);
+      if (!missing) break;
+      delete payload[missing];
+      ({ error } = await db.from("tickets").update(payload).eq("id", id));
+    }
+    if (!error) {
+      await writeAudit({
+        actorUserId: desk.me?.id,
+        actorRole: desk.me?.role,
+        action: "ticket.status",
+        entityType: "ticket",
+        entityId: id,
+        metadata: { status },
+      });
+    }
   }
-  if (!error) {
+
+  if (body) {
+    const { error } = await db.from("ticket_notes").insert({
+      ticket_id: id,
+      body,
+      created_by: desk.me?.id ?? null,
+    });
+    if (error) {
+      const stamp = formatIstDateTime(new Date());
+      const { data: row } = await db.from("tickets").select("resolution").eq("id", id).maybeSingle();
+      const prev = typeof row?.resolution === "string" ? row.resolution.trim() : "";
+      const next = prev ? `${prev}\n${stamp} — ${body}` : `${stamp} — ${body}`;
+      await db.from("tickets").update({ resolution: next.slice(0, 2000) }).eq("id", id);
+    }
     await writeAudit({
       actorUserId: desk.me?.id,
       actorRole: desk.me?.role,
-      action: "ticket.update",
+      action: "ticket.note",
       entityType: "ticket",
       entityId: id,
     });
   }
+
   refreshDeskTickets(id);
 }

@@ -35,6 +35,9 @@ export type TicketNote = {
   ticket_id: string;
   body: string;
   created_at: string;
+  created_by?: string | null;
+  actor_name?: string | null;
+  actor_role?: string | null;
 };
 
 export function notesByTicket(rows: TicketNote[]): Map<string, TicketNote[]> {
