@@ -3,11 +3,10 @@ import { DeskPager } from "@/app/desk/desk-pager";
 import { requireDesk } from "@/lib/desk/access";
 import { deskPage, deskRange } from "@/lib/desk/pager";
 import { fetchDeskTickets } from "@/lib/desk/ticket-rows";
+import { cachedDeskTickets } from "@/lib/desk/cached";
 import { isOpenTicket, ticketEnquiryLabel, ticketStatusClass, ticketStatusLabel } from "@/lib/desk/tickets";
 import { formatIstDateTime } from "@/lib/time/ist";
 import { cardClass } from "@/lib/ui/classes";
-
-export const dynamic = "force-dynamic";
 
 export default async function DeskTicketsPage({
   searchParams,
@@ -19,7 +18,9 @@ export default async function DeskTicketsPage({
   const { page: rawPage } = await searchParams;
   const page = deskPage(rawPage);
   const { from, to } = deskRange(page);
-  const { rows, count } = await fetchDeskTickets(desk.supabase, from, to);
+  const { rows, count } = await cachedDeskTickets(from, to).catch(() =>
+    fetchDeskTickets(desk.supabase, from, to),
+  );
   const open = rows.filter((row) => isOpenTicket(String(row.status ?? ""))).length;
 
   return (

@@ -6,12 +6,10 @@ import { notifyPlanActivated } from "@/lib/notify/dispatch";
 import { isPlanCode, readPlanForm } from "@/lib/membership/catalog";
 import { fetchPlanByCode } from "@/lib/membership/load";
 import { createServiceClient } from "@/lib/supabase/server";
-import { revalidatePath } from "next/cache";
+import { refreshDesk } from "@/lib/desk/refresh";
 
 function refresh() {
-  revalidatePath("/desk/plans");
-  revalidatePath("/app/plans");
-  revalidatePath("/", "layout");
+  refreshDesk(["/desk/plans", "/app/plans", "/"]);
 }
 
 function addMonths(from: Date, months: number) {

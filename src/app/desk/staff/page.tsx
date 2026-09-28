@@ -1,9 +1,8 @@
 import { appointStaff, removeStaff } from "@/app/desk/staff/actions";
 import { requireDesk } from "@/lib/desk/access";
+import { cachedStaffRoster } from "@/lib/desk/cached";
 import { createServiceClient } from "@/lib/supabase/server";
 import { btnGhost, btnPrimary, cardClass, inputClass } from "@/lib/ui/classes";
-
-export const dynamic = "force-dynamic";
 
 export default async function DeskStaffPage() {
   const desk = await requireDesk("/desk/staff");
@@ -19,11 +18,14 @@ export default async function DeskStaffPage() {
   }
 
   const db = createServiceClient() ?? desk.supabase;
-  const { data: rows } = await db
-    .from("app_users")
-    .select("id, email, display_name, role")
-    .in("role", ["service", "admin"])
-    .order("display_name");
+  const rows = await cachedStaffRoster().catch(async () => {
+    const { data } = await db
+      .from("app_users")
+      .select("id, email, display_name, role")
+      .in("role", ["service", "admin"])
+      .order("display_name");
+    return data ?? [];
+  });
   const staff = (rows ?? []).filter((row) => row.role === "service");
   const admins = (rows ?? []).filter((row) => row.role === "admin");
 

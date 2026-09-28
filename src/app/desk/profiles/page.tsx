@@ -9,8 +9,6 @@ import { formatIstDateTime } from "@/lib/time/ist";
 import { btnGhost, btnPrimary, cardClass, inputClass } from "@/lib/ui/classes";
 import Link from "next/link";
 
-export const dynamic = "force-dynamic";
-
 const SELECT =
   "id, member_code, subject_full_name, status, is_complete, profile_type, created_by, created_at, about";
 const UUID =

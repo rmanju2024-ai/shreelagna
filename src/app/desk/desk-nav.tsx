@@ -22,6 +22,7 @@ export function DeskNav({ admin }: { admin: boolean }) {
         return (
           <Link
             key={item.id}
+            prefetch
             href={item.href}
             aria-current={on ? "page" : undefined}
             className={`browse-view${on ? " is-on" : ""}`}

@@ -6,16 +6,15 @@ import { parseTicketStatus, trimTicketResolution } from "@/lib/desk/tickets";
 import { missingPayloadColumn } from "@/lib/profile/db-errors";
 import { createServiceClient } from "@/lib/supabase/server";
 import { formatIstDateTime } from "@/lib/time/ist";
-import { revalidatePath } from "next/cache";
+import { refreshDesk } from "@/lib/desk/refresh";
 
 function deskDb(supabase: Awaited<ReturnType<typeof requireDesk>>["supabase"]) {
   return createServiceClient() ?? supabase;
 }
 
-function refreshDesk(id?: string) {
-  revalidatePath("/desk/tickets");
-  revalidatePath("/desk/analytics", "layout");
-  if (id) revalidatePath(`/desk/tickets/${id}`);
+function refreshDeskTickets(id?: string) {
+  refreshDesk(["/desk/tickets", "/desk/analytics"]);
+  if (id) refreshDesk([`/desk/tickets/${id}`]);
 }
 
 export async function setTicketStatus(formData: FormData) {
@@ -46,7 +45,7 @@ export async function setTicketStatus(formData: FormData) {
       metadata: { status },
     });
   }
-  refreshDesk(id);
+  refreshDeskTickets(id);
 }
 
 export async function addTicketNote(formData: FormData) {
@@ -75,5 +74,5 @@ export async function addTicketNote(formData: FormData) {
     entityType: "ticket",
     entityId: id,
   });
-  refreshDesk(id);
+  refreshDeskTickets(id);
 }

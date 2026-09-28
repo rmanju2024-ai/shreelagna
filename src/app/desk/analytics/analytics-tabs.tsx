@@ -17,7 +17,13 @@ export function AnalyticsTabs() {
       {TABS.map((tab) => {
         const on = tab.href === "/desk/analytics" ? path === tab.href : path.startsWith(tab.href);
         return (
-          <Link key={tab.href} href={tab.href} className={`desk-tab${on ? " is-on" : ""}`} aria-current={on ? "page" : undefined}>
+          <Link
+            key={tab.href}
+            href={tab.href}
+            prefetch
+            className={`desk-tab${on ? " is-on" : ""}`}
+            aria-current={on ? "page" : undefined}
+          >
             <b>{tab.label}</b>
             <small>{tab.hint}</small>
           </Link>

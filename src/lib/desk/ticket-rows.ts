@@ -1,5 +1,6 @@
 import type { TicketNote } from "@/lib/desk/tickets";
 
+const LIST = "id, name, city, status, created_at, enquiry_type";
 const FULL =
   "id, name, city, status, created_at, message, email, mobile, enquiry_type, resolution";
 const BASIC = "id, name, city, status, created_at, message, email, mobile, enquiry_type";
@@ -26,7 +27,7 @@ export async function fetchDeskTickets(
 ): Promise<{ rows: DeskTicketRow[]; count: number }> {
   const listed = await supabase
     .from("tickets")
-    .select(FULL, { count: "exact" })
+    .select(LIST, { count: "exact" })
     .order("created_at", { ascending: false })
     .range(from, to);
   if (listed.error) {

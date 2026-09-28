@@ -1,13 +1,12 @@
 import { DeskPager } from "@/app/desk/desk-pager";
 import { requireDesk } from "@/lib/desk/access";
+import { cachedAuditPage } from "@/lib/desk/cached";
 import { auditActionLabel, houseRoleLabel } from "@/lib/desk/breakdown";
 import { auditDetails, type AuditActor, type AuditEventRow } from "@/lib/desk/audit-log";
 import { deskPage, deskRange } from "@/lib/desk/pager";
 import { createServiceClient } from "@/lib/supabase/server";
 import { formatIstDateTime } from "@/lib/time/ist";
 import { btnGhost } from "@/lib/ui/classes";
-
-export const dynamic = "force-dynamic";
 
 export default async function DeskAuditPage({
   searchParams,
@@ -20,23 +19,32 @@ export default async function DeskAuditPage({
   const page = deskPage(rawPage);
   const { from, to } = deskRange(page);
   const db = createServiceClient() ?? desk.supabase;
-  const [{ data, error }, counted] = await Promise.all([
-    db
-      .from("audit_events")
-      .select("id, at, actor_user_id, actor_role, action, entity_type, entity_id, metadata")
-      .in("actor_role", ["service", "admin"])
-      .order("at", { ascending: false })
-      .range(from, to),
-    db.from("audit_events").select("id", { count: "exact", head: true }).in("actor_role", ["service", "admin"]),
-  ]);
-
-  const rows = error ? [] : ((data ?? []) as AuditEventRow[]);
-  const total = counted.count ?? rows.length;
-  const actorIds = [...new Set(rows.map((row) => row.actor_user_id).filter((id): id is string => Boolean(id)))];
-  const actors = actorIds.length
-    ? await db.from("app_users").select("id, display_name, email, role").in("id", actorIds)
-    : { data: [] as AuditActor[] };
-  const actorById = new Map((actors.data ?? []).map((row) => [row.id, row]));
+  let rows: AuditEventRow[] = [];
+  let total = 0;
+  let actorById = new Map<string, AuditActor>();
+  try {
+    const cached = await cachedAuditPage(from, to);
+    rows = cached.rows as AuditEventRow[];
+    total = cached.total;
+    actorById = new Map((cached.actors as AuditActor[]).map((row) => [row.id, row]));
+  } catch {
+    const [{ data, error }, counted] = await Promise.all([
+      db
+        .from("audit_events")
+        .select("id, at, actor_user_id, actor_role, action, entity_type, entity_id, metadata")
+        .in("actor_role", ["service", "admin"])
+        .order("at", { ascending: false })
+        .range(from, to),
+      db.from("audit_events").select("id", { count: "exact", head: true }).in("actor_role", ["service", "admin"]),
+    ]);
+    rows = error ? [] : ((data ?? []) as AuditEventRow[]);
+    total = counted.count ?? rows.length;
+    const actorIds = [...new Set(rows.map((row) => row.actor_user_id).filter((id): id is string => Boolean(id)))];
+    const actors = actorIds.length
+      ? await db.from("app_users").select("id, display_name, email, role").in("id", actorIds)
+      : { data: [] as AuditActor[] };
+    actorById = new Map((actors.data ?? []).map((row) => [row.id, row]));
+  }
 
   return (
     <div className="desk-audit">

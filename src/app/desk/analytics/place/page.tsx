@@ -1,16 +1,17 @@
 import { BreakdownCard, Stat } from "@/app/desk/analytics/breakdown-card";
 import { requireDesk } from "@/lib/desk/access";
+import { cachedPulseProfiles } from "@/lib/desk/cached";
 import { placeBreakdown } from "@/lib/desk/breakdown";
 import { fetchPulseProfiles } from "@/lib/desk/pulse-profiles";
 import { createServiceClient } from "@/lib/supabase/server";
 
-export const dynamic = "force-dynamic";
-
 export default async function AnalyticsPlacePage() {
   const desk = await requireDesk("/desk/analytics/place");
   if (!desk.allowed) return null;
-  const db = createServiceClient() ?? desk.supabase;
-  const place = placeBreakdown(await fetchPulseProfiles(db));
+  const profiles = await cachedPulseProfiles().catch(async () =>
+    fetchPulseProfiles(createServiceClient() ?? desk.supabase),
+  );
+  const place = placeBreakdown(profiles);
 
   return (
     <>

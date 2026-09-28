@@ -1,5 +1,7 @@
+import { Suspense } from "react";
 import { PageShell } from "@/components/site-chrome";
 import { DeskNav } from "@/app/desk/desk-nav";
+import { DeskPaneFallback } from "@/app/desk/desk-fallback";
 import { requireDesk } from "@/lib/desk/access";
 
 export default async function DeskLayout({ children }: { children: React.ReactNode }) {
@@ -29,7 +31,9 @@ export default async function DeskLayout({ children }: { children: React.ReactNo
         </header>
         <div className="browse-board desk-board">
           <DeskNav admin={desk.admin} />
-          <div className="desk-main">{children}</div>
+          <div className="desk-main">
+            <Suspense fallback={<DeskPaneFallback />}>{children}</Suspense>
+          </div>
         </div>
       </div>
     </PageShell>

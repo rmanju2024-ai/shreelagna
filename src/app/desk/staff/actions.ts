@@ -3,11 +3,10 @@
 import { requireDesk } from "@/lib/desk/access";
 import { writeAudit } from "@/lib/desk/audit";
 import { createServiceClient } from "@/lib/supabase/server";
-import { revalidatePath } from "next/cache";
+import { refreshDesk } from "@/lib/desk/refresh";
 
 function refresh() {
-  revalidatePath("/desk/staff");
-  revalidatePath("/desk/analytics", "layout");
+  refreshDesk(["/desk/staff", "/desk/analytics"]);
 }
 
 export async function appointStaff(formData: FormData) {

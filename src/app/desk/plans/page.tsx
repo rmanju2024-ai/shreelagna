@@ -8,8 +8,6 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { formatIstDateTime } from "@/lib/time/ist";
 import { btnGhost, btnPrimary, cardClass, inputClass } from "@/lib/ui/classes";
 
-export const dynamic = "force-dynamic";
-
 function PlanFields({ plan }: { plan?: PlanCard }) {
   return (
     <>
@@ -90,8 +88,8 @@ export default async function DeskPlansPage({
   const page = deskPage(rawPage);
   const { from, to } = deskRange(page);
   const db = createServiceClient() ?? desk.supabase;
-  const catalog = await fetchPlans(db);
-  const [listed, pendingCount, liveCount] = await Promise.all([
+  const [catalog, listed, pendingCount, liveCount] = await Promise.all([
+    fetchPlans(db),
     db
       .from("memberships")
       .select("id, user_id, plan_code, source, status, created_at, ends_at", { count: "exact" })

@@ -1,12 +1,11 @@
 import { BreakdownCard, Stat } from "@/app/desk/analytics/breakdown-card";
 import { requireDesk } from "@/lib/desk/access";
+import { cachedPulseMedia, cachedPulseProfiles, cachedWeekPresence } from "@/lib/desk/cached";
 import { healthBreakdown, tallyWeekPresence } from "@/lib/desk/breakdown";
 import { fetchPulseMedia, fetchPulseProfiles, fetchWeekPresence } from "@/lib/desk/pulse-profiles";
 import { createServiceClient } from "@/lib/supabase/server";
 import { istDayKey, istWeekStartKey } from "@/lib/time/ist";
 import { cardClass } from "@/lib/ui/classes";
-
-export const dynamic = "force-dynamic";
 
 export default async function AnalyticsHealthPage() {
   const desk = await requireDesk("/desk/analytics/health");
@@ -14,9 +13,9 @@ export default async function AnalyticsHealthPage() {
   const db = createServiceClient() ?? desk.supabase;
   const now = new Date();
   const [profiles, media, visits] = await Promise.all([
-    fetchPulseProfiles(db),
-    fetchPulseMedia(db),
-    fetchWeekPresence(db, istWeekStartKey(now), istDayKey(now)),
+    cachedPulseProfiles().catch(() => fetchPulseProfiles(db)),
+    cachedPulseMedia().catch(() => fetchPulseMedia(db)),
+    cachedWeekPresence().catch(() => fetchWeekPresence(db, istWeekStartKey(now), istDayKey(now))),
   ]);
   const health = healthBreakdown(profiles, media);
   const week = tallyWeekPresence(visits, 4);

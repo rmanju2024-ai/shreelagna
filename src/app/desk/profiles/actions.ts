@@ -8,12 +8,12 @@ import { aboutPlainText } from "@/lib/profile/about-html";
 import { missingPayloadColumn } from "@/lib/profile/db-errors";
 import { createServiceClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { refreshDesk } from "@/lib/desk/refresh";
 
 const OPS = ["active", "on_hold", "hidden"] as const;
 
 function refresh() {
-  revalidatePath("/desk/profiles");
-  revalidatePath("/desk/analytics", "layout");
+  refreshDesk(["/desk/profiles", "/desk/analytics"]);
 }
 
 export async function setProfileStatus(formData: FormData) {

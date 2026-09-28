@@ -7,6 +7,7 @@ import { KalyanBanner } from "@/components/home/kalyan-banner";
 import { HeaderNav } from "@/components/site-nav";
 import { SceneLayer } from "@/components/scene-layer";
 import { collapseNotices } from "@/lib/match/collapse-notices";
+import { unreadNoticeBadge } from "@/lib/notices/unread-badge";
 import { SyncSession } from "@/components/sync-session";
 import { parseScene, SCENE_COOKIE } from "@/lib/ui/scenes";
 
@@ -28,16 +29,22 @@ export async function SiteHeader({ overlay = false, glass = false }: { overlay?:
     staff = me?.role === "service" || me?.role === "admin";
     houseStar = me?.role === "admin" ? "admin" : me?.role === "service" ? "staff" : undefined;
     if (me) {
-      const { data: unread } = await supabase
-        .from("notices")
-        .select("id, kind, match_profile_id, created_at")
-        .eq("user_id", me.id)
-        .is("read_at", null)
-        .order("created_at", { ascending: false })
-        .limit(200);
-      const open = collapseNotices(unread ?? []);
-      chatUnread = open.filter((row) => row.kind === "chat").length;
-      alertUnread = open.filter((row) => row.kind !== "chat").length;
+      const badge = await unreadNoticeBadge(me.id).catch(async () => {
+        const { data: unread } = await supabase
+          .from("notices")
+          .select("id, kind, match_profile_id, created_at")
+          .eq("user_id", me.id)
+          .is("read_at", null)
+          .order("created_at", { ascending: false })
+          .limit(80);
+        const open = collapseNotices(unread ?? []);
+        return {
+          chatUnread: open.filter((row) => row.kind === "chat").length,
+          alertUnread: open.filter((row) => row.kind !== "chat").length,
+        };
+      });
+      chatUnread = badge.chatUnread;
+      alertUnread = badge.alertUnread;
     }
   }
 

@@ -1,4 +1,6 @@
+import { Suspense } from "react";
 import { AnalyticsTabs } from "@/app/desk/analytics/analytics-tabs";
+import { DeskPaneFallback } from "@/app/desk/desk-fallback";
 
 export default function AnalyticsLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -10,7 +12,7 @@ export default function AnalyticsLayout({ children }: { children: React.ReactNod
         </div>
       </header>
       <AnalyticsTabs />
-      {children}
+      <Suspense fallback={<DeskPaneFallback />}>{children}</Suspense>
     </section>
   );
 }
