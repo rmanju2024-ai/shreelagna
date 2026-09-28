@@ -32,10 +32,15 @@ export default async function DeskAuditPage({
       db
         .from("audit_events")
         .select("id, at, actor_user_id, actor_role, action, entity_type, entity_id, metadata")
+          .in("actor_role", ["service", "admin"])
+          .neq("entity_type", "ticket")
+          .order("at", { ascending: false })
+          .range(from, to),
+      db
+        .from("audit_events")
+        .select("id", { count: "exact", head: true })
         .in("actor_role", ["service", "admin"])
-        .order("at", { ascending: false })
-        .range(from, to),
-      db.from("audit_events").select("id", { count: "exact", head: true }).in("actor_role", ["service", "admin"]),
+        .neq("entity_type", "ticket"),
     ]);
     rows = error ? [] : ((data ?? []) as AuditEventRow[]);
     total = counted.count ?? rows.length;

@@ -31,9 +31,14 @@ export const cachedAuditPage = (from: number, to: number) =>
           .from("audit_events")
           .select("id, at, actor_user_id, actor_role, action, entity_type, entity_id, metadata")
           .in("actor_role", ["service", "admin"])
+          .neq("entity_type", "ticket")
           .order("at", { ascending: false })
           .range(from, to),
-        db.from("audit_events").select("id", { count: "exact", head: true }).in("actor_role", ["service", "admin"]),
+        db
+          .from("audit_events")
+          .select("id", { count: "exact", head: true })
+          .in("actor_role", ["service", "admin"])
+          .neq("entity_type", "ticket"),
       ]);
       const rows = error ? [] : (data ?? []);
       const actorIds = [
@@ -48,7 +53,7 @@ export const cachedAuditPage = (from: number, to: number) =>
         actors: actors.data ?? [],
       };
     },
-    ["desk-audit", String(from), String(to)],
+    ["desk-audit-no-tickets", String(from), String(to)],
     { revalidate: 20, tags: ["desk"] },
   )();
 

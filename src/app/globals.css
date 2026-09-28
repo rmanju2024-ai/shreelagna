@@ -4661,10 +4661,10 @@ a.browse-view {
 }
 
 .desk-ticket-modal {
-  width: min(58rem, calc(100vw - 1.6rem));
+  width: min(76rem, calc(100vw - 1.2rem));
   max-height: min(92dvh, 54rem);
   overflow: auto;
-  padding: 1.15rem 1.15rem 1.35rem;
+  padding: 1.15rem 1.2rem 1.35rem;
   border-radius: 1.25rem;
   border: 1px solid rgba(255, 248, 232, 0.7);
   background:
@@ -4700,8 +4700,8 @@ a.browse-view {
 
 .desk-ticket-modal-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(16rem, 0.9fr);
-  gap: 0.9rem;
+  grid-template-columns: minmax(0, 1.2fr) minmax(22rem, 1fr);
+  gap: 1rem;
   align-items: start;
 }
 

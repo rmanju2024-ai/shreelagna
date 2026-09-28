@@ -1,7 +1,6 @@
 "use server";
 
 import { requireDesk } from "@/lib/desk/access";
-import { writeAudit } from "@/lib/desk/audit";
 import { parseTicketStatus, stampNoteBody, trimTicketResolution } from "@/lib/desk/tickets";
 import { missingPayloadColumn } from "@/lib/profile/db-errors";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -65,16 +64,6 @@ export async function setTicketStatus(formData: FormData) {
     delete payload[missing];
     ({ error } = await db.from("tickets").update(payload).eq("id", id));
   }
-  if (!error) {
-    await writeAudit({
-      actorUserId: desk.me?.id,
-      actorRole: desk.me?.role,
-      action: "ticket.status",
-      entityType: "ticket",
-      entityId: id,
-      metadata: { status },
-    });
-  }
   refreshDeskTickets(id);
 }
 
@@ -87,14 +76,6 @@ export async function addTicketNote(formData: FormData) {
   if (!id || !body) return;
   const db = deskDb(desk.supabase);
   await insertNote(db, id, body, desk.me?.id ?? null, status);
-  await writeAudit({
-    actorUserId: desk.me?.id,
-    actorRole: desk.me?.role,
-    action: "ticket.note",
-    entityType: "ticket",
-    entityId: id,
-    metadata: status ? { status } : undefined,
-  });
   refreshDeskTickets(id);
 }
 
@@ -119,28 +100,10 @@ export async function saveTicketWork(formData: FormData) {
       delete payload[missing];
       ({ error } = await db.from("tickets").update(payload).eq("id", id));
     }
-    if (!error) {
-      await writeAudit({
-        actorUserId: desk.me?.id,
-        actorRole: desk.me?.role,
-        action: "ticket.status",
-        entityType: "ticket",
-        entityId: id,
-        metadata: { status },
-      });
-    }
   }
 
   if (body) {
     await insertNote(db, id, body, desk.me?.id ?? null, status);
-    await writeAudit({
-      actorUserId: desk.me?.id,
-      actorRole: desk.me?.role,
-      action: "ticket.note",
-      entityType: "ticket",
-      entityId: id,
-      metadata: status ? { status } : undefined,
-    });
   }
 
   refreshDeskTickets(id);

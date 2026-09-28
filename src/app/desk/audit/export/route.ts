@@ -20,6 +20,7 @@ export async function GET() {
     .from("audit_events")
     .select("id, at, actor_user_id, actor_role, action, entity_type, entity_id, metadata")
     .in("actor_role", ["service", "admin"])
+    .neq("entity_type", "ticket")
     .order("at", { ascending: false })
     .limit(AUDIT_EXPORT_LIMIT);
 
