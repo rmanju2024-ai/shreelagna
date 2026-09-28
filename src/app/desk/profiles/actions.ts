@@ -87,34 +87,73 @@ export async function translateProfileCopy(
 ): Promise<{ ok: true; lang: string; text: string } | { ok: false; error: string }> {
   const loaded = await loadDeskProfile(profileId);
   if ("error" in loaded) return { ok: false, error: String(loaded.error ?? "Not allowed.") };
-  const copy =
-    field === "family"
-      ? typeof loaded.profile.siblings_note === "string"
-        ? loaded.profile.siblings_note
-        : ""
-      : typeof loaded.profile.about === "string"
-        ? loaded.profile.about
-        : "";
-  if (!isMemberAbout(copy)) {
+  const copy = fieldCopy(loaded.profile, field);
+  const text = await translateCopy(copy, target);
+  if (!text) {
     return { ok: false, error: field === "family" ? "No family note to translate." : "No intro to translate." };
   }
+  await writeAudit({
+    actorUserId: loaded.desk.me?.id,
+    actorRole: loaded.desk.me?.role,
+    action: "profile.translate",
+    entityType: "profile",
+    entityId: profileId,
+    metadata: { field, target },
+  });
+  return { ok: true, lang: target === "kn" ? "Kannada" : "English", text };
+}
+
+export async function translateProfileBundle(profileId: string): Promise<
+  | {
+      ok: true;
+      introEn: string | null;
+      introKn: string | null;
+      familyEn: string | null;
+      familyKn: string | null;
+    }
+  | { ok: false; error: string }
+> {
+  const loaded = await loadDeskProfile(profileId);
+  if ("error" in loaded) return { ok: false, error: String(loaded.error ?? "Not allowed.") };
+  const about = typeof loaded.profile.about === "string" ? loaded.profile.about : "";
+  const family =
+    typeof loaded.profile.siblings_note === "string" ? loaded.profile.siblings_note : "";
+  const [introEn, introKn, familyEn, familyKn] = await Promise.all([
+    translateCopy(about, "en"),
+    translateCopy(about, "kn"),
+    translateCopy(family, "en"),
+    translateCopy(family, "kn"),
+  ]);
+  await writeAudit({
+    actorUserId: loaded.desk.me?.id,
+    actorRole: loaded.desk.me?.role,
+    action: "profile.translate",
+    entityType: "profile",
+    entityId: profileId,
+    metadata: { field: "bundle", target: "en,kn" },
+  });
+  return { ok: true, introEn, introKn, familyEn, familyKn };
+}
+
+function fieldCopy(profile: { about?: unknown; siblings_note?: unknown }, field: "about" | "family") {
+  return field === "family"
+    ? typeof profile.siblings_note === "string"
+      ? profile.siblings_note
+      : ""
+    : typeof profile.about === "string"
+      ? profile.about
+      : "";
+}
+
+async function translateCopy(copy: string, target: "en" | "kn"): Promise<string | null> {
+  if (!isMemberAbout(copy)) return null;
   const raw = aboutPlainText(copy);
   const lang = detectReviewLang(raw);
-  if (lang.code === target) {
-    return { ok: true, lang: target === "kn" ? "Kannada" : lang.name, text: raw };
-  }
+  if (lang.code === target) return raw;
   try {
     const text = await translateText(raw, lang.code, target);
-    await writeAudit({
-      actorUserId: loaded.desk.me?.id,
-      actorRole: loaded.desk.me?.role,
-      action: "profile.translate",
-      entityType: "profile",
-      entityId: profileId,
-      metadata: { field, target },
-    });
-    return { ok: true, lang: target === "kn" ? "Kannada" : "English", text };
+    return text.trim() || null;
   } catch {
-    return { ok: false, error: "Translate is busy. Try again." };
+    return null;
   }
 }

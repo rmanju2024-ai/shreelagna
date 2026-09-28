@@ -2,10 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { clearContactFlags, translateProfileCopy } from "@/app/desk/profiles/actions";
+import { clearContactFlags, translateProfileBundle } from "@/app/desk/profiles/actions";
 import { contentFlagLabel, type ContentFlag } from "@/lib/moderation/content-flags";
 import { isMemberAbout } from "@/lib/moderation/indian-lang";
 import { btnGhost } from "@/lib/ui/classes";
+
+function line(label: string, value: string | null) {
+  return (
+    <p className="staff-review-english">
+      <strong>{label}.</strong> {value?.trim() || "Not available"}
+    </p>
+  );
+}
 
 export function StaffReviewTools({
   profileId,
@@ -21,13 +29,14 @@ export function StaffReviewTools({
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [introEn, setIntroEn] = useState<string | null>(null);
-  const [introKn, setIntroKn] = useState<string | null>(null);
-  const [familyEn, setFamilyEn] = useState<string | null>(null);
-  const [familyKn, setFamilyKn] = useState<string | null>(null);
-  const hasIntro = isMemberAbout(about);
-  const hasFamily = isMemberAbout(family);
-  if (!hasIntro && !hasFamily && !flags.length) return null;
+  const [bundle, setBundle] = useState<{
+    introEn: string | null;
+    introKn: string | null;
+    familyEn: string | null;
+    familyKn: string | null;
+  } | null>(null);
+  const canTranslate = isMemberAbout(about) || isMemberAbout(family);
+  if (!canTranslate && !flags.length) return null;
 
   async function onClear() {
     setBusy("clear");
@@ -38,22 +47,22 @@ export function StaffReviewTools({
     else router.refresh();
   }
 
-  async function onCopy(field: "about" | "family", target: "en" | "kn") {
-    setBusy(`${field}-${target}`);
+  async function onTranslate() {
+    setBusy("translate");
     setError(null);
-    const res = await translateProfileCopy(profileId, field, target);
+    const res = await translateProfileBundle(profileId);
     setBusy(null);
     if (!res.ok) {
       setError(res.error);
+      setBundle({ introEn: null, introKn: null, familyEn: null, familyKn: null });
       return;
     }
-    if (field === "family") {
-      if (target === "kn") setFamilyKn(res.text);
-      else setFamilyEn(res.text);
-      return;
-    }
-    if (target === "kn") setIntroKn(res.text);
-    else setIntroEn(res.text);
+    setBundle({
+      introEn: res.introEn,
+      introKn: res.introKn,
+      familyEn: res.familyEn,
+      familyKn: res.familyKn,
+    });
   }
 
   return (
@@ -68,46 +77,19 @@ export function StaffReviewTools({
             {busy === "clear" ? "Clearing…" : "Clear flag"}
           </button>
         ) : null}
-        {hasIntro ? (
-          <>
-            <button type="button" className={btnGhost} disabled={Boolean(busy)} onClick={() => void onCopy("about", "en")}>
-              {busy === "about-en" ? "Translating…" : "Intro · English"}
-            </button>
-            <button type="button" className={btnGhost} disabled={Boolean(busy)} onClick={() => void onCopy("about", "kn")}>
-              {busy === "about-kn" ? "Translating…" : "Intro · Kannada"}
-            </button>
-          </>
-        ) : null}
-        {hasFamily ? (
-          <>
-            <button type="button" className={btnGhost} disabled={Boolean(busy)} onClick={() => void onCopy("family", "en")}>
-              {busy === "family-en" ? "Translating…" : "Family · English"}
-            </button>
-            <button type="button" className={btnGhost} disabled={Boolean(busy)} onClick={() => void onCopy("family", "kn")}>
-              {busy === "family-kn" ? "Translating…" : "Family · Kannada"}
-            </button>
-          </>
+        {canTranslate ? (
+          <button type="button" className={btnGhost} disabled={Boolean(busy)} onClick={() => void onTranslate()}>
+            {busy === "translate" ? "Translating…" : "Translate"}
+          </button>
         ) : null}
       </div>
-      {introEn ? (
-        <p className="staff-review-english">
-          <strong>Intro · English.</strong> {introEn}
-        </p>
-      ) : null}
-      {introKn ? (
-        <p className="staff-review-english">
-          <strong>Intro · Kannada.</strong> {introKn}
-        </p>
-      ) : null}
-      {familyEn ? (
-        <p className="staff-review-english">
-          <strong>Family · English.</strong> {familyEn}
-        </p>
-      ) : null}
-      {familyKn ? (
-        <p className="staff-review-english">
-          <strong>Family · Kannada.</strong> {familyKn}
-        </p>
+      {bundle ? (
+        <div className="staff-review-bundle">
+          {line("Intro · English", bundle.introEn)}
+          {line("Intro · Kannada", bundle.introKn)}
+          {line("Family · English", bundle.familyEn)}
+          {line("Family · Kannada", bundle.familyKn)}
+        </div>
       ) : null}
       {error ? <p className="staff-review-error">{error}</p> : null}
     </div>

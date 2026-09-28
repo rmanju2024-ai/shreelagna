@@ -162,6 +162,13 @@ export function PortraitSheet({
                 </p>
               ) : null}
             </div>
+            {aboutText || introMedia ? (
+              <div className="portrait-intro-slot">
+                <Gate on={needPlan}>
+                  <IntroductionPane about={aboutText ? about : null} media={introMedia} editable={false} />
+                </Gate>
+              </div>
+            ) : null}
             {interest ? <div className="portrait-interest">{interest}</div> : null}
           </div>
         </div>
@@ -177,10 +184,8 @@ export function PortraitSheet({
             </Link>
           ) : null}
           <div className="portrait-tab-live">
-            {tab === "intro" ? (
-              <Gate on={needPlan && Boolean(aboutText || introMedia)}>
-                <IntroductionPane about={aboutText ? about : null} media={introMedia} editable={editable} />
-              </Gate>
+            {tab === "intro" && !(aboutText || introMedia) ? (
+              <IntroductionPane about={null} media={null} editable={editable} />
             ) : null}
             {tab === "personal" ? (
               <FactGroups
