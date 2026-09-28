@@ -3,6 +3,9 @@ import {
   isOpenTicket,
   notesByTicket,
   parseTicketStatus,
+  readNoteBody,
+  readNoteStatus,
+  stampNoteBody,
   ticketEnquiryLabel,
   ticketStatusClass,
   ticketStatusLabel,
@@ -36,5 +39,13 @@ describe("desk tickets", () => {
         { id: "3", ticket_id: "a", body: "done", created_at: "2026-09-25T10:00:00Z" },
       ]).get("a")?.map((row) => row.body),
     ).toEqual(["called", "done"]);
+  });
+
+  it("keeps ticket status on each note body", () => {
+    const stored = stampNoteBody("called family", "done");
+    expect(stored.startsWith("[[status:done]]")).toBe(true);
+    expect(readNoteBody(stored)).toBe("called family");
+    expect(readNoteStatus({ body: stored })).toBe("done");
+    expect(readNoteStatus({ body: stored, ticket_status: "on_hold" })).toBe("on_hold");
   });
 });

@@ -1,4 +1,4 @@
-import type { TicketNote } from "@/lib/desk/tickets";
+import { readNoteBody, readNoteStatus, type TicketNote } from "@/lib/desk/tickets";
 
 const LIST = "id, name, city, status, created_at, message, email, mobile, enquiry_type, resolution";
 const FULL =
@@ -85,6 +85,8 @@ export async function fetchTicketNotes(supabase: Db, ids: string[]) {
     const actor = row.created_by ? byId.get(row.created_by) : undefined;
     return {
       ...row,
+      body: readNoteBody(row.body),
+      ticket_status: readNoteStatus(row),
       actor_name: actor?.display_name || actor?.email || null,
       actor_role: actor?.role ?? null,
     } as TicketNote;

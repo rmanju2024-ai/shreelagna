@@ -2,7 +2,7 @@
 
 import { requireDesk } from "@/lib/desk/access";
 import { writeAudit } from "@/lib/desk/audit";
-import { parseTicketStatus, ticketStatusLabel, trimTicketResolution } from "@/lib/desk/tickets";
+import { parseTicketStatus, stampNoteBody, trimTicketResolution } from "@/lib/desk/tickets";
 import { missingPayloadColumn } from "@/lib/profile/db-errors";
 import { createServiceClient } from "@/lib/supabase/server";
 import { formatIstDateTime } from "@/lib/time/ist";
@@ -24,9 +24,10 @@ async function insertNote(
   createdBy: string | null,
   status: string | null,
 ) {
+  const stored = stampNoteBody(body, status);
   const payload: Record<string, unknown> = {
     ticket_id: id,
-    body,
+    body: stored,
     created_by: createdBy,
   };
   if (status) payload.ticket_status = status;
@@ -39,10 +40,9 @@ async function insertNote(
   }
   if (error) {
     const stamp = formatIstDateTime(new Date());
-    const label = status ? `${ticketStatusLabel(status)} · ` : "";
     const { data: row } = await db.from("tickets").select("resolution").eq("id", id).maybeSingle();
     const prev = typeof row?.resolution === "string" ? row.resolution.trim() : "";
-    const next = prev ? `${prev}\n${stamp} — ${label}${body}` : `${stamp} — ${label}${body}`;
+    const next = prev ? `${prev}\n${stamp} — ${stored}` : `${stamp} — ${stored}`;
     await db.from("tickets").update({ resolution: next.slice(0, 2000) }).eq("id", id);
   }
 }

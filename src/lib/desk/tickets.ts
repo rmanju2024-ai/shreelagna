@@ -30,6 +30,23 @@ export function trimTicketResolution(value: unknown): string | null {
   return text.slice(0, TICKET_RESOLUTION_MAX);
 }
 
+const NOTE_STATUS_MARK = /^\[\[status:([a-z_]+)\]\]\s*/i;
+
+export function stampNoteBody(body: string, status: string | null | undefined) {
+  const clean = body.replace(NOTE_STATUS_MARK, "").trim();
+  const code = parseTicketStatus(status);
+  if (!code) return clean.slice(0, TICKET_RESOLUTION_MAX);
+  return `[[status:${code}]] ${clean}`.slice(0, TICKET_RESOLUTION_MAX);
+}
+
+export function readNoteBody(body: string | null | undefined) {
+  return String(body ?? "").replace(NOTE_STATUS_MARK, "").trim();
+}
+
+export function readNoteStatus(row: { body?: string | null; ticket_status?: string | null }) {
+  return parseTicketStatus(row.ticket_status) ?? parseTicketStatus(String(row.body ?? "").match(NOTE_STATUS_MARK)?.[1]);
+}
+
 export type TicketNote = {
   id: string;
   ticket_id: string;
