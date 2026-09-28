@@ -27,6 +27,7 @@ async function exchange(
             ...options,
             path: "/",
             sameSite: "lax",
+            secure: request.nextUrl.protocol === "https:",
           });
         });
       },
@@ -41,7 +42,21 @@ export async function GET(request: NextRequest) {
 
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
+  const oauthError = searchParams.get("error");
+  const oauthDesc = searchParams.get("error_description");
   const dest = safeNextPath(searchParams.get("next"));
+
+  console.error("[auth/callback] hit", {
+    origin,
+    dest,
+    hasCode: Boolean(code),
+    oauthError,
+    oauthDesc,
+  });
+
+  if (oauthError) {
+    return NextResponse.redirect(`${origin}/login?error=google`);
+  }
 
   if (!code) {
     return NextResponse.redirect(`${origin}/login?error=missing_code`);
@@ -59,14 +74,17 @@ export async function GET(request: NextRequest) {
       last = await exchange(url, key, request, code, dest);
     }
     if (last.error) {
+      console.error("[auth/callback] exchange failed", last.error.message);
       const safe = isNetworkError(last.error.message)
         ? "network"
         : encodeURIComponent(last.error.message.slice(0, 80));
       return NextResponse.redirect(`${origin}/login?error=${safe}`);
     }
+    console.error("[auth/callback] success", dest);
     return last.redirect;
   } catch (err) {
     const message = err instanceof Error ? err.message : "";
+    console.error("[auth/callback] exception", message);
     const safe = isNetworkError(message) ? "network" : "auth";
     return NextResponse.redirect(`${origin}/login?error=${safe}`);
   }
