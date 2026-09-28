@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { TicketNotes, TicketStatusForm } from "@/app/desk/tickets/ticket-status";
 import {
@@ -28,6 +29,7 @@ export function TicketBoard({
   const router = useRouter();
   const path = usePathname();
   const params = useSearchParams();
+  const [mounted, setMounted] = useState(false);
   const openId = params.get("open");
   const ticket = useMemo(
     () =>
@@ -54,17 +56,128 @@ export function TicketBoard({
   }
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     if (!ticket) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") close();
+      if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        close();
+      }
     };
+    const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKey);
+    window.addEventListener("keydown", onKey, true);
     return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey, true);
     };
-  }, [ticket, path]);
+  }, [ticket, path, params]);
+
+  const dialog =
+    ticket && mounted
+      ? createPortal(
+          <div
+            className="desk-ticket-layer"
+            role="presentation"
+            onMouseDown={(event) => event.stopPropagation()}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div
+              className="desk-ticket-modal card-3d"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="desk-ticket-title"
+              onMouseDown={(event) => event.stopPropagation()}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <header className="desk-ticket-modal-head">
+                <div>
+                  <p className="browse-kicker">{ticketEnquiryLabel(String(ticket.enquiry_type ?? ""))}</p>
+                  <h2 id="desk-ticket-title">{String(ticket.name)}</h2>
+                  <p className="desk-ticket-meta">
+                    {formatIstDateTime(String(ticket.created_at))}
+                    {ticket.city ? ` · ${ticket.city}` : ""}
+                  </p>
+                </div>
+                <span className={`desk-pill ${ticketStatusClass(String(ticket.status ?? ""))}`}>
+                  {ticketStatusLabel(String(ticket.status ?? ""))}
+                </span>
+                <button type="button" className={`${btnGhost} desk-ticket-modal-close`} onClick={close}>
+                  Close
+                </button>
+              </header>
+
+              <div className="desk-ticket-modal-grid">
+                <form
+                  key={`${ticket.id}-${ticket.name}-${ticket.message}-${ticket.email}-${ticket.mobile}-${ticket.city}`}
+                  action={saveTicketDetails}
+                  className={`${cardClass} card-3d desk-case`}
+                >
+                  <input type="hidden" name="id" value={String(ticket.id)} />
+                  <p className="browse-kicker">Family message</p>
+                  <div className="gold-ornament" />
+                  <div className="desk-ticket-fields">
+                    <label className="desk-ticket-note-label">
+                      Name
+                      <input name="name" required className={inputClass} defaultValue={String(ticket.name ?? "")} />
+                    </label>
+                    <label className="desk-ticket-note-label">
+                      City
+                      <input name="city" className={inputClass} defaultValue={String(ticket.city ?? "")} />
+                    </label>
+                    <label className="desk-ticket-note-label">
+                      Email
+                      <input name="email" type="email" className={inputClass} defaultValue={String(ticket.email ?? "")} />
+                    </label>
+                    <label className="desk-ticket-note-label">
+                      Mobile
+                      <input name="mobile" className={inputClass} defaultValue={String(ticket.mobile ?? "")} />
+                    </label>
+                    <label className="desk-ticket-note-label desk-ticket-field-wide">
+                      Message
+                      <textarea
+                        name="message"
+                        rows={8}
+                        className={inputClass}
+                        defaultValue={String(ticket.message ?? "")}
+                      />
+                    </label>
+                  </div>
+                  <button type="submit" className={btnPrimary}>
+                    Save details
+                  </button>
+                </form>
+
+                <aside className="desk-ticket-side">
+                  <div className={`${cardClass} card-3d desk-case`}>
+                    <p className="browse-kicker">House status</p>
+                    <div className="gold-ornament" />
+                    <TicketStatusForm
+                      key={`${ticket.id}-${ticket.status}`}
+                      id={String(ticket.id)}
+                      status={String(ticket.status ?? "new")}
+                    />
+                  </div>
+                  <div className={`${cardClass} card-3d desk-case`}>
+                    <p className="browse-kicker">Follow-up</p>
+                    <div className="gold-ornament" />
+                    <TicketNotes
+                      id={String(ticket.id)}
+                      notes={trail}
+                      fallback={"resolution" in ticket ? String(ticket.resolution ?? "") : null}
+                    />
+                  </div>
+                </aside>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )
+      : null;
 
   return (
     <>
@@ -94,97 +207,7 @@ export function TicketBoard({
         ))}
       </ul>
       {children}
-      {ticket ? (
-        <div className="desk-ticket-layer" role="presentation" onClick={close}>
-          <div
-            className="desk-ticket-modal card-3d"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="desk-ticket-title"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <header className="desk-ticket-modal-head">
-              <div>
-                <p className="browse-kicker">{ticketEnquiryLabel(String(ticket.enquiry_type ?? ""))}</p>
-                <h2 id="desk-ticket-title">{String(ticket.name)}</h2>
-                <p className="desk-ticket-meta">
-                  {formatIstDateTime(String(ticket.created_at))}
-                  {ticket.city ? ` · ${ticket.city}` : ""}
-                </p>
-              </div>
-              <span className={`desk-pill ${ticketStatusClass(String(ticket.status ?? ""))}`}>
-                {ticketStatusLabel(String(ticket.status ?? ""))}
-              </span>
-              <button type="button" className={`${btnGhost} desk-ticket-modal-close`} onClick={close}>
-                Close
-              </button>
-            </header>
-
-            <div className="desk-ticket-modal-grid">
-              <form
-                key={`${ticket.id}-${ticket.name}-${ticket.message}-${ticket.email}-${ticket.mobile}-${ticket.city}`}
-                action={saveTicketDetails}
-                className={`${cardClass} card-3d desk-case`}
-              >
-                <input type="hidden" name="id" value={String(ticket.id)} />
-                <p className="browse-kicker">Family message</p>
-                <div className="gold-ornament" />
-                <div className="desk-ticket-fields">
-                  <label className="desk-ticket-note-label">
-                    Name
-                    <input name="name" required className={inputClass} defaultValue={String(ticket.name ?? "")} />
-                  </label>
-                  <label className="desk-ticket-note-label">
-                    City
-                    <input name="city" className={inputClass} defaultValue={String(ticket.city ?? "")} />
-                  </label>
-                  <label className="desk-ticket-note-label">
-                    Email
-                    <input name="email" type="email" className={inputClass} defaultValue={String(ticket.email ?? "")} />
-                  </label>
-                  <label className="desk-ticket-note-label">
-                    Mobile
-                    <input name="mobile" className={inputClass} defaultValue={String(ticket.mobile ?? "")} />
-                  </label>
-                  <label className="desk-ticket-note-label desk-ticket-field-wide">
-                    Message
-                    <textarea
-                      name="message"
-                      rows={8}
-                      className={inputClass}
-                      defaultValue={String(ticket.message ?? "")}
-                    />
-                  </label>
-                </div>
-                <button type="submit" className={btnPrimary}>
-                  Save details
-                </button>
-              </form>
-
-              <aside className="desk-ticket-side">
-                <div className={`${cardClass} card-3d desk-case`}>
-                  <p className="browse-kicker">House status</p>
-                  <div className="gold-ornament" />
-                  <TicketStatusForm
-                    key={`${ticket.id}-${ticket.status}`}
-                    id={String(ticket.id)}
-                    status={String(ticket.status ?? "new")}
-                  />
-                </div>
-                <div className={`${cardClass} card-3d desk-case`}>
-                  <p className="browse-kicker">Follow-up</p>
-                  <div className="gold-ornament" />
-                  <TicketNotes
-                    id={String(ticket.id)}
-                    notes={trail}
-                    fallback={"resolution" in ticket ? String(ticket.resolution ?? "") : null}
-                  />
-                </div>
-              </aside>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      {dialog}
     </>
   );
 }
