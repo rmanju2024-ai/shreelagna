@@ -1,7 +1,7 @@
 import { BrowseProfileView } from "@/app/browse/browse-profile-view";
-import { PageShell } from "@/components/site-chrome";
+import { ProfilePeek } from "@/app/browse/profile-peek";
 
-export default async function BrowseProfilePage({
+export default async function BrowseProfilePeekPage({
   params,
   searchParams,
 }: {
@@ -9,8 +9,8 @@ export default async function BrowseProfilePage({
   searchParams: Promise<{ error?: string; sent?: string; contact?: string; wa?: string }>;
 }) {
   return (
-    <PageShell full>
+    <ProfilePeek>
       <BrowseProfileView params={params} searchParams={searchParams} />
-    </PageShell>
+    </ProfilePeek>
   );
 }

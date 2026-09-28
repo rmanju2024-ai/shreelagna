@@ -136,39 +136,41 @@ export function PortraitSheet({
       <div className="portrait-details">
         <div className="portrait-sheet-id">
           <div className="portrait-sheet-id-head">
-            <div className="portrait-sheet-id-copy">
-              <p className="portrait-sheet-meta">
-                <span className="portrait-kind">{kind}</span>
-                {memberCode ? (
-                  <>
-                    <i>·</i>
-                    <CopyMemberId code={memberCode} />
-                  </>
-                ) : (
-                  <>
-                    <i>·</i>
-                    <span>Pending ID</span>
-                  </>
-                )}
-                <i>·</i>
-                <span>{posted}</span>
-              </p>
-              <h1>{name}</h1>
-              <div className="gold-ornament" />
-              {lastSeen ? (
-                <p className={`portrait-last-seen${isOnlineNow(lastSeenAt) ? " is-now" : ""}`}>
-                  <i aria-hidden />
-                  {lastSeen}
+            <div className="portrait-id-slot">
+              <div className="portrait-sheet-id-copy">
+                <p className="portrait-sheet-meta">
+                  <span className="portrait-kind">{kind}</span>
+                  {memberCode ? (
+                    <>
+                      <i>·</i>
+                      <CopyMemberId code={memberCode} />
+                    </>
+                  ) : (
+                    <>
+                      <i>·</i>
+                      <span>Pending ID</span>
+                    </>
+                  )}
+                  <i>·</i>
+                  <span>{posted}</span>
                 </p>
+                <h1>{name}</h1>
+                <div className="gold-ornament" />
+                {lastSeen ? (
+                  <p className={`portrait-last-seen${isOnlineNow(lastSeenAt) ? " is-now" : ""}`}>
+                    <i aria-hidden />
+                    {lastSeen}
+                  </p>
+                ) : null}
+              </div>
+              {aboutText || introMedia ? (
+                <div className="portrait-intro-slot">
+                  <Gate on={needPlan}>
+                    <IntroductionPane about={aboutText ? about : null} media={introMedia} editable={false} />
+                  </Gate>
+                </div>
               ) : null}
             </div>
-            {aboutText || introMedia ? (
-              <div className="portrait-intro-slot">
-                <Gate on={needPlan}>
-                  <IntroductionPane about={aboutText ? about : null} media={introMedia} editable={false} />
-                </Gate>
-              </div>
-            ) : null}
             {interest ? <div className="portrait-interest">{interest}</div> : null}
           </div>
         </div>
