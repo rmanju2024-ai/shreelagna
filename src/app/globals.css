@@ -1654,6 +1654,107 @@ a.card-premium:hover,
     0 8px 18px rgba(15, 118, 110, 0.22);
 }
 
+.match-lure {
+  overflow: hidden;
+  gap: 0.4rem;
+  padding-top: 0.55rem;
+}
+
+.match-chirp {
+  margin: 0;
+  font-size: 0.84rem;
+  font-weight: 800;
+  line-height: 1.3;
+  color: #fff7ed;
+}
+
+.match-bird-sky {
+  position: relative;
+  display: block;
+  height: 2.7rem;
+  margin: 0 0 0.15rem;
+}
+
+.match-bird-svg {
+  position: absolute;
+  left: 0.15rem;
+  top: 0.1rem;
+  width: 3.4rem;
+  height: 2.25rem;
+  filter: drop-shadow(0 6px 8px rgba(15, 23, 42, 0.28));
+  animation: match-bird-fly 2.4s ease-in-out infinite;
+}
+
+.match-bird-wing {
+  transform-origin: 28px 24px;
+  animation: match-wing-flap 0.28s ease-in-out infinite;
+}
+
+.match-bird-dot {
+  position: absolute;
+  width: 0.28rem;
+  height: 0.28rem;
+  border-radius: 999px;
+  background: rgba(254, 243, 199, 0.7);
+  animation: match-bird-spark 1.8s ease-in-out infinite;
+}
+
+.match-bird-dot.is-2 {
+  left: 2.8rem;
+  top: 0.2rem;
+  animation-delay: 0.5s;
+}
+
+.match-peek {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #fef08a;
+}
+
+@keyframes match-bird-fly {
+  0%,
+  100% {
+    transform: translate(0, 0.12rem) rotate(-8deg);
+  }
+  35% {
+    transform: translate(1.55rem, -0.55rem) rotate(10deg);
+  }
+  65% {
+    transform: translate(0.35rem, -0.18rem) rotate(-4deg);
+  }
+}
+
+@keyframes match-wing-flap {
+  from {
+    transform: rotate(6deg);
+  }
+  to {
+    transform: rotate(-32deg);
+  }
+}
+
+@keyframes match-bird-spark {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: translate(0.2rem, 0.8rem) scale(0.6);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(1.4rem, 0.15rem) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .match-bird-svg,
+  .match-bird-wing,
+  .match-bird-dot {
+    animation: none;
+  }
+}
+
 .match-side-kicker {
   margin: 0;
   font-size: 0.62rem;
@@ -1723,22 +1824,19 @@ a.card-premium:hover,
   list-style: none;
   font-size: 0.72rem;
   font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #a5f3fc;
+  color: #fef08a;
 }
 
 .match-side-more summary::-webkit-details-marker {
   display: none;
 }
 
-.match-side-more summary::after {
-  content: " ▾";
-  font-size: 0.78rem;
+.match-side-more[open] .match-peek::after {
+  content: " ▴";
 }
 
-.match-side-more[open] summary::after {
-  content: " ▴";
+.match-side-more .match-peek::after {
+  content: " ▾";
 }
 
 .match-side-more .match-side-parts {
