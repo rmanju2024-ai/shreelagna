@@ -6,7 +6,7 @@ import { notifyInterestAccepted } from "@/lib/notify/dispatch";
 import { missingPayloadColumn } from "@/lib/profile/db-errors";
 import { chatReceivedCopy, interestAcceptedCopy, interestDeclinedCopy } from "@/lib/match/alert-copy";
 import { canAlertInterest } from "@/lib/match/profile-settings";
-import { hasAcceptedInterest, isStalePending, trimDeclineReason } from "@/lib/match/interest-status";
+import { orderedProfilePair, pairCanChat, isStalePending, trimDeclineReason } from "@/lib/match/interest-status";
 import { pairPlanLive } from "@/lib/membership/access";
 import { loadMembership, loadMembershipForProfile } from "@/lib/membership/load";
 import { displayFirstName } from "@/lib/profile/options";
@@ -31,7 +31,7 @@ async function requireMember() {
 }
 
 function orderedPair(a: string, b: string): [string, string] {
-  return a < b ? [a, b] : [b, a];
+  return orderedProfilePair(a, b);
 }
 
 export async function expireStaleInterests() {
@@ -219,22 +219,37 @@ export async function saveProfileSettings(formData: FormData) {
 
 export async function sendChat(formData: FormData) {
   const { supabase, me } = await requireMember();
-  const threadId = String(formData.get("thread_id") ?? "");
+  const next = String(formData.get("next") ?? "").trim();
+  const toId = String(formData.get("to_profile_id") ?? "");
   const body = String(formData.get("body") ?? "").trim();
-  if (!threadId || body.length < 1) redirect("/app/chat");
+  let threadId = String(formData.get("thread_id") ?? "");
+  const bounce = next || (toId ? `/browse/${toId}` : "/app/chat");
+  if (body.length < 1) redirect(bounce);
+  if (!threadId && toId && me.active_profile_id) {
+    const [a, b] = orderedPair(me.active_profile_id, toId);
+    await supabase.from("threads").insert({ profile_a: a, profile_b: b });
+    const { data: made } = await supabase
+      .from("threads")
+      .select("id")
+      .eq("profile_a", a)
+      .eq("profile_b", b)
+      .maybeSingle();
+    threadId = made?.id ?? "";
+  }
+  if (!threadId) redirect(bounce);
   const { data: thread } = await supabase
     .from("threads")
     .select("id, profile_a, profile_b, frozen")
     .eq("id", threadId)
     .maybeSingle();
-  if (!thread || thread.frozen) redirect("/app/chat");
+  if (!thread || thread.frozen) redirect(bounce);
   const { data: pair } = await supabase
     .from("profiles")
     .select("id, status, created_by, subject_full_name")
     .in("id", [thread.profile_a, thread.profile_b]);
   const mine = (pair ?? []).find((p) => p.created_by === me.id);
   const other = (pair ?? []).find((p) => p.created_by !== me.id);
-  if (!mine || mine.status !== "active" || !other || other.status !== "active") redirect("/app/chat");
+  if (!mine || mine.status !== "active" || !other || other.status !== "active") redirect(bounce);
   const { data: interestRows } = await supabase
     .from("interests")
     .select("from_profile_id, to_profile_id, status, created_at")
@@ -242,10 +257,10 @@ export async function sendChat(formData: FormData) {
       `and(from_profile_id.eq.${mine.id},to_profile_id.eq.${other.id}),and(from_profile_id.eq.${other.id},to_profile_id.eq.${mine.id})`,
     )
     .limit(8);
-  if (!hasAcceptedInterest(interestRows ?? [], mine.id, other.id)) redirect("/app/chat");
+  if (!pairCanChat(interestRows ?? [], mine.id, other.id)) redirect(bounce);
   const myAccess = await loadMembership(supabase, me);
   const otherAccess = await loadMembershipForProfile(supabase, other.id);
-  if (!pairPlanLive(myAccess.live, otherAccess.live)) redirect(`/app/chat/${threadId}`);
+  if (!pairPlanLive(myAccess.live, otherAccess.live)) redirect(bounce);
   const text = body.slice(0, 4000);
   await supabase.from("messages").insert({
     thread_id: threadId,
@@ -267,8 +282,9 @@ export async function sendChat(formData: FormData) {
   revalidatePath(`/app/chat/${threadId}`);
   revalidatePath("/app/chat");
   revalidatePath("/app/alerts");
+  revalidatePath(`/browse/${other.id}`);
   revalidatePath("/", "layout");
-  redirect(`/app/chat/${threadId}`);
+  redirect(bounce);
 }
 
 export async function recordProfileView(viewerId: string, viewedId: string) {

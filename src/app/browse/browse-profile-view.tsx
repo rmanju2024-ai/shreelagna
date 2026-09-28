@@ -7,7 +7,7 @@ import { ProfilePortrait } from "@/app/app/profiles/profile-portrait";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { kundaliScore } from "@/lib/match/kundali";
 import { photosVisible } from "@/lib/match/photo-privacy";
-import { effectiveInterestStatus, interestThreadState, openInterestBlocksSend } from "@/lib/match/interest-status";
+import { effectiveInterestStatus, interestThreadState, openInterestBlocksSend, orderedProfilePair } from "@/lib/match/interest-status";
 import { matchSelfFromProfile } from "@/lib/profile/match-compare";
 import { canEditMemberProfile } from "@/lib/desk/access";
 import { canViewProfile, isPublicProfileStatus, type ProfileType } from "@/lib/profile/visibility";
@@ -170,6 +170,28 @@ export async function BrowseProfileView({
     .maybeSingle();
   const targetAccess = owner ? await loadMembership(db, owner) : null;
   const pairLive = pairPlanLive(access.live, targetAccess?.live);
+  const myChatId = mine && String(mine.id) !== id ? String(mine.id) : null;
+  let chatThreadId: string | null = null;
+  let chatNotes: { id: string; sender_profile_id: string; body: string; created_at: string }[] = [];
+  if (myChatId && linkedByInterest) {
+    const [a, b] = orderedProfilePair(myChatId, id);
+    const { data: chatThread } = await db
+      .from("threads")
+      .select("id")
+      .eq("profile_a", a)
+      .eq("profile_b", b)
+      .maybeSingle();
+    chatThreadId = typeof chatThread?.id === "string" ? chatThread.id : null;
+    if (chatThreadId) {
+      const { data: msgs } = await db
+        .from("messages")
+        .select("id, sender_profile_id, body, created_at")
+        .eq("thread_id", chatThreadId)
+        .order("created_at", { ascending: false })
+        .limit(8);
+      chatNotes = [...(msgs ?? [])].reverse();
+    }
+  }
   const guestPass = complimentaryPaidProfileAccess({
     viewerKind: access.kind,
     targetKind: targetAccess?.kind,
@@ -312,6 +334,12 @@ export async function BrowseProfileView({
                 needQuota={needQuota}
                 quotaLeft={quotaLeft}
                 kundali={kundali}
+                chat={{
+                  myProfileId: myChatId,
+                  threadId: chatThreadId,
+                  notes: chatNotes,
+                  live: pairLive,
+                }}
               />
               <div className="match-dock-face">
                 {error === "incomplete" ? (

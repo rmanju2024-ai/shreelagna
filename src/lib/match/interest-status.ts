@@ -54,16 +54,39 @@ export function openInterestBlocksSend(status: InterestStatus | null | undefined
   return status === "pending" || status === "accepted";
 }
 
+export function orderedProfilePair(a: string, b: string): [string, string] {
+  return a < b ? [a, b] : [b, a];
+}
+
+function rowIsPair(
+  row: { from_profile_id?: string | null; to_profile_id?: string | null },
+  a: string,
+  b: string,
+) {
+  const from = String(row.from_profile_id ?? "");
+  const to = String(row.to_profile_id ?? "");
+  return (from === a && to === b) || (from === b && to === a);
+}
+
 export function hasAcceptedInterest(
   rows: { from_profile_id?: string | null; to_profile_id?: string | null; status?: string | null; created_at?: string | null }[],
   a: string,
   b: string,
 ): boolean {
+  return rows.some(
+    (row) => rowIsPair(row, a, b) && effectiveInterestStatus(row.status, row.created_at ?? "") === "accepted",
+  );
+}
+
+export function pairCanChat(
+  rows: { from_profile_id?: string | null; to_profile_id?: string | null; status?: string | null; created_at?: string | null }[],
+  a: string,
+  b: string,
+): boolean {
   return rows.some((row) => {
-    const from = String(row.from_profile_id ?? "");
-    const to = String(row.to_profile_id ?? "");
-    const pair = (from === a && to === b) || (from === b && to === a);
-    return pair && effectiveInterestStatus(row.status, row.created_at ?? "") === "accepted";
+    if (!rowIsPair(row, a, b)) return false;
+    const status = effectiveInterestStatus(row.status, row.created_at ?? "");
+    return status === "accepted" || status === "pending";
   });
 }
 

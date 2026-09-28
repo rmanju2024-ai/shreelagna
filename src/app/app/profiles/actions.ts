@@ -603,6 +603,8 @@ export async function sendInterest(formData: FormData) {
   if (error && !error.message.toLowerCase().includes("duplicate")) {
     redirect(`/browse/${toId}?error=could_not_send`);
   }
+  const [a, b] = mine.id < toId ? [mine.id, toId] : [toId, mine.id];
+  await supabase.from("threads").insert({ profile_a: a, profile_b: b });
   if (!error && canAlertInterest(target)) {
     const senderName = displayFirstName(mine.subject_full_name ?? "A member");
     const viewerFirst = displayFirstName(target.subject_full_name ?? "there");

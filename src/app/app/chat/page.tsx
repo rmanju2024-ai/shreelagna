@@ -4,7 +4,7 @@ import { PageShell } from "@/components/site-chrome";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { chatStamp, countByKey, latestByThread, previewText, unreadLabel } from "@/lib/match/chat-ui";
 import { pickPrimaryPhotoMap, publicMediaUrl } from "@/lib/match/inbox-card";
-import { hasAcceptedInterest } from "@/lib/match/interest-status";
+import { pairCanChat } from "@/lib/match/interest-status";
 import { displayFirstName } from "@/lib/profile/options";
 import { createServiceClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -25,15 +25,14 @@ export default async function ChatListPage() {
         .order("created_at", { ascending: false })
     : { data: [] };
 
-  const { data: acceptedRows } = ids.length
+  const { data: chatRows } = ids.length
     ? await supabase
         .from("interests")
         .select("from_profile_id, to_profile_id, status, created_at")
-        .eq("status", "accepted")
         .or(`from_profile_id.in.(${ids.join(",")}),to_profile_id.in.(${ids.join(",")})`)
     : { data: [] };
   const openThreads = (threads ?? []).filter((thread) =>
-    hasAcceptedInterest(acceptedRows ?? [], thread.profile_a, thread.profile_b),
+    pairCanChat(chatRows ?? [], thread.profile_a, thread.profile_b),
   );
   const otherIds = [...new Set(openThreads.map((t) => (ids.includes(t.profile_a) ? t.profile_b : t.profile_a)))];
   const { data: names } = otherIds.length

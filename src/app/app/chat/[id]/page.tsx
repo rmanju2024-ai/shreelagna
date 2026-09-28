@@ -6,7 +6,7 @@ import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { chatStamp } from "@/lib/match/chat-ui";
 import { publicMediaUrl } from "@/lib/match/inbox-card";
 import { lastOnlineLine } from "@/lib/profile/last-seen";
-import { hasAcceptedInterest } from "@/lib/match/interest-status";
+import { pairCanChat } from "@/lib/match/interest-status";
 import { pairPlanLive } from "@/lib/membership/access";
 import { loadMembership, loadMembershipForProfile } from "@/lib/membership/load";
 import { displayFirstName } from "@/lib/profile/options";
@@ -44,7 +44,7 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
       `and(from_profile_id.eq.${mine.id},to_profile_id.eq.${otherId}),and(from_profile_id.eq.${otherId},to_profile_id.eq.${mine.id})`,
     )
     .limit(8);
-  if (!hasAcceptedInterest(interestRows ?? [], mine.id, otherId)) notFound();
+  if (!pairCanChat(interestRows ?? [], mine.id, otherId)) notFound();
   const db = createServiceClient() ?? supabase;
   const [myAccess, otherAccess] = await Promise.all([
     loadMembership(db, me),

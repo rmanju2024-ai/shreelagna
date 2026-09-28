@@ -8,6 +8,8 @@ import {
   isHistoryStatus,
   isStalePending,
   openInterestBlocksSend,
+  hasAcceptedInterest,
+  pairCanChat,
   trimDeclineReason,
 } from "./interest-status";
 
@@ -53,5 +55,12 @@ describe("interest status", () => {
 
   it("prints history date and time", () => {
     expect(formatInboxWhen("2026-04-01T10:05:00+05:30")).toBe("1 Apr 2026 · 10:05 am IST");
+  });
+
+  it("opens chat after interest is sent or accepted", () => {
+    const pending = [{ from_profile_id: "a", to_profile_id: "b", status: "pending", created_at: "2026-03-20T00:00:00Z" }];
+    expect(pairCanChat(pending, "a", "b")).toBe(true);
+    expect(hasAcceptedInterest(pending, "a", "b")).toBe(false);
+    expect(pairCanChat([{ ...pending[0], status: "declined" }], "a", "b")).toBe(false);
   });
 });

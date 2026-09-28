@@ -1624,11 +1624,14 @@ a.card-premium:hover,
 }
 
 .portrait-interest {
-  flex: 0 0 16.5rem;
-  width: 16.5rem;
+  flex: 0 0 18rem;
+  width: 18rem;
   max-width: 100%;
   min-width: 0;
   margin: 0;
+  position: relative;
+  z-index: 4;
+  align-self: start;
 }
 
 .portrait-header-edit {
@@ -1637,10 +1640,20 @@ a.card-premium:hover,
 
 .match-dock {
   width: 100%;
-  max-width: 17.5rem;
+  max-width: 18rem;
+  position: relative;
+  z-index: 4;
+  align-self: start;
+}
+
+.match-dock-stack {
+  display: grid;
+  gap: 0.7rem;
+  align-content: start;
 }
 
 .match-side {
+  position: relative;
   display: grid;
   gap: 0.45rem;
   padding: 0.7rem 0.75rem 0.8rem;
@@ -1816,7 +1829,27 @@ a.card-premium:hover,
 }
 
 .match-side-more {
-  margin: 0.1rem 0 0;
+  position: relative;
+  margin: 0;
+}
+
+.match-kundali-pop {
+  display: none;
+}
+
+.match-side-more[open] .match-kundali-pop {
+  display: grid;
+  gap: 0.4rem;
+  position: absolute;
+  z-index: 8;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  width: min(18rem, calc(100vw - 2rem));
+  padding: 0.65rem 0.7rem 0.75rem;
+  border-radius: 0.9rem;
+  background: linear-gradient(165deg, #3b0764 0%, #6b21a8 48%, #4a044e 100%);
+  border: 1px solid rgba(253, 224, 171, 0.35);
+  box-shadow: 0 16px 32px rgba(24, 8, 20, 0.35);
 }
 
 .match-side-more summary {
@@ -1884,6 +1917,133 @@ a.card-premium:hover,
 
 .match-side.is-good {
   background: linear-gradient(165deg, #065f46 0%, #047857 48%, #064e3b 100%);
+}
+
+.peek-chat {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.7rem 0.7rem 0.75rem;
+  border-radius: 1.05rem;
+  color: #f5f3ff;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(251, 191, 36, 0.22), transparent 42%),
+    linear-gradient(165deg, #1e1b4b 0%, #312e81 46%, #0f172a 100%);
+  border: 1px solid rgba(196, 181, 253, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 10px 22px rgba(30, 27, 75, 0.28);
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+}
+
+.peek-chat-kicker {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #fde68a;
+}
+
+.peek-chat-stream {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0.35rem;
+  list-style: none;
+  min-height: 4.4rem;
+  max-height: 9.5rem;
+  overflow: auto;
+  border-radius: 0.7rem;
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.peek-chat-empty {
+  margin: 0.4rem 0.2rem;
+  font-family: Georgia, "Source Serif 4", serif;
+  font-style: italic;
+  font-size: 0.84rem;
+  color: #c4b5fd;
+}
+
+.peek-chat-bubble {
+  max-width: 92%;
+  padding: 0.38rem 0.55rem 0.3rem;
+  border-radius: 0.85rem;
+}
+
+.peek-chat-bubble p {
+  margin: 0;
+  font-family: Georgia, "Palatino Linotype", "Source Serif 4", serif;
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.peek-chat-bubble time {
+  display: block;
+  margin-top: 0.15rem;
+  font-family: "Trebuchet MS", sans-serif;
+  font-size: 0.58rem;
+  letter-spacing: 0.04em;
+  opacity: 0.72;
+}
+
+.peek-chat-bubble.is-theirs {
+  justify-self: start;
+  color: #1e1b4b;
+  background: linear-gradient(180deg, #fde68a, #fcd34d);
+  border-bottom-left-radius: 0.25rem;
+}
+
+.peek-chat-bubble.is-mine {
+  justify-self: end;
+  color: #eef2ff;
+  background: linear-gradient(180deg, #6366f1, #4338ca);
+  border-bottom-right-radius: 0.25rem;
+}
+
+.peek-chat-lock {
+  margin: 0;
+  font-size: 0.72rem;
+  color: #ddd6fe;
+}
+
+.peek-chat-lock a {
+  color: #fde68a;
+}
+
+.peek-chat-composer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.35rem;
+  align-items: end;
+}
+
+.peek-chat-composer textarea {
+  width: 100%;
+  min-height: 2.5rem;
+  resize: none;
+  border: 0;
+  border-radius: 0.7rem;
+  padding: 0.45rem 0.55rem;
+  font-family: Georgia, "Palatino Linotype", serif;
+  font-size: 0.82rem;
+  color: #1e1b4b;
+  background: #eef2ff;
+}
+
+.peek-chat-composer button {
+  min-height: 2.5rem;
+  border: 0;
+  border-radius: 0.7rem;
+  padding: 0 0.75rem;
+  font-family: "Trebuchet MS", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #1e1b4b;
+  background: linear-gradient(180deg, #fde68a, #f59e0b);
+  box-shadow: inset 0 1px 0 #fff, 0 3px 0 #b45309;
 }
 
 .match-dock-face {
@@ -2099,9 +2259,9 @@ a.card-premium:hover,
 
   .portrait-interest,
   .match-dock {
-    width: 16.5rem;
+    width: 18rem;
     max-width: 100%;
-    align-self: flex-end;
+    align-self: start;
     margin-left: auto;
   }
 
@@ -2321,7 +2481,7 @@ a.card-premium:hover,
   }
 
   .portrait-sheet-id-head {
-    grid-template-columns: minmax(0, 1fr) 16.5rem;
+    grid-template-columns: minmax(0, 1fr) 18rem;
     align-items: start;
   }
 
@@ -2332,10 +2492,11 @@ a.card-premium:hover,
   .portrait-interest,
   .match-dock {
     flex: none;
-    width: 16.5rem;
-    max-width: 16.5rem;
+    width: 18rem;
+    max-width: 18rem;
     justify-self: end;
     margin-left: 0;
+    align-self: start;
   }
 
   .portrait-groups {
