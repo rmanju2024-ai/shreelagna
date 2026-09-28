@@ -4505,6 +4505,43 @@ a.browse-view {
   padding: 0.7rem 0.85rem 1rem;
 }
 
+@media (max-width: 899px) {
+  .desk-board {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .desk-board .browse-views {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 0.4rem;
+    max-height: none;
+    overflow: visible;
+    border-right: none;
+    border-bottom: 1px solid rgba(184, 137, 76, 0.28);
+    padding: 0.55rem 0.55rem 0.7rem;
+  }
+
+  .desk-board .browse-views .browse-kicker {
+    flex: 1 0 100%;
+    margin: 0;
+  }
+
+  .desk-board .browse-view {
+    flex: 1 1 calc(33.333% - 0.3rem);
+    width: auto;
+    min-width: 5.2rem;
+    justify-content: center;
+    text-align: center;
+    border-radius: 0.8rem;
+  }
+
+  .desk-board .browse-view span {
+    justify-items: center;
+    text-align: center;
+  }
+}
+
 .desk-panel-head {
   display: flex;
   flex-wrap: wrap;
