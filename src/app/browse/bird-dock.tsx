@@ -298,21 +298,24 @@ export function BirdDock({
                   : "Finish profile";
 
   const dock = (
-    <div className={`bird-dock${open ? " is-open" : ""}`} data-phase={phase} data-thread={thread}>
+    <div className={`bird-dock${open ? " is-open" : ""}${wide ? " is-wide" : ""}`} data-phase={phase} data-thread={thread}>
+      {wide ? <button type="button" className="bird-wa-scrim" aria-label="Restore chat" onClick={() => setWide(false)} /> : null}
       {open && showChat ? (
         <section className={`bird-wa${wide ? " is-max" : ""}`} aria-label="Chat">
           <header className="bird-wa-head">
-            <ChatAvatar name={name} src={chat?.photo} size="sm" />
+            <ChatAvatar name={name} src={chat?.photo} size={wide ? "md" : "sm"} />
             <div className="bird-wa-who">
               <h2>{name}</h2>
               <p>{chat?.seen ?? "tap to chat"}</p>
             </div>
-            <button type="button" className="bird-wa-close" onClick={() => setWide((on) => !on)}>
-              {wide ? "Restore" : "Maximize"}
-            </button>
-            <button type="button" className="bird-wa-close" onClick={() => setOpen(false)}>
-              Close
-            </button>
+            <div className="bird-wa-tools">
+              <button type="button" className="bird-wa-icon" onClick={() => setWide((on) => !on)} aria-label={wide ? "Restore" : "Maximize"}>
+                {wide ? "↙" : "↗"}
+              </button>
+              <button type="button" className="bird-wa-icon" onClick={() => setOpen(false)} aria-label="Close">
+                ✕
+              </button>
+            </div>
           </header>
           <div className="bird-wa-stage">
             <ul className="bird-wa-stream">
@@ -367,7 +370,7 @@ export function BirdDock({
                   }
                 }}
               />
-              <button type="submit" className="bird-wa-send" aria-label="Send">
+              <button type="submit" className="bird-wa-send" aria-label="Send" disabled={!draft.trim()}>
                 ➤
               </button>
             </form>
