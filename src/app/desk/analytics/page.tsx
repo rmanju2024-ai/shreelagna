@@ -1,13 +1,11 @@
 import { BreakdownCard, PulseGroup, Stat } from "@/app/desk/analytics/breakdown-card";
 import { requireDesk } from "@/lib/desk/access";
 import { cachedDeskPulse } from "@/lib/desk/cached";
-import { houseRoleLabel } from "@/lib/desk/breakdown";
-import { cardClass } from "@/lib/ui/classes";
 
 export default async function DeskAnalyticsPage() {
   const desk = await requireDesk("/desk/analytics");
   if (!desk.allowed) return null;
-  const { pulse, created, purchased, usage, staff } = await cachedDeskPulse(desk.admin);
+  const { pulse, created, purchased, usage } = await cachedDeskPulse();
 
   return (
     <>
@@ -39,28 +37,6 @@ export default async function DeskAnalyticsPage() {
         <BreakdownCard title="Plans purchased" rows={purchased.monthly} />
         <BreakdownCard title="Plans in use" rows={usage.rows} />
       </div>
-      {desk.admin ? (
-        <div className="desk-admin-block">
-          <p className="browse-kicker">Admin only</p>
-          <h3>Staff on duty</h3>
-          <ul className="desk-staff-list">
-            {staff.map((row) => (
-              <li key={row.email} className={`${cardClass} card-3d desk-ticket-row desk-person-row`}>
-                <span className="desk-ticket-row-main">
-                  <span className="desk-ticket-name">{row.display_name || row.email}</span>
-                  <span className={`desk-pill ${row.role === "admin" ? "is-done" : "is-busy"}`}>
-                    {houseRoleLabel(row.role)}
-                  </span>
-                  <span className="desk-ticket-meta">{row.email}</span>
-                </span>
-              </li>
-            ))}
-          </ul>
-          {!staff.length ? <p className="desk-empty">No staff rows loaded.</p> : null}
-        </div>
-      ) : (
-        <p className="browse-saved-note">Service can work tickets. Place, people, and health tabs sit beside this pulse.</p>
-      )}
     </>
   );
 }

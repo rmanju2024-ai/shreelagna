@@ -95,7 +95,7 @@ export const cachedWeekPresence = () =>
     { revalidate: 30, tags: ["desk"] },
   )();
 
-export const cachedDeskPulse = (admin: boolean) =>
+export const cachedDeskPulse = () =>
   unstable_cache(
     async () => {
       const db = serviceDb();
@@ -114,7 +114,6 @@ export const cachedDeskPulse = (admin: boolean) =>
         welcomeWindow,
         catalog,
         purchaseRows,
-        staff,
       ] = await Promise.all([
         db.from("profiles").select("profile_type, status, created_at").limit(4000),
         db.from("tickets").select("status").limit(2000),
@@ -134,9 +133,6 @@ export const cachedDeskPulse = (admin: boolean) =>
           .in("status", ["active", "cancelled"])
           .gte("created_at", yearAgo)
           .limit(3000),
-        admin
-          ? db.from("app_users").select("email, role, display_name").in("role", ["service", "admin"]).order("role")
-          : Promise.resolve({ data: [] as { email: string; role: string; display_name: string | null }[] }),
       ]);
 
       const profiles = (profileRows.data ?? []) as {
@@ -197,8 +193,8 @@ export const cachedDeskPulse = (admin: boolean) =>
         catalog,
         now,
       });
-      return { pulse, created, purchased, usage, staff: staff.data ?? [] };
+      return { pulse, created, purchased, usage };
     },
-    ["desk-pulse", admin ? "admin" : "staff"],
+    ["desk-pulse"],
     { revalidate: 20, tags: ["desk"] },
   )();
