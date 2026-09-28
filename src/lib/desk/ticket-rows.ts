@@ -1,6 +1,6 @@
 import type { TicketNote } from "@/lib/desk/tickets";
 
-const LIST = "id, name, city, status, created_at, enquiry_type";
+const LIST = "id, name, city, status, created_at, message, email, mobile, enquiry_type, resolution";
 const FULL =
   "id, name, city, status, created_at, message, email, mobile, enquiry_type, resolution";
 const BASIC = "id, name, city, status, created_at, message, email, mobile, enquiry_type";

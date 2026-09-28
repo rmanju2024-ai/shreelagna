@@ -1,25 +1,32 @@
-import Link from "next/link";
+import { Suspense } from "react";
 import { DeskPager } from "@/app/desk/desk-pager";
+import { TicketBoard } from "@/app/desk/tickets/ticket-board";
 import { requireDesk } from "@/lib/desk/access";
-import { deskPage, deskRange } from "@/lib/desk/pager";
-import { fetchDeskTickets } from "@/lib/desk/ticket-rows";
 import { cachedDeskTickets } from "@/lib/desk/cached";
-import { isOpenTicket, ticketEnquiryLabel, ticketStatusClass, ticketStatusLabel } from "@/lib/desk/tickets";
-import { formatIstDateTime } from "@/lib/time/ist";
-import { cardClass } from "@/lib/ui/classes";
+import { deskPage, deskRange } from "@/lib/desk/pager";
+import { fetchDeskTicket, fetchDeskTickets, fetchTicketNotes } from "@/lib/desk/ticket-rows";
+import { isOpenTicket } from "@/lib/desk/tickets";
 
 export default async function DeskTicketsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; open?: string }>;
 }) {
   const desk = await requireDesk("/desk/tickets");
   if (!desk.allowed) return null;
-  const { page: rawPage } = await searchParams;
+  const { page: rawPage, open: openId } = await searchParams;
   const page = deskPage(rawPage);
   const { from, to } = deskRange(page);
   const { rows, count } = await cachedDeskTickets(from, to).catch(() =>
     fetchDeskTickets(desk.supabase, from, to),
+  );
+  const extra =
+    openId && !rows.some((row) => String(row.id) === openId)
+      ? await fetchDeskTicket(desk.supabase, openId)
+      : null;
+  const notes = await fetchTicketNotes(
+    desk.supabase,
+    [...rows.map((row) => String(row.id)), extra ? String(extra.id) : ""].filter(Boolean),
   );
   const open = rows.filter((row) => isOpenTicket(String(row.status ?? ""))).length;
 
@@ -35,31 +42,17 @@ export default async function DeskTicketsPage({
         </p>
       </header>
       {rows.length ? (
-        <ul className="desk-ticket-list">
-          {rows.map((ticket) => (
-            <li key={String(ticket.id)}>
-              <Link href={`/desk/tickets/${ticket.id}`} className={`${cardClass} card-3d desk-ticket-row`}>
-                <span className="desk-ticket-row-main">
-                  <span className="desk-ticket-name">{String(ticket.name)}</span>
-                  <span className={`desk-pill ${ticketStatusClass(String(ticket.status ?? ""))}`}>
-                    {ticketStatusLabel(String(ticket.status ?? ""))}
-                  </span>
-                  <span className="desk-ticket-meta">
-                    {ticketEnquiryLabel(String(ticket.enquiry_type ?? ""))}
-                    {" · "}
-                    {formatIstDateTime(String(ticket.created_at))}
-                    {ticket.city ? ` · ${ticket.city}` : ""}
-                  </span>
-                </span>
-                <span className="desk-ticket-open">View</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <Suspense fallback={<p className="desk-empty">Opening tickets…</p>}>
+          <TicketBoard tickets={rows} extra={extra as (typeof rows)[number] | null} notes={notes}>
+            <DeskPager path="/desk/tickets" page={page} count={count} />
+          </TicketBoard>
+        </Suspense>
       ) : (
-        <p className="desk-empty">No contact tickets yet.</p>
+        <>
+          <p className="desk-empty">No contact tickets yet.</p>
+          <DeskPager path="/desk/tickets" page={page} count={count} />
+        </>
       )}
-      <DeskPager path="/desk/tickets" page={page} count={count} />
     </section>
   );
 }

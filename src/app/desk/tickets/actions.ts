@@ -76,3 +76,36 @@ export async function addTicketNote(formData: FormData) {
   });
   refreshDeskTickets(id);
 }
+
+export async function saveTicketDetails(formData: FormData) {
+  const desk = await requireDesk("/desk/tickets");
+  if (!desk.allowed) return;
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  const payload: Record<string, unknown> = {
+    name: String(formData.get("name") ?? "").trim().slice(0, 120),
+    city: String(formData.get("city") ?? "").trim().slice(0, 80) || null,
+    email: String(formData.get("email") ?? "").trim().slice(0, 160) || null,
+    mobile: String(formData.get("mobile") ?? "").trim().slice(0, 40) || null,
+    message: String(formData.get("message") ?? "").trim().slice(0, 4000),
+  };
+  if (!payload.name) return;
+  const db = deskDb(desk.supabase);
+  let { error } = await db.from("tickets").update(payload).eq("id", id);
+  while (error) {
+    const missing = missingPayloadColumn(error, payload);
+    if (!missing) break;
+    delete payload[missing];
+    ({ error } = await db.from("tickets").update(payload).eq("id", id));
+  }
+  if (!error) {
+    await writeAudit({
+      actorUserId: desk.me?.id,
+      actorRole: desk.me?.role,
+      action: "ticket.update",
+      entityType: "ticket",
+      entityId: id,
+    });
+  }
+  refreshDeskTickets(id);
+}
