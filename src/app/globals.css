@@ -1670,17 +1670,12 @@ a.card-premium:hover,
 
 .bird-dock {
   position: fixed;
-  z-index: 80;
+  z-index: 260;
   right: max(0.9rem, env(safe-area-inset-right));
-  bottom: max(1.1rem, calc(env(safe-area-inset-bottom) + 4.6rem));
+  bottom: max(1.15rem, calc(env(safe-area-inset-bottom) + 1.25rem));
   display: grid;
   justify-items: end;
   gap: 0.55rem;
-  pointer-events: none;
-}
-
-.bird-dock > * {
-  pointer-events: auto;
 }
 
 .bird-dock-stage {
@@ -5437,9 +5432,14 @@ a.browse-view {
 }
 
 .portrait-peek-modal {
+  position: relative;
   width: min(88rem, calc(100vw - 1rem));
   max-height: min(94dvh, 62rem);
   padding: 0.7rem 0.75rem 1rem;
+}
+
+.portrait-peek-modal .bird-dock {
+  z-index: 260;
 }
 
 .portrait-peek-head {

@@ -124,7 +124,7 @@ export function PortraitSheet({
             Edit album
           </Link>
         ) : houseEdit ? (
-          <Link href={editHref} className={`${btnGhost} portrait-album-edit`}>
+          <Link href={editHref} className={`${btnGhost} portrait-album-edit`} prefetch={false}>
             Edit
           </Link>
         ) : null}

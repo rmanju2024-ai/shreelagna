@@ -69,17 +69,6 @@ export function MatchBar({
           </ol>
         </div>
       </details>
-      <BirdDock
-        profileId={profileId}
-        interestId={interestId}
-        thread={thread}
-        canSend={canSend}
-        needPlan={needPlan}
-        needQuota={needQuota}
-        quotaLeft={quotaLeft}
-        finishHref={finishHref}
-        chat={chat}
-      />
     </div>
   );
 }

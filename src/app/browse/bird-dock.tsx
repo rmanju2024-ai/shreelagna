@@ -171,8 +171,6 @@ export function BirdDock({
                 ? "Spark interest"
                 : "Finish profile";
 
-  if (!mounted) return null;
-
   const dock = (
     <div className={`bird-dock${open ? " is-open" : ""}`} data-phase={phase} data-thread={thread}>
       {open && showChat ? (
@@ -256,14 +254,20 @@ export function BirdDock({
           </form>
         ) : null}
 
-        {thread === "sent" && interestId ? (
-          <form action={cancelInterest}>
-            <input type="hidden" name="to_profile_id" value={profileId} />
-            <input type="hidden" name="interest_id" value={interestId} />
-            <button type="submit" className="bird-dock-cta is-drop">
-              Drop Interest
+        {thread === "sent" ? (
+          interestId ? (
+            <form action={cancelInterest}>
+              <input type="hidden" name="to_profile_id" value={profileId} />
+              <input type="hidden" name="interest_id" value={interestId} />
+              <button type="submit" className="bird-dock-cta is-drop">
+                Drop Interest
+              </button>
+            </form>
+          ) : (
+            <button type="button" className="bird-dock-cta is-sent">
+              Interest sent
             </button>
-          </form>
+          )
         ) : null}
 
         {thread === "accepted" ? (
@@ -290,5 +294,5 @@ export function BirdDock({
     </div>
   );
 
-  return createPortal(dock, document.body);
+  return mounted ? createPortal(dock, document.body) : dock;
 }

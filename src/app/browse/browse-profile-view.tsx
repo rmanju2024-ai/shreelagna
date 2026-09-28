@@ -1,4 +1,5 @@
 ﻿import { viewContact } from "@/app/app/profiles/actions";
+import { BirdDock } from "@/app/browse/bird-dock";
 import { MatchBar } from "@/app/browse/match-bar";
 import { profileViewedCopy } from "@/lib/match/alert-copy";
 import { canAlertProfileView, isIncognito } from "@/lib/match/profile-settings";
@@ -397,6 +398,24 @@ export async function BrowseProfileView({
           ) : null
         }
       />
+      {!own && user ? (
+        <BirdDock
+          profileId={String(profile.id)}
+          interestId={interestId}
+          thread={thread}
+          canSend={canSend}
+          needPlan={needPlan}
+          needQuota={needQuota}
+          quotaLeft={quotaLeft}
+          finishHref={`/app/profiles/${mine?.id ?? ""}`}
+          chat={{
+            myProfileId: myChatId,
+            threadId: chatThreadId,
+            notes: chatNotes,
+            live: pairLive,
+          }}
+        />
+      ) : null}
     </div>
   );
 }
