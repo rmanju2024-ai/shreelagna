@@ -1,5 +1,5 @@
 import { houseRoleLabel } from "@/lib/desk/breakdown";
-import { type TicketNote } from "@/lib/desk/tickets";
+import { ticketStatusClass, ticketStatusLabel, type TicketNote } from "@/lib/desk/tickets";
 import { formatIstDateTime } from "@/lib/time/ist";
 
 export function TicketNoteTrail({
@@ -28,6 +28,11 @@ export function TicketNoteTrail({
           <p className="desk-ticket-note-by">
             <strong>{note.actor_name || "Staff"}</strong>
             {note.actor_role ? <span>{houseRoleLabel(note.actor_role)}</span> : null}
+            {note.ticket_status ? (
+              <span className={`desk-pill ${ticketStatusClass(note.ticket_status)}`}>
+                {ticketStatusLabel(note.ticket_status)}
+              </span>
+            ) : null}
           </p>
           {note.created_at ? (
             <time dateTime={note.created_at}>{formatIstDateTime(note.created_at)}</time>

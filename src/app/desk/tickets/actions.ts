@@ -2,7 +2,7 @@
 
 import { requireDesk } from "@/lib/desk/access";
 import { writeAudit } from "@/lib/desk/audit";
-import { parseTicketStatus, trimTicketResolution } from "@/lib/desk/tickets";
+import { parseTicketStatus, ticketStatusLabel, trimTicketResolution } from "@/lib/desk/tickets";
 import { missingPayloadColumn } from "@/lib/profile/db-errors";
 import { createServiceClient } from "@/lib/supabase/server";
 import { formatIstDateTime } from "@/lib/time/ist";
@@ -15,6 +15,36 @@ function deskDb(supabase: Awaited<ReturnType<typeof requireDesk>>["supabase"]) {
 function refreshDeskTickets(id?: string) {
   refreshDesk(["/desk/tickets", "/desk/analytics"]);
   if (id) refreshDesk([`/desk/tickets/${id}`]);
+}
+
+async function insertNote(
+  db: ReturnType<typeof deskDb>,
+  id: string,
+  body: string,
+  createdBy: string | null,
+  status: string | null,
+) {
+  const payload: Record<string, unknown> = {
+    ticket_id: id,
+    body,
+    created_by: createdBy,
+  };
+  if (status) payload.ticket_status = status;
+  let { error } = await db.from("ticket_notes").insert(payload);
+  while (error) {
+    const missing = missingPayloadColumn(error, payload);
+    if (!missing) break;
+    delete payload[missing];
+    ({ error } = await db.from("ticket_notes").insert(payload));
+  }
+  if (error) {
+    const stamp = formatIstDateTime(new Date());
+    const label = status ? `${ticketStatusLabel(status)} · ` : "";
+    const { data: row } = await db.from("tickets").select("resolution").eq("id", id).maybeSingle();
+    const prev = typeof row?.resolution === "string" ? row.resolution.trim() : "";
+    const next = prev ? `${prev}\n${stamp} — ${label}${body}` : `${stamp} — ${label}${body}`;
+    await db.from("tickets").update({ resolution: next.slice(0, 2000) }).eq("id", id);
+  }
 }
 
 export async function setTicketStatus(formData: FormData) {
@@ -53,26 +83,17 @@ export async function addTicketNote(formData: FormData) {
   if (!desk.allowed) return;
   const id = String(formData.get("id") ?? "");
   const body = trimTicketResolution(formData.get("body"));
+  const status = parseTicketStatus(formData.get("status"));
   if (!id || !body) return;
   const db = deskDb(desk.supabase);
-  const { error } = await db.from("ticket_notes").insert({
-    ticket_id: id,
-    body,
-    created_by: desk.me?.id ?? null,
-  });
-  if (error) {
-    const stamp = formatIstDateTime(new Date());
-    const { data: row } = await db.from("tickets").select("resolution").eq("id", id).maybeSingle();
-    const prev = typeof row?.resolution === "string" ? row.resolution.trim() : "";
-    const next = prev ? `${prev}\n${stamp} — ${body}` : `${stamp} — ${body}`;
-    await db.from("tickets").update({ resolution: next.slice(0, 2000) }).eq("id", id);
-  }
+  await insertNote(db, id, body, desk.me?.id ?? null, status);
   await writeAudit({
     actorUserId: desk.me?.id,
     actorRole: desk.me?.role,
     action: "ticket.note",
     entityType: "ticket",
     entityId: id,
+    metadata: status ? { status } : undefined,
   });
   refreshDeskTickets(id);
 }
@@ -111,24 +132,14 @@ export async function saveTicketWork(formData: FormData) {
   }
 
   if (body) {
-    const { error } = await db.from("ticket_notes").insert({
-      ticket_id: id,
-      body,
-      created_by: desk.me?.id ?? null,
-    });
-    if (error) {
-      const stamp = formatIstDateTime(new Date());
-      const { data: row } = await db.from("tickets").select("resolution").eq("id", id).maybeSingle();
-      const prev = typeof row?.resolution === "string" ? row.resolution.trim() : "";
-      const next = prev ? `${prev}\n${stamp} — ${body}` : `${stamp} — ${body}`;
-      await db.from("tickets").update({ resolution: next.slice(0, 2000) }).eq("id", id);
-    }
+    await insertNote(db, id, body, desk.me?.id ?? null, status);
     await writeAudit({
       actorUserId: desk.me?.id,
       actorRole: desk.me?.role,
       action: "ticket.note",
       entityType: "ticket",
       entityId: id,
+      metadata: status ? { status } : undefined,
     });
   }
 

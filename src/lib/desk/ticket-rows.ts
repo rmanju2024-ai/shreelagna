@@ -52,16 +52,19 @@ export async function fetchDeskTicket(supabase: Db, id: string) {
 
 export async function fetchTicketNotes(supabase: Db, ids: string[]) {
   if (!ids.length) return [] as TicketNote[];
-  const listed = await supabase
-    .from("ticket_notes")
-    .select("id, ticket_id, body, created_at, created_by")
-    .in("ticket_id", ids)
-    .order("created_at");
-  const rows = listed.error
-    ? ((
-        await supabase.from("ticket_notes").select("id, ticket_id, body, created_at").in("ticket_id", ids).order("created_at")
-      ).data ?? [])
-    : (listed.data ?? []);
+  const selects = [
+    "id, ticket_id, body, created_at, created_by, ticket_status",
+    "id, ticket_id, body, created_at, created_by",
+    "id, ticket_id, body, created_at",
+  ];
+  let rows: TicketNote[] = [];
+  for (const cols of selects) {
+    const listed = await supabase.from("ticket_notes").select(cols).in("ticket_id", ids).order("created_at");
+    if (!listed.error) {
+      rows = (listed.data ?? []) as TicketNote[];
+      break;
+    }
+  }
   const actorIds = [
     ...new Set(
       rows

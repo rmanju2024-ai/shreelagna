@@ -4752,6 +4752,10 @@ a.browse-view {
   color: var(--muted);
 }
 
+.desk-ticket-note-by .desk-pill {
+  margin-left: 0.15rem;
+}
+
 .desk-ticket-field-wide {
   grid-column: 1 / -1;
 }
