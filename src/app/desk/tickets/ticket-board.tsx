@@ -10,6 +10,53 @@ import { formatIstDateTime } from "@/lib/time/ist";
 import { btnGhost, btnPrimary, cardClass, inputClass } from "@/lib/ui/classes";
 import { saveTicketWork } from "./actions";
 
+function TicketWorkForm({ ticket, notes }: { ticket: DeskTicketRow; notes: TicketNote[] }) {
+  const [status, setStatus] = useState(String(ticket.status ?? "new"));
+
+  return (
+    <form action={saveTicketWork} className={`${cardClass} card-3d desk-case desk-ticket-work-form`}>
+      <input type="hidden" name="id" value={String(ticket.id)} />
+      <label className="desk-ticket-note-label">
+        Status
+        <select
+          name="status"
+          value={status}
+          className={inputClass}
+          aria-label="Ticket status"
+          onChange={(event) => setStatus(event.target.value)}
+        >
+          {TICKET_STATUSES.map((item) => (
+            <option key={item} value={item}>
+              {ticketStatusLabel(item)}
+            </option>
+          ))}
+        </select>
+      </label>
+      <TicketNoteTrail
+        id={String(ticket.id)}
+        notes={notes}
+        fallback={"resolution" in ticket ? String(ticket.resolution ?? "") : null}
+      />
+      <label className="desk-ticket-note-label">
+        <span className="desk-ticket-new-note-label">
+          New note
+          <span className={`desk-pill ${ticketStatusClass(status)}`}>{ticketStatusLabel(status)}</span>
+        </span>
+        <textarea
+          name="body"
+          className={inputClass}
+          rows={4}
+          maxLength={2000}
+          placeholder={`Note while ticket is ${ticketStatusLabel(status).toLowerCase()}…`}
+        />
+      </label>
+      <button type="submit" className={btnPrimary}>
+        Save
+      </button>
+    </form>
+  );
+}
+
 export function TicketBoard({
   tickets,
   extra,
@@ -108,8 +155,6 @@ export function TicketBoard({
 
               <div className="desk-ticket-modal-grid">
                 <article className={`${cardClass} card-3d desk-case`}>
-                  <p className="browse-kicker">Visitor message</p>
-                  <div className="gold-ornament" />
                   <dl className="desk-ticket-facts">
                     <div>
                       <dt>Name</dt>
@@ -146,48 +191,11 @@ export function TicketBoard({
                   </dl>
                 </article>
 
-                <form
+                <TicketWorkForm
                   key={`${ticket.id}-${ticket.status}-${trail.length}`}
-                  action={saveTicketWork}
-                  className={`${cardClass} card-3d desk-case desk-ticket-work-form`}
-                >
-                  <input type="hidden" name="id" value={String(ticket.id)} />
-                  <p className="browse-kicker">House work</p>
-                  <div className="gold-ornament" />
-                  <label className="desk-ticket-note-label">
-                    Status
-                    <select
-                      name="status"
-                      defaultValue={String(ticket.status ?? "new")}
-                      className={inputClass}
-                      aria-label="Ticket status"
-                    >
-                      {TICKET_STATUSES.map((item) => (
-                        <option key={item} value={item}>
-                          {ticketStatusLabel(item)}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <TicketNoteTrail
-                    id={String(ticket.id)}
-                    notes={trail}
-                    fallback={"resolution" in ticket ? String(ticket.resolution ?? "") : null}
-                  />
-                  <label className="desk-ticket-note-label">
-                    New note
-                    <textarea
-                      name="body"
-                      className={inputClass}
-                      rows={4}
-                      maxLength={2000}
-                      placeholder="Call made, waiting on family, next step…"
-                    />
-                  </label>
-                  <button type="submit" className={btnPrimary}>
-                    Save
-                  </button>
-                </form>
+                  ticket={ticket}
+                  notes={trail}
+                />
               </div>
             </div>
           </div>,
