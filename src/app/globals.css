@@ -1652,6 +1652,400 @@ a.card-premium:hover,
   align-content: start;
 }
 
+.match-kundali-chip {
+  justify-self: end;
+}
+
+.match-kundali-chip > summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0 0.75rem;
+  border-radius: 999px;
+  color: #fff8e7;
+  background: linear-gradient(180deg, #8b1e1a, #6f1d1b);
+  border: 1px solid #d4a017;
+  box-shadow: inset 0 1px 0 rgba(255, 248, 231, 0.25), 0 3px 0 #4a0d0c;
+}
+
+.bird-dock {
+  position: fixed;
+  z-index: 80;
+  right: max(0.9rem, env(safe-area-inset-right));
+  bottom: max(1.1rem, calc(env(safe-area-inset-bottom) + 4.6rem));
+  display: grid;
+  justify-items: end;
+  gap: 0.55rem;
+  pointer-events: none;
+}
+
+.bird-dock > * {
+  pointer-events: auto;
+}
+
+.bird-dock-stage {
+  position: relative;
+  display: grid;
+  justify-items: end;
+  gap: 0.45rem;
+  padding-top: 1.7rem;
+}
+
+.bird-dock-actor {
+  position: absolute;
+  top: -0.15rem;
+  right: 1.15rem;
+  width: 3.4rem;
+  height: 2.2rem;
+  z-index: 2;
+  filter: drop-shadow(0 6px 8px rgba(63, 14, 13, 0.35));
+  transform-origin: 70% 80%;
+}
+
+.gold-bird-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.gold-bird-wing {
+  transform-origin: 28px 24px;
+}
+
+.bird-dock[data-phase="enter"] .bird-dock-actor {
+  animation: bird-swoop 1s cubic-bezier(0.22, 0.9, 0.32, 1) both;
+}
+
+.bird-dock[data-phase="idle"] .bird-dock-actor {
+  animation: bird-bob 2.4s ease-in-out infinite;
+}
+
+.bird-dock[data-phase="idle"] .gold-bird-wing {
+  animation: bird-flap-idle 4.6s ease-in-out infinite;
+}
+
+.bird-dock[data-phase="peck"] .bird-dock-actor {
+  animation: bird-peck 0.9s ease-in-out both;
+}
+
+.bird-dock[data-phase="send"] .bird-dock-actor {
+  animation: bird-send 1s ease-in-out both;
+}
+
+.bird-dock[data-phase="deliver"] .bird-dock-actor {
+  animation: bird-deliver 1s ease-in-out both;
+}
+
+.bird-dock-cta,
+.bird-dock-chat {
+  border: 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.bird-dock-cta {
+  min-height: 2.55rem;
+  padding: 0 1.05rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #3f0e0d;
+  background: linear-gradient(180deg, #fff4d6, #e8b84a);
+  border: 1px solid #f5c84c;
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 4px 0 #8a5a12,
+    0 10px 18px rgba(111, 29, 27, 0.28);
+}
+
+.bird-dock-cta.is-drop,
+.bird-dock-cta.is-sent {
+  color: #fff8e7;
+  background: linear-gradient(180deg, #9a3412, #6f1d1b);
+  border-color: #d4a017;
+  box-shadow: inset 0 1px 0 rgba(255, 248, 231, 0.2), 0 4px 0 #3f0e0d;
+}
+
+.bird-dock-chat {
+  position: relative;
+  width: 2.7rem;
+  height: 2.7rem;
+  border-radius: 1.05rem 1.05rem 1.05rem 0.25rem;
+  color: #6f1d1b;
+  background: linear-gradient(180deg, #fff8e7, #f3e2c8);
+  border: 1px solid #d4a017;
+  box-shadow: inset 0 1px 0 #fff, 0 4px 0 #b8894c;
+}
+
+.bird-dock-chat.has-mail {
+  animation: bird-bubble-pop 0.55s ease;
+}
+
+.bird-dock-chat i {
+  position: absolute;
+  top: -0.35rem;
+  right: -0.35rem;
+  min-width: 1.05rem;
+  height: 1.05rem;
+  padding: 0 0.22rem;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-style: normal;
+  font-weight: 800;
+  line-height: 1.05rem;
+  color: #fff8e7;
+  background: #6f1d1b;
+}
+
+.bird-dock-sheet {
+  width: min(19.5rem, calc(100vw - 1.6rem));
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.7rem 0.75rem 0.8rem;
+  border-radius: 1.1rem;
+  color: #fff8e7;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(232, 184, 74, 0.28), transparent 46%),
+    linear-gradient(165deg, #6f1d1b 0%, #9a3412 48%, #3f0e0d 100%);
+  border: 1px solid rgba(232, 184, 74, 0.45);
+  box-shadow: inset 0 1px 0 rgba(255, 248, 231, 0.18), 0 16px 28px rgba(63, 14, 13, 0.32);
+  font-family: Georgia, "Source Serif 4", serif;
+}
+
+.bird-dock-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.bird-dock-sheet-head p {
+  margin: 0;
+  font-family: "Trebuchet MS", sans-serif;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #f5c84c;
+}
+
+.bird-dock-sheet-head button {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #3f0e0d;
+  background: #f5c84c;
+}
+
+.bird-dock-stream {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0.4rem;
+  list-style: none;
+  max-height: 9.5rem;
+  overflow: auto;
+  border-radius: 0.7rem;
+  background: rgba(63, 14, 13, 0.28);
+}
+
+.bird-dock-empty {
+  margin: 0.35rem;
+  font-style: italic;
+  color: #fde68a;
+}
+
+.bird-dock-bubble {
+  max-width: 92%;
+  padding: 0.38rem 0.55rem 0.3rem;
+  border-radius: 0.85rem;
+}
+
+.bird-dock-bubble p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.bird-dock-bubble time {
+  display: block;
+  margin-top: 0.12rem;
+  font-family: "Trebuchet MS", sans-serif;
+  font-size: 0.58rem;
+  opacity: 0.7;
+}
+
+.bird-dock-bubble.is-theirs {
+  justify-self: start;
+  color: #3f0e0d;
+  background: linear-gradient(180deg, #fff8e7, #e8b84a);
+}
+
+.bird-dock-bubble.is-mine {
+  justify-self: end;
+  color: #fff8e7;
+  background: linear-gradient(180deg, #9a3412, #6f1d1b);
+}
+
+.bird-dock-lock {
+  margin: 0;
+  font-size: 0.72rem;
+}
+
+.bird-dock-lock a {
+  color: #f5c84c;
+}
+
+.bird-dock-composer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.35rem;
+}
+
+.bird-dock-composer textarea {
+  width: 100%;
+  min-height: 2.5rem;
+  resize: none;
+  border: 0;
+  border-radius: 0.7rem;
+  padding: 0.45rem 0.55rem;
+  font-family: Georgia, serif;
+  font-size: 0.82rem;
+  color: #3f0e0d;
+  background: #fff8e7;
+}
+
+.bird-dock-composer button {
+  border: 0;
+  border-radius: 0.7rem;
+  padding: 0 0.75rem;
+  font-family: "Trebuchet MS", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #3f0e0d;
+  background: linear-gradient(180deg, #fff4d6, #e8b84a);
+}
+
+@keyframes bird-swoop {
+  from {
+    opacity: 0;
+    transform: translate(4.2rem, -3.4rem) rotate(18deg);
+  }
+  72% {
+    transform: translate(-0.15rem, 0.12rem) rotate(-6deg);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+@keyframes bird-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(0.18rem);
+  }
+}
+
+@keyframes bird-flap-idle {
+  0%,
+  78%,
+  100% {
+    transform: rotate(0deg);
+  }
+  84%,
+  92% {
+    transform: rotate(-26deg);
+  }
+  88% {
+    transform: rotate(10deg);
+  }
+}
+
+@keyframes bird-peck {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  18%,
+  50%,
+  78% {
+    transform: rotate(18deg) translateY(0.18rem);
+  }
+  34%,
+  64% {
+    transform: rotate(-8deg);
+  }
+}
+
+@keyframes bird-send {
+  0% {
+    transform: translate(0, 0) rotate(0);
+  }
+  38% {
+    transform: translate(0.4rem, -2.6rem) rotate(-18deg);
+  }
+  62% {
+    transform: translate(-0.3rem, -3.2rem) rotate(8deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(0);
+  }
+}
+
+@keyframes bird-deliver {
+  0% {
+    transform: translate(0, 0);
+  }
+  40% {
+    transform: translate(0.15rem, 3.35rem) rotate(8deg);
+  }
+  58% {
+    transform: translate(0.15rem, 3.55rem) scale(0.94);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes bird-bubble-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 720px) {
+  .bird-dock-sheet {
+    position: fixed;
+    inset: auto 0 0;
+    width: 100%;
+    max-height: min(70dvh, 28rem);
+    border-radius: 1.2rem 1.2rem 0 0;
+    padding-bottom: max(0.9rem, env(safe-area-inset-bottom));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bird-dock-actor,
+  .gold-bird-wing,
+  .bird-dock-chat.has-mail {
+    animation: none !important;
+  }
+}
+
 .match-side {
   position: relative;
   display: grid;
@@ -1847,8 +2241,8 @@ a.card-premium:hover,
   width: min(18rem, calc(100vw - 2rem));
   padding: 0.65rem 0.7rem 0.75rem;
   border-radius: 0.9rem;
-  background: linear-gradient(165deg, #3b0764 0%, #6b21a8 48%, #4a044e 100%);
-  border: 1px solid rgba(253, 224, 171, 0.35);
+  background: linear-gradient(165deg, #6f1d1b 0%, #9a3412 48%, #3f0e0d 100%);
+  border: 1px solid rgba(232, 184, 74, 0.45);
   box-shadow: 0 16px 32px rgba(24, 8, 20, 0.35);
 }
 
