@@ -8690,6 +8690,7 @@ a.inbox-name.inbox-open:focus-visible {
 }
 
 .site-nav .nav-3d-label {
+  display: block;
   font-size: 0.64rem;
   font-weight: 700;
   line-height: 1;
@@ -8713,6 +8714,7 @@ a.inbox-name.inbox-open:focus-visible {
   left: 50%;
   max-width: 15rem;
   right: auto;
+  top: auto;
   transform: translateX(-50%);
 }
 
