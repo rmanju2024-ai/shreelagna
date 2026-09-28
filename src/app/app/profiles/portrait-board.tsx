@@ -81,7 +81,6 @@ export function PortraitSheet({
   const familyGroups = family ?? [];
   const hopeGroups = hope ?? [];
   const tabs = [
-    { id: "intro", label: "Introduction", short: "Intro" },
     { id: "personal", label: "Personal", short: "Personal" },
     { id: "faith", label: "Religion & astronomy", short: "Rel & Astro" },
     { id: "work", label: "Education & work", short: "Edu & Career" },
@@ -89,7 +88,7 @@ export function PortraitSheet({
     { id: "partner", label: "Partner Preference", short: "Partner Pref." },
   ];
   const tabIds = tabs.map((t) => t.id);
-  const startTab = initialTab && tabIds.includes(initialTab) ? initialTab : "intro";
+  const startTab = initialTab && tabIds.includes(initialTab) ? initialTab : "personal";
   const aboutText = aboutPlainText(about ?? "");
   const lastSeen = lastOnlineLine(lastSeenAt, profileType);
   const [tab, setTab] = useState(startTab);
@@ -163,11 +162,16 @@ export function PortraitSheet({
                   </p>
                 ) : null}
               </div>
-              {aboutText || introMedia ? (
+              {aboutText || introMedia || editable ? (
                 <div className="portrait-intro-slot">
                   <Gate on={needPlan}>
-                    <IntroductionPane about={aboutText ? about : null} media={introMedia} editable={false} />
+                    <IntroductionPane about={aboutText ? about : null} media={introMedia} editable={editable} />
                   </Gate>
+                  {editable ? (
+                    <Link href={sectionHref(introEdit)} className={`${btnGhost} portrait-intro-edit`}>
+                      Edit intro
+                    </Link>
+                  ) : null}
                 </div>
               ) : null}
             </div>
@@ -179,16 +183,13 @@ export function PortraitSheet({
         <div className="portrait-tab-frame">
           {editable ? (
             <Link
-              href={sectionHref(tab === "intro" ? introEdit : (tab as ProfileEditTarget))}
+              href={sectionHref(tab as ProfileEditTarget)}
               className={`${btnPrimary} portrait-body-edit portrait-tab-edit-${tab}`}
             >
               Edit
             </Link>
           ) : null}
           <div className="portrait-tab-live">
-            {tab === "intro" && !(aboutText || introMedia) ? (
-              <IntroductionPane about={null} media={null} editable={editable} />
-            ) : null}
             {tab === "personal" ? (
               <FactGroups
                 groups={personalGroups}

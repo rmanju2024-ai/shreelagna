@@ -249,7 +249,7 @@ export function pickSectionRecord<T extends Record<string, unknown>>(
 }
 
 export function portraitTabForSection(section: string | undefined): string | undefined {
-  if (section === "about" || section === "album") return "intro";
+  if (section === "about" || section === "album") return "personal";
   if (isProfileEditSection(section ?? "")) return section;
   return undefined;
 }

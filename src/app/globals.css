@@ -1567,6 +1567,10 @@ a.card-premium:hover,
   max-width: 36rem;
 }
 
+.portrait-intro-edit {
+  margin-top: 0.45rem;
+}
+
 .portrait-intro-slot .portrait-intro,
 .portrait-intro-slot .portrait-intro-media .album-video,
 .portrait-intro-slot .portrait-intro-media .voice-strip {
@@ -1708,6 +1712,42 @@ a.card-premium:hover,
   font-weight: 750;
   line-height: 1.35;
   color: #fef9c3;
+}
+
+.match-side-more {
+  margin: 0.1rem 0 0;
+}
+
+.match-side-more summary {
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #a5f3fc;
+}
+
+.match-side-more summary::-webkit-details-marker {
+  display: none;
+}
+
+.match-side-more summary::after {
+  content: " ▾";
+  font-size: 0.78rem;
+}
+
+.match-side-more[open] summary::after {
+  content: " ▴";
+}
+
+.match-side-more .match-side-parts {
+  margin-top: 0.45rem;
+}
+
+.match-side-more form,
+.match-side-more .match-side-link {
+  margin-top: 0.45rem;
 }
 
 .match-side form,
