@@ -2,9 +2,8 @@ import { safeNextPath } from "@/lib/auth/safe-next";
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { appendFileSync } from "fs";
-import { join } from "path";
 
-const logFile = join(process.cwd(), ".oauth_debug.log");
+const logFile = "/tmp/.oauth_debug.log";
 
 function log(msg: string | any, data?: any) {
   const timestamp = new Date().toISOString();

@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import { readFileSync } from "fs";
-import { join } from "path";
 
 export async function GET() {
   try {
-    const logFile = join(process.cwd(), ".oauth_debug.log");
+    const logFile = "/tmp/.oauth_debug.log";
     const logs = readFileSync(logFile, "utf-8");
     
     return NextResponse.json({
