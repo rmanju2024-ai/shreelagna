@@ -3,7 +3,7 @@
 import { ensureAppUser } from "@/lib/auth/session";
 import { writeAudit } from "@/lib/desk/audit";
 import { notifyInterestAccepted } from "@/lib/notify/dispatch";
-import { missingPayloadColumn } from "@/lib/profile/db-errors";
+import { missingPayloadColumn, isMissingColumnError } from "@/lib/profile/db-errors";
 import { chatReceivedCopy, interestAcceptedCopy, interestDeclinedCopy } from "@/lib/match/alert-copy";
 import { canAlertInterest } from "@/lib/match/profile-settings";
 import { orderedProfilePair, pairCanChat, isStalePending, trimDeclineReason } from "@/lib/match/interest-status";
@@ -218,13 +218,48 @@ export async function saveProfileSettings(formData: FormData) {
 }
 
 export async function sendChat(formData: FormData) {
+  const posted = await postChatMessage(formData);
+  redirect(posted.bounce);
+}
+
+export async function sendPeekChat(formData: FormData) {
+  return postChatMessage(formData);
+}
+
+export async function markPeekRead(formData: FormData) {
+  const { supabase, me } = await requireMember();
+  const threadId = String(formData.get("thread_id") ?? "");
+  const toId = String(formData.get("to_profile_id") ?? "");
+  if (!threadId || !me.active_profile_id) return { ok: false };
+  const now = new Date().toISOString();
+  const update = await supabase
+    .from("messages")
+    .update({ read_at: now })
+    .eq("thread_id", threadId)
+    .neq("sender_profile_id", me.active_profile_id)
+    .is("read_at", null);
+  if (update.error && !isMissingColumnError(update.error, "read_at")) {
+    return { ok: false };
+  }
+  await supabase
+    .from("notices")
+    .update({ read_at: now })
+    .eq("user_id", me.id)
+    .eq("kind", "chat")
+    .is("read_at", null);
+  if (toId) revalidatePath(`/browse/${toId}`);
+  revalidatePath("/app/alerts");
+  return { ok: true };
+}
+
+async function postChatMessage(formData: FormData) {
   const { supabase, me } = await requireMember();
   const next = String(formData.get("next") ?? "").trim();
   const toId = String(formData.get("to_profile_id") ?? "");
   const body = String(formData.get("body") ?? "").trim();
   let threadId = String(formData.get("thread_id") ?? "");
   const bounce = next || (toId ? `/browse/${toId}` : "/app/chat");
-  if (body.length < 1) redirect(bounce);
+  if (body.length < 1) return { ok: false as const, bounce, threadId: threadId || null };
   if (!threadId && toId && me.active_profile_id) {
     const [a, b] = orderedPair(me.active_profile_id, toId);
     await supabase.from("threads").insert({ profile_a: a, profile_b: b });
@@ -236,20 +271,22 @@ export async function sendChat(formData: FormData) {
       .maybeSingle();
     threadId = made?.id ?? "";
   }
-  if (!threadId) redirect(bounce);
+  if (!threadId) return { ok: false as const, bounce, threadId: null };
   const { data: thread } = await supabase
     .from("threads")
     .select("id, profile_a, profile_b, frozen")
     .eq("id", threadId)
     .maybeSingle();
-  if (!thread || thread.frozen) redirect(bounce);
+  if (!thread || thread.frozen) return { ok: false as const, bounce, threadId };
   const { data: pair } = await supabase
     .from("profiles")
     .select("id, status, created_by, subject_full_name")
     .in("id", [thread.profile_a, thread.profile_b]);
   const mine = (pair ?? []).find((p) => p.created_by === me.id);
   const other = (pair ?? []).find((p) => p.created_by !== me.id);
-  if (!mine || mine.status !== "active" || !other || other.status !== "active") redirect(bounce);
+  if (!mine || mine.status !== "active" || !other || other.status !== "active") {
+    return { ok: false as const, bounce, threadId };
+  }
   const { data: interestRows } = await supabase
     .from("interests")
     .select("from_profile_id, to_profile_id, status, created_at")
@@ -257,10 +294,10 @@ export async function sendChat(formData: FormData) {
       `and(from_profile_id.eq.${mine.id},to_profile_id.eq.${other.id}),and(from_profile_id.eq.${other.id},to_profile_id.eq.${mine.id})`,
     )
     .limit(8);
-  if (!pairCanChat(interestRows ?? [], mine.id, other.id)) redirect(bounce);
+  if (!pairCanChat(interestRows ?? [], mine.id, other.id)) return { ok: false as const, bounce, threadId };
   const myAccess = await loadMembership(supabase, me);
   const otherAccess = await loadMembershipForProfile(supabase, other.id);
-  if (!pairPlanLive(myAccess.live, otherAccess.live)) redirect(bounce);
+  if (!pairPlanLive(myAccess.live, otherAccess.live)) return { ok: false as const, bounce, threadId };
   const text = body.slice(0, 4000);
   await supabase.from("messages").insert({
     thread_id: threadId,
@@ -284,7 +321,7 @@ export async function sendChat(formData: FormData) {
   revalidatePath("/app/alerts");
   revalidatePath(`/browse/${other.id}`);
   revalidatePath("/", "layout");
-  redirect(bounce);
+  return { ok: true as const, bounce, threadId };
 }
 
 export async function recordProfileView(viewerId: string, viewedId: string) {

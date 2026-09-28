@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 import { cancelInterest, sendInterest } from "@/app/app/profiles/actions";
-import { sendChat } from "@/app/app/match/actions";
+import { markPeekRead, sendPeekChat } from "@/app/app/match/actions";
 import { ChatAvatar } from "@/app/app/chat/chat-avatar";
 import type { InterestThread } from "@/lib/match/interest-status";
 import { chatStamp } from "@/lib/match/chat-ui";
@@ -14,6 +14,8 @@ export type PeekChatNote = {
   sender_profile_id: string;
   body: string;
   created_at: string;
+  read_at?: string | null;
+  pending?: boolean;
 };
 
 type Phase = "enter" | "idle" | "peck" | "send" | "deliver";
@@ -35,6 +37,25 @@ function chirpPool(thread: InterestThread, needPlan: boolean, needQuota: boolean
   if (thread === "none" && needQuota) return CHIRPS.quota;
   if (thread === "none" && !canSend) return CHIRPS.finish;
   return CHIRPS[thread] ?? CHIRPS.none;
+}
+
+function dayLabel(iso: string) {
+  const at = new Date(iso);
+  if (Number.isNaN(at.getTime())) return "";
+  const today = new Date();
+  const sameDay = at.toDateString() === today.toDateString();
+  if (sameDay) return "Today";
+  const y = new Date(today);
+  y.setDate(today.getDate() - 1);
+  if (at.toDateString() === y.toDateString()) return "Yesterday";
+  return at.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+}
+
+function Tick({ mine, pending, read }: { mine: boolean; pending?: boolean; read?: boolean }) {
+  if (!mine) return null;
+  if (pending) return <span className="bird-wa-tick">✓</span>;
+  if (read) return <span className="bird-wa-tick is-read">✓✓</span>;
+  return <span className="bird-wa-tick">✓</span>;
 }
 
 function GoldBird({ carry }: { carry?: "heart" | "mail" | null }) {
@@ -102,21 +123,49 @@ export function BirdDock({
   const [mounted, setMounted] = useState(false);
   const [phase, setPhase] = useState<Phase>("enter");
   const [open, setOpen] = useState(false);
+  const [wide, setWide] = useState(false);
   const [badge, setBadge] = useState(0);
   const [line, setLine] = useState(0);
+  const [draft, setDraft] = useState("");
+  const [extra, setExtra] = useState<PeekChatNote[]>([]);
   const acted = useRef(false);
   const inbound = useRef(0);
-  const endRef = useRef<HTMLLIElement | null>(null);
+  const endRef = useRef<HTMLDivElement | null>(null);
+  const storeKey = `sl-bird-chat:${profileId}`;
   const [, startTransition] = useTransition();
   const showChat = thread === "sent" || thread === "received" || thread === "accepted";
-  const returnTo = `/browse/${profileId}`;
   const pool = phase === "peck" ? CHIRPS.peck : chirpPool(thread, needPlan, needQuota, canSend);
   const chirp = pool[line % pool.length];
   const name = chat?.name ?? "Match";
+  const notes = useMemo(() => {
+    const server = chat?.notes ?? [];
+    const pending = extra.filter(
+      (row) =>
+        !server.some(
+          (note) => note.body === row.body && note.sender_profile_id === row.sender_profile_id,
+        ),
+    );
+    return [...server, ...pending];
+  }, [chat?.notes, extra]);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    try {
+      const saved = sessionStorage.getItem(storeKey);
+      if (saved) {
+        const parsed = JSON.parse(saved) as { open?: boolean; wide?: boolean };
+        if (parsed.open) setOpen(true);
+        if (parsed.wide) setWide(true);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, [storeKey]);
+
+  useEffect(() => {
+    if (!mounted) return;
+    sessionStorage.setItem(storeKey, JSON.stringify({ open, wide }));
+  }, [open, wide, mounted, storeKey]);
 
   useEffect(() => {
     setLine(0);
@@ -165,7 +214,7 @@ export function BirdDock({
 
   useEffect(() => {
     if (open) endRef.current?.scrollIntoView({ block: "end" });
-  }, [open, chat?.notes]);
+  }, [open, notes]);
 
   function markActed() {
     acted.current = true;
@@ -199,6 +248,36 @@ export function BirdDock({
     markActed();
     setOpen(true);
     setBadge(0);
+    const data = new FormData();
+    if (chat?.threadId) data.set("thread_id", chat.threadId);
+    data.set("to_profile_id", profileId);
+    void markPeekRead(data);
+  }
+
+  function onSend(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const text = draft.trim();
+    if (!text) return;
+    markActed();
+    setOpen(true);
+    setDraft("");
+    setExtra((rows) => [
+      ...rows,
+      {
+        id: `local-${Date.now()}`,
+        sender_profile_id: chat?.myProfileId ?? "me",
+        body: text,
+        created_at: new Date().toISOString(),
+        pending: true,
+      },
+    ]);
+    const data = new FormData();
+    if (chat?.threadId) data.set("thread_id", chat.threadId);
+    data.set("to_profile_id", profileId);
+    data.set("body", text);
+    startTransition(() => {
+      void sendPeekChat(data);
+    });
   }
 
   const perchLabel =
@@ -221,38 +300,47 @@ export function BirdDock({
   const dock = (
     <div className={`bird-dock${open ? " is-open" : ""}`} data-phase={phase} data-thread={thread}>
       {open && showChat ? (
-        <section className="bird-wa" aria-label="Chat">
+        <section className={`bird-wa${wide ? " is-max" : ""}`} aria-label="Chat">
           <header className="bird-wa-head">
             <ChatAvatar name={name} src={chat?.photo} size="sm" />
             <div className="bird-wa-who">
               <h2>{name}</h2>
-              <p>{chat?.seen ?? "Online on Shree Lagna"}</p>
+              <p>{chat?.seen ?? "tap to chat"}</p>
             </div>
+            <button type="button" className="bird-wa-close" onClick={() => setWide((on) => !on)}>
+              {wide ? "Restore" : "Maximize"}
+            </button>
             <button type="button" className="bird-wa-close" onClick={() => setOpen(false)}>
               Close
             </button>
           </header>
           <div className="bird-wa-stage">
             <ul className="bird-wa-stream">
-              {(chat?.notes ?? []).length ? (
-                (chat?.notes ?? []).map((note, index, all) => (
-                  <li
-                    key={note.id}
-                    className={`bird-wa-row ${note.sender_profile_id === chat?.myProfileId ? "is-mine" : "is-theirs"}`}
-                    ref={index === all.length - 1 ? endRef : undefined}
-                  >
-                    {note.sender_profile_id !== chat?.myProfileId ? (
-                      <ChatAvatar name={name} src={chat?.photo} size="sm" />
-                    ) : null}
-                    <div className="bird-wa-bubble">
-                      <p>{note.body}</p>
-                      <time>
-                        {chatStamp(note.created_at)}
-                        {note.sender_profile_id === chat?.myProfileId ? " ✓✓" : ""}
-                      </time>
-                    </div>
-                  </li>
-                ))
+              {notes.length ? (
+                notes.map((note, index, all) => {
+                  const mine = note.sender_profile_id === chat?.myProfileId;
+                  const prev = all[index - 1];
+                  const stamp = dayLabel(note.created_at);
+                  const showDay = !prev || dayLabel(prev.created_at) !== stamp;
+                  return (
+                    <li key={note.id}>
+                      {showDay && stamp ? <p className="bird-wa-day">{stamp}</p> : null}
+                      <div
+                        className={`bird-wa-row ${mine ? "is-mine" : "is-theirs"}`}
+                        ref={index === all.length - 1 ? endRef : undefined}
+                      >
+                        {!mine ? <ChatAvatar name={name} src={chat?.photo} size="sm" /> : null}
+                        <div className="bird-wa-bubble">
+                          <p>{note.body}</p>
+                          <time>
+                            {chatStamp(note.created_at)}
+                            <Tick mine={mine} pending={note.pending} read={Boolean(note.read_at)} />
+                          </time>
+                        </div>
+                      </div>
+                    </li>
+                  );
+                })
               ) : (
                 <li className="bird-wa-empty">Say hi. Keep it warm and short.</li>
               )}
@@ -263,11 +351,22 @@ export function BirdDock({
               A live plan keeps this chat open. <Link href="/app/plans">Open plans</Link>
             </p>
           ) : (
-            <form action={sendChat} className="bird-wa-composer">
-              {chat?.threadId ? <input type="hidden" name="thread_id" value={chat.threadId} /> : null}
-              <input type="hidden" name="to_profile_id" value={profileId} />
-              <input type="hidden" name="next" value={returnTo} />
-              <textarea name="body" required maxLength={4000} rows={1} placeholder="Message" />
+            <form onSubmit={onSend} className="bird-wa-composer">
+              <textarea
+                name="body"
+                required
+                maxLength={4000}
+                rows={1}
+                placeholder="Message"
+                value={draft}
+                onChange={(event) => setDraft(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && !event.shiftKey) {
+                    event.preventDefault();
+                    event.currentTarget.form?.requestSubmit();
+                  }
+                }}
+              />
               <button type="submit" className="bird-wa-send" aria-label="Send">
                 ➤
               </button>

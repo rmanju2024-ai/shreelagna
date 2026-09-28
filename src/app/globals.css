@@ -1817,6 +1817,39 @@ a.card-premium:hover,
     inset 0 1px 0 rgba(255, 248, 231, 0.35);
 }
 
+.bird-wa.is-max {
+  width: min(44rem, calc(100vw - 1.2rem));
+  height: min(84dvh, 48rem);
+  display: flex;
+  flex-direction: column;
+}
+
+.bird-wa.is-max .bird-wa-stage {
+  flex: 1;
+  max-height: none;
+}
+
+.bird-wa-day {
+  margin: 0.35rem auto 0.55rem;
+  width: fit-content;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #54656f;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.bird-wa-tick {
+  margin-left: 0.28rem;
+  letter-spacing: -0.12em;
+  color: #8696a0;
+}
+
+.bird-wa-tick.is-read {
+  color: #53bdeb;
+}
+
 .bird-wa-head {
   display: flex;
   align-items: center;

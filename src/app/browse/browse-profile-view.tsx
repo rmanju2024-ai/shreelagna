@@ -175,7 +175,7 @@ export async function BrowseProfileView({
   const pairLive = pairPlanLive(access.live, targetAccess?.live);
   const myChatId = mine && String(mine.id) !== id ? String(mine.id) : null;
   let chatThreadId: string | null = null;
-  let chatNotes: { id: string; sender_profile_id: string; body: string; created_at: string }[] = [];
+  let chatNotes: { id: string; sender_profile_id: string; body: string; created_at: string; read_at?: string | null }[] = [];
   if (myChatId && linkedByInterest) {
     const [a, b] = orderedProfilePair(myChatId, id);
     const { data: chatThread } = await db
@@ -186,13 +186,23 @@ export async function BrowseProfileView({
       .maybeSingle();
     chatThreadId = typeof chatThread?.id === "string" ? chatThread.id : null;
     if (chatThreadId) {
-      const { data: msgs } = await db
+      const full = await db
         .from("messages")
-        .select("id, sender_profile_id, body, created_at")
+        .select("id, sender_profile_id, body, created_at, read_at")
         .eq("thread_id", chatThreadId)
         .order("created_at", { ascending: false })
-        .limit(8);
-      chatNotes = [...(msgs ?? [])].reverse();
+        .limit(80);
+      const rows = full.error
+        ? (
+            await db
+              .from("messages")
+              .select("id, sender_profile_id, body, created_at")
+              .eq("thread_id", chatThreadId)
+              .order("created_at", { ascending: false })
+              .limit(80)
+          ).data
+        : full.data;
+      chatNotes = [...(rows ?? [])].reverse();
     }
   }
   const guestPass = complimentaryPaidProfileAccess({
