@@ -23,3 +23,11 @@ export function collapseNotices<T extends { id: string; kind: string; match_prof
   }
   return out;
 }
+
+/** Hide person-specific alerts when that profile is no longer publicly active. */
+export function noticesForActiveProfiles<T extends { match_profile_id?: string | null }>(
+  rows: T[],
+  activeProfileIds: Set<string>,
+): T[] {
+  return rows.filter((row) => !row.match_profile_id || activeProfileIds.has(row.match_profile_id));
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { collapseNotices } from "./collapse-notices";
+import { collapseNotices, noticesForActiveProfiles } from "./collapse-notices";
 
 describe("collapse notices", () => {
   it("keeps one profile-view alert per person", () => {
@@ -17,5 +17,17 @@ describe("collapse notices", () => {
       { id: "a", kind: "contact_view", match_profile_id: "manju", created_at: "2026-09-25T09:00:00Z" },
     ]);
     expect(rows.map((row) => row.id)).toEqual(["b"]);
+  });
+
+  it("removes alerts for hidden profiles but keeps system alerts", () => {
+    const rows = [
+      { id: "active", match_profile_id: "p1" },
+      { id: "hidden", match_profile_id: "p2" },
+      { id: "system", match_profile_id: null },
+    ];
+    expect(noticesForActiveProfiles(rows, new Set(["p1"])).map((row) => row.id)).toEqual([
+      "active",
+      "system",
+    ]);
   });
 });

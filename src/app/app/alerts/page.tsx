@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { PageHero } from "@/components/page-hero";
-import { after } from "next/server";
 import { ChatAvatar } from "@/app/app/chat/chat-avatar";
 import { PageShell } from "@/components/site-chrome";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { alertHeadline, alertWhen } from "@/lib/match/alert-copy";
-import { collapseNotices } from "@/lib/match/collapse-notices";
+import { collapseNotices, noticesForActiveProfiles } from "@/lib/match/collapse-notices";
 import { publicMediaUrl } from "@/lib/match/inbox-card";
 import { createServiceClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -29,8 +28,12 @@ export default async function AlertsPage() {
     .order("created_at", { ascending: false })
     .limit(50);
 
-  const alerts = collapseNotices(notices ?? []);
-  const profileIds = [...new Set(alerts.map((row) => row.match_profile_id).filter(Boolean))] as string[];
+  const collapsed = collapseNotices(notices ?? []);
+  const profileIds = [...new Set(collapsed.map((row) => row.match_profile_id).filter(Boolean))] as string[];
+  const { data: visibleProfiles } = profileIds.length
+    ? await supabase.from("profiles").select("id").in("id", profileIds).eq("status", "active")
+    : { data: [] as { id: string }[] };
+  const alerts = noticesForActiveProfiles(collapsed, new Set((visibleProfiles ?? []).map((row) => row.id)));
   const photoMap = new Map<string, string>();
   if (profileIds.length) {
     const media = createServiceClient() ?? supabase;
@@ -46,21 +49,23 @@ export default async function AlertsPage() {
     }
   }
 
-  after(async () => {
-    await supabase
+  const readAt = new Date().toISOString();
+  const marked = await supabase
       .from("notices")
-      .update({ read_at: new Date().toISOString() })
+      .update({ read_at: readAt })
       .eq("user_id", me.id)
       .neq("kind", "chat")
       .is("read_at", null);
-  });
+  const shownAlerts = marked.error
+    ? alerts
+    : alerts.map((alert) => ({ ...alert, read_at: alert.read_at ?? readAt }));
 
   return (
     <PageShell>
       <div className="sx-stage">
-      <PageHero kicker="Activity" title="Alerts" sub="Matches, views and replies in one place." stat={{ value: alerts.length, label: "Recent" }} />
+      <PageHero kicker="Activity" title="Alerts" sub="Matches, views and replies in one place." stat={{ value: shownAlerts.length, label: "Recent" }} />
       <ul className="alert-list">
-        {alerts.map((note) => {
+        {shownAlerts.map((note) => {
           const unread = !note.read_at;
           const { name, detail } = alertHeadline(note.kind, note.title, note.body);
           const inner = (
@@ -88,7 +93,7 @@ export default async function AlertsPage() {
           );
         })}
       </ul>
-      {!alerts.length ? (
+      {!shownAlerts.length ? (
         <div className="sx-empty">
           <h3>No alerts yet</h3>
         </div>

@@ -191,7 +191,13 @@ export function HeaderNav({
         )}
         {user ? <NavChip item={{ href: "/app", label: "Profile", icon: "profile" }} overlay={overlay} current={accountOn} /> : null}
         {staff ? <NavChip item={desk} overlay={overlay} current={pathMatches(pathname, desk.href, tab)} /> : null}
-        <NavGroup label="More" icon="more" overlay={overlay} current={moreOn} badge={alertUnread}>
+        <NavGroup
+          label="More"
+          icon="more"
+          overlay={overlay}
+          current={moreOn}
+          badge={pathname === "/app/alerts" ? 0 : alertUnread}
+        >
           {more.map((item) => <MenuLink key={item.href} item={item} current={pathMatches(pathname, item.href, tab)} />)}
           {user ? <MenuLink item={inbox[2]} current={pathMatches(pathname, inbox[2].href, tab)} /> : null}
           {user ? account.filter((item) => item.href !== "/app").map((item) => <MenuLink key={item.href} item={item} current={pathMatches(pathname, item.href, tab)} />) : null}
