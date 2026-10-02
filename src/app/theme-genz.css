@@ -467,3 +467,54 @@ table { max-width: 100%; }
   .site-nav-row > .nav-group > .nav-3d { width: 100%; }
   .site-nav-row .nav-3d > .nav-3d-label { font-size: 0.6rem; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
+
+/* ===== WhatsApp look for the chat (list + conversation) ===== */
+.wc-shell { background: #fff; border: 0; border-radius: 1rem; backdrop-filter: none; box-shadow: 0 20px 50px -24px rgb(0 0 0 / 40%); }
+.wc-side { background: #fff; border-right: 1px solid #e9edef; }
+.wc-side-head { background: #f0f2f5; color: #111b21; padding: 0.85rem 1rem; }
+.wc-side-head h1 { color: #111b21; font-family: inherit; font-size: 1.25rem; font-weight: 700; }
+.wc-side-head p { color: #667781; opacity: 1; }
+.wc-list { padding: 0; }
+.wc-list .wa-row { border-radius: 0; padding: 0.75rem 1rem; border-bottom: 1px solid #f0f2f5; }
+.wc-list .wa-row:hover { background: #f5f6f6; }
+.wc-list .wa-row.is-active { background: #f0f2f5; box-shadow: none; }
+.wc-list .wa-row-top b { color: #111b21; font-weight: 600; }
+.wc-list .wa-row-top time { color: #667781; font-size: 0.72rem; }
+.wc-row-bottom .wa-preview { color: #667781; }
+.wc-row-bottom .wa-unread, .wa-unread { background: #25d366 !important; color: #fff !important; }
+.wc-row-bottom .wa-preview.is-new { color: #111b21; }
+
+.wc-pane .wa-head { background: #f0f2f5 !important; color: #111b21; padding: 0.6rem 1rem; border-bottom: 1px solid #e9edef; }
+.wc-pane .wa-head h1 { color: #111b21; font-family: inherit; font-size: 1rem; font-weight: 600; }
+.wc-pane .wa-head p { color: #667781; font-size: 0.78rem; }
+.wc-pane .wa-back { color: #54656f; }
+@media (max-width: 820px) { .wc-pane .wa-back { display: grid !important; } }
+
+.wc-pane .wa-stage {
+  justify-content: flex-end; padding: 1rem 6%; gap: 0;
+  background-color: #efeae2;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23d9d2c5' stroke-width='1.2' opacity='.7'%3E%3Ccircle cx='20' cy='22' r='6'/%3E%3Cpath d='M60 18l8 8-8 8-8-8z'/%3E%3Cpath d='M96 20c6-6 12 0 6 8s-12 2-6-8z'/%3E%3Cpath d='M22 74l10 4-4 10z'/%3E%3Ccircle cx='70' cy='78' r='4'/%3E%3Cpath d='M98 82h14M105 75v14'/%3E%3Cpath d='M30 108q8-8 16 0'/%3E%3C/g%3E%3C/svg%3E");
+}
+.wc-pane .wa-stream { display: flex; flex-direction: column; gap: 0.25rem; }
+.wc-pane .wa-bubble {
+  position: relative; width: fit-content; max-width: min(75%, 34rem); padding: 0.4rem 0.6rem 0.25rem; border: 0;
+  border-radius: 0.5rem; box-shadow: 0 1px 0.5px rgb(11 20 26 / 13%); color: #111b21; animation: wa-in 0.18s ease both;
+}
+.wc-pane .wa-bubble p { font-size: 0.92rem; line-height: 1.35; }
+.wc-pane .wa-bubble time { display: inline-block; float: right; margin: 0.3rem 0 0 0.6rem; font-size: 0.66rem; color: #667781; }
+.wc-pane .wa-bubble.is-mine { align-self: flex-end; background: #d9fdd3; border-top-right-radius: 0; margin-left: 0; }
+.wc-pane .wa-bubble.is-theirs { align-self: flex-start; background: #fff; border-top-left-radius: 0; margin-right: 0; }
+.wc-pane .wa-bubble.is-mine::before, .wc-pane .wa-bubble.is-theirs::before { content: ""; position: absolute; top: 0; width: 0.6rem; height: 0.8rem; }
+.wc-pane .wa-bubble.is-mine::before { right: -0.5rem; background: #d9fdd3; clip-path: polygon(0 0, 0 100%, 100% 0); }
+.wc-pane .wa-bubble.is-theirs::before { left: -0.5rem; background: #fff; clip-path: polygon(100% 0, 100% 100%, 0 0); }
+.wa-tick { float: right; margin: 0.3rem 0 0 0.15rem; font-size: 0.66rem; letter-spacing: -0.15em; color: #53bdeb; }
+.wa-tick.is-wait { color: #8696a0; letter-spacing: 0; }
+@keyframes wa-in { from { opacity: 0; transform: translateY(6px) scale(0.98); } to { opacity: 1; transform: none; } }
+
+.wc-pane .wa-composer { background: #f0f2f5; padding: 0.55rem 0.8rem; align-items: center; }
+.wc-pane .wa-composer textarea { background: #fff; border: 0; border-radius: 1.2rem; box-shadow: none; padding: 0.65rem 1rem; }
+.wc-pane .wa-send { background: #00a884; box-shadow: none; width: 2.6rem; height: 2.6rem; }
+.wc-pane .wa-send:disabled { background: #8696a0; }
+.wc-welcome { background: #f0f2f5; }
+@media (max-width: 820px) { .wc-pane .wa-stage { padding: 0.8rem 3%; } .wc-pane .wa-bubble { max-width: 85%; } }
+@media (prefers-reduced-motion: reduce) { .wc-pane .wa-bubble { animation: none; } }

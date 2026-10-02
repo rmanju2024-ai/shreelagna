@@ -76,7 +76,12 @@ export function ThreadView({
             >
               <p>{msg.body}</p>
               <time>
-                {msg.pending ? "Sending…" : chatStamp(msg.created_at)}
+                {msg.pending ? "" : chatStamp(msg.created_at)}
+                {msg.sender_profile_id === myProfileId ? (
+                  <span className={`wa-tick${msg.pending ? " is-wait" : ""}`} aria-label={msg.pending ? "Sending" : "Sent"}>
+                    {msg.pending ? "🕓" : "✓✓"}
+                  </span>
+                ) : null}
               </time>
             </li>
           ))}
