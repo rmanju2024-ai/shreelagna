@@ -527,3 +527,113 @@ table { max-width: 100%; }
 .wc-pane .wa-stage::-webkit-scrollbar-thumb { background: #b8b0a2; border-radius: 8px; }
 .wc-pane .wa-stage::-webkit-scrollbar-track { background: transparent; }
 .wc-list { scrollbar-width: thin; }
+
+/* ===== Final responsive hardening shared by every route ===== */
+.sx-card, .alert-card, .plan-card, .portrait-group, .desk-panel {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 18rem;
+}
+
+@media (max-width: 820px) {
+  html { scroll-padding-bottom: 5.5rem; }
+  body { min-width: 0; touch-action: manipulation; }
+  main, main > *, .page-scene, .site-scene { min-width: 0; max-width: 100%; }
+
+  /* Consistent page gutters regardless of the desktop container used. */
+  .site-head-inner, main > div, main > section, .sx-stage, .desk-stage,
+  .settings-page, .plans-stage, .portrait-page, .browse-profile-view {
+    max-width: 100%;
+  }
+  main > div:not(.wc-shell), main > section:not(:first-child) {
+    padding-inline: clamp(0.65rem, 3vw, 1rem);
+  }
+
+  /* Compact header and brand; primary actions stay in the bottom navigation. */
+  .site-head-inner { min-height: 4.25rem !important; padding: 0.45rem 0.75rem !important; }
+  .site-head-brand { min-width: 0; max-width: calc(100% - 0.5rem); }
+  .site-head-brand img { width: auto; max-height: 3.2rem; object-fit: contain; }
+
+  /* One readable card per row, with no accidental desktop minimum widths. */
+  .sx-grid, .inbox-list.sx-grid, .alert-list, .plans-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .sx-card, .inbox-card, .alert-card, .plan-card, .desk-panel,
+  .portrait-sheet, .set-panel {
+    width: 100%; min-width: 0; max-width: 100%;
+  }
+
+  /* Horizontal controls remain reachable without squeezing their labels. */
+  .sx-tabs, .desk-tabs, .portrait-tabs-list, .qf-chips {
+    width: 100%; overflow-x: auto; overscroll-behavior-inline: contain;
+    scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch;
+  }
+  .sx-tabs > *, .desk-tabs > *, .portrait-tabs-list > *, .qf-chips > * {
+    scroll-snap-align: start;
+  }
+
+  /* Forms stack and controls are large enough for touch. */
+  .sx-fields, .profile-form-grid, .form-grid, .contact-grid,
+  .settings-grid, .desk-form-grid, fieldset {
+    grid-template-columns: minmax(0, 1fr) !important;
+    min-width: 0;
+  }
+  label, input, select, textarea, button { max-width: 100%; }
+  input:not([type="checkbox"]):not([type="radio"]), select, textarea {
+    width: 100%; min-width: 0;
+  }
+  button, a[role="button"], .btn, .btn-primary, .btn-ghost {
+    min-height: 44px;
+  }
+
+  /* Wide administrative data scrolls inside the page instead of widening it. */
+  main table {
+    display: block; width: 100%; max-width: 100%; overflow-x: auto;
+    white-space: nowrap; -webkit-overflow-scrolling: touch;
+  }
+
+  /* Profile summary and action areas stack naturally. */
+  .portrait-sheet-top, .portrait-sheet-id-head, .portrait-id-slot,
+  .portrait-contact-actions, .match-dock-face {
+    min-width: 0; max-width: 100%;
+  }
+  .portrait-contact-actions { display: grid; grid-template-columns: 1fr; gap: 0.55rem; }
+  .portrait-contact-actions form, .portrait-contact-actions button { width: 100%; }
+  .qf-match { align-items: flex-start; }
+  .qf-why { overflow-wrap: anywhere; }
+
+  /* More always opens within the visible phone viewport. */
+  .site-nav .nav-group > .nav-menu {
+    position: fixed; left: 0.5rem; right: 0.5rem; bottom: calc(4.7rem + env(safe-area-inset-bottom));
+    top: auto; width: auto; max-width: none; max-height: min(65dvh, 28rem);
+    overflow-y: auto; transform: none;
+  }
+  .site-nav .nav-group > .nav-menu.is-down {
+    top: auto; bottom: calc(4.7rem + env(safe-area-inset-bottom));
+  }
+
+  /* Keep the seven primary destinations evenly spaced and easy to recognize. */
+  .site-nav-row .nav-3d > .nav-3d-ico {
+    width: 1.55rem; height: 1.55rem;
+  }
+  .site-nav-row .nav-3d > .nav-3d-ico svg {
+    width: 1.35rem; height: 1.35rem;
+  }
+  .site-nav-row .nav-3d > .nav-3d-label {
+    font-size: clamp(0.5rem, 2.2vw, 0.62rem) !important;
+  }
+
+  /* Chat uses the screen efficiently without hiding the composer. */
+  .wc-shell { width: 100%; min-height: calc(100dvh - 10.5rem); }
+  .wc-shell.has-thread .wc-pane { min-height: calc(100dvh - 10.5rem); }
+  .wc-pane .wa-stage { min-height: 0; max-height: none; }
+  .wc-pane .wa-composer { position: sticky; bottom: 0; z-index: 5; }
+
+  footer { padding-bottom: 5.5rem; }
+}
+
+@media (max-width: 420px) {
+  .sx-hero { align-items: flex-start; }
+  .sx-hero-count { justify-items: start; }
+  .alert-card { grid-template-columns: auto minmax(0, 1fr) auto; padding: 0.7rem; }
+  .alert-line, .wa-preview, .sx-card { overflow-wrap: anywhere; }
+}
