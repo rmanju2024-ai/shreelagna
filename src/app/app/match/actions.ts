@@ -209,6 +209,7 @@ export async function saveProfileSettings(formData: FormData) {
     delete mail[missingPayloadColumn(emailUpdate.error, mail)!];
     emailUpdate = await supabase.from("app_users").update(mail).eq("id", me.id);
   }
+  if (error || emailUpdate.error) redirect("/app/settings?error=save");
   revalidatePath(`/app/profiles/${profileId}`);
   revalidatePath("/app/settings");
   revalidatePath("/browse");
@@ -230,6 +231,14 @@ export async function markPeekRead(formData: FormData) {
   const threadId = String(formData.get("thread_id") ?? "");
   const toId = String(formData.get("to_profile_id") ?? "");
   if (!threadId || !me.active_profile_id) return { ok: false };
+  const { data: thread } = await supabase
+    .from("threads")
+    .select("profile_a, profile_b")
+    .eq("id", threadId)
+    .maybeSingle();
+  if (!thread || (thread.profile_a !== me.active_profile_id && thread.profile_b !== me.active_profile_id)) {
+    return { ok: false };
+  }
   const now = new Date().toISOString();
   const update = await supabase
     .from("messages")
@@ -245,6 +254,7 @@ export async function markPeekRead(formData: FormData) {
     .update({ read_at: now })
     .eq("user_id", me.id)
     .eq("kind", "chat")
+    .eq("href", `/app/chat/${threadId}`)
     .is("read_at", null);
   if (toId) revalidatePath(`/browse/${toId}`);
   revalidatePath("/app/alerts");
@@ -298,11 +308,12 @@ async function postChatMessage(formData: FormData) {
   const otherAccess = await loadMembershipForProfile(supabase, other.id);
   if (!pairPlanLive(myAccess.live, otherAccess.live)) return { ok: false as const, bounce, threadId };
   const text = body.slice(0, 4000);
-  await supabase.from("messages").insert({
+  const inserted = await supabase.from("messages").insert({
     thread_id: threadId,
     sender_profile_id: mine.id,
     body: text,
   });
+  if (inserted.error) return { ok: false as const, bounce, threadId };
   const senderName = displayFirstName(mine.subject_full_name ?? "Match");
   const viewerFirst = displayFirstName(other.subject_full_name ?? "there");
   const copy = chatReceivedCopy(viewerFirst, senderName, previewText(text, 80));
@@ -325,7 +336,14 @@ async function postChatMessage(formData: FormData) {
 
 export async function recordProfileView(viewerId: string, viewedId: string) {
   if (!viewerId || !viewedId || viewerId === viewedId) return;
-  const { supabase } = await requireMember();
+  const { supabase, me } = await requireMember();
+  const { data: owned } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("id", viewerId)
+    .eq("created_by", me.id)
+    .maybeSingle();
+  if (!owned) return;
   const now = new Date().toISOString();
   const { error } = await supabase.from("profile_views").upsert(
     {

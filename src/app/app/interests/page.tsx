@@ -10,7 +10,7 @@ import {
   isHistoryStatus,
   type InterestStatus,
 } from "@/lib/match/interest-status";
-import { inboxLastOnline, pickPrimaryPhotoMap, publicMediaUrl } from "@/lib/match/inbox-card";
+import { inboxLastOnlineNow, pickPrimaryPhotoMap, publicMediaUrl } from "@/lib/match/inbox-card";
 import { yearsFromDob } from "@/lib/profile/completeness";
 import { formatHeightImperial } from "@/lib/profile/match-compare";
 import { displayFirstName } from "@/lib/profile/options";
@@ -148,10 +148,11 @@ export default async function InterestsPage() {
       .from("media")
       .select("profile_id, storage_path, created_at, is_primary")
       .eq("kind", "photo")
+      .eq("status", "approved")
       .in("profile_id", photoIds)
       .order("created_at");
     if (first.error) {
-      const retry = await mediaClient.from("media").select("profile_id, storage_path").eq("kind", "photo").in("profile_id", photoIds);
+      const retry = await mediaClient.from("media").select("profile_id, storage_path").eq("kind", "photo").eq("status", "approved").in("profile_id", photoIds);
       photos = retry.data ?? [];
     } else {
       photos = first.data ?? [];
@@ -208,10 +209,9 @@ export default async function InterestsPage() {
       href: extra.href ?? (closed ? undefined : `/browse/${profileId}`),
       status: extra.status,
       photoUrl: photo,
-      lastOnline: inboxLastOnline(
+      lastOnline: inboxLastOnlineNow(
         Boolean(other?.hide_last_seen),
         other?.last_seen_at,
-        Date.now(),
         other?.status ?? "deleted",
       ),
       age: publicProfile && age != null ? `${age} yrs` : null,
@@ -241,10 +241,9 @@ export default async function InterestsPage() {
       name,
       when: formatInboxWhen(row.closed_at || row.created_at),
       status: interestStatusLabel("deleted"),
-      lastOnline: inboxLastOnline(
+      lastOnline: inboxLastOnlineNow(
         Boolean(other?.hide_last_seen),
         other?.last_seen_at,
-        Date.now(),
         other?.status ?? "deleted",
       ),
     };

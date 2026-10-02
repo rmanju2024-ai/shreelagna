@@ -507,7 +507,8 @@ table { max-width: 100%; }
 .wc-pane .wa-bubble.is-mine::before, .wc-pane .wa-bubble.is-theirs::before { content: ""; position: absolute; top: 0; width: 0.6rem; height: 0.8rem; }
 .wc-pane .wa-bubble.is-mine::before { right: -0.5rem; background: #d9fdd3; clip-path: polygon(0 0, 0 100%, 100% 0); }
 .wc-pane .wa-bubble.is-theirs::before { left: -0.5rem; background: #fff; clip-path: polygon(100% 0, 100% 100%, 0 0); }
-.wa-tick { float: right; margin: 0.3rem 0 0 0.15rem; font-size: 0.66rem; letter-spacing: -0.15em; color: #53bdeb; }
+.wa-tick { float: right; margin: 0.3rem 0 0 0.15rem; font-size: 0.66rem; letter-spacing: -0.15em; color: #8696a0; }
+.wa-tick.is-read { color: #53bdeb; }
 .wa-tick.is-wait { color: #8696a0; letter-spacing: 0; }
 @keyframes wa-in { from { opacity: 0; transform: translateY(6px) scale(0.98); } to { opacity: 1; transform: none; } }
 

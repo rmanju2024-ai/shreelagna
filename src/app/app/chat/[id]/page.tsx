@@ -55,8 +55,19 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
       .select("id, subject_full_name, status, last_seen_at, hide_last_seen")
       .eq("id", otherId)
       .maybeSingle(),
-    supabase.from("messages").select("id, sender_profile_id, body, created_at").eq("thread_id", id).order("created_at"),
-    db.from("media").select("storage_path, is_primary").eq("profile_id", otherId).eq("kind", "photo").order("created_at"),
+    supabase
+      .from("messages")
+      .select("id, sender_profile_id, body, created_at, read_at")
+      .eq("thread_id", id)
+      .order("created_at", { ascending: false })
+      .limit(100),
+    db
+      .from("media")
+      .select("storage_path, is_primary")
+      .eq("profile_id", otherId)
+      .eq("kind", "photo")
+      .eq("status", "approved")
+      .order("created_at"),
   ]);
   if (!pairCanChat(interestRows ?? [], mine.id, otherId)) notFound();
   const chatLive = pairPlanLive(myAccess.live, otherAccess.live);
@@ -105,11 +116,12 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
         <ThreadView
           threadId={id}
           myProfileId={mine.id}
-          messages={(messages ?? []).map((msg) => ({
+          messages={[...(messages ?? [])].reverse().map((msg) => ({
             id: msg.id,
             sender_profile_id: msg.sender_profile_id,
             body: msg.body,
             created_at: msg.created_at,
+            read_at: msg.read_at,
           }))}
           canSend={!thread.frozen && otherOpen && chatLive}
         />

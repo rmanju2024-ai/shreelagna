@@ -56,11 +56,12 @@ const loadChatData = cache(async () => {
           .from("media")
           .select("profile_id, storage_path, created_at, is_primary")
           .eq("kind", "photo")
+          .eq("status", "approved")
           .in("profile_id", otherIds)
           .order("created_at")
           .then((first) =>
             first.error
-              ? media.from("media").select("profile_id, storage_path").eq("kind", "photo").in("profile_id", otherIds).then((r) => r.data ?? [])
+              ? media.from("media").select("profile_id, storage_path").eq("kind", "photo").eq("status", "approved").in("profile_id", otherIds).then((r) => r.data ?? [])
               : (first.data ?? []),
           )
       : Promise.resolve([]),
@@ -152,6 +153,5 @@ export function ChatSidebarSkeleton() {
 /** Id of the newest open conversation whose other profile is active (null when none). */
 export async function firstChatId(): Promise<string | null> {
   const { ids, openThreads, nameMap } = await loadChatData();
-  const hit = openThreads.find((t) => nameMap.get(ids.includes(t.profile_a) ? t.profile_b : t.profile_a)?.status === "active");
-  return hit?.id ?? null;
+  return pickFirstChat(openThreads, ids, nameMap)?.id ?? null;
 }

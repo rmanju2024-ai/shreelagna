@@ -5,7 +5,14 @@ import { sendPeekChat } from "@/app/app/match/actions";
 import { chatStamp } from "@/lib/match/chat-ui";
 import { btnPrimary, inputClass } from "@/lib/ui/classes";
 
-type Msg = { id: string; sender_profile_id: string; body: string; created_at: string; pending?: boolean };
+type Msg = {
+  id: string;
+  sender_profile_id: string;
+  body: string;
+  created_at: string;
+  read_at?: string | null;
+  pending?: boolean;
+};
 
 /** Chat stream + composer. Sending stays on the page: the message appears at once and the box keeps focus. */
 export function ThreadView({
@@ -78,7 +85,10 @@ export function ThreadView({
               <time>
                 {msg.pending ? "" : chatStamp(msg.created_at)}
                 {msg.sender_profile_id === myProfileId ? (
-                  <span className={`wa-tick${msg.pending ? " is-wait" : ""}`} aria-label={msg.pending ? "Sending" : "Sent"}>
+                  <span
+                    className={`wa-tick${msg.pending ? " is-wait" : msg.read_at ? " is-read" : ""}`}
+                    aria-label={msg.pending ? "Sending" : msg.read_at ? "Read" : "Delivered"}
+                  >
                     {msg.pending ? "🕓" : "✓✓"}
                   </span>
                 ) : null}

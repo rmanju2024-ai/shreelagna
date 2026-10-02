@@ -10,7 +10,7 @@ import {
 
 type Query = {
   eq: (col: string, value: string) => Query;
-  in: (col: string, value: string[]) => Query & PromiseLike<{ data: unknown[] | null }>;
+  in: (col: string, value: string[]) => Query & PromiseLike<{ data: unknown[] | null; error?: unknown }>;
   order: (col: string, opts: { ascending: boolean }) => Query;
   limit: (n: number) => Query;
   maybeSingle: () => PromiseLike<{ data: unknown }>;
@@ -18,7 +18,7 @@ type Query = {
 
 type Db = {
   from: (table: string) => {
-    select: (cols: string) => Query & PromiseLike<{ data: unknown[] | null }>;
+    select: (cols: string) => Query & PromiseLike<{ data: unknown[] | null; error?: unknown }>;
   };
 };
 
@@ -99,6 +99,7 @@ export async function loadInterestQuota(
       .from("contact_views")
       .select("viewer_profile_id, created_at")
       .in("viewer_profile_id", profileIds);
+    if (interests.error || views.error) return resolveQuota(limit, limit);
     const interestRows = (interests.data ?? []) as { from_profile_id?: string | null; created_at?: string | null }[];
     const viewRows = ((views.data ?? []) as { viewer_profile_id?: string | null; created_at?: string | null }[]).map(
       (row) => ({ from_profile_id: row.viewer_profile_id, created_at: row.created_at }),
@@ -108,7 +109,7 @@ export async function loadInterestQuota(
       usedInterestsSince(interestRows, profileIds, since) + usedInterestsSince(viewRows, profileIds, since),
     );
   } catch {
-    return resolveQuota(limit, 0);
+    return resolveQuota(limit, limit);
   }
 }
 

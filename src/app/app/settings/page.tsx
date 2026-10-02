@@ -8,7 +8,12 @@ import { parseScene, SCENE_COOKIE } from "@/lib/ui/scenes";
 import { PageHero } from "@/components/page-hero";
 import { redirect } from "next/navigation";
 
-export default async function SettingsPage() {
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
   const { supabase, user } = await getAuth();
   if (!supabase || !user) redirect("/login?next=/app/settings");
   const me = await ensureAppUser(supabase, user);
@@ -40,6 +45,11 @@ export default async function SettingsPage() {
     <PageShell>
       <div className="settings-page sx-stage">
         <PageHero kicker="Account" title="Settings" sub="Look, alerts and privacy." />
+        {error === "save" ? (
+          <p className="browse-flash is-warn" role="alert">
+            Settings could not be saved. Please try again.
+          </p>
+        ) : null}
         <ScenePicker initial={scene} />
         <SettingsForm profileId={profile.id} values={readProfileSettings(profile, account)} />
       </div>

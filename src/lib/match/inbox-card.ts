@@ -26,6 +26,15 @@ export function inboxLastOnline(
   return lastOnlineLine(iso, null, now) ?? "Online —";
 }
 
+/** Render-safe convenience for server components that do not need a fixed test clock. */
+export function inboxLastOnlineNow(
+  hide: boolean | null | undefined,
+  iso: string | null | undefined,
+  status?: string | null,
+): string {
+  return inboxLastOnline(hide, iso, Date.now(), status);
+}
+
 export function inboxPhotoPath(args: {
   path?: string | null;
   hideUntilAccept?: boolean | null;

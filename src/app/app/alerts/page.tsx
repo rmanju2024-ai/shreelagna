@@ -38,6 +38,7 @@ export default async function AlertsPage() {
       .from("media")
       .select("profile_id, storage_path, created_at")
       .eq("kind", "photo")
+      .eq("status", "approved")
       .in("profile_id", profileIds)
       .order("created_at");
     for (const row of photos ?? []) {
