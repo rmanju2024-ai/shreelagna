@@ -263,7 +263,6 @@ export function BrowseClient({
         ) : (
           <section className="sx-results" aria-live="polite" data-pending={pending || undefined}>
             <header className="sx-results-head">
-              {view === "custom" ? null : <h2>{currentView.label}</h2>}
               <p>
                 {ranked.length} {ranked.length === 1 ? "profile" : "profiles"} · {currentView.hint}
               </p>
