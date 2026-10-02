@@ -279,6 +279,14 @@ a.inbox-photo { color: inherit; text-decoration: none; display: block; }
 .settings-page.sx-stage { max-width: 56rem; }
 
 /* Uniform nav-bar icons: identical size/position on every page */
+.site-head-inner > .site-nav {
+  position: static;
+  inset: auto;
+  width: auto;
+  max-width: min(100%, 48rem);
+  padding: 0;
+  transform: none;
+}
 .site-nav-row > .nav-3d, .site-nav-row > .nav-group > .nav-3d {
   flex-direction: column; justify-content: center; align-items: center; gap: 0.2rem;
   height: 3.6rem; min-height: 3.6rem; padding: 0.4rem 0.3rem; transform: none !important;
@@ -293,6 +301,12 @@ a.inbox-photo { color: inherit; text-decoration: none; display: block; }
 .site-nav-row .nav-3d > .nav-3d-caret { display: none; }
 .site-nav-row .nav-3d.is-overlay { color: var(--ink-soft); background: transparent; box-shadow: none; }
 .site-nav-row .nav-3d.is-overlay.is-on, .site-nav-row .nav-3d.is-on { color: #fff; background: var(--grad-brand); }
+
+/* Footer sits at the true page bottom. Mobile reserves only the navigation
+   height instead of stacking the old page padding and footer spacing. */
+.page-scene { padding-bottom: 0; }
+.page-scene > .app-main { flex: 1 1 auto; }
+.page-scene > .site-footer { margin-top: auto; }
 
 /* More menu: bullet-proof layout (opens upward from the bottom bar) */
 .site-nav .nav-group { position: relative; }
@@ -1008,6 +1022,21 @@ html[data-scene="couple"] .app-main {
 .sx-hero-sub { color: color-mix(in srgb, var(--theme-ink) 76%, transparent); opacity: 1; }
 .sx-hero-count b { color: var(--theme-accent); }
 .sx-hero-count span { color: var(--muted); opacity: 1; }
+/* Settings had an older dark-maroon hero with inherited text colours. Keep it
+   in the active theme palette so title, kicker and explanation always agree. */
+.app-main .settings-page > .sx-hero {
+  color: var(--theme-ink);
+  background:
+    radial-gradient(circle at 92% 15%, rgb(255 255 255 / 48%) 0 3.2rem, transparent 3.3rem),
+    linear-gradient(120deg, var(--theme-surface), var(--theme-accent-soft) 58%, var(--theme-surface-alt));
+}
+.app-main .settings-page > .sx-hero :where(h1, p) {
+  color: var(--theme-ink);
+  text-shadow: none;
+}
+.app-main .settings-page > .sx-hero .sx-hero-sub {
+  color: color-mix(in srgb, var(--theme-ink) 76%, transparent);
+}
 .sx-eyebrow {
   display: inline-flex;
   align-items: center;
