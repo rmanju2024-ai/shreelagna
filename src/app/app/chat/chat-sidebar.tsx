@@ -34,20 +34,19 @@ const loadChatData = cache(async () => {
       : Promise.resolve({ data: [] as { from_profile_id: string; to_profile_id: string; status: string; created_at: string }[] }),
     supabase.from("notices").select("href").eq("user_id", me.id).eq("kind", "chat").is("read_at", null),
   ]);
-  const openThreads = (threads ?? []).filter((thread) => pairCanChat(chatRows ?? [], thread.profile_a, thread.profile_b));
-  const otherIds = [...new Set(openThreads.map((t) => (ids.includes(t.profile_a) ? t.profile_b : t.profile_a)))];
-  const threadIds = openThreads.map((t) => t.id);
+  const acceptedThreads = (threads ?? []).filter((thread) => pairCanChat(chatRows ?? [], thread.profile_a, thread.profile_b));
+  const otherIds = [...new Set(acceptedThreads.map((t) => (ids.includes(t.profile_a) ? t.profile_b : t.profile_a)))];
   const media = createServiceClient() ?? supabase;
 
   const [{ data: names }, { data: msgs }, photoRows] = await Promise.all([
     otherIds.length
       ? supabase.from("profiles").select("id, subject_full_name, status").in("id", otherIds)
       : Promise.resolve({ data: [] as { id: string; subject_full_name: string | null; status: string }[] }),
-    threadIds.length
+    acceptedThreads.length
       ? supabase
           .from("messages")
           .select("thread_id, body, created_at")
-          .in("thread_id", threadIds)
+          .in("thread_id", acceptedThreads.map((thread) => thread.id))
           .order("created_at", { ascending: false })
           .limit(300)
       : Promise.resolve({ data: [] as { thread_id: string; body: string; created_at: string }[] }),
@@ -67,8 +66,15 @@ const loadChatData = cache(async () => {
       : Promise.resolve([]),
   ]);
   const nameMap = new Map((names ?? []).map((n) => [n.id, n]));
+  // A hidden/deleted match cannot be opened, so it must not remain as a
+  // conversation or produce an unread-message badge.
+  const openThreads = acceptedThreads.filter((thread) => {
+    const other = ids.includes(thread.profile_a) ? thread.profile_b : thread.profile_a;
+    return nameMap.get(other)?.status === "active";
+  });
   const lastMap = latestByThread(msgs ?? []);
-  const unreadMap = countByKey((unreadNotes ?? []).map((row) => row.href));
+  const visibleChatHrefs = new Set(openThreads.map((thread) => `/app/chat/${thread.id}`));
+  const unreadMap = countByKey((unreadNotes ?? []).map((row) => (visibleChatHrefs.has(row.href ?? "") ? row.href : null)));
   const photoMap = pickPrimaryPhotoMap(photoRows as never);
   return { ids, openThreads, nameMap, lastMap, unreadMap, photoMap };
 });
@@ -88,13 +94,12 @@ export async function ChatSidebar({ activeId }: { activeId?: string; autoOpen?: 
           {openThreads.map((thread) => {
             const other = ids.includes(thread.profile_a) ? thread.profile_b : thread.profile_a;
             const row = nameMap.get(other);
-            const open = row?.status === "active";
-            const name = displayFirstName(row?.subject_full_name ?? (open ? "Match" : "Unavailable"));
+            const name = displayFirstName(row?.subject_full_name ?? "Match");
             const last = lastMap.get(thread.id);
             const unread = unreadLabel(unreadMap.get(`/app/chat/${thread.id}`) ?? 0);
             const inner = (
               <>
-                <ChatAvatar name={name} src={open ? publicMediaUrl(photoMap.get(other)) : null} />
+                <ChatAvatar name={name} src={publicMediaUrl(photoMap.get(other))} />
                 <span className="wa-row-main">
                   <span className="wa-row-top">
                     <b>{name}</b>
@@ -104,7 +109,7 @@ export async function ChatSidebar({ activeId }: { activeId?: string; autoOpen?: 
                   </span>
                   <span className="wc-row-bottom">
                     <span className={`wa-preview${unread ? " is-new" : ""}`}>
-                      {open ? previewText(last?.body) : "Hidden or deleted. Chat closed."}
+                      {previewText(last?.body)}
                     </span>
                     {unread ? <span className="wa-unread">{unread}</span> : null}
                   </span>
@@ -113,17 +118,13 @@ export async function ChatSidebar({ activeId }: { activeId?: string; autoOpen?: 
             );
             return (
               <li key={thread.id}>
-                {open ? (
-                  <Link
-                    href={`/app/chat/${thread.id}`}
-                    className={`wa-row${thread.id === activeId ? " is-active" : ""}`}
-                    aria-current={thread.id === activeId ? "page" : undefined}
-                  >
-                    {inner}
-                  </Link>
-                ) : (
-                  <div className="wa-row is-closed">{inner}</div>
-                )}
+                <Link
+                  href={`/app/chat/${thread.id}`}
+                  className={`wa-row${thread.id === activeId ? " is-active" : ""}`}
+                  aria-current={thread.id === activeId ? "page" : undefined}
+                >
+                  {inner}
+                </Link>
               </li>
             );
           })}
