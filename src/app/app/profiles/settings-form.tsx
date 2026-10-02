@@ -54,12 +54,6 @@ export function SettingsForm({
           hint="Show your photos only after you accept their interest."
           checked={values.hidePhotoUntilAccept}
         />
-        <Toggle
-          name="incognito_browse"
-          title="Incognito browsing"
-          hint="Visit profiles without appearing in Who viewed you or Alerts."
-          checked={values.incognitoBrowse}
-        />
       </section>
 
       <section>

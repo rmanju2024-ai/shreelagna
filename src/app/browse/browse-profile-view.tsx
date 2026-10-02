@@ -2,7 +2,7 @@
 import { BirdDock } from "@/app/browse/bird-dock";
 import { MatchBar } from "@/app/browse/match-bar";
 import { profileViewedCopy } from "@/lib/match/alert-copy";
-import { canAlertProfileView, isIncognito } from "@/lib/match/profile-settings";
+import { canAlertProfileView } from "@/lib/match/profile-settings";
 import { displayFirstName } from "@/lib/profile/options";
 import { ProfilePortrait } from "@/app/app/profiles/profile-portrait";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
@@ -234,8 +234,7 @@ export async function BrowseProfileView({
     me.active_profile_id &&
     me.active_profile_id !== id &&
     !own &&
-    mine &&
-    !isIncognito(mine)
+    mine
   ) {
     const viewerProfile = mine;
     const viewerId = me.active_profile_id;
