@@ -6,6 +6,7 @@ import { fetchPendingPlanCode, fetchPlans, loadInterestQuota, loadMembership } f
 import { formatIstDate } from "@/lib/time/ist";
 import { btnGhost, btnPrimary, cardClass } from "@/lib/ui/classes";
 import { createServiceClient } from "@/lib/supabase/server";
+import { PageHero } from "@/components/page-hero";
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -40,11 +41,7 @@ export default async function PlansPage({
   return (
     <PageShell>
       <section className="plans-stage">
-        <header className="plans-hero">
-          <p className="browse-kicker">Membership</p>
-          <h1>Plans</h1>
-          <p>Welcome gift on joining. Paid cover thereafter. Chat after accept.</p>
-        </header>
+        <PageHero kicker="Membership" title="Plans" sub="Welcome gift on joining. Paid cover thereafter. Chat after accept." />
 
         <div className={`${cardClass} card-3d plans-now is-${access.kind}`}>
           <p className="browse-kicker">{access.live ? "Current plan" : "No plan"}</p>

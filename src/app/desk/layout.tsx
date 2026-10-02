@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { PageHero } from "@/components/page-hero";
 import { PageShell } from "@/components/site-chrome";
 import { DeskNav } from "@/app/desk/desk-nav";
 import { DeskPaneFallback } from "@/app/desk/desk-fallback";
@@ -20,15 +21,15 @@ export default async function DeskLayout({ children }: { children: React.ReactNo
   return (
     <PageShell>
       <div className="desk-stage">
-        <header className="desk-hero">
-          <p className="browse-kicker">{desk.admin ? "Admin" : "Staff"}</p>
-          <h1>House desk</h1>
-          <p>
-            {desk.admin
+        <PageHero
+          kicker={desk.admin ? "Admin" : "Staff"}
+          title="House desk"
+          sub={
+            desk.admin
               ? "Tickets, analytics, audit, plans, member edit, and staff appoint."
-              : "Work tickets, confirm plans, review the audit log, and edit member profiles. Admin profiles stay hidden."}
-          </p>
-        </header>
+              : "Work tickets, confirm plans, review the audit log, and edit member profiles."
+          }
+        />
         <div className="browse-board desk-board">
           <DeskNav admin={desk.admin} />
           <div className="desk-main">

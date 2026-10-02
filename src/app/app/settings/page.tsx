@@ -5,6 +5,7 @@ import { ScenePicker } from "@/components/scene-picker";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { readProfileSettings } from "@/lib/match/profile-settings";
 import { parseScene, SCENE_COOKIE } from "@/lib/ui/scenes";
+import { PageHero } from "@/components/page-hero";
 import { redirect } from "next/navigation";
 
 export default async function SettingsPage() {
@@ -37,7 +38,8 @@ export default async function SettingsPage() {
 
   return (
     <PageShell>
-      <div className="settings-page">
+      <div className="settings-page sx-stage">
+        <PageHero kicker="Account" title="Settings" sub="Look, alerts and privacy." />
         <ScenePicker initial={scene} />
         <SettingsForm profileId={profile.id} values={readProfileSettings(profile, account)} />
       </div>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PageHero } from "@/components/page-hero";
 import { after } from "next/server";
 import { ChatAvatar } from "@/app/app/chat/chat-avatar";
 import { PageShell } from "@/components/site-chrome";
@@ -55,7 +56,8 @@ export default async function AlertsPage() {
 
   return (
     <PageShell>
-      <h1 className="font-[family-name:var(--font-display)] text-4xl">Alerts</h1>
+      <div className="sx-stage">
+      <PageHero kicker="Activity" title="Alerts" sub="Matches, views and replies in one place." stat={{ value: alerts.length, label: "Recent" }} />
       <ul className="alert-list">
         {alerts.map((note) => {
           const unread = !note.read_at;
@@ -85,7 +87,12 @@ export default async function AlertsPage() {
           );
         })}
       </ul>
-      {!alerts.length ? <p className="mt-6 text-sm text-[var(--muted)]">No alerts yet.</p> : null}
+      {!alerts.length ? (
+        <div className="sx-empty">
+          <h3>No alerts yet</h3>
+        </div>
+      ) : null}
+      </div>
     </PageShell>
   );
 }

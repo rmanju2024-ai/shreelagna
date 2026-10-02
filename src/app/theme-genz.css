@@ -240,3 +240,27 @@ a.inbox-photo { color: inherit; text-decoration: none; display: block; }
   .wc-shell.has-thread .wc-side { display: none; }
   .wc-pane .wa-back { display: inline-flex; }
 }
+
+/* ===== Shared hero + modern Alerts / Plans / Desk / Settings ===== */
+.sx-hero-sub { margin: 0.45rem 0 0; max-width: 40rem; font-size: 0.95rem; color: rgb(255 248 231 / 82%); }
+.desk-stage, .plans-stage { display: grid; gap: 1rem; width: 100%; max-width: 76rem; margin-inline: auto; }
+.alert-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.7rem; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); }
+.alert-card { display: flex; align-items: center; gap: 0.85rem; padding: 0.9rem 1rem; text-decoration: none; color: inherit; }
+.alert-card.is-new { box-shadow: inset 4px 0 0 var(--pop), var(--shadow-soft) !important; }
+.alert-copy { display: grid; gap: 0.2rem; min-width: 0; flex: 1; }
+.alert-copy time { font-size: 0.72rem; color: var(--muted); }
+.alert-dot { width: 0.65rem; height: 0.65rem; border-radius: 50%; background: var(--pop); box-shadow: 0 0 0 4px rgb(255 93 143 / 20%); }
+
+.plans-now { border-radius: var(--radius-lg); }
+.plans-grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.1rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
+.plan-card { position: relative; display: grid; gap: 0.5rem; align-content: start; padding: 1.3rem !important; }
+.plan-card.is-featured { background: linear-gradient(160deg, rgb(255 255 255 / 92%), rgb(255 93 143 / 10%)) !important; border-color: rgb(255 93 143 / 45%) !important; }
+.plan-mark { position: absolute; top: 0.9rem; right: 0.9rem; padding: 0.22rem 0.65rem; border-radius: 999px; font-size: 0.68rem; font-weight: 800; color: #fff; background: var(--grad-brand); }
+.plan-price { margin: 0; font-size: 1.9rem; font-weight: 800; color: var(--accent); }
+.plan-price small { display: block; font-size: 0.72rem; font-weight: 600; color: var(--muted); }
+.plan-perks { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.3rem; font-size: 0.85rem; }
+.plan-perks li::before { content: "✓ "; color: var(--accent); font-weight: 800; }
+
+.desk-board { display: grid; gap: 1rem; }
+.desk-main { min-width: 0; }
+.settings-page.sx-stage { max-width: 56rem; }

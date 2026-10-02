@@ -9,7 +9,7 @@ export default function ChatListPage() {
       <LiveRefresh table="messages" />
       <div className="wc-shell">
         <Suspense fallback={<ChatSidebarSkeleton />}>
-          <ChatSidebar />
+          <ChatSidebar autoOpen />
         </Suspense>
         <section className="wc-welcome" aria-label="No chat selected">
           <div>

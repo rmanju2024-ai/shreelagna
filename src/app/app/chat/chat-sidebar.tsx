@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { AutoOpen } from "@/app/app/chat/auto-open";
 import { ChatAvatar } from "@/app/app/chat/chat-avatar";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { chatStamp, countByKey, latestByThread, previewText, unreadLabel } from "@/lib/match/chat-ui";
@@ -9,7 +10,7 @@ import { displayFirstName } from "@/lib/profile/options";
 import { createServiceClient } from "@/lib/supabase/server";
 
 /** Left column of the chat screen: every accepted conversation, newest first. */
-export async function ChatSidebar({ activeId }: { activeId?: string }) {
+export async function ChatSidebar({ activeId, autoOpen = false }: { activeId?: string; autoOpen?: boolean }) {
   const { supabase, user } = await getAuth();
   if (!supabase || !user) redirect("/login?next=/app/chat");
   const me = await ensureAppUser(supabase, user);
@@ -69,8 +70,16 @@ export async function ChatSidebar({ activeId }: { activeId?: string }) {
   const unreadMap = countByKey((unreadNotes ?? []).map((row) => row.href));
   const photoMap = pickPrimaryPhotoMap(photoRows as never);
 
+  const firstOpen = autoOpen
+    ? openThreads.find((thread) => {
+        const other = ids.includes(thread.profile_a) ? thread.profile_b : thread.profile_a;
+        return nameMap.get(other)?.status === "active";
+      })
+    : undefined;
+
   return (
     <aside className="wc-side" aria-label="Conversations">
+      {firstOpen ? <AutoOpen href={`/app/chat/${firstOpen.id}`} /> : null}
       <header className="wc-side-head">
         <h1>Chats</h1>
         <p>{openThreads.length} {openThreads.length === 1 ? "match" : "matches"}</p>
