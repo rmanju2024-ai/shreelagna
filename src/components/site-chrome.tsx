@@ -79,6 +79,22 @@ export async function SiteHeader({ overlay = false, glass = false }: { overlay?:
   );
 }
 
+function HeaderSkeleton({ overlay }: { overlay: boolean }) {
+  return (
+    <header
+      className={
+        overlay
+          ? "absolute inset-x-0 top-0 z-50 w-full border-b border-white/15"
+          : "sticky top-0 z-40 w-full border-b border-[var(--gold)]/25 bg-[var(--paper)]/50 backdrop-blur-xl"
+      }
+    >
+      <div className={`${pageInner} site-head-inner flex min-h-24 items-center gap-4 py-3 sm:min-h-[6.5rem]`}>
+        <BrandMark light={overlay} />
+      </div>
+    </header>
+  );
+}
+
 export function SiteFooter({ glass = false }: { glass?: boolean }) {
   return (
     <footer
@@ -123,7 +139,9 @@ export async function PageShell({
           <KalyanBanner intensity="wash" />
         </div>
       ) : null}
-      <SiteHeader overlay={overlay} glass={!overlay} />
+      <Suspense fallback={<HeaderSkeleton overlay={overlay} />}>
+        <SiteHeader overlay={overlay} glass={!overlay} />
+      </Suspense>
       <main
         className={
           bleed

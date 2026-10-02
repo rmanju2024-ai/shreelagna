@@ -60,17 +60,20 @@ export default async function InterestsPage() {
   const me = await ensureAppUser(supabase, user);
   if (!me) redirect("/login?error=account");
 
-  await expireStaleInterests();
-
-  const { data: mine } = await supabase.from("profiles").select("id, subject_full_name").eq("created_by", me.id);
+  const [, { data: mine }] = await Promise.all([
+    expireStaleInterests(),
+    supabase.from("profiles").select("id, subject_full_name").eq("created_by", me.id),
+  ]);
   const ids = (mine ?? []).map((p) => p.id);
   const idSet = new Set(ids);
 
   let received: InterestRow[] = [];
   let sent: InterestRow[] = [];
   if (ids.length) {
-    const rec = await supabase.from("interests").select("id, created_at, from_profile_id, to_profile_id, status, decline_reason").in("to_profile_id", ids).order("created_at", { ascending: false });
-    const sen = await supabase.from("interests").select("id, created_at, from_profile_id, to_profile_id, status, decline_reason").in("from_profile_id", ids).order("created_at", { ascending: false });
+    const [rec, sen] = await Promise.all([
+      supabase.from("interests").select("id, created_at, from_profile_id, to_profile_id, status, decline_reason").in("to_profile_id", ids).order("created_at", { ascending: false }),
+      supabase.from("interests").select("id, created_at, from_profile_id, to_profile_id, status, decline_reason").in("from_profile_id", ids).order("created_at", { ascending: false }),
+    ]);
     if (rec.error || sen.error) {
       const rec2 = await supabase.from("interests").select("id, created_at, from_profile_id, to_profile_id").in("to_profile_id", ids);
       const sen2 = await supabase.from("interests").select("id, created_at, from_profile_id, to_profile_id").in("from_profile_id", ids);
@@ -111,12 +114,14 @@ export default async function InterestsPage() {
   }
   const nameMap = new Map(names.map((n) => [n.id, n]));
 
-  const { data: views } = ids.length
-    ? await supabase.from("profile_views").select("viewer_profile_id, viewed_profile_id, viewed_at").in("viewed_profile_id", ids).order("viewed_at", { ascending: false }).limit(30)
-    : { data: [] };
-  const { data: visits } = ids.length
-    ? await supabase.from("profile_views").select("viewer_profile_id, viewed_profile_id, viewed_at").in("viewer_profile_id", ids).order("viewed_at", { ascending: false }).limit(30)
-    : { data: [] };
+  const [{ data: views }, { data: visits }] = await Promise.all([
+    ids.length
+      ? supabase.from("profile_views").select("viewer_profile_id, viewed_profile_id, viewed_at").in("viewed_profile_id", ids).order("viewed_at", { ascending: false }).limit(30)
+      : Promise.resolve({ data: [] as { viewer_profile_id: string; viewed_profile_id: string; viewed_at: string }[] }),
+    ids.length
+      ? supabase.from("profile_views").select("viewer_profile_id, viewed_profile_id, viewed_at").in("viewer_profile_id", ids).order("viewed_at", { ascending: false }).limit(30)
+      : Promise.resolve({ data: [] as { viewer_profile_id: string; viewed_profile_id: string; viewed_at: string }[] }),
+  ]);
   const viewIds = [...new Set([
     ...(views ?? []).map((v) => v.viewer_profile_id),
     ...(visits ?? []).map((v) => v.viewed_profile_id),

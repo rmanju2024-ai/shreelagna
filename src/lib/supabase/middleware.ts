@@ -56,8 +56,9 @@ export async function updateSession(request: NextRequest) {
 
   let user: { id: string } | null = null;
   try {
-    const { data } = await supabase.auth.getUser();
-    user = data.user;
+    // Local JWT verification; refreshes the session only when the token expired.
+    const { data } = await supabase.auth.getClaims();
+    user = data?.claims?.sub ? { id: data.claims.sub } : null;
   } catch {
     return response;
   }

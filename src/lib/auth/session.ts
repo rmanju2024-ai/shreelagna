@@ -1,4 +1,5 @@
 import type { User } from "@supabase/supabase-js";
+import { after } from "next/server";
 import { cache } from "react";
 import { writeLastSeen } from "@/lib/auth/presence";
 import { createClient } from "@/lib/supabase/server";
@@ -7,9 +8,19 @@ import { shouldTouchLastSeen } from "@/lib/profile/last-seen";
 export const getAuth = cache(async () => {
   try {
     const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    // getClaims verifies the JWT locally (cached signing keys) — no ~500 ms Supabase round trip.
+    const { data } = await supabase.auth.getClaims();
+    const claims = data?.claims;
+    if (!claims?.sub) return { supabase, user: null };
+    const user = {
+      id: claims.sub,
+      email: claims.email,
+      email_confirmed_at: undefined,
+      user_metadata: claims.user_metadata ?? {},
+      app_metadata: claims.app_metadata ?? {},
+      aud: "authenticated",
+      created_at: "",
+    } as unknown as User;
     return { supabase, user };
   } catch {
     return { supabase: null, user: null };
@@ -76,7 +87,12 @@ export const ensureAppUser = cache(async (
 
   const seen = "last_seen_at" in existing ? String(existing.last_seen_at ?? "") : "";
   if (shouldTouchLastSeen(seen || null)) {
-    await writeLastSeen(user.id);
+    // Best-effort: run after the response is sent so it never delays the page.
+    try {
+      after(() => writeLastSeen(user.id));
+    } catch {
+      void writeLastSeen(user.id);
+    }
   }
 
   return existing;

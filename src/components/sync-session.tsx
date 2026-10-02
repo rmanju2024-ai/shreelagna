@@ -34,16 +34,26 @@ export function SyncSession({ guest }: { guest: boolean }) {
 
   useEffect(() => {
     if (guest) return;
+    // Server actions queue behind navigation, so never fire one on page load and
+    // never more than once per interval across page changes.
     const beat = () => {
+      try {
+        const last = Number(sessionStorage.getItem("sl-ping") ?? 0);
+        if (Date.now() - last < PING_EVERY_MS) return;
+        sessionStorage.setItem("sl-ping", String(Date.now()));
+      } catch {
+        /* ignore */
+      }
       void pingPresence();
     };
-    beat();
+    const first = window.setTimeout(beat, 6000);
     const id = window.setInterval(beat, PING_EVERY_MS);
     const onVis = () => {
       if (document.visibilityState === "visible") beat();
     };
     document.addEventListener("visibilitychange", onVis);
     return () => {
+      window.clearTimeout(first);
       window.clearInterval(id);
       document.removeEventListener("visibilitychange", onVis);
     };

@@ -17,20 +17,22 @@ export default async function ChatListPage() {
 
   const { data: mine } = await supabase.from("profiles").select("id").eq("created_by", me.id);
   const ids = (mine ?? []).map((p) => p.id);
-  const { data: threads } = ids.length
-    ? await supabase
-        .from("threads")
-        .select("id, profile_a, profile_b, created_at")
-        .or(`profile_a.in.(${ids.join(",")}),profile_b.in.(${ids.join(",")})`)
-        .order("created_at", { ascending: false })
-    : { data: [] };
-
-  const { data: chatRows } = ids.length
-    ? await supabase
-        .from("interests")
-        .select("from_profile_id, to_profile_id, status, created_at")
-        .or(`from_profile_id.in.(${ids.join(",")}),to_profile_id.in.(${ids.join(",")})`)
-    : { data: [] };
+  const [{ data: threads }, { data: chatRows }, { data: unreadNotes }] = await Promise.all([
+    ids.length
+      ? supabase
+          .from("threads")
+          .select("id, profile_a, profile_b, created_at")
+          .or(`profile_a.in.(${ids.join(",")}),profile_b.in.(${ids.join(",")})`)
+          .order("created_at", { ascending: false })
+      : Promise.resolve({ data: [] as { id: string; profile_a: string; profile_b: string; created_at: string }[] }),
+    ids.length
+      ? supabase
+          .from("interests")
+          .select("from_profile_id, to_profile_id, status, created_at")
+          .or(`from_profile_id.in.(${ids.join(",")}),to_profile_id.in.(${ids.join(",")})`)
+      : Promise.resolve({ data: [] as { from_profile_id: string; to_profile_id: string; status: string; created_at: string }[] }),
+    supabase.from("notices").select("href").eq("user_id", me.id).eq("kind", "chat").is("read_at", null),
+  ]);
   const openThreads = (threads ?? []).filter((thread) =>
     pairCanChat(chatRows ?? [], thread.profile_a, thread.profile_b),
   );
@@ -45,12 +47,6 @@ export default async function ChatListPage() {
     ? await supabase.from("messages").select("thread_id, body, created_at").in("thread_id", threadIds).order("created_at", { ascending: false })
     : { data: [] };
   const lastMap = latestByThread(msgs ?? []);
-  const { data: unreadNotes } = await supabase
-    .from("notices")
-    .select("href")
-    .eq("user_id", me.id)
-    .eq("kind", "chat")
-    .is("read_at", null);
   const unreadMap = countByKey((unreadNotes ?? []).map((row) => row.href));
 
   const media = createServiceClient() ?? supabase;
