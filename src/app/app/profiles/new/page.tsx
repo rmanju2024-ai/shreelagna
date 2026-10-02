@@ -24,8 +24,8 @@ export default async function NewProfilePage({
 
   return (
     <PageShell>
-      <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)]">
-        <aside className="relative overflow-hidden rounded-[1.8rem] border border-[var(--gold)]/35 shadow-[0_28px_50px_rgba(47,22,14,0.18)] lg:sticky lg:top-32">
+      <div className="profile-create-shell grid items-start gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)]">
+        <aside className="profile-create-intro relative overflow-hidden rounded-[1.8rem] border border-[var(--gold)]/35 shadow-[0_28px_50px_rgba(47,22,14,0.18)] lg:sticky lg:top-32">
           <div className="relative min-h-[280px] lg:min-h-[520px]">
             <KalyanBanner intensity="hero" />
             <div className="relative z-10 flex h-full min-h-[280px] flex-col justify-end p-8 lg:min-h-[520px]">
@@ -39,6 +39,7 @@ export default async function NewProfilePage({
                 Choose whether you write for yourself, a parent, a sister, a
                 brother, or as guardian — then complete their profile.
               </p>
+              <p className="profile-create-tip">💡 Save a draft anytime. Perfect can wait.</p>
             </div>
           </div>
         </aside>

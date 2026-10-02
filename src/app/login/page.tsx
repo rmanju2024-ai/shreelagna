@@ -21,8 +21,8 @@ export default async function LoginPage({
 
   return (
     <PageShell bleed atmosphere={false}>
-      <div className="grid min-h-dvh flex-1 lg:grid-cols-2">
-        <section className="relative min-h-[42vh] overflow-hidden lg:min-h-full">
+      <div className="login-genz grid min-h-dvh flex-1 lg:grid-cols-2">
+        <section className="login-genz-visual relative min-h-[42vh] overflow-hidden lg:min-h-full">
           <KalyanBanner intensity="hero" />
           <div className="relative z-10 flex h-full flex-col justify-end px-8 py-12 lg:justify-center lg:px-14">
             <BrandMark light />
@@ -34,10 +34,10 @@ export default async function LoginPage({
             </h1>
           </div>
         </section>
-        <section className="relative flex flex-col justify-center bg-[#f7efe4] px-6 py-14 sm:px-10 lg:px-16">
-          <div className={`${cardClass} card-3d p-8`}>
+        <section className="login-genz-action relative flex flex-col justify-center px-6 py-14 sm:px-10 lg:px-16">
+          <div className={`${cardClass} card-3d login-genz-card p-8`}>
             <h2 className="font-[family-name:var(--font-display)] text-2xl">Welcome back</h2>
-            <div className="gold-ornament" />
+            <p className="login-genz-chip">✨ One tap, you’re in</p>
             <p className="mb-6 text-sm leading-relaxed text-[var(--muted)]">
               Continue with the same Gmail. Your profile and member ID stay with
               that address. New families may also begin here in this one step.

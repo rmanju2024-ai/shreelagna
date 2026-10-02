@@ -7,6 +7,7 @@ import { getAuth, ensureAppUser } from "@/lib/auth/session";
 import { KalyanBanner } from "@/components/home/kalyan-banner";
 import { HeaderNav } from "@/components/site-nav";
 import { SceneLayer } from "@/components/scene-layer";
+import { ThemeQuickPicker } from "@/components/theme-quick-picker";
 import { collapseNotices } from "@/lib/match/collapse-notices";
 import { unreadNoticeBadge } from "@/lib/notices/unread-badge";
 import { effectiveInterestStatus } from "@/lib/match/interest-status";
@@ -173,13 +174,14 @@ export async function PageShell({
       <Suspense fallback={<HeaderSkeleton overlay={overlay} />}>
         <SiteHeader overlay={overlay} glass={!overlay} />
       </Suspense>
+      <ThemeQuickPicker initial={scene} />
       <main
         className={
           bleed
-            ? "relative z-10 flex w-full flex-1 flex-col"
+            ? "app-main is-bleed relative z-10 flex w-full flex-1 flex-col"
             : full
-              ? `${pageFull} relative z-10 flex w-full flex-1 flex-col py-5`
-              : `${pageInner} relative z-10 flex w-full flex-1 flex-col py-8 sm:py-12`
+              ? `${pageFull} app-main relative z-10 flex w-full flex-1 flex-col py-5`
+              : `${pageInner} app-main relative z-10 flex w-full flex-1 flex-col py-8 sm:py-12`
         }
       >
         {children}

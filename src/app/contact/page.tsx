@@ -4,6 +4,7 @@ import { cardClass } from "@/lib/ui/classes";
 import { getAuth } from "@/lib/auth/session";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHero } from "@/components/page-hero";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -14,22 +15,24 @@ export default async function ContactPage() {
   const { user } = await getAuth();
   return (
     <PageShell>
-      <div className="grid gap-12 lg:grid-cols-2">
-        <div>
-          <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--gold)]">Write to us</p>
-          <h1 className="mt-4 font-[family-name:var(--font-display)] text-5xl leading-tight text-[var(--ink)]">
-            We are glad to hear from you.
-          </h1>
-          <p className="mt-5 max-w-xl text-lg leading-relaxed text-[var(--muted)]">
-            A blessing, a question, or a request for guidance — someone in the
-            house will read it with care.
-          </p>
+      <div className="sx-stage public-stage">
+        <PageHero
+          kicker="Real people, real help"
+          title="Let’s talk."
+          sub="Questions, feedback, or profile guidance—send it over. Someone from our family team will read it."
+        />
+        <div className="public-contact-grid">
+        <div className="public-contact-note">
+          <span aria-hidden>💌</span>
+          <h2>We’ve got you</h2>
+          <p>A blessing, a question, or a request for guidance—write freely.</p>
           <Link href={user ? "/app" : "/login"} className="mt-6 inline-block text-sm text-[var(--accent)]">
             {user ? "My profile →" : "Sign in with Gmail →"}
           </Link>
         </div>
         <div className={cardClass}>
           <ContactForm />
+        </div>
         </div>
       </div>
     </PageShell>

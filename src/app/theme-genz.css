@@ -642,6 +642,57 @@ table { max-width: 100%; }
 .site-footer-links a:hover { color: var(--gold-soft); }
 .site-footer-inner > p { margin: 0; color: #e7d3b0; font-size: 0.72rem; white-space: nowrap; }
 
+/* One shared content frame for every member and staff page. */
+.app-main:not(.is-bleed) {
+  gap: 1rem;
+}
+.app-main > .sx-stage,
+.app-main > .desk-stage,
+.app-main > .plans-stage,
+.app-main > .settings-page,
+.app-main > .portrait-page,
+.app-main > .browse-profile-view,
+.app-main > .wc-shell {
+  width: 100%; max-width: none; margin-inline: 0;
+}
+.sx-stage, .desk-stage, .plans-stage, .settings-page.sx-stage, .wc-shell {
+  max-width: none;
+}
+
+/* Guest-safe quick theme selector, available before profile creation. */
+.theme-quick {
+  position: fixed; z-index: 95; top: 7.1rem; right: 0.8rem;
+}
+.theme-quick-trigger {
+  display: inline-flex; align-items: center; gap: 0.35rem; min-height: 2.5rem;
+  padding: 0.4rem 0.7rem; border: 1px solid rgb(255 255 255 / 75%);
+  border-radius: 999px; background: rgb(255 255 255 / 88%); color: var(--ink);
+  box-shadow: 0 10px 24px -14px rgb(63 14 13 / 60%); cursor: pointer;
+  backdrop-filter: blur(14px);
+}
+.theme-quick-trigger b { font-size: 0.72rem; }
+.theme-quick-menu {
+  position: absolute; top: calc(100% + 0.45rem); right: 0; display: grid; gap: 0.3rem;
+  width: min(20rem, calc(100vw - 1rem)); padding: 0.55rem; border-radius: 1.1rem;
+  border: 1px solid rgb(184 137 76 / 30%); background: rgb(255 250 243 / 98%);
+  box-shadow: 0 20px 50px -18px rgb(63 14 13 / 55%);
+}
+.theme-quick-menu > p {
+  margin: 0; padding: 0.25rem 0.4rem; color: var(--accent);
+  font-size: 0.68rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+}
+.theme-quick-menu > button {
+  display: grid; grid-template-columns: 3rem minmax(0, 1fr) auto; align-items: center; gap: 0.6rem;
+  width: 100%; min-height: 3.2rem; padding: 0.4rem; border: 0; border-radius: 0.8rem;
+  background: transparent; color: var(--ink); text-align: left; cursor: pointer;
+}
+.theme-quick-menu > button:hover, .theme-quick-menu > button.is-on { background: rgb(255 93 143 / 11%); }
+.theme-quick-menu > button > span:first-child { width: 3rem; height: 2.2rem; border-radius: 0.65rem; }
+.theme-quick-menu > button > span:nth-child(2) { display: grid; min-width: 0; }
+.theme-quick-menu b { font-size: 0.82rem; }
+.theme-quick-menu small { overflow: hidden; color: var(--muted); font-size: 0.68rem; text-overflow: ellipsis; white-space: nowrap; }
+.theme-quick-menu em { color: #25a45a; font-style: normal; font-weight: 900; }
+
 /* ===== Final responsive hardening shared by every route ===== */
 .sx-card, .alert-card, .plan-card, .portrait-group, .desk-panel {
   content-visibility: auto;
@@ -682,6 +733,16 @@ table { max-width: 100%; }
   html { scroll-padding-bottom: 5.5rem; }
   body { min-width: 0; touch-action: manipulation; }
   main, main > *, .page-scene, .site-scene { min-width: 0; max-width: 100%; }
+  .app-main { padding: 0.7rem 0.65rem 6rem !important; gap: 0.7rem; }
+  .app-main > .sx-stage, .app-main > .desk-stage, .app-main > .plans-stage,
+  .app-main > .settings-page, .app-main > .portrait-page,
+  .app-main > .browse-profile-view, .app-main > .wc-shell {
+    width: 100%; max-width: 100%; padding-inline: 0; margin: 0;
+  }
+  .theme-quick { top: 4.65rem; right: 0.45rem; }
+  .theme-quick-trigger { min-height: 2.25rem; padding: 0.3rem 0.55rem; }
+  .theme-quick-trigger b { display: none; }
+  .theme-quick-menu { position: fixed; top: 7.3rem; right: 0.5rem; }
 
   /* Consistent page gutters regardless of the desktop container used. */
   .site-head-inner, main > div, main > section, .sx-stage, .desk-stage,
@@ -824,4 +885,236 @@ table { max-width: 100%; }
   .sx-hero-count { justify-items: start; }
   .alert-card { grid-template-columns: auto minmax(0, 1fr) auto; padding: 0.7rem; }
   .alert-line, .wa-preview, .sx-card { overflow-wrap: anywhere; }
+}
+
+/* ===== Universal Gen-Z finish: every route and content surface ===== */
+.app-main {
+  --gz-surface: rgb(255 255 255 / 78%);
+  --gz-stroke: rgb(184 137 76 / 24%);
+  --gz-shadow: 0 18px 46px -28px rgb(63 14 13 / 48%);
+}
+
+.app-main :where(h1, h2, h3) {
+  text-wrap: balance;
+  letter-spacing: -0.025em;
+}
+.app-main :where(p, li, dd) { text-wrap: pretty; }
+.app-main :where(h1) {
+  font-size: clamp(1.65rem, 3.2vw, 3.2rem);
+  line-height: 1.02;
+}
+.app-main :where(h2) { line-height: 1.12; }
+
+/* One recognizable glass-card language across discovery, account and staff content. */
+.app-main :where(
+  .sx-board, .sx-card, .alert-card, .plan-card, .settings-card,
+  .profile-wizard, .profile-readiness, .portrait-group, .portrait-sheet,
+  .desk-panel, .desk-admin-block, .desk-break-card, .wc-shell,
+  .browse-profile-missing, .card-premium
+) {
+  border-color: var(--gz-stroke);
+  background-color: var(--gz-surface);
+  box-shadow: var(--gz-shadow);
+  backdrop-filter: blur(16px) saturate(1.18);
+}
+
+.app-main :where(
+  .sx-board, .alert-card, .plan-card, .settings-card, .profile-wizard,
+  .profile-readiness, .portrait-group, .desk-panel, .desk-admin-block,
+  .desk-break-card, .browse-profile-missing
+) {
+  border-radius: clamp(1rem, 2vw, 1.5rem);
+}
+
+/* Gradient accent makes separate page families feel like one product. */
+.app-main :where(
+  .sx-board, .plans-stage, .settings-page, .profile-wizard,
+  .desk-panel, .portrait-sheet, .wc-shell
+) {
+  position: relative;
+  isolation: isolate;
+}
+.app-main :where(
+  .sx-board, .profile-wizard, .desk-panel, .portrait-sheet
+)::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 auto auto 1.25rem;
+  width: min(7rem, 28%);
+  height: 3px;
+  border-radius: 0 0 999px 999px;
+  background: linear-gradient(90deg, var(--pop), var(--violet), var(--mint));
+  opacity: 0.86;
+}
+
+.sx-hero {
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 72%);
+  background:
+    radial-gradient(circle at 92% 15%, rgb(255 255 255 / 48%) 0 3.2rem, transparent 3.3rem),
+    linear-gradient(120deg, rgb(255 255 255 / 72%), rgb(255 233 241 / 68%) 55%, rgb(238 234 255 / 72%));
+  box-shadow: var(--gz-shadow);
+  backdrop-filter: blur(18px) saturate(1.2);
+}
+.sx-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: fit-content;
+  padding: 0.28rem 0.62rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 72%);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px rgb(194 65 90 / 14%);
+}
+.sx-eyebrow::before { content: "✦"; color: var(--pop); }
+
+/* Familiar, tactile controls on forms and dense utility pages. */
+.app-main :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+  min-height: 2.8rem;
+  border-radius: 0.9rem;
+  border-color: rgb(184 137 76 / 30%);
+  background-color: rgb(255 255 255 / 88%);
+  transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+}
+.app-main :where(input, select, textarea):focus {
+  border-color: var(--violet);
+  box-shadow: 0 0 0 4px rgb(124 92 255 / 13%);
+  background-color: #fff;
+}
+.app-main :where(button, a) {
+  -webkit-tap-highlight-color: transparent;
+}
+.app-main :where(button:not(:disabled), a[href]) {
+  transition:
+    transform 160ms var(--ease-pop),
+    box-shadow 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+.app-main :where(button:not(:disabled), a[href]):active { transform: scale(0.97); }
+
+/* Short metadata is easier to scan as soft chips. */
+.app-main :where(
+  .sx-tag, .sx-badge, .desk-pill, .portrait-kind, .plans-badge,
+  .profile-wizard-step-number
+) {
+  border-radius: 999px;
+  font-weight: 750;
+  letter-spacing: 0.01em;
+}
+
+.app-main :where(.sx-empty, .desk-empty, .portrait-empty, .wc-welcome) {
+  border: 1px dashed rgb(194 65 90 / 26%);
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(circle at 50% 0, rgb(255 93 143 / 10%), transparent 58%),
+    rgb(255 255 255 / 54%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .app-main :where(.sx-card, .alert-card, .plan-card, .desk-break-card) {
+    transition: transform 200ms var(--ease-pop), box-shadow 200ms ease, border-color 200ms ease;
+  }
+  .app-main :where(.sx-card, .alert-card, .plan-card, .desk-break-card):hover {
+    transform: translateY(-4px);
+    border-color: rgb(255 93 143 / 30%);
+    box-shadow: 0 24px 52px -28px rgb(124 42 69 / 56%);
+  }
+}
+
+@media (max-width: 820px) {
+  .app-main { --gz-shadow: 0 12px 30px -24px rgb(63 14 13 / 46%); }
+  .app-main :where(h1) { font-size: clamp(1.45rem, 8vw, 2.15rem); }
+  .sx-hero { border-radius: 1.15rem; padding: 1rem; }
+  .app-main :where(
+    .sx-board, .alert-card, .plan-card, .settings-card, .profile-wizard,
+    .profile-readiness, .portrait-group, .desk-panel, .desk-admin-block,
+    .desk-break-card, .browse-profile-missing
+  ) { border-radius: 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-main, .app-main *, .app-main *::before, .app-main *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Public and entry surfaces use the same playful visual language as discovery. */
+.public-stage { display: grid; gap: clamp(1rem, 2vw, 1.5rem); }
+.public-card-grid {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem;
+}
+.public-card-grid > article { margin: 0; min-width: 0; }
+.public-card-grid > article::before {
+  content: "✦"; display: grid; place-items: center; width: 2rem; height: 2rem; margin-bottom: 0.85rem;
+  border-radius: 0.7rem; color: #fff; background: var(--grad-brand);
+  box-shadow: 0 8px 18px -10px rgb(194 65 90 / 80%);
+}
+.public-quote {
+  margin: 0; padding: clamp(1.1rem, 3vw, 2rem); border: 1px solid rgb(124 92 255 / 18%);
+  border-radius: 1.4rem; background: linear-gradient(120deg, rgb(255 255 255 / 78%), rgb(241 237 255 / 82%));
+  color: var(--accent-dark); font-family: var(--font-source-serif), serif;
+  font-size: clamp(1.25rem, 3vw, 2rem); line-height: 1.2; box-shadow: var(--gz-shadow);
+}
+.public-cta { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.public-contact-grid {
+  display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 1rem; align-items: start;
+}
+.public-contact-note {
+  padding: clamp(1.2rem, 3vw, 2rem); border-radius: 1.4rem;
+  background: linear-gradient(145deg, rgb(255 93 143 / 13%), rgb(124 92 255 / 10%));
+}
+.public-contact-note > span { display: block; margin-bottom: 0.75rem; font-size: 2rem; }
+.public-contact-note h2 { margin: 0; font-size: 1.55rem; }
+.public-contact-note p { color: var(--muted); }
+.gz-empty-state {
+  display: flex; align-items: center; gap: 1rem; width: min(100%, 46rem); padding: clamp(1rem, 3vw, 1.5rem);
+  border: 1px dashed rgb(194 65 90 / 28%); border-radius: 1.4rem;
+  background: rgb(255 255 255 / 68%); box-shadow: var(--gz-shadow); backdrop-filter: blur(14px);
+}
+.gz-empty-state h2, .gz-empty-state p { margin: 0; }
+.gz-empty-state p { margin-top: 0.3rem; color: var(--muted); }
+.gz-empty-icon {
+  display: grid; flex: 0 0 auto; place-items: center; width: 3.5rem; height: 3.5rem;
+  border-radius: 1.1rem; background: linear-gradient(145deg, rgb(255 93 143 / 18%), rgb(124 92 255 / 16%));
+  font-size: 1.6rem;
+}
+.login-genz-action {
+  background:
+    radial-gradient(circle at 100% 0, rgb(124 92 255 / 15%), transparent 42%),
+    radial-gradient(circle at 0 100%, rgb(255 93 143 / 14%), transparent 45%),
+    var(--paper);
+}
+.login-genz-card { max-width: 34rem; border-radius: 1.7rem; }
+.login-genz-chip, .profile-create-tip {
+  display: inline-flex; width: fit-content; padding: 0.35rem 0.7rem; border-radius: 999px;
+  background: rgb(255 93 143 / 11%); color: var(--accent); font-size: 0.72rem; font-weight: 800;
+}
+.login-genz-chip { margin: 0.75rem 0 1rem; }
+.profile-create-intro { isolation: isolate; }
+.profile-create-tip {
+  margin: 1rem 0 0; background: rgb(255 255 255 / 17%); color: #fff;
+  backdrop-filter: blur(10px);
+}
+.home-values { background: linear-gradient(120deg, rgb(255 248 239 / 90%), rgb(255 234 242 / 82%)); }
+.home-value-card {
+  position: relative; min-width: 0; padding: 1.15rem; border: 1px solid rgb(255 255 255 / 72%);
+  border-radius: 1.3rem; background: rgb(255 255 255 / 68%); box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(14px);
+}
+.home-value-card > span { color: var(--pop); }
+
+@media (max-width: 820px) {
+  .public-card-grid, .public-contact-grid { grid-template-columns: minmax(0, 1fr); }
+  .gz-empty-state { align-items: flex-start; }
+  .login-genz { min-height: auto; }
+  .login-genz-card { padding: 1.25rem; }
+  .profile-create-shell { gap: 0.8rem; }
+  .profile-create-intro { position: relative; top: auto; }
+  .profile-create-intro > div, .profile-create-intro > div > div { min-height: 15rem !important; }
 }

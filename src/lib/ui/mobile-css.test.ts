@@ -43,4 +43,24 @@ describe("shared mobile CSS contract", () => {
     expect(css).toContain(".inbox-tab-shell");
     expect(css).toContain("scroll-behavior: smooth");
   });
+
+  it("uses one full-width page frame and a mobile-safe theme picker", () => {
+    expect(css).toContain(".app-main:not(.is-bleed)");
+    expect(css).toContain(".app-main > .sx-stage");
+    expect(css).toContain("width: 100%");
+    expect(css).toContain(".theme-quick-menu");
+    expect(css).toContain("position: fixed");
+  });
+
+  it("applies the shared Gen-Z finish across every page family", () => {
+    expect(css).toContain("Universal Gen-Z finish");
+    expect(css).toContain(".profile-wizard, .profile-readiness, .portrait-group");
+    expect(css).toContain(".desk-panel, .desk-admin-block, .desk-break-card");
+    expect(css).toContain(".sx-board, .sx-card, .alert-card, .plan-card");
+    expect(css).toContain("@media (prefers-reduced-motion: reduce)");
+    expect(css).toContain(".public-card-grid");
+    expect(css).toContain(".login-genz-action");
+    expect(css).toContain(".profile-create-shell");
+    expect(css).toContain(".home-value-card");
+  });
 });

@@ -10,10 +10,17 @@ export default async function DeskLayout({ children }: { children: React.ReactNo
   if (!desk.allowed) {
     return (
       <PageShell>
-        <h1 className="font-[family-name:var(--font-display)] text-4xl">Staff only</h1>
-        <p className="mt-3 max-w-xl text-[var(--muted)]">
-          This desk is for family operators. Ask an admin to grant the service role on your Gmail.
-        </p>
+        <div className="sx-stage public-stage">
+          <PageHero
+            kicker="Private workspace"
+            title="Staff access needed"
+            sub="This desk is reserved for family operators. Ask an admin to add the service role to your Gmail."
+          />
+          <div className="gz-empty-state">
+            <span className="gz-empty-icon" aria-hidden>🔐</span>
+            <div><h2>This area is locked</h2><p>Your member account is safe; only the operations desk needs extra access.</p></div>
+          </div>
+        </div>
       </PageShell>
     );
   }

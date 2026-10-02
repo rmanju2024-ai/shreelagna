@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { GoogleSignIn } from "@/app/login/google-button";
 import { PageShell } from "@/components/site-chrome";
+import { PageHero } from "@/components/page-hero";
 import { getAuth } from "@/lib/auth/session";
 import { btnPrimary, cardClass } from "@/lib/ui/classes";
 
@@ -15,17 +16,14 @@ export default async function AboutPage() {
 
   return (
     <PageShell>
-      <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--gold)]">About us</p>
-      <h1 className="mt-4 max-w-3xl font-[family-name:var(--font-display)] text-5xl leading-tight sm:text-6xl">
-        A private house for Indian families who expect discretion.
-      </h1>
-      <p className="mt-6 max-w-2xl text-lg leading-relaxed text-[var(--muted)]">
-        Shree Lagna is a family-run matrimonial house. Members sign in with
-        Gmail and present a bride or a groom — for yourself, or for someone you
-        hold dear. We keep every introduction considered.
-      </p>
+      <div className="sx-stage public-stage">
+        <PageHero
+          kicker="Our story"
+          title="A private house for meaningful matches."
+          sub="Family-run, proudly Indian, and built for introductions that feel human—not transactional."
+        />
 
-      <div className="mt-14 grid gap-6 md:grid-cols-3">
+      <div className="public-card-grid">
         {[
           [
             "Who we serve",
@@ -47,12 +45,11 @@ export default async function AboutPage() {
         ))}
       </div>
 
-      <div className="gold-ornament" />
-      <blockquote className="mt-10 max-w-3xl border-l-2 border-[var(--gold)] pl-6 font-[family-name:var(--font-display)] text-2xl leading-snug sm:text-3xl">
+      <blockquote className="public-quote">
         Search with ease. Speak when both families are ready.
       </blockquote>
 
-      <div className="mt-12">
+      <div className="public-cta">
         {user ? (
           <Link href="/app" className={btnPrimary}>
             My profile
@@ -60,6 +57,7 @@ export default async function AboutPage() {
         ) : (
             <GoogleSignIn label="Continue with Gmail" tone="ivory" />
         )}
+      </div>
       </div>
     </PageShell>
   );

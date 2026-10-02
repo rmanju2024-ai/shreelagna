@@ -45,14 +45,15 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="relative w-full border-y border-[var(--stroke)] bg-[#fff8ef]">
-        <ul className={`${pageInner} grid gap-8 py-12 sm:grid-cols-3`}>
+      <section className="home-values relative w-full border-y border-[var(--stroke)]">
+        <ul className={`${pageInner} grid gap-4 py-8 sm:grid-cols-3`}>
           {[
             ["Dignity", "Every bride and groom, presented with care."],
             ["Discretion", "Private details stay in the house."],
             ["A person", "Write to us. Someone will read it."],
           ].map(([t, d]) => (
-            <li key={t}>
+            <li key={t} className="home-value-card">
+              <span aria-hidden>✦</span>
               <p className="font-[family-name:var(--font-display)] text-2xl">{t}</p>
               <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">{d}</p>
             </li>

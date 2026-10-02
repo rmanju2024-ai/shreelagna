@@ -4,6 +4,7 @@ import { btnPrimary, cardClass } from "@/lib/ui/classes";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { after } from "next/server";
+import { PageHero } from "@/components/page-hero";
 
 export default async function AppHome() {
   const { supabase, user } = await getAuth();
@@ -29,24 +30,22 @@ export default async function AppHome() {
 
   return (
     <PageShell>
-      <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)]">
-        Signed in · {user.email}
-      </p>
-      <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl sm:text-5xl">
-        Your profile
-      </h1>
-      <div className="gold-ornament" />
-      <p className="mt-3 max-w-2xl text-[var(--muted)]">
-        This Gmail does not have a profile yet. One profile belongs to this
-        email.
-      </p>
-      <div className={`${cardClass} mt-8 max-w-xl`}>
-        <p className="text-[var(--muted)]">
-          Register a bride or groom to begin browsing families.
-        </p>
+      <div className="sx-stage public-stage">
+      <PageHero
+        kicker="You’re signed in"
+        title="Ready to start your story?"
+        sub={`Create the profile connected to ${user.email}. You can save a draft and finish it anytime.`}
+      />
+      <div className={`${cardClass} gz-empty-state`}>
+        <span className="gz-empty-icon" aria-hidden>✨</span>
+        <div>
+        <h2>Create your first profile</h2>
+        <p>Register a bride or groom, then discover compatible families.</p>
         <Link href="/app/profiles/new" className={`${btnPrimary} mt-4`}>
           Create your profile
         </Link>
+        </div>
+      </div>
       </div>
     </PageShell>
   );
