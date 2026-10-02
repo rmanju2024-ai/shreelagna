@@ -8,7 +8,7 @@ import { KalyanBanner } from "@/components/home/kalyan-banner";
 import { HeaderNav } from "@/components/site-nav";
 import { SceneLayer } from "@/components/scene-layer";
 import { ThemeQuickPicker } from "@/components/theme-quick-picker";
-import { collapseNotices } from "@/lib/match/collapse-notices";
+import { collapseNotices, noticesForActiveProfiles } from "@/lib/match/collapse-notices";
 import { unreadNoticeBadge } from "@/lib/notices/unread-badge";
 import { effectiveInterestStatus } from "@/lib/match/interest-status";
 import { isPublicProfileStatus } from "@/lib/profile/visibility";
@@ -43,7 +43,12 @@ export async function SiteHeader({ overlay = false, glass = false }: { overlay?:
             .is("read_at", null)
             .order("created_at", { ascending: false })
             .limit(80);
-          const open = collapseNotices(unread ?? []);
+          const collapsed = collapseNotices(unread ?? []);
+          const profileIds = [...new Set(collapsed.map((row) => row.match_profile_id).filter(Boolean))] as string[];
+          const { data: profiles } = profileIds.length
+            ? await supabase.from("profiles").select("id").in("id", profileIds).eq("status", "active")
+            : { data: [] as { id: string }[] };
+          const open = noticesForActiveProfiles(collapsed, new Set((profiles ?? []).map((profile) => profile.id)));
           return {
             chatUnread: open.filter((row) => row.kind === "chat").length,
             alertUnread: open.filter((row) => row.kind !== "chat").length,
