@@ -162,7 +162,6 @@ export function HeaderNav({
   ];
   const registerHere = pathMatches(pathname, "/login", tab);
   const moreOn = more.some((item) => pathMatches(pathname, item.href, tab));
-  const inboxOn = inbox.some((item) => pathMatches(pathname, item.href, tab));
   const accountOn = account.some((item) => pathMatches(pathname, item.href, tab));
 
   return (
@@ -171,7 +170,7 @@ export function HeaderNav({
         <NavChip item={{ href: "/", label: "Home", icon: "home" }} overlay={overlay} current={pathMatches(pathname, "/", tab)} />
         <NavChip item={{ href: "/browse", label: "Discover", icon: "browse" }} overlay={overlay} current={pathMatches(pathname, "/browse", tab)} />
         {user ? (
-          <NavChip item={{ href: "/app/interests", label: "Likes", icon: "inbox", badge: alertUnread }} overlay={overlay} current={inboxOn} />
+          <NavChip item={{ href: "/app/interests", label: "Likes", icon: "inbox", badge: alertUnread }} overlay={overlay} current={pathMatches(pathname, "/app/interests", tab)} />
         ) : null}
         {user ? (
           <NavChip item={{ href: "/app/chat", label: "Chat", icon: "chat", badge: chatUnread }} overlay={overlay} current={pathMatches(pathname, "/app/chat", tab)} />

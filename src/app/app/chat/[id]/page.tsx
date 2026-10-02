@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { LiveRefresh } from "@/components/live-refresh";
 import { after } from "next/server";
-import { sendChat } from "@/app/app/match/actions";
+import { ThreadView } from "@/app/app/chat/[id]/thread-view";
 import { ChatAvatar } from "@/app/app/chat/chat-avatar";
 import { PageShell } from "@/components/site-chrome";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
-import { chatStamp } from "@/lib/match/chat-ui";
 import { publicMediaUrl } from "@/lib/match/inbox-card";
 import { lastOnlineLine } from "@/lib/profile/last-seen";
 import { pairCanChat } from "@/lib/match/interest-status";
@@ -13,7 +12,6 @@ import { pairPlanLive } from "@/lib/membership/access";
 import { loadMembership, loadMembershipForProfile } from "@/lib/membership/load";
 import { displayFirstName } from "@/lib/profile/options";
 import { createServiceClient } from "@/lib/supabase/server";
-import { btnPrimary, inputClass } from "@/lib/ui/classes";
 import { notFound, redirect } from "next/navigation";
 
 export default async function ChatThreadPage({ params }: { params: Promise<{ id: string }> }) {
@@ -101,31 +99,24 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
             <div className="wa-head-person">{person}</div>
           )}
         </header>
-        <div className="wa-stage">
-          <ul className="wa-stream">
-            {(messages ?? []).map((msg) => (
-              <li key={msg.id} className={`wa-bubble ${msg.sender_profile_id === mine.id ? "is-mine" : "is-theirs"}`}>
-                <p>{msg.body}</p>
-                <time>{chatStamp(msg.created_at)}</time>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <ThreadView
+          threadId={id}
+          myProfileId={mine.id}
+          messages={(messages ?? []).map((msg) => ({
+            id: msg.id,
+            sender_profile_id: msg.sender_profile_id,
+            body: msg.body,
+            created_at: msg.created_at,
+          }))}
+          canSend={!thread.frozen && otherOpen && chatLive}
+        />
         {thread.frozen || !otherOpen ? (
           <p className="wa-closed">This chat is closed.</p>
         ) : !chatLive ? (
           <p className="wa-closed">
             A live plan is needed to keep chatting. <Link href="/app/plans">Open plans</Link>
           </p>
-        ) : (
-          <form action={sendChat} className="wa-composer">
-            <input type="hidden" name="thread_id" value={id} />
-            <textarea name="body" required maxLength={4000} rows={1} className={inputClass} placeholder="Message" />
-            <button type="submit" className={`${btnPrimary} wa-send`} aria-label="Send">
-              ➤
-            </button>
-          </form>
-        )}
+        ) : null}
       </article>
     </PageShell>
   );
