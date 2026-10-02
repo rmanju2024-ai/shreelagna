@@ -32,3 +32,16 @@ export function unreadLabel(count: number): string {
   if (count <= 0) return "";
   return count > 99 ? "99+" : String(count);
 }
+
+/** Newest open thread whose other profile is active; null when none. */
+export function pickFirstChat<T extends { id: string; profile_a: string; profile_b: string }>(
+  threads: T[],
+  myIds: string[],
+  others: Map<string, { status?: string | null }>,
+): T | null {
+  for (const thread of threads) {
+    const other = myIds.includes(thread.profile_a) ? thread.profile_b : thread.profile_a;
+    if (others.get(other)?.status === "active") return thread;
+  }
+  return null;
+}

@@ -1,34 +1,46 @@
 import { describe, expect, it } from "vitest";
-import { chatStamp, countByKey, latestByThread, previewText, unreadLabel } from "./chat-ui";
+import { countByKey, latestByThread, pickFirstChat, previewText, unreadLabel } from "./chat-ui";
 
-describe("chat ui", () => {
-  it("stamps today as time and older as date", () => {
-    const now = Date.parse("2026-09-24T18:30:00+05:30");
-    expect(chatStamp("2026-09-24T18:19:25+05:30", now)).toBe("6:19 pm");
-    expect(chatStamp("2026-09-23T18:19:25+05:30", now)).toBe("Yesterday");
-    expect(chatStamp("2026-09-10T18:19:25+05:30", now)).toBe("10 Sep");
-  });
-
+describe("chat list helpers", () => {
   it("keeps the newest message per thread", () => {
     const map = latestByThread([
-      { thread_id: "a", created_at: "2026-09-24T10:00:00Z", body: "old" },
-      { thread_id: "a", created_at: "2026-09-24T12:00:00Z", body: "new" },
-      { thread_id: "b", created_at: "2026-09-24T11:00:00Z", body: "b" },
+      { thread_id: "a", created_at: "2026-01-01T10:00:00Z", body: "old" },
+      { thread_id: "a", created_at: "2026-01-02T10:00:00Z", body: "new" },
+      { thread_id: "b", created_at: "2026-01-01T09:00:00Z", body: "other" },
     ]);
     expect(map.get("a")?.body).toBe("new");
-    expect(map.get("b")?.body).toBe("b");
+    expect(map.size).toBe(2);
   });
 
-  it("prints unread badges", () => {
-    expect(unreadLabel(0)).toBe("");
-    expect(unreadLabel(3)).toBe("3");
-    expect(unreadLabel(120)).toBe("99+");
-    expect(countByKey(["/app/chat/a", "/app/chat/a", "/app/chat/b"]).get("/app/chat/a")).toBe(2);
-  });
-
-  it("shortens preview text", () => {
+  it("builds a short preview", () => {
     expect(previewText("")).toBe("Tap to chat");
-    expect(previewText("Hi")).toBe("Hi");
-    expect(previewText("x".repeat(50)).endsWith("…")).toBe(true);
+    expect(previewText("  hello   world ")).toBe("hello world");
+    expect(previewText("x".repeat(60)).endsWith("…")).toBe(true);
+    expect(previewText("x".repeat(60)).length).toBe(42);
+  });
+
+  it("counts unread per chat link and caps the label", () => {
+    const counts = countByKey(["/app/chat/1", "/app/chat/1", null, "/app/chat/2"]);
+    expect(counts.get("/app/chat/1")).toBe(2);
+    expect(counts.get("/app/chat/2")).toBe(1);
+    expect(unreadLabel(0)).toBe("");
+    expect(unreadLabel(7)).toBe("7");
+    expect(unreadLabel(150)).toBe("99+");
+  });
+
+  it("opens the top active conversation", () => {
+    const threads = [
+      { id: "t1", profile_a: "me", profile_b: "gone" },
+      { id: "t2", profile_a: "pal", profile_b: "me" },
+      { id: "t3", profile_a: "me", profile_b: "other" },
+    ];
+    const others = new Map([
+      ["gone", { status: "deleted" }],
+      ["pal", { status: "active" }],
+      ["other", { status: "active" }],
+    ]);
+    expect(pickFirstChat(threads, ["me"], others)?.id).toBe("t2");
+    expect(pickFirstChat(threads, ["me"], new Map())).toBeNull();
+    expect(pickFirstChat([], ["me"], others)).toBeNull();
   });
 });

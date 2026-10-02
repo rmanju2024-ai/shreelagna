@@ -3,7 +3,7 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { ChatAvatar } from "@/app/app/chat/chat-avatar";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
-import { chatStamp, countByKey, latestByThread, previewText, unreadLabel } from "@/lib/match/chat-ui";
+import { chatStamp, countByKey, latestByThread, pickFirstChat, previewText, unreadLabel } from "@/lib/match/chat-ui";
 import { pickPrimaryPhotoMap, publicMediaUrl } from "@/lib/match/inbox-card";
 import { pairCanChat } from "@/lib/match/interest-status";
 import { displayFirstName } from "@/lib/profile/options";

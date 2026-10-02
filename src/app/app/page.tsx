@@ -3,6 +3,7 @@ import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { btnPrimary, cardClass } from "@/lib/ui/classes";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { after } from "next/server";
 
 export default async function AppHome() {
   const { supabase, user } = await getAuth();
@@ -19,7 +20,9 @@ export default async function AppHome() {
   const active = profiles?.find((p) => p.id === me.active_profile_id) ?? profiles?.[0];
   if (active) {
     if (me.active_profile_id !== active.id) {
-      await supabase.from("app_users").update({ active_profile_id: active.id }).eq("id", me.id);
+      after(async () => {
+        await supabase.from("app_users").update({ active_profile_id: active.id }).eq("id", me.id);
+      });
     }
     redirect(`/app/profiles/${active.id}`);
   }
