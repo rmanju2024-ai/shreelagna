@@ -1259,3 +1259,59 @@ html[data-scene="couple"] .app-main {
   .desk-main, .desk-panel { padding: 0.7rem; }
   .desk-panel-head { align-items: flex-start; }
 }
+
+/* Analytics categories: visually grouped on desktop and mobile. */
+.desk-pulse-group {
+  --category: var(--theme-accent);
+  --category-soft: color-mix(in srgb, var(--category) 10%, var(--theme-surface));
+  display: grid;
+  gap: 0.65rem;
+  margin-bottom: 0.8rem;
+  padding: 0.8rem;
+  border: 2px solid color-mix(in srgb, var(--category) 42%, transparent);
+  border-left-width: 0.42rem;
+  border-radius: 1.2rem;
+  background: linear-gradient(120deg, var(--category-soft), var(--theme-surface));
+  box-shadow: 0 12px 28px -24px color-mix(in srgb, var(--category) 70%, transparent);
+}
+.desk-pulse-group[data-category="new-profiles"] { --category: #e44f82; }
+.desk-pulse-group[data-category="total-profiles"] { --category: #7357d6; }
+.desk-pulse-group[data-category="tickets"] { --category: #d88924; }
+.desk-pulse-group[data-category="interest"] { --category: #2f9c83; }
+.desk-pulse-group > .browse-kicker {
+  color: var(--category);
+  font-size: 0.72rem;
+}
+.desk-pulse-group .desk-stat {
+  border: 1px solid color-mix(in srgb, var(--category) 32%, transparent);
+  border-top: 3px solid var(--category);
+  background: color-mix(in srgb, var(--category) 6%, white);
+}
+.desk-pulse-group .desk-stat b { color: color-mix(in srgb, var(--category) 72%, #20120e); }
+
+.desk-break-grid > .desk-break-card {
+  --category: var(--theme-accent);
+  border: 2px solid color-mix(in srgb, var(--category) 34%, transparent);
+  border-top: 4px solid var(--category);
+}
+.desk-break-grid > .desk-break-card:nth-child(3n + 1) { --category: #e44f82; }
+.desk-break-grid > .desk-break-card:nth-child(3n + 2) { --category: #7357d6; }
+.desk-break-grid > .desk-break-card:nth-child(3n) { --category: #2f9c83; }
+.desk-break-grid > .desk-break-card .browse-kicker { color: var(--category); }
+.desk-break-grid > .desk-break-card .desk-break-bar {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--category) 45%, white), var(--category));
+  box-shadow: none;
+}
+
+@media (max-width: 899px) {
+  .desk-pulse-group { padding: 0.65rem; border-radius: 1rem; }
+  .desk-pulse-group .desk-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .desk-pulse-group .desk-stat { min-width: 0; }
+  .desk-break-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 420px) {
+  .desk-pulse-group .desk-stats { grid-template-columns: minmax(0, 1fr); }
+}

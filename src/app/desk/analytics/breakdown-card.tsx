@@ -1,10 +1,14 @@
 import type { CountRow } from "@/lib/desk/breakdown";
 import { cardClass } from "@/lib/ui/classes";
 
+function categoryId(title: string) {
+  return title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
 export function BreakdownCard({ title, rows }: { title: string; rows: CountRow[] }) {
   const max = Math.max(1, ...rows.map((row) => row.count));
   return (
-    <section className={`${cardClass} card-3d desk-break-card`}>
+    <section className={`${cardClass} card-3d desk-break-card`} data-category={categoryId(title)}>
       <p className="browse-kicker">{title}</p>
       {rows.length ? (
         <ul className="desk-break-list">
@@ -36,7 +40,7 @@ export function Stat({ label, value }: { label: string; value: number }) {
 
 export function PulseGroup({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="desk-pulse-group">
+    <section className="desk-pulse-group" data-category={categoryId(title)}>
       <p className="browse-kicker">{title}</p>
       <div className="desk-stats">{children}</div>
     </section>

@@ -84,4 +84,12 @@ describe("shared mobile CSS contract", () => {
     expect(css).toContain(".desk-board > .browse-views");
     expect(css).toContain("overflow-x: auto");
   });
+
+  it("separates analytics categories with responsive themed borders", () => {
+    expect(css).toContain('.desk-pulse-group[data-category="new-profiles"]');
+    expect(css).toContain('.desk-pulse-group[data-category="total-profiles"]');
+    expect(css).toContain('.desk-pulse-group[data-category="tickets"]');
+    expect(css).toContain('.desk-pulse-group[data-category="interest"]');
+    expect(css).toContain("border-top: 4px solid var(--category)");
+  });
 });
