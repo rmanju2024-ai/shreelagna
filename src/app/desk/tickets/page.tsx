@@ -34,7 +34,6 @@ export default async function DeskTicketsPage({
     <section className="desk-panel">
       <header className="desk-panel-head">
         <div>
-          <p className="browse-kicker">Ticketing</p>
           <h2>Contact from families</h2>
         </div>
         <p>

@@ -1,5 +1,6 @@
 import { InboxBoard } from "@/app/app/interests/inbox-board";
 import { expireStaleInterests } from "@/app/app/match/actions";
+import { PageHero } from "@/components/page-hero";
 import { PageShell } from "@/components/site-chrome";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import {
@@ -260,10 +261,7 @@ export default async function InterestsPage() {
 
   return (
     <PageShell>
-      <h1 className="font-[family-name:var(--font-display)] text-[1.55rem] leading-tight sm:text-2xl">Interest inbox</h1>
-      <p className="mt-1 max-w-2xl text-sm text-[var(--muted)]">
-        History keeps expired, declined, and deleted profiles with date and time.
-      </p>
+      <PageHero kicker="Inbox" title="Likes" sub="Received, sent, and history with date and time." />
       <InboxBoard
         received={inbox.map((i) =>
           cardFor(i.from_profile_id, {
