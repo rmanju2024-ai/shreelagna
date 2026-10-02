@@ -1208,3 +1208,54 @@ html[data-scene="couple"] .app-main {
   .profile-create-intro { position: relative; top: auto; }
   .profile-create-intro > div, .profile-create-intro > div > div { min-height: 15rem !important; }
 }
+
+/* Desk: keep every tab's content inside its own column without clipping. */
+.desk-stage, .desk-board, .desk-main, .desk-panel {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+.desk-board { overflow: visible; }
+.desk-main {
+  overflow: visible;
+  padding: clamp(0.75rem, 1.6vw, 1.25rem);
+}
+.desk-panel {
+  overflow: visible;
+  padding: clamp(0.75rem, 1.5vw, 1.15rem);
+}
+.desk-panel > * { min-width: 0; max-width: 100%; }
+.desk-panel :where(p, h2, h3, li, td, th, label) { overflow-wrap: anywhere; }
+.desk-panel :where(input, select, textarea) { width: 100%; min-width: 0; max-width: 100%; }
+
+@media (min-width: 900px) {
+  .desk-board {
+    display: grid;
+    grid-template-columns: clamp(10rem, 16vw, 13rem) minmax(0, 1fr);
+    gap: 0;
+    align-items: start;
+  }
+  .desk-board > .browse-views { min-width: 0; }
+}
+
+@media (max-width: 899px) {
+  .desk-board { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .desk-board > .browse-views {
+    display: flex;
+    flex-wrap: nowrap;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+  .desk-board > .browse-views > .browse-kicker { display: none; }
+  .desk-board > .browse-views > .browse-view {
+    flex: 0 0 auto;
+    min-width: 8.5rem;
+    scroll-snap-align: start;
+  }
+  .desk-main, .desk-panel { padding: 0.7rem; }
+  .desk-panel-head { align-items: flex-start; }
+}
