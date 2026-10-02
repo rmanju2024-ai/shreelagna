@@ -8,6 +8,8 @@ import { HeaderNav } from "@/components/site-nav";
 import { SceneLayer } from "@/components/scene-layer";
 import { collapseNotices } from "@/lib/match/collapse-notices";
 import { unreadNoticeBadge } from "@/lib/notices/unread-badge";
+import { effectiveInterestStatus } from "@/lib/match/interest-status";
+import { isPublicProfileStatus } from "@/lib/profile/visibility";
 import { SyncSession } from "@/components/sync-session";
 import { parseScene, SCENE_COOKIE } from "@/lib/ui/scenes";
 
@@ -24,6 +26,7 @@ export async function SiteHeader({ overlay = false, glass = false }: { overlay?:
   let houseStar: "admin" | "staff" | undefined;
   let chatUnread = 0;
   let alertUnread = 0;
+  let likesPending = 0;
   if (user && supabase) {
     const me = await ensureAppUser(supabase, user);
     staff = me?.role === "service" || me?.role === "admin";
@@ -45,6 +48,23 @@ export async function SiteHeader({ overlay = false, glass = false }: { overlay?:
       });
       chatUnread = badge.chatUnread;
       alertUnread = badge.alertUnread;
+      if (me.active_profile_id) {
+        // Likes badge = pending interests actually waiting in Likes > Received (same rules as that page).
+        const { data: waiting } = await supabase
+          .from("interests")
+          .select("from_profile_id, status, created_at")
+          .eq("to_profile_id", me.active_profile_id)
+          .eq("status", "pending")
+          .limit(100);
+        const senderIds = [...new Set((waiting ?? []).map((row) => row.from_profile_id))];
+        const { data: senders } = senderIds.length
+          ? await supabase.from("profiles").select("id, status").in("id", senderIds)
+          : { data: [] as { id: string; status: string }[] };
+        const live = new Set((senders ?? []).filter((p) => isPublicProfileStatus(p.status)).map((p) => p.id));
+        likesPending = (waiting ?? []).filter(
+          (row) => live.has(row.from_profile_id) && effectiveInterestStatus(row.status, row.created_at) === "pending",
+        ).length;
+      }
     }
   }
 
@@ -72,6 +92,7 @@ export async function SiteHeader({ overlay = false, glass = false }: { overlay?:
             houseStar={houseStar}
             chatUnread={chatUnread}
             alertUnread={alertUnread}
+            likesPending={likesPending}
           />
         </Suspense>
       </div>

@@ -140,6 +140,7 @@ export function HeaderNav({
   staff,
   chatUnread = 0,
   alertUnread = 0,
+  likesPending = 0,
 }: {
   overlay: boolean;
   user: boolean;
@@ -147,6 +148,7 @@ export function HeaderNav({
   houseStar?: "admin" | "staff";
   chatUnread?: number;
   alertUnread?: number;
+  likesPending?: number;
 }) {
   const pathname = usePathname();
   const tab = useSearchParams().get("tab");
@@ -175,7 +177,7 @@ export function HeaderNav({
         <NavChip item={{ href: "/", label: "Home", icon: "home" }} overlay={overlay} current={pathMatches(pathname, "/", tab)} />
         <NavChip item={{ href: "/browse", label: "Discover", icon: "browse" }} overlay={overlay} current={pathMatches(pathname, "/browse", tab)} />
         {user ? (
-          <NavChip item={{ href: "/app/interests", label: "Likes", icon: "inbox", badge: alertUnread }} overlay={overlay} current={pathMatches(pathname, "/app/interests", tab)} />
+          <NavChip item={{ href: "/app/interests", label: "Likes", icon: "inbox", badge: likesPending }} overlay={overlay} current={pathMatches(pathname, "/app/interests", tab)} />
         ) : null}
         {user ? (
           <NavChip item={{ href: "/app/chat", label: "Chat", icon: "chat", badge: chatUnread }} overlay={overlay} current={pathMatches(pathname, "/app/chat", tab)} />
@@ -189,7 +191,7 @@ export function HeaderNav({
         )}
         {user ? <NavChip item={{ href: "/app", label: "Profile", icon: "profile" }} overlay={overlay} current={accountOn} /> : null}
         {staff ? <NavChip item={desk} overlay={overlay} current={pathMatches(pathname, desk.href, tab)} /> : null}
-        <NavGroup label="More" icon="more" overlay={overlay} current={moreOn}>
+        <NavGroup label="More" icon="more" overlay={overlay} current={moreOn} badge={alertUnread}>
           {more.map((item) => <MenuLink key={item.href} item={item} current={pathMatches(pathname, item.href, tab)} />)}
           {user ? <MenuLink item={inbox[2]} current={pathMatches(pathname, inbox[2].href, tab)} /> : null}
           {user ? account.filter((item) => item.href !== "/app").map((item) => <MenuLink key={item.href} item={item} current={pathMatches(pathname, item.href, tab)} />) : null}
