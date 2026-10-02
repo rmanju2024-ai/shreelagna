@@ -156,3 +156,8 @@ export async function firstChatId(): Promise<string | null> {
   const { ids, openThreads, nameMap } = await loadChatData();
   return pickFirstChat(openThreads, ids, nameMap)?.id ?? null;
 }
+
+/** Number of conversations that can actually be opened by the member. */
+export async function openChatCount(): Promise<number> {
+  return (await loadChatData()).openThreads.length;
+}

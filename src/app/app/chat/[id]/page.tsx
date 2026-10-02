@@ -72,6 +72,8 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
   if (!pairCanChat(interestRows ?? [], mine.id, otherId)) notFound();
   const chatLive = pairPlanLive(myAccess.live, otherAccess.live);
   const otherOpen = Boolean(other && other.status === "active");
+  // Hidden/deleted profiles do not retain a reachable chat route or inbox presence.
+  if (!otherOpen) notFound();
   const name = otherOpen ? displayFirstName(other?.subject_full_name ?? "Match") : "Profile unavailable";
   const cover = (photos ?? []).find((row) => row.is_primary) ?? photos?.[0];
   const photo = otherOpen ? publicMediaUrl(cover?.storage_path) : null;
