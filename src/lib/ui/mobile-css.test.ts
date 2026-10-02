@@ -25,7 +25,10 @@ describe("shared mobile CSS contract", () => {
 
   it("stacks chat and preserves a visible composer", () => {
     expect(css).toContain(".wc-shell.has-thread .wc-side { display: none; }");
-    expect(css).toContain(".wc-pane .wa-composer { position: sticky");
+    expect(css).toContain(".wc-pane .wa-composer { position: relative");
+    expect(css).toContain("overflow-y: scroll !important");
+    expect(css).toContain("-webkit-overflow-scrolling: touch");
+    expect(css).toContain(".wc-pane .wa-stage::-webkit-scrollbar-thumb");
   });
 
   it("keeps the footer compact and above the mobile navigation", () => {
@@ -33,5 +36,11 @@ describe("shared mobile CSS contract", () => {
     expect(css).toContain("min-height: 3.25rem");
     expect(css).toContain("margin-bottom: calc(4.65rem + env(safe-area-inset-bottom))");
     expect(css).not.toContain("footer { padding-bottom: 5.5rem; }");
+  });
+
+  it("overrides the legacy vertical Likes tabs with a horizontal strip", () => {
+    expect(css).toContain(".inbox-tabs { flex-direction: row !important");
+    expect(css).toContain(".inbox-tab-shell");
+    expect(css).toContain("scroll-behavior: smooth");
   });
 });

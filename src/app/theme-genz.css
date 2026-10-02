@@ -156,6 +156,7 @@ main { animation: gz-rise 0.35s ease both; }
 .inbox-modern { display: grid; gap: 1rem; margin-top: 0.7rem; }
 .inbox-pane-modern { display: grid; gap: 1rem; }
 .inbox-tab-shell { position: relative; min-width: 0; }
+.inbox-tabs { flex-direction: row !important; align-items: center; min-height: 0; }
 .inbox-tab-scroll { display: none; }
 .inbox-list.sx-grid { display: grid; gap: 1.1rem; grid-template-columns: repeat(auto-fill, minmax(16.5rem, 1fr)); }
 .inbox-card.sx-card { border: 0; background: transparent; padding: 0; }
@@ -688,10 +689,24 @@ table { max-width: 100%; }
   }
 
   /* Chat uses the screen efficiently without hiding the composer. */
-  .wc-shell { width: 100%; min-height: calc(100dvh - 10.5rem); }
-  .wc-shell.has-thread .wc-pane { min-height: calc(100dvh - 10.5rem); }
-  .wc-pane .wa-stage { min-height: 0; max-height: none; }
-  .wc-pane .wa-composer { position: sticky; bottom: 0; z-index: 5; }
+  .wc-shell {
+    width: 100%; height: calc(100dvh - 10.5rem); min-height: 28rem;
+    max-height: calc(100dvh - 10.5rem); overflow: hidden;
+  }
+  .wc-shell.has-thread .wc-pane {
+    height: 100%; min-height: 0; max-height: 100%; overflow: hidden;
+  }
+  .wc-shell:not(.has-thread) .wc-side { height: 100%; min-height: 0; }
+  .wc-pane .wa-stage {
+    flex: 1 1 auto; height: 0; min-height: 0; max-height: none;
+    overflow-y: scroll !important; -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain; scrollbar-width: thin;
+  }
+  .wc-pane .wa-stage::-webkit-scrollbar { width: 6px; }
+  .wc-pane .wa-stage::-webkit-scrollbar-thumb {
+    background: rgb(84 101 111 / 55%); border-radius: 999px;
+  }
+  .wc-pane .wa-composer { position: relative; flex: none; bottom: auto; z-index: 5; }
 
   .site-footer {
     margin-bottom: calc(4.65rem + env(safe-area-inset-bottom));
