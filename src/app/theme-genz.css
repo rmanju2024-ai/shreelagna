@@ -155,9 +155,9 @@ main { animation: gz-rise 0.35s ease both; }
 /* Likes inbox uses the same cards as Discover */
 .inbox-modern { display: grid; gap: 1rem; margin-top: 0.7rem; }
 .inbox-pane-modern { display: grid; gap: 1rem; }
-.inbox-tab-shell { position: relative; min-width: 0; }
+.inbox-tab-shell, .sx-tab-shell { position: relative; min-width: 0; }
 .inbox-tabs { flex-direction: row !important; align-items: center; min-height: 0; }
-.inbox-tab-scroll { display: none; }
+.inbox-tab-scroll, .sx-tab-scroll { display: none; }
 .inbox-list.sx-grid { display: grid; gap: 1.1rem; grid-template-columns: repeat(auto-fill, minmax(16.5rem, 1fr)); }
 .inbox-card.sx-card { border: 0; background: transparent; padding: 0; }
 .inbox-card.is-openable { cursor: pointer; }
@@ -616,7 +616,7 @@ table { max-width: 100%; }
     width: 100%; overflow-x: auto; overscroll-behavior-inline: contain;
     scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch;
   }
-  .inbox-tab-shell {
+  .inbox-tab-shell, .sx-tab-shell {
     display: grid; grid-template-columns: 2.4rem minmax(0, 1fr) 2.4rem;
     align-items: center; width: 100%; min-width: 0;
   }
@@ -624,15 +624,15 @@ table { max-width: 100%; }
     position: static; width: 100%; min-width: 0; border-radius: 1rem;
     scroll-behavior: smooth; scroll-padding-inline: 0.5rem;
   }
-  .inbox-tab-scroll {
+  .inbox-tab-scroll, .sx-tab-scroll {
     display: grid; place-items: center; position: relative; z-index: 22;
     width: 2.25rem; min-width: 2.25rem; height: 2.75rem; min-height: 2.75rem;
     padding: 0; border: 1px solid rgb(184 137 76 / 30%); background: #fffaf3;
     color: var(--accent); font-size: 1.5rem; font-weight: 800; cursor: pointer;
     box-shadow: 0 6px 14px -10px rgb(63 14 13 / 45%);
   }
-  .inbox-tab-scroll.is-left { border-radius: 1rem 0 0 1rem; }
-  .inbox-tab-scroll.is-right { border-radius: 0 1rem 1rem 0; }
+  .inbox-tab-scroll.is-left, .sx-tab-scroll.is-left { border-radius: 1rem 0 0 1rem; }
+  .inbox-tab-scroll.is-right, .sx-tab-scroll.is-right { border-radius: 0 1rem 1rem 0; }
   .sx-tabs > *, .desk-tabs > *, .portrait-tabs-list > *, .qf-chips > * {
     scroll-snap-align: start;
   }

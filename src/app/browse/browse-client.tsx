@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { BrowseCard, type BrowseCardNote } from "@/app/browse/browse-card";
 import { BrowseFilterDesk } from "@/app/browse/browse-filter-desk";
 import { EMPTY_BROWSE_FILTERS, profileFitsBrowse, type BrowseFilters } from "@/lib/match/browse-filters";
@@ -142,6 +142,7 @@ export function BrowseClient({
   );
   const [page, setPage] = useState(1);
   const [pending, startTransition] = useTransition();
+  const tabsRef = useRef<HTMLElement>(null);
 
   const ranked = useMemo(() => {
     const rows = notesFor(catalog, lists[view]);
@@ -189,7 +190,10 @@ export function BrowseClient({
         type="button"
         aria-current={view === item.id ? "page" : undefined}
         className={`sx-tab${view === item.id ? " is-on" : ""}`}
-        onClick={() => chooseView(item.id)}
+        onClick={(event) => {
+          chooseView(item.id);
+          event.currentTarget.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+        }}
       >
         <b>{item.short}</b>
         <em>{counts[item.id]}</em>
@@ -220,9 +224,27 @@ export function BrowseClient({
       ) : null}
 
       <div className="sx-board">
-        <nav className="sx-tabs" aria-label="Match lists">
-          {ALL_VIEWS.map(viewButton)}
-        </nav>
+        <div className="sx-tab-shell">
+          <button
+            type="button"
+            className="sx-tab-scroll is-left"
+            aria-label="Show previous Discover options"
+            onClick={() => tabsRef.current?.scrollBy({ left: -260, behavior: "smooth" })}
+          >
+            ‹
+          </button>
+          <nav className="sx-tabs" aria-label="Match lists" ref={tabsRef}>
+            {ALL_VIEWS.map(viewButton)}
+          </nav>
+          <button
+            type="button"
+            className="sx-tab-scroll is-right"
+            aria-label="Show more Discover options"
+            onClick={() => tabsRef.current?.scrollBy({ left: 260, behavior: "smooth" })}
+          >
+            ›
+          </button>
+        </div>
 
         {view === "custom" && !notice ? (
           <BrowseFilterDesk
