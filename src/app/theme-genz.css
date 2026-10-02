@@ -131,3 +131,13 @@ main { animation: gz-rise 0.35s ease both; }
   main, .site-nav .nav-3d.is-on .nav-3d-ico svg { animation: none; }
   html { scroll-behavior: auto; }
 }
+
+.inbox-photo { position: relative; }
+
+
+/* Icons */
+.nav-3d-ico svg, .nav-menu-item .nav-3d-ico svg { width: 1.45rem; height: 1.45rem; display: block; }
+.nav-3d.is-on .ico-duo { fill-opacity: 0.32; }
+.nav-menu-item { border-radius: 0.9rem; font-weight: 600; }
+.nav-menu-item .nav-3d-ico { color: var(--accent); }
+.nav-menu-item:hover { background: rgb(255 93 143 / 10%); }

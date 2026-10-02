@@ -156,8 +156,8 @@ export function HeaderNav({
     { href: "/app/alerts", label: "Alerts", icon: "alerts", badge: alertUnread },
   ];
   const account: NavItem[] = [
-    { href: "/app", label: "My profile", icon: "profile" },
-    { href: "/app/plans", label: "Plans", icon: "profile" },
+    { href: "/app", label: "Profile", icon: "profile" },
+    { href: "/app/plans", label: "Plans", icon: "plans" },
     { href: "/app/settings", label: "Settings", icon: "settings" },
   ];
   const registerHere = pathMatches(pathname, "/login", tab);
@@ -169,7 +169,7 @@ export function HeaderNav({
     <nav aria-label="Primary" className={`site-nav${overlay ? " is-overlay" : ""}`}>
       <div className="site-nav-row">
         <NavChip item={{ href: "/", label: "Home", icon: "home" }} overlay={overlay} current={pathMatches(pathname, "/", tab)} />
-        <NavChip item={{ href: "/browse", label: "Search", icon: "browse" }} overlay={overlay} current={pathMatches(pathname, "/browse", tab)} />
+        <NavChip item={{ href: "/browse", label: "Discover", icon: "browse" }} overlay={overlay} current={pathMatches(pathname, "/browse", tab)} />
         {user ? (
           <NavChip item={{ href: "/app/interests", label: "Likes", icon: "inbox", badge: alertUnread }} overlay={overlay} current={inboxOn} />
         ) : null}
@@ -187,6 +187,7 @@ export function HeaderNav({
         {staff ? <NavChip item={desk} overlay={overlay} current={pathMatches(pathname, desk.href, tab)} /> : null}
         <NavGroup label="More" icon="more" overlay={overlay} current={moreOn}>
           {more.map((item) => <MenuLink key={item.href} item={item} current={pathMatches(pathname, item.href, tab)} />)}
+          {user ? <MenuLink item={inbox[2]} current={pathMatches(pathname, inbox[2].href, tab)} /> : null}
           {user ? account.filter((item) => item.href !== "/app").map((item) => <MenuLink key={item.href} item={item} current={pathMatches(pathname, item.href, tab)} />) : null}
           {user ? <SignOutButton className="nav-menu-item" icon /> : null}
         </NavGroup>

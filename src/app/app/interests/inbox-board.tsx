@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type MouseEvent, type ReactNode } from "react";
@@ -212,8 +213,7 @@ function cardChips(note: InboxNote): string[] {
 function CardFace({ note, actions }: { note: InboxNote; actions?: ReactNode }) {
   const href = profileHref(note);
   const photo = note.photoUrl ? (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img src={note.photoUrl} alt="" loading="lazy" decoding="async" />
+    <Image src={note.photoUrl} alt="" fill sizes="(max-width: 640px) 40vw, 200px" quality={65} style={{ objectFit: "cover" }} />
   ) : (
     <span>{note.name.slice(0, 1)}</span>
   );

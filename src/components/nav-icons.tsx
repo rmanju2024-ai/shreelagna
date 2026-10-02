@@ -1,106 +1,111 @@
+/** Site icons: 24px rounded line set with a soft duotone fill (fill deepens on the active tab). */
 export function NavGlyph({ name }: { name: string }) {
   const common = {
     viewBox: "0 0 24 24",
     fill: "none",
     stroke: "currentColor",
-    strokeWidth: 1.8,
+    strokeWidth: 1.7,
     strokeLinecap: "round" as const,
     strokeLinejoin: "round" as const,
     "aria-hidden": true,
+    focusable: false,
   };
+  const duo = { className: "ico-duo", fill: "currentColor", fillOpacity: 0.14 };
   switch (name) {
     case "home":
       return (
         <svg {...common}>
-          <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5Z" />
-        </svg>
-      );
-    case "about":
-      return (
-        <svg {...common}>
-          <circle cx="12" cy="12" r="8.2" />
-          <path d="M12 11.2V17" />
-          <path d="M12 8.2h.01" />
+          <path {...duo} d="M4 11 12 4l8 7v8a1.5 1.5 0 0 1-1.5 1.5H15v-5.5H9v5.5H5.5A1.5 1.5 0 0 1 4 19v-8Z" />
         </svg>
       );
     case "browse":
       return (
         <svg {...common}>
-          <circle cx="9" cy="8.2" r="2.4" />
-          <circle cx="15.4" cy="8.2" r="2.4" />
-          <path d="M4.8 18c.6-2.6 2.6-4 4.8-4s4.2 1.4 4.8 4" />
-          <path d="M13.2 14.2c1.5-.4 3.2.2 4.4 1.6.6.7 1 1.6 1.2 2.2" />
-        </svg>
-      );
-    case "help":
-      return (
-        <svg {...common}>
-          <circle cx="12" cy="12" r="8.2" />
-          <path d="M9.6 9.4a2.4 2.4 0 1 1 3.3 2.2c-.7.4-1.1.9-1.1 1.7V14" />
-          <path d="M12 17h.01" />
-        </svg>
-      );
-    case "staff":
-      return (
-        <svg {...common}>
-          <path d="M12 3.5 19 7v5.2c0 4.2-2.8 6.8-7 8.3-4.2-1.5-7-4.1-7-8.3V7l7-3.5Z" />
-        </svg>
-      );
-    case "profile":
-      return (
-        <svg {...common}>
-          <circle cx="12" cy="8.2" r="3.1" />
-          <path d="M5.4 19c.8-3.2 3-5 6.6-5s5.8 1.8 6.6 5" />
+          <circle {...duo} cx="12" cy="12" r="8.5" />
+          <path {...duo} fillOpacity={0.35} d="m15.6 8.4-2 5.2-5.2 2 2-5.2 5.2-2Z" />
         </svg>
       );
     case "inbox":
       return (
         <svg {...common}>
-          <path d="M4 7.5 12 13l8-5.5" />
-          <path d="M5 6h14a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1Z" />
+          <path {...duo} d="M12 20s-7.5-4.4-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.6-7.5 10-7.5 10Z" />
         </svg>
       );
     case "chat":
       return (
         <svg {...common}>
-          <path d="M5 16.5 3.8 20 8 18.2A8.2 8.2 0 1 0 5 16.5Z" />
+          <path {...duo} d="M20 11.5a7.5 7.5 0 0 1-11 6.6L4 19.5l1.4-4.3A7.5 7.5 0 1 1 20 11.5Z" />
+          <path d="M9 11.5h.01M12.5 11.5h.01M16 11.5h.01" strokeWidth={2.2} />
         </svg>
       );
     case "alerts":
       return (
         <svg {...common}>
-          <path d="M6.5 16h11" />
-          <path d="M7.2 16a5.8 5.8 0 0 1 4.8-10 5.8 5.8 0 0 1 4.8 10" />
-          <path d="M10 16v.8a2 2 0 0 0 4 0V16" />
+          <path {...duo} d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15L6 16.5Z" />
+          <path d="M10 20.5a2.2 2.2 0 0 0 4 0" />
+        </svg>
+      );
+    case "profile":
+      return (
+        <svg {...common}>
+          <circle {...duo} cx="12" cy="8.5" r="3.6" />
+          <path {...duo} d="M4.8 20c.7-3.7 3.6-5.6 7.2-5.6s6.5 1.9 7.2 5.6H4.8Z" />
+        </svg>
+      );
+    case "plans":
+      return (
+        <svg {...common}>
+          <path {...duo} d="m12 3.5 2.4 5 5.4.7-4 3.8 1 5.4-4.8-2.7-4.8 2.7 1-5.4-4-3.8 5.4-.7 2.4-5Z" />
+        </svg>
+      );
+    case "staff":
+      return (
+        <svg {...common}>
+          <path {...duo} d="M12 3.5 19 6.5v5.3c0 4.3-2.9 7.1-7 8.7-4.1-1.6-7-4.4-7-8.7V6.5l7-3Z" />
+          <path d="m8.8 12 2.2 2.2 4.2-4.4" />
         </svg>
       );
     case "settings":
       return (
         <svg {...common}>
-          <circle cx="12" cy="12" r="3.1" />
-          <path d="M19.2 12.8v-1.6l1.5-1.1-1.5-2.6-1.8.4a6.4 6.4 0 0 0-1.4-.8l-.3-1.8h-3l-.3 1.8a6.4 6.4 0 0 0-1.4.8l-1.8-.4-1.5 2.6 1.5 1.1v1.6l-1.5 1.1 1.5 2.6 1.8-.4c.4.3.9.6 1.4.8l.3 1.8h3l.3-1.8c.5-.2 1-.5 1.4-.8l1.8.4 1.5-2.6-1.5-1.1Z" />
+          <path d="M4 7h9M17 7h3M4 17h3M11 17h9" />
+          <circle {...duo} cx="15" cy="7" r="2.2" />
+          <circle {...duo} cx="9" cy="17" r="2.2" />
+        </svg>
+      );
+    case "about":
+      return (
+        <svg {...common}>
+          <circle {...duo} cx="12" cy="12" r="8.5" />
+          <path d="M12 11v5.2M12 7.9h.01" strokeWidth={2} />
+        </svg>
+      );
+    case "help":
+      return (
+        <svg {...common}>
+          <circle {...duo} cx="12" cy="12" r="8.5" />
+          <path d="M9.7 9.6a2.4 2.4 0 1 1 3.4 2.2c-.7.4-1.1.9-1.1 1.6M12 16.8h.01" />
         </svg>
       );
     case "more":
       return (
         <svg {...common}>
-          <circle cx="5.5" cy="12" r="1.4" fill="currentColor" />
-          <circle cx="12" cy="12" r="1.4" fill="currentColor" />
-          <circle cx="18.5" cy="12" r="1.4" fill="currentColor" />
+          <circle cx="6" cy="12" r="1.5" fill="currentColor" />
+          <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+          <circle cx="18" cy="12" r="1.5" fill="currentColor" />
         </svg>
       );
     case "out":
       return (
         <svg {...common}>
-          <path d="M10 7V5.8A1.8 1.8 0 0 1 11.8 4H18a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6.2A1.8 1.8 0 0 1 10 18.2V17" />
-          <path d="M4 12h10" />
-          <path d="M11 9l3 3-3 3" />
+          <path d="M10 5H6.5A1.5 1.5 0 0 0 5 6.5v11A1.5 1.5 0 0 0 6.5 19H10" />
+          <path d="M14 8.5 18 12l-4 3.5M18 12H9.5" />
         </svg>
       );
     default:
       return (
         <svg {...common}>
-          <circle cx="12" cy="12" r="8.2" />
+          <circle {...duo} cx="12" cy="12" r="8.5" />
         </svg>
       );
   }
