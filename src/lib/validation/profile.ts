@@ -163,10 +163,35 @@ export function parseProfileForm(
   raw: Record<string, unknown>,
   lists: FormLists,
   section?: ProfileEditSection,
+  draft = false,
 ):
   | { ok: true; data: ProfileFormInput }
   | { ok: false; error: string } {
   const scoped = section && isProfileEditSection(section) ? section : undefined;
+  if (draft && !scoped) {
+    const cleaned = Object.fromEntries(
+      Object.entries(raw).filter(([, value]) => {
+        if (value == null || value === "") return false;
+        if (Array.isArray(value) && value.length === 0) return false;
+        return true;
+      }),
+    );
+    const partial = profileFormSchema.partial().safeParse(cleaned);
+    if (!partial.success) {
+      return { ok: false, error: "Check the details entered on this step, then save the draft again." };
+    }
+    const d = partial.data;
+    if (!d.creator_relationship) return { ok: false, error: "Choose who is registering." };
+    if (!d.profile_type) return { ok: false, error: "Choose bride or groom." };
+    if (!d.subject_full_name || d.subject_full_name.trim().length < 2) {
+      return { ok: false, error: "Enter the full name before saving a draft." };
+    }
+    if (!d.date_of_birth) return { ok: false, error: "Choose the adult date of birth before saving a draft." };
+    if (!isAdult(d.date_of_birth)) {
+      return { ok: false, error: "Bride or groom must be at least 21 years old." };
+    }
+    return { ok: true, data: d as ProfileFormInput };
+  }
   const parsed = (scoped ? profileFormSchema.partial() : profileFormSchema).safeParse(raw);
   if (!parsed.success) {
     const path = parsed.error.issues[0]?.path[0];

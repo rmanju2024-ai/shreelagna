@@ -280,6 +280,7 @@ export async function saveProfile(formData: FormData) {
   const sectionRaw = String(formData.get("section") ?? "");
   const section = isProfileEditSection(sectionRaw) ? sectionRaw : undefined;
   const bounceId = String(formData.get("id") ?? "");
+  const saveDraft = !bounceId && !section && formData.get("save_intent") === "draft";
 
   const raw: Record<string, unknown> = {
     id: bounceId,
@@ -368,6 +369,7 @@ export async function saveProfile(formData: FormData) {
     section ? pickSectionRecord(raw, SECTION_FORM_KEYS[section]) : raw,
     lists,
     section,
+    saveDraft,
   );
 
   if (!parsed.ok) {

@@ -36,6 +36,50 @@ describe("parseProfileForm", () => {
     expect(parsed.ok).toBe(true);
   });
 
+  it("allows an incomplete profile to be saved as a draft", () => {
+    const parsed = parseProfileForm(
+      {
+        creator_relationship: "self",
+        profile_type: "vara",
+        subject_full_name: "Arjun Rao",
+        date_of_birth: "1995-06-12",
+        qualification: "",
+        occupation: "",
+        subject_mobile: "",
+      },
+      lists,
+      undefined,
+      true,
+    );
+    expect(parsed.ok).toBe(true);
+  });
+
+  it("still requires database-safe identity basics for a draft", () => {
+    expect(
+      parseProfileForm(
+        { creator_relationship: "self", profile_type: "vara", subject_full_name: "", date_of_birth: "" },
+        lists,
+        undefined,
+        true,
+      ).ok,
+    ).toBe(false);
+  });
+
+  it("does not allow an under-21 draft profile", () => {
+    const parsed = parseProfileForm(
+      {
+        creator_relationship: "self",
+        profile_type: "vadhu",
+        subject_full_name: "Young Person",
+        date_of_birth: "2010-01-01",
+      },
+      lists,
+      undefined,
+      true,
+    );
+    expect(parsed.ok).toBe(false);
+  });
+
   it("rejects a missing required native city", () => {
     const parsed = parseProfileForm({ ...base, native_city: "" }, lists);
     expect(parsed.ok).toBe(false);

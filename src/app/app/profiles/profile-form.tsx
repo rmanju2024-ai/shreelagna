@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useFormStatus } from "react-dom";
 import { saveProfile } from "@/app/app/profiles/actions";
 import { BirthDatePicker, BirthTimePicker } from "@/app/app/profiles/birth-date-picker";
 import {
@@ -29,6 +28,14 @@ import { Field, PlaceBlock, SaveButton, SiblingCounts } from "@/app/app/profiles
 
 export type { ProfileFormValues };
 
+const WIZARD_STEPS = [
+  { id: 1, short: "Start", title: "Basics", hint: "Who, identity and contact" },
+  { id: 2, short: "Life", title: "Life today", hint: "Home, work and lifestyle" },
+  { id: 3, short: "Faith", title: "Faith", hint: "Birth and horoscope" },
+  { id: 4, short: "Story", title: "Your story", hint: "About and family" },
+  { id: 5, short: "Match", title: "Preferences", hint: "What you are looking for" },
+] as const;
+
 export function ProfileForm({
   values,
   religions,
@@ -38,8 +45,6 @@ export function ProfileForm({
   mode = "create",
   section,
   loginEmail,
-  hasVideo: _hasVideo = false,
-  hasAudio: _hasAudio = false,
   cancelHref,
   omitAbout = false,
   allowMobileOtp = true,
@@ -111,9 +116,37 @@ export function ProfileForm({
   const self = who === "self";
   const aboutDefault = values?.about ?? "";
   const show = (id: ProfileEditSection) => (!omitAbout || id !== "about") && (!section || section === id);
+  const wizard = mode === "create" && !section;
+  const [wizardStep, setWizardStep] = useState(1);
+  const panelClass = (step: number) =>
+    `form-3d-panel${wizard ? ` wizard-panel${wizardStep === step ? " is-current" : ""}` : ""}`;
+
+  function moveWizard(next: number) {
+    setWizardStep(Math.min(WIZARD_STEPS.length, Math.max(1, next)));
+    window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
+  }
 
   return (
-    <form action={saveProfile} className="form-3d" autoComplete="off">
+    <form
+      action={saveProfile}
+      className={`form-3d${wizard ? " is-wizard" : ""}`}
+      autoComplete="off"
+      noValidate={wizard}
+      onSubmit={(event) => {
+        if (!wizard) return;
+        const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+        if (submitter?.value === "draft") return;
+        const invalid = event.currentTarget.querySelector<HTMLElement>(":invalid");
+        if (!invalid) return;
+        event.preventDefault();
+        const targetStep = Number(invalid.closest<HTMLElement>(".wizard-panel")?.dataset.step ?? 1);
+        setWizardStep(targetStep);
+        window.setTimeout(() => {
+          invalid.focus();
+          if ("reportValidity" in invalid) (invalid as HTMLInputElement).reportValidity();
+        });
+      }}
+    >
       {values?.id ? <input type="hidden" name="id" value={values.id} /> : null}
       {values?.member_code ? <input type="hidden" name="member_code" value={values.member_code} /> : null}
       {section ? <input type="hidden" name="section" value={section} /> : null}
@@ -135,8 +168,47 @@ export function ProfileForm({
 
       {mode === "edit" ? <input type="hidden" name="creator_relationship" value={who} /> : null}
 
+      {wizard ? (
+        <div className="profile-wizard">
+          <div className="profile-wizard-hero">
+            <span aria-hidden>✨</span>
+            <div>
+              <p>Guided profile setup</p>
+              <h2>Tell your story, one easy step at a time</h2>
+              <small>
+                Fill what you know now. Optional details can be improved later from Profile.
+              </small>
+            </div>
+          </div>
+          <nav className="profile-wizard-steps" aria-label="Profile creation progress">
+            {WIZARD_STEPS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={wizardStep === item.id ? "is-current" : wizardStep > item.id ? "is-done" : ""}
+                aria-current={wizardStep === item.id ? "step" : undefined}
+                onClick={() => moveWizard(item.id)}
+              >
+                <b>{wizardStep > item.id ? "✓" : item.id}</b>
+                <span>
+                  <strong>{item.short}</strong>
+                  <small>{item.title}</small>
+                </span>
+              </button>
+            ))}
+          </nav>
+          <div className="profile-wizard-guide">
+            <span aria-hidden>?</span>
+            <p>
+              <b>{WIZARD_STEPS[wizardStep - 1].title}:</b>{" "}
+              {WIZARD_STEPS[wizardStep - 1].hint}. Fields marked <strong>*</strong> help unlock your profile.
+            </p>
+          </div>
+        </div>
+      ) : null}
+
       {show("family") && mode !== "edit" ? (
-      <section className="form-3d-panel">
+      <section className={panelClass(1)} data-step="1">
         <p className="form-3d-kicker">Step one</p>
         <h2 className="form-3d-title">Who is creating this profile?</h2>
         <div className="gold-ornament" />
@@ -195,7 +267,7 @@ export function ProfileForm({
       ) : null}
 
       {show("personal") ? (
-      <section className="form-3d-panel">
+      <section className={panelClass(1)} data-step="1">
         <p className="form-3d-kicker">{mode === "edit" ? "Details" : "Step two"}</p>
         <h2 className="form-3d-title">{self ? "Your details" : "Bride or groom"}</h2>
         <div className="gold-ornament" />
@@ -349,7 +421,7 @@ export function ProfileForm({
       ) : null}
 
       {show("personal") || show("work") ? (
-      <section className="form-3d-panel">
+      <section className={panelClass(2)} data-step="2">
         <p className="form-3d-kicker">
           {section === "work" ? "Education & work" : section === "personal" ? "Place" : mode === "edit" ? "Home and vocation" : "Step three"}
         </p>
@@ -562,7 +634,7 @@ export function ProfileForm({
       ) : null}
 
       {show("personal") ? (
-      <section className="form-3d-panel">
+      <section className={panelClass(2)} data-step="2">
         <p className="form-3d-kicker">{mode === "edit" ? "Habits" : "Health"}</p>
         <h2 className="form-3d-title">Health and habits</h2>
         <div className="gold-ornament" />
@@ -619,7 +691,7 @@ export function ProfileForm({
       ) : null}
 
       {show("faith") ? (
-      <section className="form-3d-panel">
+      <section className={panelClass(3)} data-step="3">
         <p className="form-3d-kicker">{mode === "edit" ? "Faith" : "Religion"}</p>
         <h2 className="form-3d-title">Religion and astronomy</h2>
         <div className="gold-ornament" />
@@ -770,7 +842,7 @@ export function ProfileForm({
       ) : null}
 
       {show("about") ? (
-      <section className="form-3d-panel">
+      <section className={panelClass(4)} data-step="4">
         <p className="form-3d-kicker">Story</p>
         <h2 className="form-3d-title">About</h2>
         <div className="gold-ornament" />
@@ -798,7 +870,7 @@ export function ProfileForm({
       ) : null}
 
       {show("family") ? (
-      <section className="form-3d-panel">
+      <section className={panelClass(4)} data-step="4">
         <p className="form-3d-kicker">Family</p>
         <h2 className="form-3d-title">Family background</h2>
         <div className="gold-ornament" />
@@ -923,7 +995,7 @@ export function ProfileForm({
       ) : null}
 
       {show("partner") ? (
-      <section className="form-3d-panel">
+      <section className={panelClass(5)} data-step="5">
         <p className="form-3d-kicker">{mode === "edit" ? "Hope for a match" : "Step five"}</p>
         <h2 className="form-3d-title">Partner Preference</h2>
         <div className="gold-ornament" />
@@ -1108,7 +1180,44 @@ export function ProfileForm({
         </div>
       </section>
       ) : null}
-      <section className="form-3d-panel">
+      {wizard ? (
+        <div className="profile-wizard-actions">
+          <button
+            type="button"
+            className={btnHeroGhost}
+            onClick={() => moveWizard(wizardStep - 1)}
+            disabled={wizardStep === 1}
+          >
+            ← Back
+          </button>
+          <span>
+            Step {wizardStep} of {WIZARD_STEPS.length}
+          </span>
+          {wizardStep < WIZARD_STEPS.length ? (
+            <button type="button" className={btnHero} onClick={() => moveWizard(wizardStep + 1)}>
+              Next →
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+      <section className={panelClass(5)} data-step="5">
+        {wizard ? (
+          <div className="profile-readiness">
+            <span aria-hidden>💡</span>
+            <div>
+              <h3>Save now, activate when ready</h3>
+              <p>
+                Your profile is saved as a draft until the required details, approved photo and verification
+                are complete. Draft profiles cannot send interests, chat, or reveal contact details.
+              </p>
+              <ul>
+                <li>Missing fields will be shown clearly on your Profile page.</li>
+                <li>You can return and improve every section later.</li>
+                <li>When everything required is ready, the profile goes for house review.</li>
+              </ul>
+            </div>
+          </div>
+        ) : null}
         <div className="form-3d-actions">
           {error ? (
             <p className="w-full rounded-xl border border-red-200 bg-white px-4 py-3 text-sm text-red-800">
@@ -1119,6 +1228,11 @@ export function ProfileForm({
             <Link href={cancelHref} className={`${btnHeroGhost} form-3d-cancel`}>
               Cancel
             </Link>
+          ) : null}
+          {wizard ? (
+            <button type="submit" name="save_intent" value="draft" formNoValidate className={btnHeroGhost}>
+              Save draft
+            </button>
           ) : null}
           <SaveButton />
         </div>
