@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Source_Serif_4 } from "next/font/google";
+import { WebVitals } from "@/components/web-vitals";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -36,7 +37,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${sourceSerif.variable} h-full antialiased`}
     >
-      <body className="min-h-dvh w-full overflow-x-hidden">{children}</body>
+      <body className="min-h-dvh w-full overflow-x-hidden">
+        {children}
+        <WebVitals />
+      </body>
     </html>
   );
 }

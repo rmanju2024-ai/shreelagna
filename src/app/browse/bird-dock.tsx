@@ -137,8 +137,14 @@ export function BirdDock({
   const pool = phase === "peck" ? CHIRPS.peck : chirpPool(thread, needPlan, needQuota, canSend);
   const chirp = pool[line % pool.length];
   const name = chat?.name ?? "Match";
+  const [liveNotes, setLiveNotes] = useState<PeekChatNote[]>([]);
+  const [liveRead, setLiveRead] = useState<Record<string, string>>({});
   const notes = useMemo(() => {
-    const server = chat?.notes ?? [];
+    const base = chat?.notes ?? [];
+    const seen = new Set(base.map((note) => note.id));
+    const server = [...base, ...liveNotes.filter((note) => !seen.has(note.id))].map((note) =>
+      liveRead[note.id] ? { ...note, read_at: liveRead[note.id] } : note,
+    );
     const pending = extra.filter(
       (row) =>
         !server.some(
@@ -146,7 +152,48 @@ export function BirdDock({
         ),
     );
     return [...server, ...pending];
-  }, [chat?.notes, extra]);
+  }, [chat?.notes, extra, liveNotes, liveRead]);
+
+  // Realtime: new messages and read receipts arrive without reloading the page.
+  const threadId = chat?.threadId ?? null;
+  const myProfileId = chat?.myProfileId ?? null;
+  const openRef = useRef(open);
+  useEffect(() => {
+    openRef.current = open;
+  }, [open]);
+  useEffect(() => {
+    if (!threadId) return;
+    let cleanup = () => {};
+    void import("@/lib/supabase/client").then(({ createClient }) => {
+      const supabase = createClient();
+      const channel = supabase
+        .channel(`peek-chat:${threadId}`)
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "messages", filter: `thread_id=eq.${threadId}` },
+          (payload) => {
+            const row = payload.new as PeekChatNote;
+            setLiveNotes((prev) => (prev.some((note) => note.id === row.id) ? prev : [...prev, row]));
+            if (row.sender_profile_id !== myProfileId) {
+              if (!openRef.current) setBadge((n) => n + 1);
+              setPhase("deliver");
+              window.setTimeout(() => setPhase("idle"), 1000);
+            }
+          },
+        )
+        .on(
+          "postgres_changes",
+          { event: "UPDATE", schema: "public", table: "messages", filter: `thread_id=eq.${threadId}` },
+          (payload) => {
+            const row = payload.new as PeekChatNote;
+            if (row.read_at) setLiveRead((prev) => ({ ...prev, [row.id]: row.read_at as string }));
+          },
+        )
+        .subscribe();
+      cleanup = () => void supabase.removeChannel(channel);
+    });
+    return () => cleanup();
+  }, [threadId, myProfileId]);
 
   useEffect(() => {
     setMounted(true);

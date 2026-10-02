@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export type BrowseCardNote = {
@@ -44,13 +45,13 @@ export function BrowseCard({ note, priority = false }: { note: BrowseCardNote; p
       <Link href={note.href} className="sx-card-link" prefetch={false}>
         <div className="sx-photo">
           {note.photoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={note.photoUrl}
               alt=""
-              loading={priority ? "eager" : "lazy"}
-              decoding="async"
-              fetchPriority={priority ? "high" : "low"}
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1100px) 33vw, 264px"
+              quality={70}
+              priority={priority}
             />
           ) : (
             <span className="sx-initial">{note.name.slice(0, 1)}</span>

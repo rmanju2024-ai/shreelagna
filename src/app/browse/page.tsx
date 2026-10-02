@@ -26,6 +26,7 @@ import { isPublicProfileStatus, oppositeType, type ProfileType } from "@/lib/pro
 import { displayFirstName, profileKindLabel } from "@/lib/profile/options";
 import { fetchAdminUserIds } from "@/lib/desk/admin-ids";
 import { createServiceClient } from "@/lib/supabase/server";
+import { timed } from "@/lib/perf";
 
 function nestedName(value: unknown): string | null {
   if (Array.isArray(value) && value[0] && typeof value[0] === "object" && value[0] && "name" in value[0]) {
@@ -113,7 +114,7 @@ export default async function BrowsePage({
   if (!supabase || !user) {
     notice = "Sign in and create a profile to search families.";
   } else {
-    const me = await ensureAppUser(supabase, user);
+    const me = await timed("ensureAppUser", ensureAppUser(supabase, user));
     if (!me?.active_profile_id) {
       notice = "Create a profile first, then search.";
     } else {
@@ -171,14 +172,17 @@ export default async function BrowsePage({
         const mineId = String(mine.id);
         type Visit = { viewer_profile_id: string; viewed_profile_id: string; viewed_at: string };
         // One database call (supabase/migrations/058_browse_bundle.sql); falls back to the older multi-call path.
-        const rpc = await (
-          supabase as unknown as {
-            rpc: (
-              fn: string,
-              args: Record<string, unknown>,
-            ) => Promise<{ data: unknown; error: { message?: string } | null }>;
-          }
-        ).rpc("browse_bundle", { p_mine: mineId, p_want: want, p_limit: BROWSE_LIST_LIMIT });
+        const rpc = await timed(
+          "browse_bundle",
+          (
+            supabase as unknown as {
+              rpc: (
+                fn: string,
+                args: Record<string, unknown>,
+              ) => Promise<{ data: unknown; error: { message?: string } | null }>;
+            }
+          ).rpc("browse_bundle", { p_mine: mineId, p_want: want, p_limit: BROWSE_LIST_LIMIT }),
+        );
         const bundle =
           !rpc.error && rpc.data && typeof rpc.data === "object"
             ? (rpc.data as { rows: Record<string, unknown>[]; viewed_you: Visit[]; you_viewed: Visit[] })
