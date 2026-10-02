@@ -21,16 +21,19 @@ export default async function PlansPage({
   const me = await ensureAppUser(supabase, user);
   if (!me) redirect("/login?error=account");
   const db = createServiceClient() ?? supabase;
-  const access = await loadMembership(db, me);
-  const { data: mine } = await db.from("profiles").select("id").eq("created_by", me.id);
+  const [access, { data: mine }, plans, pendingCode] = await Promise.all([
+    loadMembership(db, me),
+    db.from("profiles").select("id").eq("created_by", me.id),
+    fetchPlans(db),
+    fetchPendingPlanCode(db, me.id),
+  ]);
   const quota = await loadInterestQuota(
     db,
     me,
     access,
     (mine ?? []).map((row) => row.id),
   );
-  const catalog = (await fetchPlans(db)).filter((plan) => plan.forSale);
-  const pendingCode = await fetchPendingPlanCode(db, me.id);
+  const catalog = plans.filter((plan) => plan.forSale);
   const pending = planByCode(pendingCode, catalog);
   const house = access.kind === "house";
 

@@ -13,19 +13,15 @@ export default async function SettingsPage() {
   const me = await ensureAppUser(supabase, user);
   if (!me) redirect("/login?error=account");
 
-  const { data: profiles } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("created_by", me.id)
-    .order("updated_at", { ascending: false });
+  const [{ data: profiles }, accountResult] = await Promise.all([
+    supabase.from("profiles").select("*").eq("created_by", me.id).order("updated_at", { ascending: false }),
+    supabase.from("app_users").select("notify_match_email, notify_whatsapp").eq("id", me.id).maybeSingle(),
+  ]);
   const profile = profiles?.find((row) => row.id === me.active_profile_id) ?? profiles?.[0];
   if (!profile) redirect("/app");
 
-  let { data: account, error: accountError } = await supabase
-    .from("app_users")
-    .select("notify_match_email, notify_whatsapp")
-    .eq("id", me.id)
-    .maybeSingle();
+  let account = accountResult.data;
+  const accountError = accountResult.error;
   if (accountError) {
     const retry = await supabase
       .from("app_users")

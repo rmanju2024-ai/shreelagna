@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Source_Serif_4 } from "next/font/google";
 import { WebVitals } from "@/components/web-vitals";
+import { Butterflies } from "@/components/butterflies";
 import "./globals.css";
+import "./theme-genz.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,6 +41,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-dvh w-full overflow-x-hidden">
         {children}
+        <Butterflies />
         <WebVitals />
       </body>
     </html>

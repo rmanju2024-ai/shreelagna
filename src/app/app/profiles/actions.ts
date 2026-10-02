@@ -442,7 +442,7 @@ export async function saveProfile(formData: FormData) {
     }
   }
   if (editingId) {
-    let current: Record<string, unknown> = { ...payload };
+    const current: Record<string, unknown> = { ...payload };
     let saved = false;
     let lastError: { message?: string; code?: string; details?: string; hint?: string } | null = null;
     const attempts = Math.min(12, Math.max(4, Object.keys(current).length));

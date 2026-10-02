@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LiveRefresh } from "@/components/live-refresh";
 import { after } from "next/server";
 import { sendChat } from "@/app/app/match/actions";
 import { ChatAvatar } from "@/app/app/chat/chat-avatar";
@@ -86,6 +87,7 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
 
   return (
     <PageShell>
+      <LiveRefresh table="messages" filter={`thread_id=eq.${id}`} />
       <article className="wa-app">
         <header className="wa-head">
           <Link href="/app/chat" className="wa-back" aria-label="All chats">

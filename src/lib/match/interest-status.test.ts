@@ -58,7 +58,7 @@ describe("interest status", () => {
   });
 
   it("opens chat after interest is sent or accepted", () => {
-    const pending = [{ from_profile_id: "a", to_profile_id: "b", status: "pending", created_at: "2026-03-20T00:00:00Z" }];
+    const pending = [{ from_profile_id: "a", to_profile_id: "b", status: "pending", created_at: new Date().toISOString() }];
     expect(pairCanChat(pending, "a", "b")).toBe(true);
     expect(hasAcceptedInterest(pending, "a", "b")).toBe(false);
     expect(pairCanChat([{ ...pending[0], status: "declined" }], "a", "b")).toBe(false);

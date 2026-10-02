@@ -135,7 +135,7 @@ export function BirthDatePicker({
 function parseTime(value?: string | null) {
   const match = /^(\d{1,2}):([0-5]\d)(?::[0-5]\d)?$/.exec((value ?? "").trim());
   if (!match) return { hour: "", minute: "", meridiem: "AM" };
-  let hour24 = Number(match[1]);
+  const hour24 = Number(match[1]);
   if (!Number.isFinite(hour24) || hour24 < 0 || hour24 > 23) {
     return { hour: "", minute: "", meridiem: "AM" };
   }
