@@ -454,3 +454,16 @@ table { max-width: 100%; }
   100% { opacity: 0; transform: translate(-24px, -200px) rotate(-12deg) scale(0.9); }
 }
 @media (prefers-reduced-motion: reduce) { .pv-butterfly, .album-lock, .album-gate-veil::before { animation: none; } }
+
+/* Mobile: full-width bottom tab bar, icons spread evenly */
+@media (max-width: 820px) {
+  .site-nav {
+    position: fixed !important; left: 0 !important; right: 0 !important; bottom: 0 !important; top: auto !important;
+    transform: none !important; width: 100% !important; max-width: none !important; display: block !important;
+    padding: 0 0.4rem max(0.4rem, env(safe-area-inset-bottom)); z-index: 90;
+  }
+  .site-nav-row { display: flex !important; flex-wrap: nowrap !important; justify-content: space-between !important; width: 100%; gap: 0; padding: 0.3rem 0.2rem; border-radius: 1.4rem; }
+  .site-nav-row > .nav-3d, .site-nav-row > .nav-group { flex: 1 1 0 !important; min-width: 0 !important; width: auto; }
+  .site-nav-row > .nav-group > .nav-3d { width: 100%; }
+  .site-nav-row .nav-3d > .nav-3d-label { font-size: 0.6rem; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
