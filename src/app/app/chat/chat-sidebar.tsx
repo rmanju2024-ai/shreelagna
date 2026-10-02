@@ -72,6 +72,22 @@ const loadChatData = cache(async () => {
     const other = ids.includes(thread.profile_a) ? thread.profile_b : thread.profile_a;
     return nameMap.get(other)?.status === "active";
   });
+  const visibleThreadIds = new Set(openThreads.map((thread) => thread.id));
+  const closedChatHrefs = acceptedThreads
+    .filter((thread) => !visibleThreadIds.has(thread.id))
+    .map((thread) => `/app/chat/${thread.id}`);
+  // Retire the actual unread records as well. This prevents the global header
+  // badge from resurfacing if its independent badge query runs before this
+  // sidebar is rendered on a future request.
+  if (closedChatHrefs.length) {
+    await supabase
+      .from("notices")
+      .update({ read_at: new Date().toISOString() })
+      .eq("user_id", me.id)
+      .eq("kind", "chat")
+      .is("read_at", null)
+      .in("href", closedChatHrefs);
+  }
   const lastMap = latestByThread(msgs ?? []);
   const visibleChatHrefs = new Set(openThreads.map((thread) => `/app/chat/${thread.id}`));
   const unreadMap = countByKey((unreadNotes ?? []).map((row) => (visibleChatHrefs.has(row.href ?? "") ? row.href : null)));
