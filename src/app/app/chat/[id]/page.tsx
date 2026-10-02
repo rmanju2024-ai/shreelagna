@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Suspense } from "react";
+import { ChatSidebar, ChatSidebarSkeleton } from "@/app/app/chat/chat-sidebar";
 import { LiveRefresh } from "@/components/live-refresh";
 import { after } from "next/server";
 import { ThreadView } from "@/app/app/chat/[id]/thread-view";
@@ -86,7 +88,11 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
   return (
     <PageShell>
       <LiveRefresh table="messages" filter={`thread_id=eq.${id}`} />
-      <article className="wa-app">
+      <div className="wc-shell has-thread">
+      <Suspense fallback={<ChatSidebarSkeleton />}>
+        <ChatSidebar activeId={id} />
+      </Suspense>
+      <article className="wa-app wc-pane">
         <header className="wa-head">
           <Link href="/app/chat" className="wa-back" aria-label="All chats">
             ‹
@@ -118,6 +124,7 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
           </p>
         ) : null}
       </article>
+      </div>
     </PageShell>
   );
 }

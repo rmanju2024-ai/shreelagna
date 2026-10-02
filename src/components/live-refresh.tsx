@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 /** Refreshes the page when a row changes in `table` for this filter (Supabase Realtime, RLS applies). */
-export function LiveRefresh({ table, filter }: { table: string; filter: string }) {
+export function LiveRefresh({ table, filter }: { table: string; filter?: string }) {
   const router = useRouter();
   useEffect(() => {
     let cleanup = () => {};
@@ -12,8 +12,8 @@ export function LiveRefresh({ table, filter }: { table: string; filter: string }
     void import("@/lib/supabase/client").then(({ createClient }) => {
       const supabase = createClient();
       const channel = supabase
-        .channel(`live:${table}:${filter}`)
-        .on("postgres_changes", { event: "*", schema: "public", table, filter }, () => {
+        .channel(`live:${table}:${filter ?? "all"}`)
+        .on("postgres_changes", { event: "*", schema: "public", table, ...(filter ? { filter } : {}) }, () => {
           window.clearTimeout(timer);
           timer = window.setTimeout(() => router.refresh(), 250);
         })
