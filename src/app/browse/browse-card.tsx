@@ -23,52 +23,60 @@ export type BrowseCardNote = {
 
 function chips(note: BrowseCardNote): string[] {
   return [
-    [note.age, note.height].filter(Boolean).join(" · "),
     [note.religion, note.community].filter(Boolean).join(" · "),
-    [note.city, note.state].filter(Boolean).join(", "),
     note.education ?? "",
     note.occupation ?? "",
   ].filter(Boolean);
 }
 
-function matchPercent(score?: string | null): number {
+function matchPercent(score?: string | null): number | null {
   const match = score?.match(/(\d+)\s*\/\s*(\d+)/);
-  if (!match) return 64;
-  const value = Math.round((Number(match[1]) / Number(match[2])) * 100);
-  return Math.max(1, Math.min(100, value));
+  if (!match) return null;
+  return Math.max(1, Math.min(100, Math.round((Number(match[1]) / Number(match[2])) * 100)));
 }
 
-export function BrowseCard({ note }: { note: BrowseCardNote }) {
+export function BrowseCard({ note, priority = false }: { note: BrowseCardNote; priority?: boolean }) {
   const percent = matchPercent(note.score);
-  const photo = note.photoUrl ? (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img src={note.photoUrl} alt="" loading="lazy" decoding="async" />
-  ) : (
-    <span>{note.name.slice(0, 1)}</span>
-  );
+  const place = [note.city, note.state].filter(Boolean).join(", ");
+  const facts = [note.age, note.height].filter(Boolean).join(" · ");
   return (
-    <li className="browse-card" style={{ "--match-dash": `${percent}` } as React.CSSProperties}>
-      <Link href={note.href} className="browse-card-link">
-        <div className="browse-card-photo-wrap">
-          <div className="browse-card-photo">{photo}</div>
-          <div className="match-ring" aria-label={`${percent}% match`}>
-            <svg viewBox="0 0 40 40" aria-hidden>
-              <circle className="match-ring-track" cx="20" cy="20" r="16" />
-              <circle className="match-ring-fill" cx="20" cy="20" r="16" pathLength="100" />
-            </svg>
-            <strong>{percent}%</strong>
+    <li className="sx-card">
+      <Link href={note.href} className="sx-card-link" prefetch={false}>
+        <div className="sx-photo">
+          {note.photoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={note.photoUrl}
+              alt=""
+              loading={priority ? "eager" : "lazy"}
+              decoding="async"
+              fetchPriority={priority ? "high" : "low"}
+            />
+          ) : (
+            <span className="sx-initial">{note.name.slice(0, 1)}</span>
+          )}
+          {percent != null ? (
+            <b className="sx-badge">{percent}% match</b>
+          ) : note.score ? (
+            <b className="sx-badge">{note.score}</b>
+          ) : null}
+          <div className="sx-photo-copy">
+            <h3>{note.name}</h3>
+            {facts ? <p>{facts}</p> : null}
           </div>
         </div>
-        <div className="browse-card-copy">
-          <p className="browse-card-name">{note.name}</p>
-          {note.lastOnline ? <p className="browse-card-seen">{note.lastOnline}</p> : null}
-          <ul className="browse-card-meta">
+        <div className="sx-body">
+          {place ? <p className="sx-place">{place}</p> : null}
+          <ul className="sx-tags">
             {chips(note).map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
+          <div className="sx-foot">
+            <span>{note.lastOnline ?? ""}</span>
+            <em>View profile →</em>
+          </div>
         </div>
-        {note.score ? <p className="browse-score">{note.score}</p> : null}
       </Link>
     </li>
   );

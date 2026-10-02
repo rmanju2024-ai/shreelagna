@@ -53,18 +53,18 @@ export function BrowseFilterDesk({
 
   return (
     <form
-      className="browse-toolbar"
+      className="sx-filter"
       onSubmit={(event) => {
         event.preventDefault();
         onApply?.(draft);
       }}
     >
-      <div className="browse-toolbar-row">
+      <div className="sx-filter-head">
         <div>
-          <p className="browse-kicker">Advanced filter</p>
-          <p className="browse-saved-note">Pick what you want, then Apply. Age can be 18 to 80.</p>
+          <h2>Advanced filter</h2>
+          <p>Pick what you want, then Apply. Age can be 18 to 80.</p>
         </div>
-        <div className="browse-toolbar-actions">
+        <div className="sx-filter-actions">
           <button type="submit" className={btnPrimary}>
             Apply
           </button>
@@ -80,7 +80,7 @@ export function BrowseFilterDesk({
           </button>
         </div>
       </div>
-      <div className="browse-fields">
+      <div className="sx-fields">
         <label>
           <span>Age from</span>
           <input

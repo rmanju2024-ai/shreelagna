@@ -195,11 +195,15 @@ export default async function BrowsePage({
           .limit(40);
         const adminPromise =
           me.role === "admin" ? Promise.resolve(new Set<string>()) : fetchAdminUserIds(mediaClient as never);
-        const listResult = await listQuery(BROWSE_PROFILE_SELECT);
-        const listData = listResult.error ? await listQuery(BROWSE_PROFILE_SELECT_STAR) : listResult;
-        const viewedYou = await viewedYouPromise;
-        const youViewed = await youViewedPromise;
-        const adminIds = await adminPromise;
+        const listPromise = listQuery(BROWSE_PROFILE_SELECT).then((result) =>
+          result.error ? listQuery(BROWSE_PROFILE_SELECT_STAR) : result,
+        );
+        const [listData, viewedYou, youViewed, adminIds] = await Promise.all([
+          listPromise,
+          viewedYouPromise,
+          youViewedPromise,
+          adminPromise,
+        ]);
         if (listData.error) {
           notice = "Matches could not load just now. Please try again shortly.";
         } else {

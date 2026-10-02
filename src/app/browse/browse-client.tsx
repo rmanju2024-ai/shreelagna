@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { BrowseCard, type BrowseCardNote } from "@/app/browse/browse-card";
 import { BrowseFilterDesk } from "@/app/browse/browse-filter-desk";
 import { EMPTY_BROWSE_FILTERS, profileFitsBrowse, type BrowseFilters } from "@/lib/match/browse-filters";
 import { type BrowseScoreRow, type BrowseView } from "@/lib/match/browse-match";
-import { pageCount, pageItems, PROFILE_PAGE_SIZE } from "@/lib/match/inbox-card";
+import { pageCount, pageItems } from "@/lib/match/inbox-card";
 import { btnGhost, btnPrimary, cardClass } from "@/lib/ui/classes";
 
 type ViewItem = {
@@ -141,6 +141,7 @@ export function BrowseClient({
     initialView === "custom" ? initialFilters : EMPTY_BROWSE_FILTERS,
   );
   const [page, setPage] = useState(1);
+  const [pending, startTransition] = useTransition();
 
   const ranked = useMemo(() => {
     const rows = notesFor(catalog, lists[view]);
@@ -175,8 +176,10 @@ export function BrowseClient({
   const gate = viewNotes?.[view];
 
   function chooseView(next: BrowseView) {
-    setView(next);
-    setPage(1);
+    startTransition(() => {
+      setView(next);
+      setPage(1);
+    });
   }
 
   function viewButton(item: ViewItem) {
@@ -185,22 +188,28 @@ export function BrowseClient({
         key={item.id}
         type="button"
         aria-current={view === item.id ? "page" : undefined}
-        className={`browse-view${view === item.id ? " is-on" : ""}`}
+        className={`sx-tab${view === item.id ? " is-on" : ""}`}
         onClick={() => chooseView(item.id)}
       >
-        <span>
-          <b>{item.short}</b>
-          <small>{item.hint}</small>
-        </span>
+        <b>{item.short}</b>
         <em>{counts[item.id]}</em>
       </button>
     );
   }
 
   return (
-    <div className="browse-stage">
-      <header className="browse-hero">
-        <h1>{lookingFor ? `Looking for ${lookingFor}` : "Search matches"}</h1>
+    <div className="sx-stage">
+      <header className="sx-hero">
+        <div>
+          <p className="sx-eyebrow">Search</p>
+          <h1>{lookingFor ? `Find your ${lookingFor}` : "Find your match"}</h1>
+        </div>
+        {!notice ? (
+          <p className="sx-hero-count">
+            <b>{counts[view]}</b>
+            <span>{currentView.short}</span>
+          </p>
+        ) : null}
       </header>
 
       {view === "custom" && !notice ? (
@@ -226,9 +235,9 @@ export function BrowseClient({
         <p className="browse-flash is-warn">That profile is hidden or no longer available.</p>
       ) : null}
 
-      <div className="browse-board">
-        <nav className="browse-views browse-chip-row" aria-label="Match lists">
-          {[...DEFAULT_VIEWS, ...EXTRA_VIEWS].map(viewButton)}
+      <div className="sx-board">
+        <nav className="sx-tabs" aria-label="Match lists">
+          {ALL_VIEWS.map(viewButton)}
         </nav>
 
         {notice ? (
@@ -252,32 +261,27 @@ export function BrowseClient({
             </div>
           </div>
         ) : (
-          <section className="browse-results" aria-live="polite">
-            <header className="browse-results-head">
-              <div>
-                <p className="browse-kicker">{currentView.label}</p>
-                <h2>{lookingFor ?? "Matches"}</h2>
-              </div>
+          <section className="sx-results" aria-live="polite" data-pending={pending || undefined}>
+            <header className="sx-results-head">
+              <h2>{currentView.label}</h2>
               <p>
-                {ranked.length} {ranked.length === 1 ? "profile" : "profiles"}
-                <span> · {PROFILE_PAGE_SIZE} on a page</span>
+                {ranked.length} {ranked.length === 1 ? "profile" : "profiles"} · {currentView.hint}
               </p>
             </header>
-            {gate && shown.length ? <p className="browse-saved-note">{gate}</p> : null}
+            {gate && shown.length ? <p className="sx-note">{gate}</p> : null}
             {shown.length ? (
-              <ul className="browse-list">
-                {shown.map((note) => (
-                  <BrowseCard key={`${view}-${note.id}`} note={note} />
+              <ul className="sx-grid">
+                {shown.map((note, index) => (
+                  <BrowseCard key={`${view}-${note.id}`} note={note} priority={index < 3} />
                 ))}
               </ul>
             ) : (
-              <div className="browse-empty">
-                <div className="gold-ornament" />
+              <div className="sx-empty">
                 <h3>{gate || currentView.empty}</h3>
               </div>
             )}
             {pages > 1 ? (
-              <nav className="inbox-pager" aria-label="Search pages">
+              <nav className="sx-pager" aria-label="Search pages">
                 {currentPage > 1 ? (
                   <button type="button" className={btnGhost} onClick={() => setPage(currentPage - 1)}>
                     Previous

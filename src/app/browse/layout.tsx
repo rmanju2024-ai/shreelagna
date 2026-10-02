@@ -1,3 +1,5 @@
+import "./search-modern.css";
+
 export default function BrowseLayout({
   children,
   modal,
