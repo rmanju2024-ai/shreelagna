@@ -308,3 +308,7 @@ a.inbox-photo { color: inherit; text-decoration: none; display: block; }
 .site-nav .nav-menu > .nav-menu-item:hover { background: rgb(255 93 143 / 12%); }
 .site-nav .nav-menu > .nav-menu-item.is-on { background: rgb(255 93 143 / 16%); }
 .site-nav .nav-menu-item > span:not(.nav-3d-ico) { display: inline !important; font-size: 0.92rem; font-weight: 700; }
+
+/* backdrop-filter on the header trapped the fixed bottom nav inside it (menu flew off-screen). */
+header.sticky, header.absolute { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+header.sticky { background: rgb(251 245 236 / 94%) !important; }
