@@ -1,7 +1,6 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { Suspense } from "react";
-import { ChatSidebar, ChatSidebarSkeleton, firstChatId } from "@/app/app/chat/chat-sidebar";
+import { ChatSidebar, firstChatId } from "@/app/app/chat/chat-sidebar";
 import { LiveRefresh } from "@/components/live-refresh";
 import { PageShell } from "@/components/site-chrome";
 
@@ -19,9 +18,7 @@ export default async function ChatListPage() {
     <PageShell>
       <LiveRefresh table="messages" />
       <div className="wc-shell">
-        <Suspense fallback={<ChatSidebarSkeleton />}>
-          <ChatSidebar />
-        </Suspense>
+        <ChatSidebar />
         <section className="wc-welcome" aria-label="No chat selected">
           <div>
             <span className="gz-emoji" aria-hidden>💬</span>

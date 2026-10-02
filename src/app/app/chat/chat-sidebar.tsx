@@ -1,6 +1,6 @@
 import Link from "next/link";
+import { cache } from "react";
 import { redirect } from "next/navigation";
-import { AutoOpen } from "@/app/app/chat/auto-open";
 import { ChatAvatar } from "@/app/app/chat/chat-avatar";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { chatStamp, countByKey, latestByThread, previewText, unreadLabel } from "@/lib/match/chat-ui";
@@ -9,8 +9,8 @@ import { pairCanChat } from "@/lib/match/interest-status";
 import { displayFirstName } from "@/lib/profile/options";
 import { createServiceClient } from "@/lib/supabase/server";
 
-/** Left column of the chat screen: every accepted conversation, newest first. */
-export async function ChatSidebar({ activeId, autoOpen = false }: { activeId?: string; autoOpen?: boolean }) {
+/** One shared, per-request load of the chat list (sidebar and first-chat redirect reuse it). */
+const loadChatData = cache(async () => {
   const { supabase, user } = await getAuth();
   if (!supabase || !user) redirect("/login?next=/app/chat");
   const me = await ensureAppUser(supabase, user);
@@ -69,17 +69,15 @@ export async function ChatSidebar({ activeId, autoOpen = false }: { activeId?: s
   const lastMap = latestByThread(msgs ?? []);
   const unreadMap = countByKey((unreadNotes ?? []).map((row) => row.href));
   const photoMap = pickPrimaryPhotoMap(photoRows as never);
+  return { ids, openThreads, nameMap, lastMap, unreadMap, photoMap };
+});
 
-  const firstOpen = autoOpen
-    ? openThreads.find((thread) => {
-        const other = ids.includes(thread.profile_a) ? thread.profile_b : thread.profile_a;
-        return nameMap.get(other)?.status === "active";
-      })
-    : undefined;
+/** Left column of the chat screen: every accepted conversation, newest first. */
+export async function ChatSidebar({ activeId }: { activeId?: string; autoOpen?: boolean }) {
+  const { ids, openThreads, nameMap, lastMap, unreadMap, photoMap } = await loadChatData();
 
   return (
     <aside className="wc-side" aria-label="Conversations">
-      {firstOpen ? <AutoOpen href={`/app/chat/${firstOpen.id}`} /> : null}
       <header className="wc-side-head">
         <h1>Chats</h1>
         <p>{openThreads.length} {openThreads.length === 1 ? "match" : "matches"}</p>
@@ -153,30 +151,7 @@ export function ChatSidebarSkeleton() {
 
 /** Id of the newest open conversation whose other profile is active (null when none). */
 export async function firstChatId(): Promise<string | null> {
-  const { supabase, user } = await getAuth();
-  if (!supabase || !user) return null;
-  const me = await ensureAppUser(supabase, user);
-  if (!me) return null;
-  const { data: mine } = await supabase.from("profiles").select("id").eq("created_by", me.id);
-  const ids = (mine ?? []).map((p) => p.id);
-  if (!ids.length) return null;
-  const list = ids.join(",");
-  const [{ data: threads }, { data: rows }] = await Promise.all([
-    supabase
-      .from("threads")
-      .select("id, profile_a, profile_b, created_at")
-      .or(`profile_a.in.(${list}),profile_b.in.(${list})`)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("interests")
-      .select("from_profile_id, to_profile_id, status, created_at")
-      .or(`from_profile_id.in.(${list}),to_profile_id.in.(${list})`),
-  ]);
-  const open = (threads ?? []).filter((t) => pairCanChat(rows ?? [], t.profile_a, t.profile_b));
-  if (!open.length) return null;
-  const others = open.map((t) => (ids.includes(t.profile_a) ? t.profile_b : t.profile_a));
-  const { data: names } = await supabase.from("profiles").select("id, status").in("id", others);
-  const active = new Set((names ?? []).filter((n) => n.status === "active").map((n) => n.id));
-  const hit = open.find((t) => active.has(ids.includes(t.profile_a) ? t.profile_b : t.profile_a));
+  const { ids, openThreads, nameMap } = await loadChatData();
+  const hit = openThreads.find((t) => nameMap.get(ids.includes(t.profile_a) ? t.profile_b : t.profile_a)?.status === "active");
   return hit?.id ?? null;
 }
