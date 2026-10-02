@@ -150,3 +150,33 @@ export function ChatSidebarSkeleton() {
     </aside>
   );
 }
+
+/** Id of the newest open conversation whose other profile is active (null when none). */
+export async function firstChatId(): Promise<string | null> {
+  const { supabase, user } = await getAuth();
+  if (!supabase || !user) return null;
+  const me = await ensureAppUser(supabase, user);
+  if (!me) return null;
+  const { data: mine } = await supabase.from("profiles").select("id").eq("created_by", me.id);
+  const ids = (mine ?? []).map((p) => p.id);
+  if (!ids.length) return null;
+  const list = ids.join(",");
+  const [{ data: threads }, { data: rows }] = await Promise.all([
+    supabase
+      .from("threads")
+      .select("id, profile_a, profile_b, created_at")
+      .or(`profile_a.in.(${list}),profile_b.in.(${list})`)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("interests")
+      .select("from_profile_id, to_profile_id, status, created_at")
+      .or(`from_profile_id.in.(${list}),to_profile_id.in.(${list})`),
+  ]);
+  const open = (threads ?? []).filter((t) => pairCanChat(rows ?? [], t.profile_a, t.profile_b));
+  if (!open.length) return null;
+  const others = open.map((t) => (ids.includes(t.profile_a) ? t.profile_b : t.profile_a));
+  const { data: names } = await supabase.from("profiles").select("id, status").in("id", others);
+  const active = new Set((names ?? []).filter((n) => n.status === "active").map((n) => n.id));
+  const hit = open.find((t) => active.has(ids.includes(t.profile_a) ? t.profile_b : t.profile_a));
+  return hit?.id ?? null;
+}

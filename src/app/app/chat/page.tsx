@@ -1,15 +1,26 @@
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { ChatSidebar, ChatSidebarSkeleton } from "@/app/app/chat/chat-sidebar";
+import { ChatSidebar, ChatSidebarSkeleton, firstChatId } from "@/app/app/chat/chat-sidebar";
 import { LiveRefresh } from "@/components/live-refresh";
 import { PageShell } from "@/components/site-chrome";
 
-export default function ChatListPage() {
+export default async function ChatListPage() {
+  // Desktop: open the top conversation straight away (server-side, no flash, no client hop).
+  // Phones keep the list first.
+  const h = await headers();
+  const mobile = h.get("sec-ch-ua-mobile") === "?1" || /Mobi|Android|iPhone|iPad/i.test(h.get("user-agent") ?? "");
+  if (!mobile) {
+    const first = await firstChatId();
+    if (first) redirect(`/app/chat/${first}`);
+  }
+
   return (
     <PageShell>
       <LiveRefresh table="messages" />
       <div className="wc-shell">
         <Suspense fallback={<ChatSidebarSkeleton />}>
-          <ChatSidebar autoOpen />
+          <ChatSidebar />
         </Suspense>
         <section className="wc-welcome" aria-label="No chat selected">
           <div>
