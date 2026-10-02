@@ -518,3 +518,11 @@ table { max-width: 100%; }
 .wc-welcome { background: #f0f2f5; }
 @media (max-width: 820px) { .wc-pane .wa-stage { padding: 0.8rem 3%; } .wc-pane .wa-bubble { max-width: 85%; } }
 @media (prefers-reduced-motion: reduce) { .wc-pane .wa-bubble { animation: none; } }
+
+/* Chat scroll: old messages reachable (flex-end clipped the top), visible slim scrollbar */
+.wc-pane .wa-stage { display: flex; flex-direction: column; justify-content: flex-start !important; overflow-y: scroll; scrollbar-width: thin; scrollbar-color: #b8b0a2 transparent; overscroll-behavior: contain; }
+.wc-pane .wa-stream { margin-top: auto; }
+.wc-pane .wa-stage::-webkit-scrollbar { width: 8px; }
+.wc-pane .wa-stage::-webkit-scrollbar-thumb { background: #b8b0a2; border-radius: 8px; }
+.wc-pane .wa-stage::-webkit-scrollbar-track { background: transparent; }
+.wc-list { scrollbar-width: thin; }
