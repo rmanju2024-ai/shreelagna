@@ -1,5 +1,6 @@
 "use server";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { ensureAppUser } from "@/lib/auth/session";
 import { findOwnProfile } from "@/lib/profile/own-profile";
 import { isUniqueViolation, missingPayloadColumn, saveErrorMessage } from "@/lib/profile/db-errors";
@@ -53,7 +54,7 @@ async function requireMember() {
 }
 
 async function loadEditableProfile(
-  supabase: { from: (table: string) => any },
+  supabase: SupabaseClient,
   me: { id: string; role?: string | null },
   profileId: string,
 ) {
@@ -718,10 +719,13 @@ export async function viewContact(formData: FormData) {
   const email = typeof owner?.email === "string" ? owner.email.trim() : "";
   if (!mobile && !email) redirect(`/browse/${toId}`);
 
-  const { error } = await supabase.from("contact_views").insert({
-    viewer_profile_id: mine.id,
-    viewed_profile_id: toId,
-  });
+  const { error } = await supabase.from("contact_views").upsert(
+    {
+      viewer_profile_id: mine.id,
+      viewed_profile_id: toId,
+    },
+    { onConflict: "viewer_profile_id,viewed_profile_id", ignoreDuplicates: true },
+  );
   if (error) redirect(`/browse/${toId}?error=could_not_send`);
 
   if (me.role !== "admin" && me.role !== "service") {

@@ -32,6 +32,7 @@ export function ThreadView({
   const [, startTransition] = useTransition();
   const endRef = useRef<HTMLLIElement | null>(null);
   const boxRef = useRef<HTMLTextAreaElement | null>(null);
+  const sendLockRef = useRef(false);
 
   const shown = useMemo(() => {
     const open = pending.filter(
@@ -45,8 +46,10 @@ export function ThreadView({
   }, [shown.length]);
 
   function send() {
+    if (sendLockRef.current) return;
     const body = draft.trim();
     if (!body) return;
+    sendLockRef.current = true;
     const temp: Msg = {
       id: `tmp-${Date.now()}`,
       sender_profile_id: myProfileId,
@@ -63,6 +66,7 @@ export function ThreadView({
     data.set("body", body);
     startTransition(async () => {
       const result = await sendPeekChat(data).catch(() => null);
+      sendLockRef.current = false;
       if (!result || !result.ok) {
         setPending((prev) => prev.filter((row) => row.id !== temp.id));
         setDraft(body);

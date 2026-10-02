@@ -32,30 +32,35 @@ export async function SiteHeader({ overlay = false, glass = false }: { overlay?:
     staff = me?.role === "service" || me?.role === "admin";
     houseStar = me?.role === "admin" ? "admin" : me?.role === "service" ? "staff" : undefined;
     if (me) {
-      const badge = await unreadNoticeBadge(me.id).catch(async () => {
-        const { data: unread } = await supabase
-          .from("notices")
-          .select("id, kind, match_profile_id, created_at")
-          .eq("user_id", me.id)
-          .is("read_at", null)
-          .order("created_at", { ascending: false })
-          .limit(80);
-        const open = collapseNotices(unread ?? []);
-        return {
-          chatUnread: open.filter((row) => row.kind === "chat").length,
-          alertUnread: open.filter((row) => row.kind !== "chat").length,
-        };
-      });
+      const [badge, waitingResult] = await Promise.all([
+        unreadNoticeBadge(me.id).catch(async () => {
+          const { data: unread } = await supabase
+            .from("notices")
+            .select("id, kind, match_profile_id, created_at")
+            .eq("user_id", me.id)
+            .is("read_at", null)
+            .order("created_at", { ascending: false })
+            .limit(80);
+          const open = collapseNotices(unread ?? []);
+          return {
+            chatUnread: open.filter((row) => row.kind === "chat").length,
+            alertUnread: open.filter((row) => row.kind !== "chat").length,
+          };
+        }),
+        me.active_profile_id
+          ? supabase
+              .from("interests")
+              .select("from_profile_id, status, created_at")
+              .eq("to_profile_id", me.active_profile_id)
+              .eq("status", "pending")
+              .limit(100)
+          : Promise.resolve({ data: [] }),
+      ]);
       chatUnread = badge.chatUnread;
       alertUnread = badge.alertUnread;
       if (me.active_profile_id) {
         // Likes badge = pending interests actually waiting in Likes > Received (same rules as that page).
-        const { data: waiting } = await supabase
-          .from("interests")
-          .select("from_profile_id, status, created_at")
-          .eq("to_profile_id", me.active_profile_id)
-          .eq("status", "pending")
-          .limit(100);
+        const waiting = waitingResult.data ?? [];
         const senderIds = [...new Set((waiting ?? []).map((row) => row.from_profile_id))];
         const { data: senders } = senderIds.length
           ? await supabase.from("profiles").select("id, status").in("id", senderIds)
@@ -141,14 +146,12 @@ export async function PageShell({
   full = false,
   overlay = false,
   atmosphere,
-  honeymoon = false,
 }: {
   children: React.ReactNode;
   bleed?: boolean;
   full?: boolean;
   overlay?: boolean;
   atmosphere?: boolean;
-  honeymoon?: boolean;
 }) {
   const scene = await readScene();
   const showAtmosphere = atmosphere === true;

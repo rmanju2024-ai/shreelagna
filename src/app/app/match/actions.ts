@@ -97,15 +97,30 @@ export async function respondInterest(formData: FormData) {
   const reason = next === "declined" ? trimDeclineReason(formData.get("reason")) : null;
   const payload: Record<string, unknown> = { status: next, responded_at: new Date().toISOString() };
   if (next === "declined") payload.decline_reason = reason;
-  const { error } = await supabase.from("interests").update(payload).eq("id", id);
+  let changed = await supabase
+    .from("interests")
+    .update(payload)
+    .eq("id", id)
+    .eq("status", "pending")
+    .select("id")
+    .maybeSingle();
+  const { error } = changed;
   if (error && missingPayloadColumn(error, payload)) {
     const retry = { status: next, responded_at: payload.responded_at };
-    const again = await supabase.from("interests").update(retry).eq("id", id);
-    if (again.error) {
-      revalidatePath("/app/interests");
-      redirect("/app/interests?error=sql");
-    }
+    changed = await supabase
+      .from("interests")
+      .update(retry)
+      .eq("id", id)
+      .eq("status", "pending")
+      .select("id")
+      .maybeSingle();
   }
+  if (changed.error) {
+    revalidatePath("/app/interests");
+    redirect("/app/interests?error=sql");
+  }
+  // A second click or concurrent response finds no pending row and must not repeat side effects.
+  if (!changed.data) redirect("/app/interests");
 
   if (next === "accepted") {
     const [a, b] = orderedPair(row.from_profile_id, row.to_profile_id);
