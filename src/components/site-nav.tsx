@@ -75,6 +75,7 @@ function NavGroup({
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const [down, setDown] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const mark = unreadLabel(badge ?? 0);
 
@@ -100,7 +101,11 @@ function NavGroup({
         className={`nav-3d${overlay ? " is-overlay" : ""}${current || open ? " is-on" : ""}`}
         aria-expanded={open}
         aria-haspopup="menu"
-        onClick={() => setOpen((value) => !value)}
+        onClick={(event) => {
+          const r = event.currentTarget.getBoundingClientRect();
+          setDown(r.top < 360);
+          setOpen((value) => !value);
+        }}
       >
         <span className="nav-3d-ico">
           <NavGlyph name={icon} />
@@ -121,7 +126,7 @@ function NavGroup({
         {mark ? <b className="nav-badge">{mark}</b> : null}
       </button>
       {open ? (
-        <div className="nav-menu" role="menu" onClick={() => setOpen(false)}>
+        <div className={`nav-menu${down ? " is-down" : ""}`} role="menu" onClick={() => setOpen(false)}>
           {children}
         </div>
       ) : null}
