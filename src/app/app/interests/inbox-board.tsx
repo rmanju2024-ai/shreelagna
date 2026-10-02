@@ -74,26 +74,25 @@ export function InboxBoard({
   };
 
   return (
-    <article className={`inbox-board inbox-theme-${tab}`}>
-      <aside className="inbox-rail" aria-label="Inbox sections">
-        <div className="inbox-tabs" role="tablist">
+    <article className="sx-board inbox-modern">
+      <aside aria-label="Inbox sections">
+        <div className="sx-tabs" role="tablist">
           {TABS.map((item) => (
             <button
               key={item.id}
               type="button"
               role="tab"
               aria-selected={tab === item.id}
-              className={`inbox-tab inbox-tab-${item.id}${tab === item.id ? " is-on" : ""}`}
+              className={`sx-tab${tab === item.id ? " is-on" : ""}`}
               onClick={() => setTab(item.id)}
             >
-              <span className="inbox-tab-full">{item.label}</span>
-              <span className="inbox-tab-short">{item.short}</span>
-              <b>{counts[item.id]}</b>
+              <b>{item.label}</b>
+              <em>{counts[item.id]}</em>
             </button>
           ))}
         </div>
       </aside>
-      <div className="inbox-pane">
+      <div className="inbox-pane-modern">
         {tab === "received" ? (
           <NoteList
             empty="None pending."
@@ -212,50 +211,46 @@ function cardChips(note: InboxNote): string[] {
 
 function CardFace({ note, actions }: { note: InboxNote; actions?: ReactNode }) {
   const href = profileHref(note);
-  const photo = note.photoUrl ? (
-    <Image src={note.photoUrl} alt="" fill sizes="(max-width: 640px) 40vw, 200px" quality={65} style={{ objectFit: "cover" }} />
-  ) : (
-    <span>{note.name.slice(0, 1)}</span>
-  );
-  const chips = cardChips(note);
-  return (
-    <div className="browse-card-link inbox-card-face">
-      {href ? (
-        <OpenLink href={href} className="browse-card-photo inbox-photo inbox-open" kind="photo">
-          {photo}
-        </OpenLink>
+  const facts = [note.age, note.height].filter(Boolean).join(" · ");
+  const place = [note.city, note.state].filter(Boolean).join(", ");
+  const tags = [[note.religion, note.community].filter(Boolean).join(" · "), note.education ?? "", note.occupation ?? ""].filter(Boolean);
+  const inner = (
+    <>
+      {note.photoUrl ? (
+        <Image src={note.photoUrl} alt="" fill sizes="(max-width: 640px) 50vw, 264px" quality={65} style={{ objectFit: "cover" }} />
       ) : (
-        <div className="browse-card-photo inbox-photo" aria-hidden={!note.photoUrl}>
-          {photo}
-        </div>
+        <span className="sx-initial">{note.name.slice(0, 1)}</span>
       )}
-      <div className="browse-card-copy inbox-body">
-        {href ? (
-          <OpenLink href={href} className="browse-card-name inbox-name inbox-open" kind="name">
-            {note.name}
-          </OpenLink>
-        ) : (
-          <p className="browse-card-name inbox-name">{note.name}</p>
-        )}
-        {note.lastOnline ? <p className="browse-card-seen inbox-online">{note.lastOnline}</p> : null}
-        {chips.length ? (
-          <ul className="browse-card-meta inbox-meta">
-            {chips.map((item) => (
+      {note.status ? <b className="sx-badge">{note.status}</b> : null}
+      <div className="sx-photo-copy">
+        <h3>{note.name}</h3>
+        {facts ? <p>{facts}</p> : null}
+      </div>
+    </>
+  );
+  return (
+    <div className="sx-card-link inbox-card-face">
+      {href ? (
+        <a href={href} className="sx-photo inbox-photo inbox-open">
+          {inner}
+        </a>
+      ) : (
+        <div className="sx-photo inbox-photo">{inner}</div>
+      )}
+      <div className="sx-body">
+        {place ? <p className="sx-place">{place}</p> : null}
+        {tags.length ? (
+          <ul className="sx-tags">
+            {tags.map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
         ) : null}
-        {note.status ? <p className="inbox-status">{note.status}</p> : null}
         {note.reason ? <p className="inbox-reason">{note.reason}</p> : null}
-      </div>
-      <div className="inbox-side">
-        {note.when ? (
-          <p className="inbox-when">
-            {note.whenLabel ? `${note.whenLabel} · ` : ""}
-            {note.when}
-          </p>
-        ) : null}
-        {actions ? <div className="inbox-actions">{actions}</div> : null}
+        <div className="sx-foot">
+          <span>{note.when ? `${note.whenLabel ? `${note.whenLabel} · ` : ""}${note.when}` : note.lastOnline ?? ""}</span>
+        </div>
+        {actions ? <div className="inbox-actions sx-actions">{actions}</div> : null}
       </div>
     </div>
   );
@@ -286,13 +281,13 @@ function NoteList({
 
   return (
     <div>
-      <ul className="inbox-list">
+      <ul className="sx-grid inbox-list">
         {shown.map((note) => {
           const href = profileHref(note);
           return (
           <li
             key={note.id}
-            className={`browse-card inbox-card inbox-profile${href ? " is-openable" : ""}`}
+            className={`sx-card inbox-card inbox-profile${href ? " is-openable" : ""}`}
             onClick={(event) => openProfile(event, href)}
           >
             <CardFace note={note} actions={actions ? actions(note) : null} />
@@ -301,7 +296,7 @@ function NoteList({
         })}
       </ul>
       {pages > 1 ? (
-        <nav className="inbox-pager" aria-label="Profile pages">
+        <nav className="sx-pager" aria-label="Profile pages">
           <button type="button" className={btnGhost} disabled={current <= 1} onClick={() => setPage(current - 1)}>
             Previous
           </button>

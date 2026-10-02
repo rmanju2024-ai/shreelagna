@@ -141,3 +141,54 @@ main { animation: gz-rise 0.35s ease both; }
 .nav-menu-item { border-radius: 0.9rem; font-weight: 600; }
 .nav-menu-item .nav-3d-ico { color: var(--accent); }
 .nav-menu-item:hover { background: rgb(255 93 143 / 10%); }
+
+/* Likes inbox uses the same cards as Discover */
+.inbox-modern { display: grid; gap: 1rem; margin-top: 0.7rem; }
+.inbox-pane-modern { display: grid; gap: 1rem; }
+.inbox-list.sx-grid { display: grid; gap: 1.1rem; grid-template-columns: repeat(auto-fill, minmax(16.5rem, 1fr)); }
+.inbox-card.sx-card { border: 0; background: transparent; padding: 0; }
+.inbox-card.is-openable { cursor: pointer; }
+.sx-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.4rem; }
+.inbox-reason { margin: 0; font-size: 0.8rem; font-style: italic; color: var(--muted); }
+a.inbox-photo { color: inherit; text-decoration: none; display: block; }
+
+/* ===== Same modern surface language everywhere (Likes, Chat, Alerts, Plans, Profile, Desk) ===== */
+.desk-hero, .portrait-mast, .settings-page > header {
+  border-radius: var(--radius-lg);
+  border: 0;
+  color: #fff8e7;
+  background: radial-gradient(120% 140% at 0% 0%, #8c2a27 0%, #4a0f0e 55%, #2a0807 100%);
+  box-shadow: 0 20px 40px -22px rgb(63 14 13 / 55%);
+}
+.desk-hero h1, .desk-hero h2, .desk-hero p, .portrait-mast h1, .portrait-mast h2, .portrait-mast p { color: inherit; }
+
+.desk-stat, .alert-card, .plan-card, .portrait-sheet, .portrait-group, .portrait-story, .pref-sheet, .wa-app {
+  border-radius: var(--radius-lg) !important;
+  border: 1px solid rgb(184 137 76 / 22%) !important;
+  background: rgb(255 255 255 / 74%) !important;
+  box-shadow: var(--shadow-soft) !important;
+  backdrop-filter: blur(14px) saturate(1.3);
+}
+.plan-card:hover, .alert-card:hover { transform: translateY(-3px); transition: transform 0.2s var(--ease-pop); }
+
+.desk-tab, .desk-pill, .portrait-tabs button, .portrait-tabs a {
+  border-radius: 999px !important;
+  border: 1.5px solid rgb(184 137 76 / 30%) !important;
+  background: rgb(255 255 255 / 72%) !important;
+  box-shadow: none !important;
+  font-weight: 700;
+  transition: background 0.18s, color 0.18s, transform 0.18s var(--ease-pop);
+}
+.desk-tab.is-on, .desk-tab[aria-current="page"], .portrait-tabs .is-on, .portrait-tabs [aria-selected="true"], .desk-pill.is-on {
+  color: #fff !important;
+  border-color: transparent !important;
+  background: var(--grad-brand) !important;
+  box-shadow: 0 10px 20px -10px rgb(194 65 90 / 80%) !important;
+}
+
+/* Chat list rows & alerts */
+.wa-head { background: var(--grad-brand) !important; color: #fff; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+.wa-list > li > a, .wa-list > li, .alert-list > li { border-radius: 1.1rem; transition: background 0.15s, transform 0.18s var(--ease-pop); }
+.wa-list > li:hover, .alert-list > li:hover { background: rgb(255 93 143 / 8%); transform: translateX(2px); }
+.wa-unread { background: var(--pop) !important; color: #fff !important; }
+.wa-avatar { box-shadow: 0 0 0 2px #fff, 0 6px 14px -6px rgb(63 14 13 / 45%); }

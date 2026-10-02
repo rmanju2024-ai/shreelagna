@@ -21,21 +21,22 @@ export function NavGlyph({ name }: { name: string }) {
     case "browse":
       return (
         <svg {...common}>
-          <circle {...duo} cx="12" cy="12" r="8.5" />
-          <path {...duo} fillOpacity={0.35} d="m15.6 8.4-2 5.2-5.2 2 2-5.2 5.2-2Z" />
+          <circle {...duo} cx="12" cy="12" r="9" />
+          <path {...duo} fillOpacity={0.4} d="m16.2 7.8-2.3 6.1-6.1 2.3 2.3-6.1 6.1-2.3Z" />
+          <circle cx="12" cy="12" r="0.9" fill="currentColor" stroke="none" />
         </svg>
       );
     case "inbox":
       return (
         <svg {...common}>
-          <path {...duo} d="M12 20s-7.5-4.4-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.6-7.5 10-7.5 10Z" />
+          <path {...duo} d="M12 20.5s-8-4.9-8-11a4.6 4.6 0 0 1 8-3.1 4.6 4.6 0 0 1 8 3.1c0 6.1-8 11-8 11Z" />
         </svg>
       );
     case "chat":
       return (
         <svg {...common}>
-          <path {...duo} d="M20 11.5a7.5 7.5 0 0 1-11 6.6L4 19.5l1.4-4.3A7.5 7.5 0 1 1 20 11.5Z" />
-          <path d="M9 11.5h.01M12.5 11.5h.01M16 11.5h.01" strokeWidth={2.2} />
+          <path {...duo} d="M6 4.5h12A2.5 2.5 0 0 1 20.5 7v8a2.5 2.5 0 0 1-2.5 2.5h-6.2L7.5 21v-3.5H6A2.5 2.5 0 0 1 3.5 15V7A2.5 2.5 0 0 1 6 4.5Z" />
+          <path d="M8 9.5h8M8 12.8h5" />
         </svg>
       );
     case "alerts":

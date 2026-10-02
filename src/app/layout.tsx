@@ -3,6 +3,7 @@ import { Geist, Source_Serif_4 } from "next/font/google";
 import { WebVitals } from "@/components/web-vitals";
 import { Butterflies } from "@/components/butterflies";
 import "./globals.css";
+import "./search-modern.css";
 import "./theme-genz.css";
 
 const geistSans = Geist({
