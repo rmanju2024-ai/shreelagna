@@ -63,4 +63,10 @@ describe("shared mobile CSS contract", () => {
     expect(css).toContain(".profile-create-shell");
     expect(css).toContain(".home-value-card");
   });
+
+  it("keeps headings and explanations readable over every scene", () => {
+    expect(css).toContain(".sx-hero h1 { color: var(--ink)");
+    expect(css).toContain(".sx-hero-sub { color: color-mix");
+    expect(css).toContain("background-color: rgb(255 252 247 / 92%)");
+  });
 });

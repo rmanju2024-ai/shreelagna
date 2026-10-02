@@ -953,10 +953,15 @@ table { max-width: 100%; }
   border: 1px solid rgb(255 255 255 / 72%);
   background:
     radial-gradient(circle at 92% 15%, rgb(255 255 255 / 48%) 0 3.2rem, transparent 3.3rem),
-    linear-gradient(120deg, rgb(255 255 255 / 72%), rgb(255 233 241 / 68%) 55%, rgb(238 234 255 / 72%));
+    linear-gradient(120deg, rgb(255 255 255 / 94%), rgb(255 233 241 / 92%) 55%, rgb(238 234 255 / 94%));
+  color: var(--ink);
   box-shadow: var(--gz-shadow);
   backdrop-filter: blur(18px) saturate(1.2);
 }
+.sx-hero h1 { color: var(--ink); text-shadow: none; }
+.sx-hero-sub { color: color-mix(in srgb, var(--ink) 76%, transparent); opacity: 1; }
+.sx-hero-count b { color: var(--accent); }
+.sx-hero-count span { color: var(--muted); opacity: 1; }
 .sx-eyebrow {
   display: inline-flex;
   align-items: center;
@@ -969,6 +974,16 @@ table { max-width: 100%; }
   box-shadow: inset 0 0 0 1px rgb(194 65 90 / 14%);
 }
 .sx-eyebrow::before { content: "✦"; color: var(--pop); }
+
+/* Scene photos are decorative: content always keeps a readable opaque layer. */
+.app-main :where(.sx-board, .card-premium, .alert-card, .plan-card, .desk-panel, .portrait-group) {
+  color: var(--ink);
+  background-color: rgb(255 252 247 / 92%);
+}
+.app-main :where(.sx-board, .card-premium, .alert-card, .plan-card, .desk-panel, .portrait-group)
+  :where(p, small, time, .sx-place, .desk-ticket-meta) {
+  text-shadow: none;
+}
 
 /* Familiar, tactile controls on forms and dense utility pages. */
 .app-main :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
