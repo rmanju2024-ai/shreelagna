@@ -207,26 +207,10 @@ export function BrowseClient({
         {!notice ? (
           <p className="sx-hero-count">
             <b>{counts[view]}</b>
-            <span>{currentView.short}</span>
+            <span>{counts[view] === 1 ? "profile" : "profiles"}</span>
           </p>
         ) : null}
       </header>
-
-      {view === "custom" && !notice ? (
-        <BrowseFilterDesk
-          filters={filters}
-          religions={religions}
-          communities={communities}
-          onApply={(next) => {
-            setFilters(next);
-            setPage(1);
-          }}
-          onClear={() => {
-            setFilters(EMPTY_BROWSE_FILTERS);
-            setPage(1);
-          }}
-        />
-      ) : null}
 
       {error === "need_profile" ? (
         <p className="browse-flash is-warn">Create and activate a profile before sending interest.</p>
@@ -239,6 +223,22 @@ export function BrowseClient({
         <nav className="sx-tabs" aria-label="Match lists">
           {ALL_VIEWS.map(viewButton)}
         </nav>
+
+        {view === "custom" && !notice ? (
+          <BrowseFilterDesk
+            filters={filters}
+            religions={religions}
+            communities={communities}
+            onApply={(next) => {
+              setFilters(next);
+              setPage(1);
+            }}
+            onClear={() => {
+              setFilters(EMPTY_BROWSE_FILTERS);
+              setPage(1);
+            }}
+          />
+        ) : null}
 
         {notice ? (
           <div className={`${cardClass} browse-gate`}>
@@ -263,7 +263,7 @@ export function BrowseClient({
         ) : (
           <section className="sx-results" aria-live="polite" data-pending={pending || undefined}>
             <header className="sx-results-head">
-              <h2>{currentView.label}</h2>
+              {view === "custom" ? null : <h2>{currentView.label}</h2>}
               <p>
                 {ranked.length} {ranked.length === 1 ? "profile" : "profiles"} · {currentView.hint}
               </p>

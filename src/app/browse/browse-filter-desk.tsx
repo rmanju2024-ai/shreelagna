@@ -61,7 +61,6 @@ export function BrowseFilterDesk({
     >
       <div className="sx-filter-head">
         <div>
-          <h2>Advanced filter</h2>
           <p>Pick what you want, then Apply. Age can be 18 to 80.</p>
         </div>
         <div className="sx-filter-actions">
