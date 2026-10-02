@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { cookies } from "next/headers";
+import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
 import { LiveClock } from "@/components/live-clock";
 import { getAuth, ensureAppUser } from "@/lib/auth/session";
@@ -124,17 +125,23 @@ function HeaderSkeleton({ overlay }: { overlay: boolean }) {
 export function SiteFooter({ glass = false }: { glass?: boolean }) {
   return (
     <footer
-      className={
+      className={`site-footer ${
         glass
           ? "relative z-20 mt-auto w-full border-t border-[var(--gold)]/30 bg-[#3f0e0d]/70 backdrop-blur-xl"
           : "relative z-20 mt-auto w-full border-t border-[var(--gold)]/35 bg-[#3f0e0d]"
-      }
+      }`}
     >
-      <div className={`${pageInner} flex flex-col gap-3 py-8 sm:flex-row sm:items-center sm:justify-between`}>
-        <BrandMark light />
-        <p className="text-sm leading-relaxed text-[#e7d3b0] sm:text-right">
-          Adults only · Indian families · Private introductions
-        </p>
+      <div className={`${pageInner} site-footer-inner`}>
+        <Link href="/" className="site-footer-brand" aria-label="Shree Lagna home">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/graphics/shreelagna-crest-3d.png" alt="" width={36} height={36} />
+          <span>Shree Lagna</span>
+        </Link>
+        <nav className="site-footer-links" aria-label="Footer">
+          <Link href="/about">About</Link>
+          <Link href="/contact">Help</Link>
+        </nav>
+        <p>Adults only · Indian families · Private introductions</p>
       </div>
     </footer>
   );

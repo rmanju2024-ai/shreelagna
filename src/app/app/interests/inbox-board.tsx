@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type MouseEvent, type ReactNode } from "react";
+import { useRef, useState, type MouseEvent, type ReactNode } from "react";
 import { respondInterest } from "@/app/app/match/actions";
 import { pageCount, pageItems, PROFILE_PAGE_SIZE } from "@/lib/match/inbox-card";
 import { btnGhost, btnPrimary } from "@/lib/ui/classes";
@@ -64,6 +64,7 @@ export function InboxBoard({
   visited?: InboxView[];
 }) {
   const [tab, setTab] = useState<TabId>("received");
+  const tabsRef = useRef<HTMLDivElement>(null);
   const counts: Record<TabId, number> = {
     received: received.length,
     sent: sent.length,
@@ -76,7 +77,16 @@ export function InboxBoard({
   return (
     <article className="sx-board inbox-modern">
       <aside aria-label="Inbox sections">
-        <div className="sx-tabs" role="tablist">
+        <div className="inbox-tab-shell">
+          <button
+            type="button"
+            className="inbox-tab-scroll is-left"
+            aria-label="Show previous Likes options"
+            onClick={() => tabsRef.current?.scrollBy({ left: -220, behavior: "smooth" })}
+          >
+            ‹
+          </button>
+          <div className="sx-tabs inbox-tabs" role="tablist" ref={tabsRef}>
           {TABS.map((item) => (
             <button
               key={item.id}
@@ -84,12 +94,24 @@ export function InboxBoard({
               role="tab"
               aria-selected={tab === item.id}
               className={`sx-tab${tab === item.id ? " is-on" : ""}`}
-              onClick={() => setTab(item.id)}
+              onClick={(event) => {
+                setTab(item.id);
+                event.currentTarget.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+              }}
             >
               <b>{item.label}</b>
               <em>{counts[item.id]}</em>
             </button>
           ))}
+          </div>
+          <button
+            type="button"
+            className="inbox-tab-scroll is-right"
+            aria-label="Show more Likes options"
+            onClick={() => tabsRef.current?.scrollBy({ left: 220, behavior: "smooth" })}
+          >
+            ›
+          </button>
         </div>
       </aside>
       <div className="inbox-pane-modern">

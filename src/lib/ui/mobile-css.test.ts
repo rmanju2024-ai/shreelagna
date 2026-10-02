@@ -1,0 +1,37 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { describe, expect, it } from "vitest";
+
+const css = readFileSync(resolve(process.cwd(), "src/app/theme-genz.css"), "utf8");
+
+describe("shared mobile CSS contract", () => {
+  it("uses the project phone breakpoint and safe-area bottom navigation", () => {
+    expect(css).toContain("@media (max-width: 820px)");
+    expect(css).toContain("env(safe-area-inset-bottom)");
+    expect(css).toContain("bottom: 0 !important");
+  });
+
+  it("keeps cards and forms inside narrow screens", () => {
+    expect(css).toContain("grid-template-columns: minmax(0, 1fr) !important");
+    expect(css).toContain("width: 100%; min-width: 0; max-width: 100%");
+    expect(css).toContain("overflow-x: auto");
+  });
+
+  it("provides touch-size controls and a scrollable More sheet", () => {
+    expect(css).toContain("min-height: 44px");
+    expect(css).toContain("body > .nav-menu.is-mobile-sheet");
+    expect(css).toContain("overflow-y: auto !important");
+  });
+
+  it("stacks chat and preserves a visible composer", () => {
+    expect(css).toContain(".wc-shell.has-thread .wc-side { display: none; }");
+    expect(css).toContain(".wc-pane .wa-composer { position: sticky");
+  });
+
+  it("keeps the footer compact and above the mobile navigation", () => {
+    expect(css).toContain(".site-footer-inner");
+    expect(css).toContain("min-height: 3.25rem");
+    expect(css).toContain("margin-bottom: calc(4.65rem + env(safe-area-inset-bottom))");
+    expect(css).not.toContain("footer { padding-bottom: 5.5rem; }");
+  });
+});

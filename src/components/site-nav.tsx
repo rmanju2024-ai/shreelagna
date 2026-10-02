@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import { createPortal } from "react-dom";
 import { useEffect, useRef, useState } from "react";
 import { NavGlyph } from "@/components/nav-icons";
 import { SignOutButton } from "@/components/sign-out-button";
@@ -76,12 +77,15 @@ function NavGroup({
 }) {
   const [open, setOpen] = useState(false);
   const [down, setDown] = useState(false);
+  const [mobile, setMobile] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const mark = unreadLabel(badge ?? 0);
 
   useEffect(() => {
     function onDoc(event: MouseEvent) {
-      if (!ref.current?.contains(event.target as Node)) setOpen(false);
+      const target = event.target as Node;
+      if (!ref.current?.contains(target) && !menuRef.current?.contains(target)) setOpen(false);
     }
     function onKey(event: KeyboardEvent) {
       if (event.key === "Escape") setOpen(false);
@@ -94,6 +98,17 @@ function NavGroup({
     };
   }, []);
 
+  const menu = open ? (
+    <div
+      ref={menuRef}
+      className={`nav-menu${down ? " is-down" : ""}${mobile ? " is-mobile-sheet" : ""}`}
+      role="menu"
+      onClick={() => setOpen(false)}
+    >
+      {children}
+    </div>
+  ) : null;
+
   return (
     <div className="nav-group" ref={ref}>
       <button
@@ -104,6 +119,7 @@ function NavGroup({
         onClick={(event) => {
           const r = event.currentTarget.getBoundingClientRect();
           setDown(r.top < 360);
+          setMobile(window.matchMedia("(max-width: 820px)").matches);
           setOpen((value) => !value);
         }}
       >
@@ -125,11 +141,7 @@ function NavGroup({
         </span>
         {mark ? <b className="nav-badge">{mark}</b> : null}
       </button>
-      {open ? (
-        <div className={`nav-menu${down ? " is-down" : ""}`} role="menu" onClick={() => setOpen(false)}>
-          {children}
-        </div>
-      ) : null}
+      {mobile && menu ? createPortal(menu, document.body) : menu}
     </div>
   );
 }
