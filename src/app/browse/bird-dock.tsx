@@ -284,6 +284,17 @@ export function BirdDock({
     event.preventDefault();
     markActed();
     const data = new FormData(event.currentTarget);
+    const rect = event.currentTarget.getBoundingClientRect();
+    for (let i = 0; i < 3; i += 1) {
+      const fly = document.createElement("span");
+      fly.className = "pv-butterfly";
+      fly.textContent = "🦋";
+      fly.style.left = `${rect.left + rect.width / 2 + (i - 1) * 22}px`;
+      fly.style.top = `${rect.top}px`;
+      fly.style.animationDelay = `${i * 0.12}s`;
+      document.body.appendChild(fly);
+      window.setTimeout(() => fly.remove(), 1800);
+    }
     playThen("send", () => {
       startTransition(() => {
         void sendInterest(data);

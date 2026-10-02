@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import Link from "next/link";
 import { CopyMemberId } from "@/app/app/profiles/copy-member-id";
 import { btnGhost, btnPrimary } from "@/lib/ui/classes";
@@ -155,6 +155,7 @@ export function PortraitSheet({
                 </p>
                 <h1>{name}</h1>
                 <div className="gold-ornament" />
+                <QuickFacts groups={[...personalGroups, ...workGroups]} sheet={hopeSheet ?? null} />
                 {lastSeen ? (
                   <p className={`portrait-last-seen${isOnlineNow(lastSeenAt) ? " is-now" : ""}`}>
                     <i aria-hidden />
@@ -408,5 +409,54 @@ function FactRows({ items, gateKeys = [] }: { items?: Fact[]; gateKeys?: string[
         </Fragment>
       ))}
     </dl>
+  );
+}
+
+const CHIP_KEYS = ["Height", "Marital status", "Highest education", "Working as", "Current residence", "Diet", "Mother tongue", "Annual income"];
+
+function QuickFacts({ groups, sheet }: { groups: FactGroup[]; sheet: HopeSheet | null }) {
+  const all = groups.flatMap((g) => g.items);
+  const chips = CHIP_KEYS.map((key) => all.find((i) => i.k === key))
+    .filter((i): i is Fact => Boolean(i && i.v && i.v !== "—"))
+    .slice(0, 8);
+  const total = sheet?.rows.length ?? 0;
+  const hit = sheet?.rows.filter((r) => r.match === true).length ?? 0;
+  const pct = total ? Math.round((hit / total) * 100) : 0;
+  const why = (sheet?.rows ?? []).filter((r) => r.match === true && r.v && r.v !== "—").slice(0, 3).map((r) => r.k);
+  const [shown, setShown] = useState(0);
+  useEffect(() => {
+    if (!pct) return;
+    let n = 0;
+    const id = window.setInterval(() => {
+      n = Math.min(pct, n + Math.max(1, Math.round(pct / 22)));
+      setShown(n);
+      if (n >= pct) window.clearInterval(id);
+    }, 28);
+    return () => window.clearInterval(id);
+  }, [pct]);
+  if (!chips.length && !total) return null;
+  return (
+    <div className="qf">
+      {total ? (
+        <div className="qf-match">
+          <svg className="qf-ring" viewBox="0 0 36 36" aria-label={`${pct}% match`}>
+            <circle cx="18" cy="18" r="15.9" className="qf-ring-bg" />
+            <circle cx="18" cy="18" r="15.9" className="qf-ring-fill" style={{ strokeDasharray: `${pct} 100` }} />
+          </svg>
+          <b className="qf-pct">{shown}%</b>
+          <span className="qf-why">{why.length ? `You match: ${why.join(" · ")}` : `${hit}/${total} preferences match`}</span>
+        </div>
+      ) : null}
+      {chips.length ? (
+        <ul className="qf-chips">
+          {chips.map((c, i) => (
+            <li key={c.k} style={{ animationDelay: `${0.1 + i * 0.06}s` }}>
+              <small>{c.k.replace("Highest ", "").replace("Current residence", "Lives in")}</small>
+              <b>{c.v}</b>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
   );
 }

@@ -170,6 +170,7 @@ export function AlbumViewer({
         </figure>
       ) : locked ? (
         <div className="album-stage album-empty">
+          <span className="album-lock" aria-hidden>🔒</span>
           <p>Photographs are shown after interest is accepted</p>
         </div>
       ) : editable ? (
