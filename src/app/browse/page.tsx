@@ -169,6 +169,21 @@ export default async function BrowsePage({
         lookingFor = want ? profileKindLabel(want) : null;
         const mediaClient = createServiceClient() ?? supabase;
         const mineId = String(mine.id);
+        type Visit = { viewer_profile_id: string; viewed_profile_id: string; viewed_at: string };
+        // One database call (supabase/migrations/058_browse_bundle.sql); falls back to the older multi-call path.
+        const rpc = await (
+          supabase as unknown as {
+            rpc: (
+              fn: string,
+              args: Record<string, unknown>,
+            ) => Promise<{ data: unknown; error: { message?: string } | null }>;
+          }
+        ).rpc("browse_bundle", { p_mine: mineId, p_want: want, p_limit: BROWSE_LIST_LIMIT });
+        const bundle =
+          !rpc.error && rpc.data && typeof rpc.data === "object"
+            ? (rpc.data as { rows: Record<string, unknown>[]; viewed_you: Visit[]; you_viewed: Visit[] })
+            : null;
+        const legacy = async () => {
         const listQuery = async (cols: string) => {
           const query = db
             .from("profiles")
@@ -204,6 +219,20 @@ export default async function BrowsePage({
           youViewedPromise,
           adminPromise,
         ]);
+        return { listData, viewedYou, youViewed, adminIds };
+        };
+        const loaded = bundle
+          ? {
+              listData: {
+                data: bundle.rows.filter((row) => row.is_extra !== true) as Record<string, unknown>[] | null,
+                error: null as { message?: string } | null,
+              },
+              viewedYou: { data: bundle.viewed_you as Visit[] | null },
+              youViewed: { data: bundle.you_viewed as Visit[] | null },
+              adminIds: new Set<string>(),
+            }
+          : await legacy();
+        const { listData, viewedYou, youViewed, adminIds } = loaded;
         if (listData.error) {
           notice = "Matches could not load just now. Please try again shortly.";
         } else {
@@ -224,8 +253,8 @@ export default async function BrowsePage({
               visit.viewer_profile_id === mineId ? visit.viewed_profile_id : visit.viewer_profile_id;
             if (other && other !== mineId && !listedIds.has(other)) extraIds.add(other);
           }
-          let extra: Record<string, unknown>[] = [];
-          if (extraIds.size) {
+          let extra: Record<string, unknown>[] = bundle ? bundle.rows.filter((row) => row.is_extra === true) : [];
+          if (!bundle && extraIds.size) {
             const extraQuery = (cols: string) =>
               db.from("profiles").select(cols).eq("status", "active").in("id", [...extraIds]);
             const extraSlim = await extraQuery(BROWSE_PROFILE_SELECT);
@@ -233,14 +262,22 @@ export default async function BrowsePage({
               []) as unknown as Record<string, unknown>[];
           }
           const keepHouse = (row: Record<string, unknown>) =>
-            me.role === "admin" || String(row.created_by) === me.id || !adminIds.has(String(row.created_by));
+            me.role === "admin" ||
+            String(row.created_by) === me.id ||
+            !(row.by_admin === true || adminIds.has(String(row.created_by)));
           const listed = rows.filter(keepHouse);
           extra = extra.filter(keepHouse);
           const allRows = [...listed, ...extra];
-          const photoMap = await loadBrowsePhotoMap(
-            mediaClient,
-            allRows.map((row) => String(row.id)),
-          );
+          const photoMap: Map<string, string> = bundle
+            ? new Map(
+                allRows
+                  .filter((row) => typeof row.photo_path === "string" && row.photo_path)
+                  .map((row) => [String(row.id), String(row.photo_path)] as [string, string]),
+              )
+            : await loadBrowsePhotoMap(
+                mediaClient,
+                allRows.map((row) => String(row.id)),
+              );
           const now = Date.now();
           const mySelf = matchSelfFromProfile(mine, {
             religion: nestedName(mine.religions),

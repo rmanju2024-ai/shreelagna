@@ -19,6 +19,7 @@ import { loadInterestQuota, loadMembership } from "@/lib/membership/load";
 import { createServiceClient } from "@/lib/supabase/server";
 import { btnGhost, btnPrimary } from "@/lib/ui/classes";
 import Link from "next/link";
+import { after } from "next/server";
 import { redirect } from "next/navigation";
 
 function nestedName(value: unknown): string | undefined {
@@ -236,9 +237,13 @@ export async function BrowseProfileView({
     mine &&
     !isIncognito(mine)
   ) {
+    const viewerProfile = mine;
+    const viewerId = me.active_profile_id;
+    // Recording the visit is best-effort: do it after the page is sent.
+    after(async () => {
     await supabase.from("profile_views").upsert(
       {
-        viewer_profile_id: me.active_profile_id,
+        viewer_profile_id: viewerId,
         viewed_profile_id: id,
         viewed_at: new Date().toISOString(),
       },
@@ -282,6 +287,7 @@ export async function BrowseProfileView({
         });
       }
     }
+    });
   }
 
   const mediaRows = media.data ?? [];

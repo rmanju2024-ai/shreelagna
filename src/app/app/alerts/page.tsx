@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { after } from "next/server";
 import { ChatAvatar } from "@/app/app/chat/chat-avatar";
 import { PageShell } from "@/components/site-chrome";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
@@ -43,12 +44,14 @@ export default async function AlertsPage() {
     }
   }
 
-  await supabase
-    .from("notices")
-    .update({ read_at: new Date().toISOString() })
-    .eq("user_id", me.id)
-    .neq("kind", "chat")
-    .is("read_at", null);
+  after(async () => {
+    await supabase
+      .from("notices")
+      .update({ read_at: new Date().toISOString() })
+      .eq("user_id", me.id)
+      .neq("kind", "chat")
+      .is("read_at", null);
+  });
 
   return (
     <PageShell>

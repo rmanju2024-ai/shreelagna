@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { after } from "next/server";
 import { sendChat } from "@/app/app/match/actions";
 import { ChatAvatar } from "@/app/app/chat/chat-avatar";
 import { PageShell } from "@/components/site-chrome";
@@ -37,21 +38,18 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
   if (!mine || mine.status !== "active") notFound();
 
   const otherId = mine.id === thread.profile_a ? thread.profile_b : thread.profile_a;
-  const { data: interestRows } = await supabase
-    .from("interests")
-    .select("from_profile_id, to_profile_id, status, created_at")
-    .or(
-      `and(from_profile_id.eq.${mine.id},to_profile_id.eq.${otherId}),and(from_profile_id.eq.${otherId},to_profile_id.eq.${mine.id})`,
-    )
-    .limit(8);
-  if (!pairCanChat(interestRows ?? [], mine.id, otherId)) notFound();
   const db = createServiceClient() ?? supabase;
-  const [myAccess, otherAccess] = await Promise.all([
+  const [{ data: interestRows }, myAccess, otherAccess, { data: other }, { data: messages }, { data: photos }] =
+    await Promise.all([
+    supabase
+      .from("interests")
+      .select("from_profile_id, to_profile_id, status, created_at")
+      .or(
+        `and(from_profile_id.eq.${mine.id},to_profile_id.eq.${otherId}),and(from_profile_id.eq.${otherId},to_profile_id.eq.${mine.id})`,
+      )
+      .limit(8),
     loadMembership(db, me),
     loadMembershipForProfile(db, otherId),
-  ]);
-  const chatLive = pairPlanLive(myAccess.live, otherAccess.live);
-  const [{ data: other }, { data: messages }, { data: photos }] = await Promise.all([
     supabase
       .from("profiles")
       .select("id, subject_full_name, status, last_seen_at, hide_last_seen")
@@ -60,18 +58,22 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
     supabase.from("messages").select("id, sender_profile_id, body, created_at").eq("thread_id", id).order("created_at"),
     db.from("media").select("storage_path, is_primary").eq("profile_id", otherId).eq("kind", "photo").order("created_at"),
   ]);
+  if (!pairCanChat(interestRows ?? [], mine.id, otherId)) notFound();
+  const chatLive = pairPlanLive(myAccess.live, otherAccess.live);
   const otherOpen = Boolean(other && other.status === "active");
   const name = otherOpen ? displayFirstName(other?.subject_full_name ?? "Match") : "Profile unavailable";
   const cover = (photos ?? []).find((row) => row.is_primary) ?? photos?.[0];
   const photo = otherOpen ? publicMediaUrl(cover?.storage_path) : null;
   const seen = otherOpen && !other?.hide_last_seen ? lastOnlineLine(other?.last_seen_at) : null;
-  await supabase
-    .from("notices")
-    .update({ read_at: new Date().toISOString() })
-    .eq("user_id", me.id)
-    .eq("kind", "chat")
-    .eq("href", `/app/chat/${id}`)
-    .is("read_at", null);
+  after(async () => {
+    await supabase
+      .from("notices")
+      .update({ read_at: new Date().toISOString() })
+      .eq("user_id", me.id)
+      .eq("kind", "chat")
+      .eq("href", `/app/chat/${id}`)
+      .is("read_at", null);
+  });
   const person = (
     <>
       <ChatAvatar name={name} src={photo} size="sm" />
