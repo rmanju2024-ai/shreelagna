@@ -47,6 +47,13 @@ export async function updateSession(request: NextRequest) {
     }
     return response;
   }
+  // Link prefetches on public pages skip the extra auth round trip.
+  const isPrefetch =
+    request.headers.get("next-router-prefetch") != null || request.headers.get("purpose") === "prefetch";
+  if (!staffPath && !memberPath && path !== "/login" && isPrefetch) {
+    return response;
+  }
+
   let user: { id: string } | null = null;
   try {
     const { data } = await supabase.auth.getUser();
