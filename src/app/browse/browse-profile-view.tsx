@@ -317,7 +317,8 @@ export async function BrowseProfileView({
           .eq("viewed_profile_id", id)
           .maybeSingle()
       : { data: null };
-  const contactRevealed = Boolean(own || isStaff || contactRow?.id || contact || guestPass);
+  const contactPrivate = profile.contact_release_mode === "never";
+  const contactRevealed = Boolean(own || isStaff || (!contactPrivate && (contactRow?.id || contact || guestPass)));
   const mobile =
     typeof profile.subject_mobile === "string" && profile.subject_mobile.trim() ? profile.subject_mobile.trim() : "—";
   const email = typeof owner?.email === "string" && owner.email.trim() ? owner.email.trim() : "—";
@@ -332,6 +333,7 @@ export async function BrowseProfileView({
         photos={photos}
         photoLocked={photos.length === 0}
         lockAlbumExtras={!showAlbum}
+        detailsLocked={!own && !isStaff && Boolean(profile.hide_details_until_accept) && !accepted}
         video={video}
         audio={audio}
         readOnly

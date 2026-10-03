@@ -757,10 +757,24 @@ export async function viewContact(formData: FormData) {
 
   const { data: target } = await db
     .from("profiles")
-    .select("id, status, subject_mobile, created_by")
+    .select("id, status, subject_mobile, created_by, contact_release_mode")
     .eq("id", toId)
     .maybeSingle();
   if (!target || target.status !== "active") redirect("/browse?error=unavailable");
+  if (target.contact_release_mode === "never") {
+    redirect(`/browse/${toId}?error=contact_private`);
+  }
+  const { data: acceptedLinks } = await db
+    .from("interests")
+    .select("status, created_at")
+    .or(
+      `and(from_profile_id.eq.${mine.id},to_profile_id.eq.${toId}),and(from_profile_id.eq.${toId},to_profile_id.eq.${mine.id})`,
+    )
+    .limit(8);
+  const accepted = (acceptedLinks ?? []).some(
+    (row) => effectiveInterestStatus(row.status, row.created_at ?? "") === "accepted",
+  );
+  if (!accepted) redirect(`/browse/${toId}?error=contact_after_accept`);
   const { data: owner } = await db.from("app_users").select("email").eq("id", target.created_by).maybeSingle();
   const mobile = typeof target.subject_mobile === "string" ? target.subject_mobile.trim() : "";
   const email = typeof owner?.email === "string" ? owner.email.trim() : "";

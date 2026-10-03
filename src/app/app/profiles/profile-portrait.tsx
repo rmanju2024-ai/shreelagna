@@ -52,6 +52,7 @@ export function ProfilePortrait({
   lockAlbumExtras = false,
   deskReview = false,
   houseEdit = false,
+  detailsLocked = false,
 }: {
   profile: Record<string, unknown> & {
     id: string;
@@ -89,6 +90,7 @@ export function ProfilePortrait({
   lockAlbumExtras?: boolean;
   deskReview?: boolean;
   houseEdit?: boolean;
+  detailsLocked?: boolean;
 }) {
   const kind = profileKindLabel(profile.profile_type);
   const posted = postedAsLabel(profile.creator_relationship, profile.profile_type);
@@ -451,6 +453,7 @@ export function ProfilePortrait({
         hope={hope}
         hopeSheet={hopeSheet}
         needPlan={needPlan}
+        detailsLocked={detailsLocked}
       />
     </div>
   );

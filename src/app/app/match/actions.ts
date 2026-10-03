@@ -204,6 +204,8 @@ export async function saveProfileSettings(formData: FormData) {
   const payload: Record<string, unknown> = {
     hide_last_seen: formData.get("hide_last_seen") === "on",
     hide_photo_until_accept: formData.get("hide_photo_until_accept") === "on",
+    hide_details_until_accept: formData.get("hide_details_until_accept") === "on",
+    contact_release_mode: formData.get("contact_release_mode") === "never" ? "never" : "accepted_interest",
     notify_profile_views: formData.get("notify_profile_views") === "on",
     notify_interest: formData.get("notify_interest") === "on",
   };

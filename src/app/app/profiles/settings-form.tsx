@@ -56,6 +56,22 @@ export function SettingsForm({
           hint="Show your photos only after you accept their interest."
           checked={values.hidePhotoUntilAccept}
         />
+        <Toggle
+          name="hide_details_until_accept"
+          title="Lock profile details"
+          hint="Show only the introduction and basic identity until you accept their interest."
+          checked={values.hideDetailsUntilAccept}
+        />
+        <label className="set-row">
+          <span>
+            <b>Contact release</b>
+            <small>Choose whether your mobile and email can be revealed after an accepted interest.</small>
+          </span>
+          <select name="contact_release_mode" defaultValue={values.contactReleaseMode}>
+            <option value="accepted_interest">After accepted interest</option>
+            <option value="never">Keep private</option>
+          </select>
+        </label>
       </section>
 
       <section>

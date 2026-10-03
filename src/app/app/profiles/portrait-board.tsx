@@ -50,6 +50,7 @@ export function PortraitSheet({
   interest,
   lastSeenAt,
   needPlan = false,
+  detailsLocked = false,
 }: {
   album: React.ReactNode;
   kind: string;
@@ -74,6 +75,7 @@ export function PortraitSheet({
   interest?: React.ReactNode;
   lastSeenAt?: string | null;
   needPlan?: boolean;
+  detailsLocked?: boolean;
 }) {
   const personalGroups = personal ?? [];
   const faithGroups = faith ?? [];
@@ -190,24 +192,27 @@ export function PortraitSheet({
             </Link>
           ) : null}
           <div className="portrait-tab-live">
-            {tab === "personal" ? (
+            {detailsLocked ? (
+              <div className="portrait-empty">Profile details are shared after this family accepts your interest.</div>
+            ) : null}
+            {!detailsLocked && tab === "personal" ? (
               <FactGroups
                 groups={personalGroups}
                 gateTitles={needPlan ? ["Health and habits"] : []}
                 gateKeys={needPlan ? ["Mobile", "Email ID"] : []}
               />
             ) : null}
-            {tab === "faith" ? (
+            {!detailsLocked && tab === "faith" ? (
               <FactGroups groups={faithGroups} gateTitles={needPlan ? ["Astronomy"] : []} />
             ) : null}
-            {tab === "work" ? <FactGroups groups={workGroups} /> : null}
-            {tab === "family" ? (
+            {!detailsLocked && tab === "work" ? <FactGroups groups={workGroups} /> : null}
+            {!detailsLocked && tab === "family" ? (
               <Gate on={needPlan}>
                 <FactGroups groups={familyGroups} />
                 <FamilyAbout note={familyNote} />
               </Gate>
             ) : null}
-            {tab === "partner" ? (
+            {!detailsLocked && tab === "partner" ? (
               hopeSheet ? (
                 <PreferenceSheet sheet={hopeSheet} />
               ) : (
