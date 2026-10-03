@@ -26,7 +26,7 @@ export default async function HomePage() {
   return (
     <PageShell bleed overlay>
       <section className="relative h-[100svh] min-h-[640px] w-full overflow-hidden lg:min-h-[780px]">
-        <KalyanBanner intensity="hero" />
+        <KalyanBanner intensity="hero" presentation="complete" />
         <div
           className={`${pageInner} relative z-10 flex h-full min-h-[640px] flex-col justify-end pb-12 pt-36 lg:min-h-[780px] lg:pb-16 lg:pt-44`}
         >
