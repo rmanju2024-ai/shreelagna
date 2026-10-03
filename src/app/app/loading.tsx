@@ -1,12 +1,13 @@
 export default function AppLoading() {
   return (
-    <div className="mx-auto w-full max-w-5xl animate-pulse space-y-4 px-4 py-8" aria-busy="true">
-      <div className="h-24 rounded-3xl bg-[#efe3cf]" />
+    <div className="app-route-loading" aria-busy="true" aria-live="polite">
+      <div className="app-route-loading-copy">
+        <p>Your Shree Lagna</p>
+        <h2>Setting up your next step</h2>
+      </div>
+      <div className="app-route-loading-hero" />
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="h-40 rounded-3xl bg-[#efe3cf]" />
-        <div className="h-40 rounded-3xl bg-[#efe3cf]" />
-        <div className="h-40 rounded-3xl bg-[#efe3cf]" />
-        <div className="h-40 rounded-3xl bg-[#efe3cf]" />
+        {Array.from({ length: 4 }, (_, i) => <div key={i} className="app-route-loading-card" />)}
       </div>
     </div>
   );

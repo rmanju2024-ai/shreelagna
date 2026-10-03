@@ -5764,6 +5764,53 @@ a.browse-view {
 .safety-helplines b { color: #b91c1c; font-size: 1.05rem; }
 .safety-helplines span { color: var(--muted); font-size: 0.78rem; line-height: 1.35; }
 
+.nav-progress {
+  position: fixed;
+  z-index: 300;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 3px;
+  border-radius: 0 999px 999px 0;
+  background: var(--accent);
+  opacity: 0;
+  transition: width 0.55s ease, opacity 0.15s ease;
+}
+
+.nav-progress.is-loading { width: 74%; opacity: 1; }
+.nav-loading-word {
+  position: fixed;
+  z-index: 299;
+  top: max(0.6rem, env(safe-area-inset-top));
+  left: 50%;
+  margin: 0;
+  transform: translateX(-50%);
+  padding: 0.32rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 750;
+  pointer-events: none;
+}
+
+.app-route-loading {
+  width: min(100%, 76rem);
+  margin: 0 auto;
+  padding: clamp(1rem, 3vw, 2rem);
+}
+.app-route-loading-copy p { margin: 0; color: var(--accent); font-size: 0.75rem; font-weight: 850; letter-spacing: 0.11em; text-transform: uppercase; }
+.app-route-loading-copy h2 { margin: 0.3rem 0 1rem; color: var(--ink); font-family: var(--font-display), serif; }
+.app-route-loading-hero, .app-route-loading-card {
+  background: linear-gradient(100deg, color-mix(in srgb, var(--paper) 86%, var(--accent)), var(--paper), color-mix(in srgb, var(--paper) 86%, var(--accent)));
+  background-size: 220% 100%;
+  animation: route-shimmer 1.5s linear infinite;
+}
+.app-route-loading-hero { height: 7rem; margin-bottom: 1rem; border-radius: 1.3rem; }
+.app-route-loading-card { height: 10rem; border-radius: 1.1rem; }
+@keyframes route-shimmer { to { background-position: -220% 0; } }
+
 .profile-trust {
   display: inline-flex;
   align-items: center;

@@ -8,6 +8,7 @@ import { KalyanBanner } from "@/components/home/kalyan-banner";
 import { HeaderNav } from "@/components/site-nav";
 import { SceneLayer } from "@/components/scene-layer";
 import { ThemeQuickPicker } from "@/components/theme-quick-picker";
+import { NavigationFeedback } from "@/components/navigation-feedback";
 import { collapseNotices, noticesForActiveProfiles } from "@/lib/match/collapse-notices";
 import { unreadNoticeBadge } from "@/lib/notices/unread-badge";
 import { effectiveInterestStatus } from "@/lib/match/interest-status";
@@ -170,6 +171,7 @@ export async function PageShell({
   const showAtmosphere = atmosphere === true;
   return (
     <div className={`relative flex min-h-dvh w-full flex-col page-scene is-${scene}`}>
+      <NavigationFeedback />
       <SceneLayer initial={scene} />
       {showAtmosphere ? (
         <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
