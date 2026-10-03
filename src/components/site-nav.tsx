@@ -178,6 +178,7 @@ export function HeaderNav({
     { href: "/app", label: "Profile", icon: "profile" },
     { href: "/app/plans", label: "Plans", icon: "plans" },
     { href: "/app/settings", label: "Settings", icon: "settings" },
+    { href: "/app/safety", label: "Safety", icon: "settings" },
   ];
   const registerHere = pathMatches(pathname, "/login", tab);
   const moreOn = more.some((item) => pathMatches(pathname, item.href, tab));

@@ -265,10 +265,23 @@ export default async function BrowsePage({
             extra = ((extraSlim.error ? await extraQuery(BROWSE_PROFILE_SELECT_STAR) : extraSlim).data ??
               []) as unknown as Record<string, unknown>[];
           }
+          const [blockedByMe, blockedMe] = await Promise.all([
+            db.from("member_blocks").select("blocker_profile_id, blocked_profile_id").eq("blocker_profile_id", mineId).order("created_at", { ascending: false }).limit(100),
+            db.from("member_blocks").select("blocker_profile_id, blocked_profile_id").eq("blocked_profile_id", mineId).order("created_at", { ascending: false }).limit(100),
+          ]);
+          const blockRows = [...(blockedByMe.data ?? []), ...(blockedMe.data ?? [])] as unknown as {
+            blocker_profile_id: string;
+            blocked_profile_id: string;
+          }[];
+          const blockedIds = new Set(
+            (blockRows ?? []).map((block) =>
+              block.blocker_profile_id === mineId ? String(block.blocked_profile_id) : String(block.blocker_profile_id),
+            ),
+          );
           const keepHouse = (row: Record<string, unknown>) =>
             me.role === "admin" ||
             String(row.created_by) === me.id ||
-            !(row.by_admin === true || adminIds.has(String(row.created_by)));
+            (!(row.by_admin === true || adminIds.has(String(row.created_by))) && !blockedIds.has(String(row.id)));
           const listed = rows.filter(keepHouse);
           extra = extra.filter(keepHouse);
           const allRows = [...listed, ...extra];

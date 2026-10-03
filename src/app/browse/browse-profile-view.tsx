@@ -13,6 +13,7 @@ import { lastOnlineLine } from "@/lib/profile/last-seen";
 import { effectiveInterestStatus, interestThreadState, openInterestBlocksSend, orderedProfilePair } from "@/lib/match/interest-status";
 import { matchSelfFromProfile } from "@/lib/profile/match-compare";
 import { canEditMemberProfile } from "@/lib/desk/access";
+import { SafetyProfileControl } from "@/app/app/safety/safety-profile-control";
 import { canViewProfile, isPublicProfileStatus, type ProfileType } from "@/lib/profile/visibility";
 import { complimentaryPaidProfileAccess, pairPlanLive } from "@/lib/membership/access";
 import { loadInterestQuota, loadMembership } from "@/lib/membership/load";
@@ -416,25 +417,28 @@ export async function BrowseProfileView({
         }
       />
       {!own && user ? (
-        <BirdDock
-          profileId={String(profile.id)}
-          interestId={interestId}
-          thread={thread}
-          canSend={canSend}
-          needPlan={needPlan}
-          needQuota={needQuota}
-          quotaLeft={quotaLeft}
-          finishHref={`/app/profiles/${mine?.id ?? ""}`}
-          chat={{
-            myProfileId: myChatId,
-            threadId: chatThreadId,
-            notes: chatNotes,
-            live: pairLive,
-            name: displayFirstName(typeof profile.subject_full_name === "string" ? profile.subject_full_name : "Match"),
-            photo: publicMediaUrl(photos[0]?.storage_path),
-            seen: hideLastSeen ? null : lastOnlineLine(typeof profile.last_seen_at === "string" ? profile.last_seen_at : null, asProfileType(profile.profile_type) ?? undefined),
-          }}
-        />
+        <>
+          <SafetyProfileControl profileId={String(profile.id)} returnTo={`/browse/${profile.id}`} />
+          <BirdDock
+            profileId={String(profile.id)}
+            interestId={interestId}
+            thread={thread}
+            canSend={canSend}
+            needPlan={needPlan}
+            needQuota={needQuota}
+            quotaLeft={quotaLeft}
+            finishHref={`/app/profiles/${mine?.id ?? ""}`}
+            chat={{
+              myProfileId: myChatId,
+              threadId: chatThreadId,
+              notes: chatNotes,
+              live: pairLive,
+              name: displayFirstName(typeof profile.subject_full_name === "string" ? profile.subject_full_name : "Match"),
+              photo: publicMediaUrl(photos[0]?.storage_path),
+              seen: hideLastSeen ? null : lastOnlineLine(typeof profile.last_seen_at === "string" ? profile.last_seen_at : null, asProfileType(profile.profile_type) ?? undefined),
+            }}
+          />
+        </>
       ) : null}
     </div>
   );

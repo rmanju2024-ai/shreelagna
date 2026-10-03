@@ -5715,6 +5715,45 @@ a.browse-view {
   font-weight: 700;
 }
 
+.safety-profile-control {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.45rem;
+  margin: 0.75rem 0;
+}
+
+.safety-profile-control .safety-report-form {
+  display: grid;
+  width: min(100%, 26rem);
+  gap: 0.55rem;
+  padding: 0.75rem;
+  border: 1px solid color-mix(in srgb, #dc2626 25%, transparent);
+  border-radius: 0.9rem;
+  background: var(--paper);
+}
+
+.safety-report-form label {
+  display: grid;
+  gap: 0.3rem;
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.safety-report-form select,
+.safety-report-form textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 0.6rem;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 0.5rem;
+  font: inherit;
+}
+
+.safety-report-form textarea { min-height: 5rem; resize: vertical; }
+
 .desk-section-title {
   margin: 0.85rem 0 0.3rem;
   font-family: var(--font-display), Georgia, serif;
