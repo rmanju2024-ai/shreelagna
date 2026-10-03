@@ -79,14 +79,19 @@ export default async function HomePage() {
       </section>
 
       <section className="home-values relative w-full border-y border-[var(--stroke)]">
-        <ul className={`${pageInner} grid gap-4 py-8 sm:grid-cols-3`}>
+        <div className={`${pageInner} home-values-intro`}>
+          <p>Rooted in values. Built for today.</p>
+          <h2>Tradition, with a fresh start.</h2>
+        </div>
+        <ul className={`${pageInner} grid gap-4 pb-10 sm:grid-cols-3`}>
           {[
-            ["01", "Dignity", "Every bride and groom, presented with care."],
-            ["02", "Discretion", "Private details stay in the house."],
-            ["03", "A real person", "Write to us. Someone will read it."],
-          ].map(([number, t, d]) => (
+            ["🪔", "Sanskar", "Respect for every family, every step."],
+            ["🔒", "Nijta", "Your story stays in trusted hands."],
+            ["🤝", "Apnapan", "Real guidance when you need it."],
+          ].map(([icon, t, d], index) => (
             <li key={t} className="home-value-card">
-              <span className="home-value-number" aria-hidden>{number}</span>
+              <span className="home-value-number" aria-hidden>{icon}</span>
+              <span className="home-value-count">0{index + 1}</span>
               <p className="font-[family-name:var(--font-display)] text-2xl">{t}</p>
               <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">{d}</p>
             </li>
