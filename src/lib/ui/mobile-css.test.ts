@@ -92,4 +92,11 @@ describe("shared mobile CSS contract", () => {
     expect(css).toContain('.desk-pulse-group[data-category="interest"]');
     expect(css).toContain("border-top: 4px solid var(--category)");
   });
+
+  it("has an accessible mobile-safe multilingual home banner", () => {
+    expect(css).toContain(".home-language-banner");
+    expect(css).toContain("@keyframes home-marquee");
+    expect(css).toContain(".home-language-viewport { overflow-x: auto; }");
+    expect(css).toContain('.home-language-track p[aria-hidden="true"]');
+  });
 });

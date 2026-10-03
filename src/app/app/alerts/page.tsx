@@ -9,6 +9,15 @@ import { publicMediaUrl } from "@/lib/match/inbox-card";
 import { createServiceClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
+const alertStyle = (kind: string) => {
+  if (kind === "interest_received") return { icon: "💌", tone: "interest" };
+  if (kind === "interest_accepted") return { icon: "✨", tone: "accepted" };
+  if (kind === "profile_view") return { icon: "👀", tone: "view" };
+  if (kind === "contact_view") return { icon: "📇", tone: "contact" };
+  if (kind === "match") return { icon: "💫", tone: "match" };
+  return { icon: "🔔", tone: "general" };
+};
+
 export default async function AlertsPage() {
   const { supabase, user } = await getAuth();
   if (!supabase || !user) redirect("/login?next=/app/alerts");
@@ -62,20 +71,26 @@ export default async function AlertsPage() {
 
   return (
     <PageShell>
-      <div className="sx-stage">
-      <PageHero kicker="Activity" title="Alerts" sub="Matches, views and replies in one place." stat={{ value: shownAlerts.length, label: "Recent" }} />
-      <ul className="alert-list">
+      <div className="sx-stage alerts-genz">
+      <PageHero kicker="Your activity" title="The tea, but private." sub="Matches, views and account moments—all in one calm place." stat={{ value: shownAlerts.length, label: "Updates" }} />
+      {shownAlerts.length ? <p className="alerts-genz-hint">Everything here is private to you. Tap an update to see what’s next.</p> : null}
+      <ul className="alert-list alerts-genz-list">
         {shownAlerts.map((note) => {
           const unread = !note.read_at;
           const { name, detail } = alertHeadline(note.kind, note.title, note.body);
+          const style = alertStyle(note.kind);
           const inner = (
             <>
+              <span className={`alerts-genz-icon is-${style.tone}`} aria-hidden>{style.icon}</span>
               <ChatAvatar name={name} src={publicMediaUrl(photoMap.get(note.match_profile_id ?? ""))} />
               <span className="alert-copy">
                 <span className="alert-line">
                   <b>{name}</b> {detail}
                 </span>
-                <time dateTime={note.created_at}>{alertWhen(note.created_at)}</time>
+                <span className="alerts-genz-meta">
+                  <time dateTime={note.created_at}>{alertWhen(note.created_at)}</time>
+                  <span>Open →</span>
+                </span>
               </span>
               {unread ? <span className="alert-dot" aria-label="Unread" /> : null}
             </>
@@ -94,8 +109,9 @@ export default async function AlertsPage() {
         })}
       </ul>
       {!shownAlerts.length ? (
-        <div className="sx-empty">
-          <h3>No alerts yet</h3>
+        <div className="sx-empty alerts-genz-empty">
+          <span aria-hidden>✨</span>
+          <div><h3>You’re all caught up</h3><p>New matches and profile activity will show up here.</p></div>
         </div>
       ) : null}
       </div>

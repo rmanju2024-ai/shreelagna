@@ -7,6 +7,19 @@ import { btnHero, btnHeroGhost } from "@/lib/ui/classes";
 
 export const dynamic = "force-dynamic";
 
+const welcomeMessages = [
+  ["English", "Welcome to your next chapter"],
+  ["हिन्दी", "आपका स्वागत है"],
+  ["বাংলা", "স্বাগতম"],
+  ["తెలుగు", "స్వాగతం"],
+  ["தமிழ்", "வரவேற்கிறோம்"],
+  ["मराठी", "स्वागत आहे"],
+  ["ગુજરાતી", "સ્વાગત છે"],
+  ["ಕನ್ನಡ", "ಸ್ವಾಗತ"],
+  ["മലയാളം", "സ്വാഗതം"],
+  ["ਪੰਜਾਬੀ", "ਜੀ ਆਇਆਂ ਨੂੰ"],
+] as const;
+
 export default async function HomePage() {
   const { user } = await getAuth();
 
@@ -17,18 +30,21 @@ export default async function HomePage() {
         <div
           className={`${pageInner} relative z-10 flex h-full min-h-[640px] flex-col justify-end pb-12 pt-36 lg:min-h-[780px] lg:pb-16 lg:pt-44`}
         >
-          <div className="max-w-2xl">
-            <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--gold-soft)]">
-              Private introductions · India
-            </p>
-            <h1 className="mt-4 font-[family-name:var(--font-display)] text-5xl leading-[1.08] text-[#f7efe4] sm:text-6xl lg:text-7xl">
+          <div className="home-hero-copy max-w-2xl">
+            <p className="home-hero-kicker">✦ Private introductions · India</p>
+            <h1 className="home-hero-title mt-4 font-[family-name:var(--font-display)]">
               Families, gathered with grace.
             </h1>
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-[#f3e6d4]/90 sm:text-lg">
+            <p className="home-hero-sub mt-5 max-w-xl">
               {user
                 ? "Welcome back. Continue your profile, or search with care."
                 : "A quiet house for Indian families. Sign in with Gmail to begin."}
             </p>
+            <ul className="home-hero-chips" aria-label="Shree Lagna promises">
+              <li>🔒 Private by default</li>
+              <li>✨ Family-first</li>
+              <li>🇮🇳 Made for India</li>
+            </ul>
             <div className="mt-8 flex flex-wrap items-center gap-4">
               {user ? (
                 <Link href="/app" className={btnHero}>
@@ -45,15 +61,29 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <section className="home-language-banner" aria-label="Welcome in Indian languages">
+        <div className="home-language-viewport">
+          <div className="home-language-track">
+            {[...welcomeMessages, ...welcomeMessages].map(([language, message], index) => (
+              <p key={`${language}-${index}`} aria-hidden={index >= welcomeMessages.length}>
+                <b>{language}</b>
+                <span>{message}</span>
+                <i aria-hidden>✦</i>
+              </p>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="home-values relative w-full border-y border-[var(--stroke)]">
         <ul className={`${pageInner} grid gap-4 py-8 sm:grid-cols-3`}>
           {[
-            ["Dignity", "Every bride and groom, presented with care."],
-            ["Discretion", "Private details stay in the house."],
-            ["A person", "Write to us. Someone will read it."],
-          ].map(([t, d]) => (
+            ["01", "Dignity", "Every bride and groom, presented with care."],
+            ["02", "Discretion", "Private details stay in the house."],
+            ["03", "A real person", "Write to us. Someone will read it."],
+          ].map(([number, t, d]) => (
             <li key={t} className="home-value-card">
-              <span aria-hidden>✦</span>
+              <span className="home-value-number" aria-hidden>{number}</span>
               <p className="font-[family-name:var(--font-display)] text-2xl">{t}</p>
               <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">{d}</p>
             </li>

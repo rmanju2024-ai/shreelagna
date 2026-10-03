@@ -9,9 +9,9 @@ export function ContactForm() {
   const [state, action, pending] = useActionState(submitContact, null);
 
   return (
-    <form action={action} className="w-full space-y-4">
+    <form action={action} className="help-genz-form">
       <label className="block">
-        <span className="text-sm text-[var(--muted)]">Your name</span>
+        <span>Your name <i>Required</i></span>
         <input
           name="name"
           required
@@ -20,7 +20,7 @@ export function ContactForm() {
         />
       </label>
       <label className="block">
-        <span className="text-sm text-[var(--muted)]">Gmail</span>
+        <span>Gmail <i>Optional</i></span>
         <input
           name="email"
           type="email"
@@ -28,7 +28,7 @@ export function ContactForm() {
         />
       </label>
       <label className="block">
-        <span className="text-sm text-[var(--muted)]">Mobile</span>
+        <span>Mobile <i>Optional</i></span>
         <input
           name="mobile"
           inputMode="numeric"
@@ -36,14 +36,14 @@ export function ContactForm() {
         />
       </label>
       <label className="block">
-        <span className="text-sm text-[var(--muted)]">City</span>
+        <span>City <i>Optional</i></span>
         <input
           name="city"
           className={inputClass}
         />
       </label>
       <label className="block">
-        <span className="text-sm text-[var(--muted)]">Enquiry</span>
+        <span>What do you need?</span>
         <Select3d
           name="enquiry_type"
           className={inputClass}
@@ -55,7 +55,7 @@ export function ContactForm() {
         </Select3d>
       </label>
       <label className="block">
-        <span className="text-sm text-[var(--muted)]">Message</span>
+        <span>Tell us more <i>Required</i></span>
         <textarea
           name="message"
           required
@@ -67,19 +67,19 @@ export function ContactForm() {
       <div className="hidden" aria-hidden>
         <input name="company" tabIndex={-1} autoComplete="off" />
       </div>
-      <p className="text-xs text-[var(--muted)]">
-        We will use this only to reply about Shree Lagna.
+      <p className="help-genz-privacy">
+        🔒 We use these details only to reply about Shree Lagna.
       </p>
       {state?.ok ? (
-        <p className="text-sm text-[var(--accent)]">Thank you. Someone will read this.</p>
+        <p className="help-genz-success">✨ Sent! Someone from the team will read this.</p>
       ) : null}
-      {state?.error ? <p className="text-sm text-red-800">{state.error}</p> : null}
+      {state?.error ? <p className="help-genz-error">{state.error}</p> : null}
       <button
         type="submit"
         disabled={pending}
         className={btnPrimary}
       >
-        {pending ? "Sending…" : "Send"}
+        {pending ? "Sending…" : "Send message ✦"}
       </button>
     </form>
   );
