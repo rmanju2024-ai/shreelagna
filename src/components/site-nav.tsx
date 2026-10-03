@@ -177,6 +177,7 @@ export function HeaderNav({
   const account: NavItem[] = [
     { href: "/app", label: "Profile", icon: "profile" },
     { href: "/app/plans", label: "Plans", icon: "plans" },
+    { href: "/app/shortlist", label: "Shortlist", icon: "likes" },
     { href: "/app/settings", label: "Settings", icon: "settings" },
     { href: "/app/safety", label: "Safety", icon: "settings" },
   ];

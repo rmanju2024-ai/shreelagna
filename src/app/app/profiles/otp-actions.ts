@@ -4,7 +4,7 @@ import { ensureAppUser } from "@/lib/auth/session";
 import { digitsCode, hashOtp, makeOtpCode, OTP_RESEND_MS, OTP_TTL_MS, otpExpired, otpMatches } from "@/lib/notify/otp";
 import { toWhatsAppNumber } from "@/lib/notify/phone";
 import { otpTemplateName, sendWhatsAppTemplate, whatsappConfigured } from "@/lib/notify/whatsapp";
-import { isUniqueViolation } from "@/lib/profile/db-errors";
+import { isUniqueViolation, missingPayloadColumn } from "@/lib/profile/db-errors";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { readSessionFromCookies } from "@/lib/supabase/user-rest";
 import { revalidatePath } from "next/cache";
@@ -113,14 +113,21 @@ export async function verifyMobileOtp(
   }
 
   const display = mobile.startsWith("91") && mobile.length === 12 ? mobile.slice(2) : mobile;
-  const { error } = await db
+  const payload: Record<string, unknown> = {
+    subject_mobile: display,
+    phone_otp_verified_at: new Date().toISOString(),
+    trust_tier: "mobile_confirmed",
+  };
+  let { error } = await db
     .from("profiles")
-    .update({
-      subject_mobile: display,
-      phone_otp_verified_at: new Date().toISOString(),
-    })
+    .update(payload)
     .eq("id", profile.id)
     .eq("created_by", me.id);
+  if (error && missingPayloadColumn(error, payload)) {
+    delete payload.trust_tier;
+    const retry = await db.from("profiles").update(payload).eq("id", profile.id).eq("created_by", me.id);
+    error = retry.error;
+  }
   if (error) {
     if (isUniqueViolation(error)) return { ok: false, error: "This mobile is already confirmed on another profile." };
     return { ok: false, error: "Could not save the confirmed mobile." };

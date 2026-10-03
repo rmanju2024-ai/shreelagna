@@ -20,9 +20,9 @@ type ViewItem = {
 const DEFAULT_VIEWS: ViewItem[] = [
   {
     id: "fits",
-    label: "Best match",
-    short: "Best match",
-    hint: "10/15 of your preference",
+    label: "Today’s picks",
+    short: "Today",
+    hint: "Curated from your preference",
     empty: "No matching profiles here yet",
   },
   {

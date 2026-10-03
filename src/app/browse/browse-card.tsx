@@ -73,6 +73,7 @@ export function BrowseCard({ note, priority = false }: { note: BrowseCardNote; p
               <li key={item}>{item}</li>
             ))}
           </ul>
+          {note.score ? <p className="sx-why-match">Why this match: {note.score}</p> : null}
           <div className="sx-foot">
             <span>{note.lastOnline ?? ""}</span>
             <em>View profile →</em>

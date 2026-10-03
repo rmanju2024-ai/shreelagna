@@ -5754,6 +5754,34 @@ a.browse-view {
 
 .safety-report-form textarea { min-height: 5rem; resize: vertical; }
 
+.safety-centre { display: grid; gap: 1rem; }
+.safety-guidance, .safety-urgent, .safety-reports { padding: clamp(1rem, 3vw, 1.4rem); }
+.safety-guidance h2, .safety-urgent h2, .safety-reports h2 { margin-top: 0; }
+.safety-guidance li { margin: 0.5rem 0; line-height: 1.5; }
+.safety-urgent { border-color: color-mix(in srgb, #dc2626 38%, var(--line)); }
+.safety-helplines { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 0.65rem; margin-top: 1rem; }
+.safety-helplines a { display: grid; gap: 0.16rem; padding: 0.75rem; border: 1px solid var(--line); border-radius: 0.8rem; background: var(--paper); color: var(--ink); text-decoration: none; }
+.safety-helplines b { color: #b91c1c; font-size: 1.05rem; }
+.safety-helplines span { color: var(--muted); font-size: 0.78rem; line-height: 1.35; }
+
+.profile-trust {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.7rem;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.profile-trust-mobile_confirmed { color: #0369a1; }
+.profile-trust-details_reviewed { color: #166534; }
+.profile-trust-identity_checked { color: #6d28d9; }
+
 .desk-section-title {
   margin: 0.85rem 0 0.3rem;
   font-family: var(--font-display), Georgia, serif;

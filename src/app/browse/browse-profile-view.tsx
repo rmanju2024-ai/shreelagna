@@ -1,4 +1,4 @@
-﻿import { viewContact } from "@/app/app/profiles/actions";
+﻿import { toggleShortlist, viewContact } from "@/app/app/profiles/actions";
 import { BirdDock } from "@/app/browse/bird-dock";
 import { MatchBar } from "@/app/browse/match-bar";
 import { profileViewedCopy } from "@/lib/match/alert-copy";
@@ -420,6 +420,11 @@ export async function BrowseProfileView({
       />
       {!own && user ? (
         <>
+          <form action={toggleShortlist} className="safety-profile-control">
+            <input type="hidden" name="profile_id" value={profile.id} />
+            <input type="hidden" name="return_to" value={`/browse/${profile.id}`} />
+            <button className={btnGhost} type="submit">Shortlist</button>
+          </form>
           <SafetyProfileControl profileId={String(profile.id)} returnTo={`/browse/${profile.id}`} />
           <BirdDock
             profileId={String(profile.id)}

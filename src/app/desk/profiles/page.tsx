@@ -1,5 +1,5 @@
 import { DeskPager } from "@/app/desk/desk-pager";
-import { setProfileStatus } from "@/app/desk/profiles/actions";
+import { setProfileStatus, setProfileTrustTier } from "@/app/desk/profiles/actions";
 import { fetchAdminUserIds } from "@/lib/desk/admin-ids";
 import { requireDesk } from "@/lib/desk/access";
 import { deskPage, deskRange } from "@/lib/desk/pager";
@@ -11,7 +11,7 @@ import Link from "next/link";
 import { ProfileDeleteControl } from "@/app/app/profiles/profile-delete-control";
 
 const SELECT =
-  "id, member_code, subject_full_name, status, is_complete, profile_type, created_by, created_at, about";
+  "id, member_code, subject_full_name, status, is_complete, profile_type, created_by, created_at, about, trust_tier";
 const UUID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 type QueueView = "ready" | "incomplete";
@@ -34,6 +34,7 @@ type DeskProfile = {
   created_by?: string | null;
   created_at?: string | null;
   about?: string | null;
+  trust_tier?: string | null;
 };
 
 function needsReview(row: DeskProfile) {
@@ -107,6 +108,16 @@ function ProfileDeskRow({ row, queue }: { row: DeskProfile; queue: QueueView }) 
             </button>
           </form>
         ) : null}
+        <form action={setProfileTrustTier}>
+          <input type="hidden" name="id" value={row.id} />
+          <select name="trust_tier" defaultValue={row.trust_tier ?? "submitted"} aria-label="Trust tier">
+            <option value="submitted">Submitted</option>
+            <option value="mobile_confirmed">Mobile confirmed</option>
+            <option value="details_reviewed">Details reviewed</option>
+            <option value="identity_checked">Identity checked</option>
+          </select>
+          <button className={btnGhost} type="submit">Set trust</button>
+        </form>
         <ProfileDeleteControl profileId={row.id} staff compact />
       </span>
     </li>

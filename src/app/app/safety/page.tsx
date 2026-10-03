@@ -33,6 +33,27 @@ export default async function SafetyPage() {
           </ul>
           <Link href="/browse" className={btnPrimary}>Browse safely</Link>
         </section>
+        <section className={`${cardClass} safety-urgent`}>
+          <p className="browse-kicker">Need help now?</p>
+          <h2>Get real-world help first</h2>
+          <p>If there is immediate danger, threat, stalking, blackmail, or pressure to meet, stop the conversation and contact local emergency services. Shree Lagna cannot provide emergency response.</p>
+          <div className="safety-helplines">
+            <a href="tel:112"><b>112</b><span>India emergency response</span></a>
+            <a href="tel:181"><b>181</b><span>Women helpline (availability can vary by state)</span></a>
+            <a href="tel:1930"><b>1930</b><span>Cyber financial-fraud helpline</span></a>
+            <a href="https://cybercrime.gov.in/" target="_blank" rel="noreferrer"><b>Cybercrime portal</b><span>File a cybercrime report in India</span></a>
+          </div>
+        </section>
+        <section className={`${cardClass} safety-guidance`}>
+          <h2>Meet safely, especially for women</h2>
+          <ul>
+            <li>Keep early conversations in Shree Lagna. Do not share your OTP, address, UPI PIN, bank details, or private documents.</li>
+            <li>Tell a trusted family member before meeting. Choose a public place, arrange your own travel, and keep your phone charged.</li>
+            <li>Do not send money, invest, or respond to “urgent” financial stories. A genuine match will respect boundaries.</li>
+            <li>Block and report anyone who pressures you, becomes abusive, asks for secrecy, or gives inconsistent profile information.</li>
+          </ul>
+          <p>Reports are confidential. We may restrict or remove accounts after review, but we do not investigate crimes or replace police support.</p>
+        </section>
         <section className={`${cardClass} safety-reports`}>
           <h2>Your confidential reports</h2>
           {reports?.length ? (

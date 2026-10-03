@@ -42,6 +42,23 @@ export async function setProfileStatus(formData: FormData) {
   refresh();
 }
 
+export async function setProfileTrustTier(formData: FormData) {
+  const desk = await requireDesk("/desk/profiles");
+  if (!desk.allowed) return;
+  const id = String(formData.get("id") ?? "");
+  const trustTier = String(formData.get("trust_tier") ?? "");
+  if (!id || !["submitted", "mobile_confirmed", "details_reviewed", "identity_checked"].includes(trustTier)) return;
+  const db = createServiceClient() ?? desk.supabase;
+  const { data: profile } = await db.from("profiles").select("id, created_by").eq("id", id).maybeSingle();
+  if (!profile) return;
+  const { data: owner } = await db.from("app_users").select("role").eq("id", profile.created_by).maybeSingle();
+  if (owner?.role === "admin" && !desk.admin) return;
+  const { error } = await db.from("profiles").update({ trust_tier: trustTier }).eq("id", id);
+  if (error) return;
+  await writeAudit({ actorUserId: desk.me?.id, actorRole: desk.me?.role, action: "profile.trust_tier", entityType: "profile", entityId: id, metadata: { trustTier } });
+  refresh();
+}
+
 export async function deleteDeskProfile(
   _previousState: { ok: boolean; error?: string },
   formData: FormData,

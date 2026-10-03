@@ -30,6 +30,7 @@ import { resolveIntroShown } from "@/lib/profile/caps";
 import { preferenceSheetRows, seekPronoun, type MatchSelf } from "@/lib/profile/match-compare";
 import { MobileOtpField, VerifyFlag } from "@/app/app/profiles/mobile-otp-field";
 import { CompletenessMeter } from "@/app/app/profiles/completeness-meter";
+import { trustTier, trustTierExplainer, trustTierLabel } from "@/lib/profile/trust-tier";
 
 type Media = { id: string; kind: string; storage_path: string; status?: string };
 
@@ -95,6 +96,7 @@ export function ProfilePortrait({
   const kind = profileKindLabel(profile.profile_type);
   const posted = postedAsLabel(profile.creator_relationship, profile.profile_type);
   const shownName = readOnly ? displayFirstName(profile.subject_full_name) : profile.subject_full_name;
+  const profileTrust = trustTier(profile.trust_tier);
   const watermark = watermarkLine(displayFirstName(profile.subject_full_name));
   const contactAlerts = activeContactFlags(
     profile.about,
@@ -415,6 +417,10 @@ export function ProfilePortrait({
           flags={contactAlerts}
         />
       ) : null}
+      <p className={`profile-trust profile-trust-${profileTrust}`} title={trustTierExplainer(profileTrust)}>
+        <span aria-hidden>✦</span>
+        {trustTierLabel(profileTrust)}
+      </p>
       <PortraitSheet
         album={
           <AlbumViewer
