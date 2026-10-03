@@ -5904,6 +5904,49 @@ a.browse-view {
   overflow: hidden;
 }
 
+.desk-profile-row {
+  grid-template-columns: minmax(13rem, 1fr) minmax(23rem, auto);
+  gap: 0.8rem;
+  padding: 0.8rem 0.9rem;
+}
+.desk-profile-summary {
+  display: grid;
+  align-content: center;
+  gap: 0.28rem;
+  overflow: visible;
+}
+.desk-profile-summary .desk-ticket-row-head { flex-wrap: wrap; }
+.desk-profile-summary .desk-ticket-meta { color: var(--muted); font-size: 0.74rem; }
+.desk-profile-chip,
+.desk-profile-check {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  border: 1px solid var(--stroke);
+  border-radius: 999px;
+  padding: 0.16rem 0.45rem;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--theme-card) 86%, transparent);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+.desk-profile-chip.is-ready { color: var(--theme-accent); }
+.desk-profile-check { color: var(--theme-ink); }
+.desk-profile-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: 31rem;
+}
+.desk-profile-actions form { display: inline-flex; align-items: center; gap: 0.28rem; }
+.desk-profile-actions select { max-width: 8.6rem; min-height: 2rem; padding: 0.25rem 0.45rem; border: 1px solid var(--stroke); border-radius: 0.65rem; background: var(--theme-card); color: var(--theme-ink); font: inherit; font-size: 0.74rem; }
+@media (max-width: 900px) {
+  .desk-profile-row { grid-template-columns: 1fr; }
+  .desk-profile-actions { justify-content: flex-start; max-width: none; }
+}
+
 .desk-ticket-row-head {
   display: inline-flex;
   flex-wrap: nowrap;

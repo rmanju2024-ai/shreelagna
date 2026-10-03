@@ -47,24 +47,19 @@ function ProfileDeskRow({ row, queue }: { row: DeskProfile; queue: QueueView }) 
   const review = needsReview(row);
   const flags = review ? activeContactFlags(typeof row.about === "string" ? row.about : "") : [];
   return (
-    <li className={`${cardClass} card-3d desk-ticket-row`}>
-      <span className="desk-ticket-row-main">
-        <span className="desk-ticket-row-head">
+    <li className={`${cardClass} card-3d desk-ticket-row desk-profile-row`}>
+      <div className="desk-ticket-row-main desk-profile-summary">
+        <div className="desk-ticket-row-head">
           <span className="desk-ticket-name">{row.subject_full_name || "Unnamed"}</span>
           <span className={`desk-pill ${status === "active" ? "is-done" : review ? "is-new" : status === "on_hold" ? "is-hold" : "is-new"}`}>
             {statusLabel(review ? "pending_review" : status)}
           </span>
-        </span>
+          <span className={`desk-profile-chip${row.is_complete ? " is-ready" : ""}`}>{row.is_complete ? "Complete" : "Needs details"}</span>
+        </div>
         <span className="desk-ticket-meta">
-          {row.member_code || row.id}
-          {" · "}
-          {row.profile_type}
-          {row.is_complete ? " · Complete" : ""}
-          {review ? " · Check album, intro, About" : ""}
-          {queue === "incomplete" ? " · Needs required details" : ""}
-          {" · "}
-          {formatIstDateTime(String(row.created_at ?? ""))}
+          <b>{row.member_code || row.id}</b> · {row.profile_type || "Profile"} · Submitted {formatIstDateTime(String(row.created_at ?? ""))}
         </span>
+        {review ? <span className="desk-profile-check">Review: photos, introduction and About</span> : null}
         {queue === "incomplete" ? (
           <span className="desk-profile-nudge">
             Not visible in search or matches yet. This profile cannot send requests or start chats until required details are complete and the profile is approved.
@@ -73,8 +68,8 @@ function ProfileDeskRow({ row, queue }: { row: DeskProfile; queue: QueueView }) 
         {flags.length ? (
           <span className="desk-ticket-flags">{flags.map((flag) => contentFlagLabel(flag)).join(" · ")}</span>
         ) : null}
-      </span>
-      <span className="desk-ticket-ops">
+      </div>
+      <div className="desk-ticket-ops desk-profile-actions">
         <Link href={`/browse/${row.id}`} className={btnGhost}>
           View
         </Link>
@@ -110,7 +105,8 @@ function ProfileDeskRow({ row, queue }: { row: DeskProfile; queue: QueueView }) 
         ) : null}
         <form action={setProfileTrustTier}>
           <input type="hidden" name="id" value={row.id} />
-          <select name="trust_tier" defaultValue={row.trust_tier ?? "submitted"} aria-label="Trust tier">
+          <label className="sr-only" htmlFor={`trust-${row.id}`}>Trust tier</label>
+          <select id={`trust-${row.id}`} name="trust_tier" defaultValue={row.trust_tier ?? "submitted"} aria-label="Trust tier">
             <option value="submitted">Submitted</option>
             <option value="mobile_confirmed">Mobile confirmed</option>
             <option value="details_reviewed">Details reviewed</option>
@@ -118,7 +114,7 @@ function ProfileDeskRow({ row, queue }: { row: DeskProfile; queue: QueueView }) 
           <button className={btnGhost} type="submit">Set trust</button>
         </form>
         <ProfileDeleteControl profileId={row.id} staff compact />
-      </span>
+      </div>
     </li>
   );
 }
