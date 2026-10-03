@@ -38,12 +38,14 @@ export function KalyanBanner({
               : "absolute inset-0 h-full w-full object-cover opacity-25"
         }
       />
-      {hero && veil ? (
-        <>
-          <div className={complete ? "absolute inset-0 bg-[linear-gradient(90deg,rgba(18,8,6,0.42)_0%,rgba(18,8,6,0.16)_48%,rgba(18,8,6,0.18)_100%)]" : "absolute inset-0 bg-[linear-gradient(90deg,rgba(18,8,6,0.78)_0%,rgba(18,8,6,0.42)_42%,rgba(18,8,6,0.22)_100%)]"} />
-          <div className={complete ? "absolute inset-0 bg-[linear-gradient(180deg,rgba(18,8,6,0.18)_0%,transparent_30%,rgba(18,8,6,0.32)_100%)]" : "absolute inset-0 bg-[linear-gradient(180deg,rgba(18,8,6,0.35)_0%,transparent_28%,rgba(18,8,6,0.55)_100%)]"} />
-          <span className="lamp lamp-a" />
-        </>
+      {hero ? (
+        veil ? (
+          <>
+            <div className={complete ? "absolute inset-0 bg-[linear-gradient(90deg,rgba(18,8,6,0.42)_0%,rgba(18,8,6,0.16)_48%,rgba(18,8,6,0.18)_100%)]" : "absolute inset-0 bg-[linear-gradient(90deg,rgba(18,8,6,0.78)_0%,rgba(18,8,6,0.42)_42%,rgba(18,8,6,0.22)_100%)]"} />
+            <div className={complete ? "absolute inset-0 bg-[linear-gradient(180deg,rgba(18,8,6,0.18)_0%,transparent_30%,rgba(18,8,6,0.32)_100%)]" : "absolute inset-0 bg-[linear-gradient(180deg,rgba(18,8,6,0.35)_0%,transparent_28%,rgba(18,8,6,0.55)_100%)]"} />
+            <span className="lamp lamp-a" />
+          </>
+        ) : null
       ) : (
         <div className="absolute inset-0 bg-[var(--paper)]/82" />
       )}
