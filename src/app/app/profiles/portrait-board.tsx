@@ -158,7 +158,6 @@ export function PortraitSheet({
                 <QuickFacts groups={[...personalGroups, ...workGroups]} sheet={hopeSheet ?? null} />
                 {lastSeen ? (
                   <p className={`portrait-last-seen${isOnlineNow(lastSeenAt) ? " is-now" : ""}`}>
-                    <i aria-hidden />
                     {lastSeen}
                   </p>
                 ) : null}

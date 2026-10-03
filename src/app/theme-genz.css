@@ -394,8 +394,6 @@ table { max-width: 100%; }
 .portrait-sheet-id-copy h1, .portrait-sheet-id-copy h2, .portrait-sheet-id-copy .portrait-name { animation: pv-up 0.5s 0.15s ease both; }
 .portrait-sheet-meta, .portrait-last-seen { animation: pv-up 0.5s 0.25s ease both; }
 .portrait-kind { background: var(--grad-brand); color: #fff; border-radius: 999px; padding: 0.15rem 0.7rem; font-weight: 700; }
-.portrait-last-seen.is-now::before { content: ""; display: inline-block; width: 0.55rem; height: 0.55rem; margin-right: 0.35rem; border-radius: 50%; background: #25d366; animation: pv-pulse 1.6s infinite; }
-
 /* section tabs as pills */
 .portrait-tabs-list { display: flex; gap: 0.4rem; overflow-x: auto; scrollbar-width: none; padding: 0.2rem; }
 .portrait-tabs-list button { flex: none; border-radius: 999px; padding: 0.45rem 0.95rem; transition: transform 0.15s, background 0.2s, color 0.2s; }
@@ -441,6 +439,8 @@ table { max-width: 100%; }
 .form-3d.is-wizard { display: grid; gap: 1rem; }
 .is-wizard .wizard-panel { display: none; }
 .is-wizard .wizard-panel.is-current { display: block; animation: pv-up 0.28s ease both; }
+/* Sticky Back/Next must never cover the last field in a step. */
+.is-wizard .wizard-panel.is-current { padding-bottom: 7.5rem; scroll-margin-bottom: 8rem; }
 .profile-wizard {
   display: grid; gap: 0.8rem; padding: 1rem; border-radius: 1.4rem;
   border: 1px solid rgb(255 255 255 / 75%);
@@ -527,6 +527,10 @@ table { max-width: 100%; }
     bottom: calc(4.7rem + env(safe-area-inset-bottom));
     grid-template-columns: minmax(5.5rem, auto) 1fr minmax(5.5rem, auto);
     padding: 0.5rem;
+  }
+  .is-wizard .wizard-panel.is-current {
+    padding-bottom: calc(8.5rem + env(safe-area-inset-bottom));
+    scroll-margin-bottom: calc(9rem + env(safe-area-inset-bottom));
   }
   .profile-wizard-actions button { min-height: 2.75rem; padding-inline: 0.7rem; }
   .profile-readiness { padding: 0.75rem; }

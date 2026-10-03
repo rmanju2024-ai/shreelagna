@@ -187,6 +187,7 @@ export function ProfileForm({
                 type="button"
                 className={wizardStep === item.id ? "is-current" : wizardStep > item.id ? "is-done" : ""}
                 aria-current={wizardStep === item.id ? "step" : undefined}
+                disabled={item.id > wizardStep}
                 onClick={() => moveWizard(item.id)}
               >
                 <b>{wizardStep > item.id ? "✓" : item.id}</b>

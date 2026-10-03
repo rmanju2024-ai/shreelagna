@@ -13,6 +13,7 @@ const SELECT =
   "id, member_code, subject_full_name, status, is_complete, profile_type, created_by, created_at, about";
 const UUID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+type QueueView = "ready" | "incomplete";
 
 function statusLabel(status: string) {
   if (status === "on_hold") return "Paused";
@@ -39,7 +40,7 @@ function needsReview(row: DeskProfile) {
   return status === "pending_review" || (Boolean(row.is_complete) && status === "draft");
 }
 
-function ProfileDeskRow({ row }: { row: DeskProfile }) {
+function ProfileDeskRow({ row, queue }: { row: DeskProfile; queue: QueueView }) {
   const status = String(row.status ?? "draft");
   const review = needsReview(row);
   const flags = review ? activeContactFlags(typeof row.about === "string" ? row.about : "") : [];
@@ -58,9 +59,15 @@ function ProfileDeskRow({ row }: { row: DeskProfile }) {
           {row.profile_type}
           {row.is_complete ? " · Complete" : ""}
           {review ? " · Check album, intro, About" : ""}
+          {queue === "incomplete" ? " · Needs required details" : ""}
           {" · "}
           {formatIstDateTime(String(row.created_at ?? ""))}
         </span>
+        {queue === "incomplete" ? (
+          <span className="desk-profile-nudge">
+            Not visible in search or matches yet. This profile cannot send requests or start chats until required details are complete and the profile is approved.
+          </span>
+        ) : null}
         {flags.length ? (
           <span className="desk-ticket-flags">{flags.map((flag) => contentFlagLabel(flag)).join(" · ")}</span>
         ) : null}
@@ -116,12 +123,13 @@ function excludeAdmins<T>(query: T, adminIds: Set<string>): T {
 export default async function DeskProfilesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; view?: string }>;
 }) {
   const desk = await requireDesk("/desk/profiles");
   if (!desk.allowed) return null;
-  const { q: rawQ, page: rawPage } = await searchParams;
+  const { q: rawQ, page: rawPage, view: rawView } = await searchParams;
   const q = (rawQ ?? "").trim();
+  const view: QueueView = rawView === "incomplete" ? "incomplete" : "ready";
   const page = deskPage(rawPage);
   const { from, to } = deskRange(page);
   const db = createServiceClient() ?? desk.supabase;
@@ -129,7 +137,8 @@ export default async function DeskProfilesPage({
 
   let found: DeskProfile | null = null;
   let listed: DeskProfile[] = [];
-  let reviewCount = 0;
+  let readyCount = 0;
+  let incompleteCount = 0;
   let missing = false;
 
   if (q) {
@@ -141,16 +150,32 @@ export default async function DeskProfilesPage({
     if (data && (desk.admin || !adminIds.has(String(data.created_by)))) found = data;
     else missing = true;
   } else {
-    const reviewRes = await excludeAdmins(
-      db
+    const readyQuery = () =>
+      excludeAdmins(
+        db
         .from("profiles")
         .select(SELECT, { count: "exact" })
         .or("status.eq.pending_review,and(status.eq.draft,is_complete.eq.true)")
         .order("created_at", { ascending: false }),
-      adminIds,
-    ).range(from, to);
-    listed = reviewRes.data ?? [];
-    reviewCount = reviewRes.count ?? listed.length;
+        adminIds,
+      );
+    const incompleteQuery = () =>
+      excludeAdmins(
+        db
+          .from("profiles")
+          .select(SELECT, { count: "exact" })
+          .eq("status", "draft")
+          .eq("is_complete", false)
+          .order("created_at", { ascending: false }),
+        adminIds,
+      );
+    const [readyResult, incompleteResult] = await Promise.all([
+      readyQuery().range(view === "ready" ? from : 0, view === "ready" ? to : 0),
+      incompleteQuery().range(view === "incomplete" ? from : 0, view === "incomplete" ? to : 0),
+    ]);
+    readyCount = readyResult.count ?? 0;
+    incompleteCount = incompleteResult.count ?? 0;
+    listed = (view === "ready" ? readyResult.data : incompleteResult.data) ?? [];
   }
 
   return (
@@ -160,7 +185,7 @@ export default async function DeskProfilesPage({
           <p className="browse-kicker">Profiles</p>
           <h2>Review queue</h2>
         </div>
-        <p>{q ? (found ? "1 found" : "No match") : `${reviewCount} in review`}</p>
+        <p>{q ? (found ? "1 found" : "No match") : `${view === "ready" ? readyCount : incompleteCount} shown`}</p>
       </header>
       <form className="desk-id-search" action="/desk/profiles" method="get">
         <label className="sr-only" htmlFor="desk-profile-id">
@@ -186,22 +211,41 @@ export default async function DeskProfilesPage({
       {q ? (
         found ? (
           <ul className="desk-ticket-list">
-            <ProfileDeskRow row={found} />
+            <ProfileDeskRow row={found} queue={found.is_complete ? "ready" : "incomplete"} />
           </ul>
         ) : missing ? (
           <p className="desk-empty">No profile for that ID.</p>
         ) : null
-      ) : listed.length ? (
+      ) : (
         <>
+          <nav className="desk-profile-queues" aria-label="Profile queues">
+            <Link className={view === "ready" ? "is-active" : ""} href="/desk/profiles">
+              Ready for review <span>{readyCount}</span>
+            </Link>
+            <Link className={view === "incomplete" ? "is-active" : ""} href="/desk/profiles?view=incomplete">
+              Needs required details <span>{incompleteCount}</span>
+            </Link>
+          </nav>
+          {view === "incomplete" ? (
+            <p className="desk-profile-queue-note">
+              These drafts stay private until their required details are complete. They cannot appear in search or matches, send requests, or start chats.
+            </p>
+          ) : null}
+          {listed.length ? (
+            <>
           <ul className="desk-ticket-list">
             {listed.map((row) => (
-              <ProfileDeskRow key={row.id} row={row} />
+              <ProfileDeskRow key={row.id} row={row} queue={view} />
             ))}
           </ul>
-          <DeskPager path="/desk/profiles" page={page} count={reviewCount} />
+              <DeskPager path="/desk/profiles" page={page} count={view === "ready" ? readyCount : incompleteCount} extra={view === "incomplete" ? { view } : {}} />
+            </>
+          ) : (
+            <p className="desk-empty">
+              {view === "ready" ? "No completed profiles are waiting for review." : "No incomplete draft profiles need follow-up."}
+            </p>
+          )}
         </>
-      ) : (
-        <p className="desk-empty">No profiles waiting for review.</p>
       )}
     </section>
   );

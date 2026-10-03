@@ -54,8 +54,10 @@ export function BirthDatePicker({
   function pick(nextYear: string, nextMonth: string, nextDay: string) {
     setYear(nextYear);
     setMonth(nextMonth);
+    // Let families choose Day, Month or Year in any order. The date only
+    // becomes complete once all three are selected; then it is safely clamped.
     if (nextYear === "" || nextMonth === "") {
-      setDay("");
+      setDay(nextDay);
       return;
     }
     const maxDate = new Date(max.year, max.monthIndex, max.day);

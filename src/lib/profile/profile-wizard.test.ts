@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 const form = readFileSync(resolve(process.cwd(), "src/app/app/profiles/profile-form.tsx"), "utf8");
 const css = readFileSync(resolve(process.cwd(), "src/app/theme-genz.css"), "utf8");
+const birthDatePicker = readFileSync(resolve(process.cwd(), "src/app/app/profiles/birth-date-picker.tsx"), "utf8");
 
 describe("guided profile creation contract", () => {
   it("contains all five guided stages", () => {
@@ -36,5 +37,15 @@ describe("guided profile creation contract", () => {
     expect(css).toContain(".profile-wizard-steps");
     expect(css).toContain("scroll-snap-type: x mandatory");
     expect(css).toContain("env(safe-area-inset-bottom)");
+  });
+
+  it("lets people progress one optional step at a time without hiding the last field", () => {
+    expect(form).toContain("disabled={item.id > wizardStep}");
+    expect(css).toContain("padding-bottom: calc(8.5rem + env(safe-area-inset-bottom))");
+  });
+
+  it("accepts birth date parts in any order before forming the final ISO date", () => {
+    expect(birthDatePicker).toContain("setDay(nextDay);");
+    expect(birthDatePicker).toContain("Let families choose Day, Month or Year in any order");
   });
 });

@@ -813,12 +813,14 @@ export async function saveIntroChoice(
   const { supabase, me } = await requireMember();
   const mine = await loadEditableProfile(supabase, me, profileId);
   if (!mine) return { ok: false, error: "This profile could not be saved just now." };
-  const { data: clips } = await supabase
+  const { data: clips, error: clipError } = await supabase
     .from("media")
     .select("id")
     .eq("profile_id", profileId)
     .eq("kind", shown)
+    .eq("status", "approved")
     .limit(1);
+  if (clipError) return { ok: false, error: "We could not check this introduction just now. Please try again." };
   if (!clips?.length) {
     return {
       ok: false,
@@ -829,7 +831,13 @@ export async function saveIntroChoice(
     .from("profiles")
     .update({ intro_shown: shown })
     .eq("id", profileId);
-  if (error && !missingPayloadColumn(error, { intro_shown: shown })) {
+  if (error) {
+    if (missingPayloadColumn(error, { intro_shown: shown })) {
+      return {
+        ok: false,
+        error: "Your site database needs the latest update before introductions can be shown. Please ask the site owner to apply migration 035.",
+      };
+    }
     return { ok: false, error: saveErrorMessage(error) };
   }
   await writeCompleteness(supabase, profileId, Boolean(me.email_otp_verified_at), {

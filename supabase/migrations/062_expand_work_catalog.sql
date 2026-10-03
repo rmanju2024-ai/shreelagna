@@ -1,0 +1,78 @@
+-- Broader, inclusive work choices for profile creation and partner preferences.
+-- Safe to run on existing production databases.
+
+begin;
+
+insert into public.lookup_occupations (name, sort_order) values
+  ('Data analyst / scientist', 101),
+  ('Cybersecurity professional', 102),
+  ('Product manager', 103),
+  ('Project manager', 104),
+  ('UI / UX designer', 105),
+  ('Civil engineer', 106),
+  ('Mechanical engineer', 107),
+  ('Electrical engineer', 108),
+  ('Electronics engineer', 109),
+  ('Chemical engineer', 110),
+  ('Aviation professional', 111),
+  ('Merchant navy', 112),
+  ('Medical specialist', 113),
+  ('Physiotherapist', 114),
+  ('Psychologist / counsellor', 115),
+  ('Veterinarian', 116),
+  ('Healthcare administrator', 117),
+  ('Researcher / scientist', 118),
+  ('Librarian', 119),
+  ('Civil services', 120),
+  ('Judiciary', 121),
+  ('Financial analyst', 122),
+  ('Investment professional', 123),
+  ('Insurance professional', 124),
+  ('Accountant', 125),
+  ('Fire and emergency services', 126),
+  ('Cost accountant', 127),
+  ('Auditor', 128),
+  ('Tax consultant', 129),
+  ('Interior designer', 130),
+  ('Artist / illustrator', 131),
+  ('Photographer / videographer', 132),
+  ('Fashion professional', 133),
+  ('Writer / editor', 134),
+  ('Media / entertainment', 135),
+  ('Public relations', 136),
+  ('Human resources', 137),
+  ('Operations professional', 138),
+  ('Customer success / support', 139),
+  ('Legal professional', 140),
+  ('Entrepreneur / startup founder', 141),
+  ('Freelancer', 142),
+  ('Real estate professional', 143),
+  ('Hospitality / tourism', 144),
+  ('Chef / culinary professional', 145),
+  ('Retail / e-commerce', 146),
+  ('Logistics / supply chain', 147),
+  ('Manufacturing professional', 148),
+  ('Construction professional', 149),
+  ('Digital marketing', 150),
+  ('Advertising professional', 151),
+  ('Social worker / NGO', 152),
+  ('Religious / spiritual services', 153),
+  ('Farmer', 154),
+  ('Dairy / food business', 155),
+  ('Skilled trade / technician', 156),
+  ('Retired', 157),
+  ('Other profession', 999)
+on conflict (name) do nothing;
+
+insert into public.lookup_options (kind, name, code, hint, sort_order) values
+  ('employed_in', 'Startup', null, 'Founder or employee at a startup', 7),
+  ('employed_in', 'Family business', null, 'Working in a family-operated business', 8),
+  ('employed_in', 'Non-profit / NGO', null, null, 9),
+  ('employed_in', 'Freelance / contract', null, null, 10),
+  ('employed_in', 'Work from home', null, 'Remote role or home-based work', 11),
+  ('employed_in', 'Overseas employer', null, null, 12),
+  ('employed_in', 'Professional practice', null, 'Independent practice, such as a doctor, lawyer or CA', 13),
+  ('employed_in', 'Retired', null, null, 14)
+on conflict (kind, name) do nothing;
+
+commit;

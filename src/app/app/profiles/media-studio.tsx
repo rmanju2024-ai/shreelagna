@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
-import { refreshProfileCompleteness } from "@/app/app/profiles/actions";
+import { refreshProfileCompleteness, saveIntroChoice } from "@/app/app/profiles/actions";
 import { MAX_INTRO_SECONDS } from "@/lib/profile/caps";
 import { btnGhost, btnPrimary, cardClass } from "@/lib/ui/classes";
 import { MediaMark } from "@/app/app/profiles/media-mark";
@@ -293,8 +293,12 @@ export function IntroStudio({
       }
       if (kind === "video") setClipVideo(ins.data);
       else setClipAudio(ins.data);
-      onStored?.();
-      void supabase.from("profiles").update({ intro_shown: kind }).eq("id", profileId);
+      const selected = await saveIntroChoice(profileId, kind);
+      if (!selected.ok) {
+        setError(selected.error);
+      } else {
+        onStored?.();
+      }
       void refreshProfileCompleteness(profileId);
       if (existing?.id && existing.id !== "local" && existing.storage_path) {
         void supabase.from("media").delete().eq("id", existing.id);

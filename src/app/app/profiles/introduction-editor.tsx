@@ -77,10 +77,12 @@ export function IntroductionEditor({
   const [audioReady, setAudioReady] = useState(Boolean(audio));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [storedMessage, setStoredMessage] = useState<string | null>(null);
 
   function pick(next: Kind) {
     setKind(next);
     setError(null);
+    setStoredMessage(null);
   }
 
   function goPortrait() {
@@ -220,11 +222,18 @@ export function IntroductionEditor({
             editable
             offer="video"
             watermark={watermark}
-            onStored={() => setVideoReady(true)}
-            onCleared={() => setVideoReady(false)}
+            onStored={() => {
+              setVideoReady(true);
+              setStoredMessage("Video saved. It is now selected for your Introduction.");
+            }}
+            onCleared={() => {
+              setVideoReady(false);
+              setStoredMessage(null);
+            }}
           />
+          {storedMessage ? <p className="mt-3 text-sm font-medium text-emerald-700">{storedMessage}</p> : null}
           <p className="mt-3 text-sm text-[var(--muted)]">
-            The clip is stored as you add it. Save shows it on Introduction.
+            Upload saves and selects the clip. Tap Save to return to your profile.
           </p>
           <div className="form-3d-actions mt-6">
             <Link href={cancelHref} className={`${btnHeroGhost} form-3d-cancel`}>
@@ -253,11 +262,18 @@ export function IntroductionEditor({
             editable
             offer="audio"
             watermark={watermark}
-            onStored={() => setAudioReady(true)}
-            onCleared={() => setAudioReady(false)}
+            onStored={() => {
+              setAudioReady(true);
+              setStoredMessage("Voice note saved. It is now selected for your Introduction.");
+            }}
+            onCleared={() => {
+              setAudioReady(false);
+              setStoredMessage(null);
+            }}
           />
+          {storedMessage ? <p className="mt-3 text-sm font-medium text-emerald-700">{storedMessage}</p> : null}
           <p className="mt-3 text-sm text-[var(--muted)]">
-            The voice note is stored as you add it. Save shows it on Introduction.
+            Upload saves and selects the voice note. Tap Save to return to your profile.
           </p>
           <div className="form-3d-actions mt-6">
             <Link href={cancelHref} className={`${btnHeroGhost} form-3d-cancel`}>

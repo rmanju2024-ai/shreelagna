@@ -17,6 +17,9 @@ describe("form lists", () => {
     expect(lists.yoniAnimals).toHaveLength(14);
     expect(lists.hopeIncomes.length).toBeGreaterThan(5);
     expect(lists.bloodGroups).toContain("O+");
+    expect(lists.occupations).toContain("Accountant");
+    expect(lists.occupations).toContain("Other profession");
+    expect(lists.employedIn).toContain("Family business");
   });
 
   it("uses loaded catalogs instead of seed when present", () => {
