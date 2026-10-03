@@ -156,11 +156,24 @@ export function ChatSidebarSkeleton() {
   return (
     <aside className="wc-side" aria-busy="true">
       <header className="wc-side-head">
-        <h1>Chats</h1>
+        <div>
+          <p className="wc-loading-label">Your circle</p>
+          <h1>Chats</h1>
+        </div>
+        <span className="wc-loading-status">
+          <i aria-hidden />
+          Syncing
+        </span>
       </header>
       <div className="wc-skel">
         {Array.from({ length: 6 }, (_, i) => (
-          <div key={i} className="sx-skel" />
+          <div key={i} className="wc-skel-row">
+            <i className="wc-skel-avatar" />
+            <span>
+              <b />
+              <em />
+            </span>
+          </div>
         ))}
       </div>
     </aside>

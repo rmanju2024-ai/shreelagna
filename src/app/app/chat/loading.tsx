@@ -7,10 +7,20 @@ export default function Loading() {
     <PageShell>
       <div className="wc-shell">
         <ChatSidebarSkeleton />
-        <section className="wc-welcome" aria-hidden>
+        <section className="wc-welcome wc-loading-welcome" aria-live="polite">
+          <div className="wc-loading-orbit" aria-hidden>
+            <span>✦</span>
+            <i />
+          </div>
           <div>
-            <span className="gz-emoji">💬</span>
-            <h2>Loading chats…</h2>
+            <p className="browse-kicker">Your circle</p>
+            <h2>Getting your chats ready</h2>
+            <p>Finding your conversations and keeping things private.</p>
+            <div className="wc-loading-bubbles" aria-hidden>
+              <i />
+              <i />
+              <i />
+            </div>
           </div>
         </section>
       </div>
