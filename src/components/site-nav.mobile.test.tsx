@@ -65,7 +65,7 @@ describe("mobile primary navigation", () => {
   it("keeps all seven member destinations available", () => {
     render(<HeaderNav overlay={false} user staff />);
     const nav = screen.getByRole("navigation", { name: "Primary" });
-    for (const label of ["Home", "Discover", "Likes", "Chat", "Profile", "Desk", "More"]) {
+    for (const label of ["Home", "Discover", "Likes", "Inbox", "Profile", "Desk", "More"]) {
       expect(nav.textContent).toContain(label);
     }
   });

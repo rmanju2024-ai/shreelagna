@@ -7023,6 +7023,36 @@ a.browse-view {
   gap: 0.28rem;
 }
 
+.inbox-unified { display: grid; gap: 0.75rem; }
+.inbox-switcher {
+  display: inline-flex;
+  gap: 0.35rem;
+  width: fit-content;
+  padding: 0.3rem;
+  border: 1px solid var(--stroke);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--theme-card) 88%, transparent);
+}
+.inbox-switcher a {
+  padding: 0.48rem 0.85rem;
+  border-radius: 999px;
+  color: var(--theme-ink);
+  font-size: 0.84rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+.inbox-switcher a.is-on { background: var(--theme-accent); color: var(--theme-accent-ink, #fff); }
+.inbox-alerts-panel { max-width: 52rem; padding: 1rem; border: 1px solid var(--stroke); border-radius: 1rem; background: var(--theme-card); }
+.inbox-alerts-panel > header p, .inbox-alerts-panel > header h1 { margin: 0; }
+.inbox-alerts-panel > header p { color: var(--muted); font-size: 0.78rem; font-weight: 700; }
+.inbox-alerts-panel > header h1 { margin-top: 0.15rem; font-size: 1.4rem; }
+.inbox-alerts { margin-top: 0.7rem; }
+@media (max-width: 820px) {
+  .inbox-switcher { width: 100%; }
+  .inbox-switcher a { flex: 1; text-align: center; }
+  .inbox-alerts-panel { padding: 0.75rem; }
+}
+
 .inbox-tab {
   display: inline-flex;
   align-items: center;
