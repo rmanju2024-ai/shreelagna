@@ -5598,19 +5598,78 @@ a.browse-view {
 }
 
 .profile-delete-control {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 0.55rem;
   margin-top: 0.85rem;
 }
 
-.profile-delete-control label {
-  display: grid;
-  gap: 0.3rem;
-  max-width: 22rem;
+.profile-delete-control > p {
+  margin: 0;
+  color: var(--muted);
   font-size: 0.88rem;
 }
 
-.profile-delete-control input:not(.sr-only) {
+.profile-delete-layer {
+  position: fixed;
+  z-index: 200;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(25 15 20 / 58%);
+  backdrop-filter: blur(7px);
+}
+
+.profile-delete-dialog {
+  width: min(100%, 28rem);
+  padding: clamp(1.15rem, 4vw, 1.65rem);
+  border: 1px solid color-mix(in srgb, #dc2626 48%, white);
+  border-radius: 1.35rem;
+  background: var(--paper);
+  box-shadow: 0 1.4rem 4rem rgb(32 10 20 / 35%);
+}
+
+.profile-delete-dialog-icon {
+  display: grid;
+  width: 2.3rem;
+  height: 2.3rem;
+  place-items: center;
+  margin-bottom: 0.6rem;
+  border-radius: 999px;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+
+.profile-delete-dialog h2,
+.profile-delete-dialog p {
+  margin: 0;
+}
+
+.profile-delete-dialog > p:not(.browse-kicker) {
+  margin-top: 0.55rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.profile-delete-dialog-form {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.profile-delete-dialog-form label {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--ink);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.profile-delete-dialog-form input {
   min-height: 2.4rem;
   padding: 0.45rem 0.6rem;
   border: 1px solid color-mix(in srgb, #dc2626 45%, transparent);
@@ -5619,10 +5678,29 @@ a.browse-view {
   color: var(--ink);
 }
 
-.profile-delete-control button {
+.profile-delete-control button,
+.profile-delete-confirm {
   width: fit-content;
   border-color: #dc2626;
   color: #b91c1c;
+}
+
+.profile-delete-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  margin-top: 0.25rem;
+}
+
+.profile-delete-dialog-actions button:first-child {
+  border-color: color-mix(in srgb, var(--ink) 20%, transparent);
+  color: var(--ink);
+}
+
+.profile-delete-confirm:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 .profile-delete-control.is-compact {

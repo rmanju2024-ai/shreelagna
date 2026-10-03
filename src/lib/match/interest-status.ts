@@ -54,6 +54,10 @@ export function openInterestBlocksSend(status: InterestStatus | null | undefined
   return status === "pending" || status === "accepted";
 }
 
+export function canSendInterest(fromProfileId: string | null | undefined, toProfileId: string | null | undefined): boolean {
+  return Boolean(fromProfileId && toProfileId && fromProfileId !== toProfileId);
+}
+
 export function orderedProfilePair(a: string, b: string): [string, string] {
   return a < b ? [a, b] : [b, a];
 }

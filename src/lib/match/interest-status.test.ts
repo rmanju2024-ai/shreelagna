@@ -8,6 +8,7 @@ import {
   isHistoryStatus,
   isStalePending,
   openInterestBlocksSend,
+  canSendInterest,
   hasAcceptedInterest,
   pairCanChat,
   trimDeclineReason,
@@ -51,6 +52,13 @@ describe("interest status", () => {
     expect(trimDeclineReason("  too far  ")).toBe("too far");
     expect(trimDeclineReason("   ")).toBeNull();
     expect(trimDeclineReason("x".repeat(300))?.length).toBe(280);
+  });
+
+  it("rejects a forged self-interest or incomplete profile pair", () => {
+    expect(canSendInterest("profile-a", "profile-a")).toBe(false);
+    expect(canSendInterest("profile-a", "")).toBe(false);
+    expect(canSendInterest(null, "profile-b")).toBe(false);
+    expect(canSendInterest("profile-a", "profile-b")).toBe(true);
   });
 
   it("prints history date and time", () => {

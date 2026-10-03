@@ -1,9 +1,11 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { deleteOwnProfile } from "@/app/app/profiles/actions";
 import { deleteDeskProfile } from "@/app/desk/profiles/actions";
+import { DELETE_PROFILE_WORD, hasDeleteConfirmation } from "@/lib/profile/delete-confirmation";
 import { btnGhost } from "@/lib/ui/classes";
 
 type DeleteResult = { ok: true } | { ok: false; error: string };
@@ -21,6 +23,13 @@ export function ProfileDeleteControl({
   const router = useRouter();
   const action = staff ? deleteDeskProfile : deleteOwnProfile;
   const [state, formAction, pending] = useActionState(action, initial);
+  const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [confirmation, setConfirmation] = useState("");
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!state.ok) return;
@@ -28,33 +37,81 @@ export function ProfileDeleteControl({
     router.refresh();
   }, [router, staff, state.ok]);
 
-  return (
-    <form className={`profile-delete-control${compact ? " is-compact" : ""}`} action={formAction}>
-      <input type="hidden" name="profile_id" value={profileId} />
-      {!compact ? (
-        <>
-          <p>
-            This permanently removes the profile, its photos, introductions, chats, interests, and related records. This cannot be undone.
-          </p>
+  useEffect(() => {
+    if (!open) return;
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape" && !pending) setOpen(false);
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open, pending]);
+
+  function close() {
+    if (!pending) {
+      setOpen(false);
+      setConfirmation("");
+    }
+  }
+
+  const dialog = open ? (
+    <div className="profile-delete-layer" role="presentation" onMouseDown={close}>
+      <div
+        className="profile-delete-dialog card-3d"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="delete-profile-title"
+        aria-describedby="delete-profile-description"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <span className="profile-delete-dialog-icon" aria-hidden>!</span>
+        <p className="browse-kicker">Permanent action</p>
+        <h2 id="delete-profile-title">Delete this profile?</h2>
+        <p id="delete-profile-description">
+          This permanently removes the profile, photos, introductions, chats, interests, and related records. It cannot be undone.
+        </p>
+        <form action={formAction} className="profile-delete-dialog-form">
+          <input type="hidden" name="profile_id" value={profileId} />
           <label>
-            Type <b>DELETE</b> to confirm
-            <input name="confirmation" autoComplete="off" required />
+            Type <b>{DELETE_PROFILE_WORD}</b> to continue
+            <input
+              name="confirmation"
+              value={confirmation}
+              autoComplete="off"
+              autoFocus
+              onChange={(event) => setConfirmation(event.target.value)}
+            />
           </label>
-        </>
-      ) : (
-        <input name="confirmation" value="DELETE" readOnly className="sr-only" aria-hidden />
-      )}
-      {!state.ok && state.error ? <p className="profile-delete-error" role="alert">{state.error}</p> : null}
+          {!state.ok && state.error ? <p className="profile-delete-error" role="alert">{state.error}</p> : null}
+          <div className="profile-delete-dialog-actions">
+            <button type="button" className={btnGhost} disabled={pending} onClick={close}>
+              Keep profile
+            </button>
+            <button
+              className={`${btnGhost} profile-delete-confirm`}
+              type="submit"
+              disabled={pending || !hasDeleteConfirmation(confirmation)}
+            >
+              {pending ? "Deleting…" : "Delete permanently"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  ) : null;
+
+  return (
+    <>
+      <div className={`profile-delete-control${compact ? " is-compact" : ""}`}>
+      {!compact ? <p>Remove this matrimonial profile permanently. This cannot be undone.</p> : null}
       <button
         className={btnGhost}
-        type="submit"
-        disabled={pending}
-        onClick={(event) => {
-          if (!window.confirm("Delete this profile permanently? This cannot be undone.")) event.preventDefault();
-        }}
+        type="button"
+        onClick={() => setOpen(true)}
       >
-        {pending ? "Deleting…" : "Delete profile"}
+        Delete profile
       </button>
-    </form>
+      </div>
+      {mounted && dialog ? createPortal(dialog, document.body) : dialog}
+    </>
   );
 }

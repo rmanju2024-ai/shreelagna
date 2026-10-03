@@ -102,6 +102,7 @@ export async function verifyMobileOtp(
     .from("whatsapp_otps")
     .select("id, code_hash, expires_at, mobile")
     .eq("user_id", me.id)
+    .eq("profile_id", profile.id)
     .eq("mobile", mobile)
     .eq("purpose", "verify_mobile")
     .order("created_at", { ascending: false })

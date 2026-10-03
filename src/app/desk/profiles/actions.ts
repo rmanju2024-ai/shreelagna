@@ -6,6 +6,7 @@ import { contactTextHash } from "@/lib/moderation/content-flags";
 import { detectReviewLang, isMemberAbout, translateText } from "@/lib/moderation/indian-lang";
 import { aboutPlainText } from "@/lib/profile/about-html";
 import { missingPayloadColumn } from "@/lib/profile/db-errors";
+import { hasDeleteConfirmation } from "@/lib/profile/delete-confirmation";
 import { createServiceClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { refreshDesk } from "@/lib/desk/refresh";
@@ -23,11 +24,13 @@ export async function setProfileStatus(formData: FormData) {
   const status = String(formData.get("status") ?? "");
   if (!id || !OPS.includes(status as (typeof OPS)[number])) return;
   const db = createServiceClient() ?? desk.supabase;
-  const { data: profile } = await db.from("profiles").select("id, created_by").eq("id", id).maybeSingle();
+  const { data: profile } = await db.from("profiles").select("id, created_by, is_complete").eq("id", id).maybeSingle();
   if (!profile) return;
   const { data: owner } = await db.from("app_users").select("role").eq("id", profile.created_by).maybeSingle();
   if (owner?.role === "admin" && !desk.admin) return;
-  await db.from("profiles").update({ status }).eq("id", id);
+  if (status === "active" && !profile.is_complete) return;
+  const { error } = await db.from("profiles").update({ status }).eq("id", id);
+  if (error) return;
   await writeAudit({
     actorUserId: desk.me?.id,
     actorRole: desk.me?.role,
@@ -46,7 +49,7 @@ export async function deleteDeskProfile(
   const desk = await requireDesk("/desk/profiles");
   if (!desk.allowed) return { ok: false, error: "Not allowed." };
   const id = String(formData.get("profile_id") ?? "");
-  if (String(formData.get("confirmation") ?? "").trim().toUpperCase() !== "DELETE") {
+  if (!hasDeleteConfirmation(formData.get("confirmation"))) {
     return { ok: false, error: 'Type DELETE to confirm.' };
   }
   const db = createServiceClient() ?? desk.supabase;

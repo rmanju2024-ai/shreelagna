@@ -16,11 +16,12 @@ import { loadFormLists } from "@/lib/profile/load-form-lists";
 import { ABOUT_MAX, ABOUT_MIN, aboutPlainText } from "@/lib/profile/about-html";
 import { contactViewedCopy, interestReceivedCopy } from "@/lib/match/alert-copy";
 import { canAlertInterest } from "@/lib/match/profile-settings";
-import { effectiveInterestStatus, openInterestBlocksSend } from "@/lib/match/interest-status";
+import { canSendInterest, effectiveInterestStatus, openInterestBlocksSend } from "@/lib/match/interest-status";
 import { parseProfileForm } from "@/lib/validation/profile";
 import { isProfileEditSection, pickSectionRecord, SECTION_FORM_KEYS } from "@/lib/profile/sections";
 import { buildProfileSaveRow, pickSaveRow } from "@/lib/profile/save-payload";
 import { canEditMemberProfile, isStaffRole } from "@/lib/desk/access";
+import { hasDeleteConfirmation } from "@/lib/profile/delete-confirmation";
 import { contentFlags, MEMBER_CONTACT_WARNING } from "@/lib/moderation/content-flags";
 import { writeAudit } from "@/lib/desk/audit";
 import { notifyInterestReceived } from "@/lib/notify/dispatch";
@@ -542,7 +543,7 @@ export async function deleteOwnProfile(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const { supabase, me } = await requireMember();
   const profileId = String(formData.get("profile_id") ?? "");
-  if (String(formData.get("confirmation") ?? "").trim().toUpperCase() !== "DELETE") {
+  if (!hasDeleteConfirmation(formData.get("confirmation"))) {
     return { ok: false, error: 'Type DELETE to confirm.' };
   }
   const { data: profile } = await supabase
@@ -592,6 +593,9 @@ export async function sendInterest(formData: FormData) {
 
   if (!mine?.is_complete || mine.status !== "active") {
     redirect(`/browse/${toId}?error=incomplete`);
+  }
+  if (!canSendInterest(mine.id, toId)) {
+    redirect("/browse?error=self");
   }
 
   const access = await loadMembership(supabase, me);

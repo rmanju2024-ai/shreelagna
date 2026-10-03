@@ -11,6 +11,7 @@ import { pairPlanLive } from "@/lib/membership/access";
 import { loadMembership, loadMembershipForProfile } from "@/lib/membership/load";
 import { displayFirstName } from "@/lib/profile/options";
 import { previewText } from "@/lib/match/chat-ui";
+import { safeNextPath } from "@/lib/auth/safe-next";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { readSessionFromCookies } from "@/lib/supabase/user-rest";
 import { revalidatePath } from "next/cache";
@@ -282,7 +283,7 @@ async function postChatMessage(formData: FormData) {
   const toId = String(formData.get("to_profile_id") ?? "");
   const body = String(formData.get("body") ?? "").trim();
   let threadId = String(formData.get("thread_id") ?? "");
-  const bounce = next || (toId ? `/browse/${toId}` : "/app/chat");
+  const bounce = safeNextPath(next, toId ? `/browse/${toId}` : "/app/chat");
   if (body.length < 1) return { ok: false as const, bounce, threadId: threadId || null };
   if (!threadId && toId && me.active_profile_id) {
     const [a, b] = orderedPair(me.active_profile_id, toId);
