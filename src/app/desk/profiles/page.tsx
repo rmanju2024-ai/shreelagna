@@ -137,7 +137,7 @@ export default async function DeskProfilesPage({
   const db = createServiceClient() ?? desk.supabase;
   const adminIds = desk.admin ? new Set<string>() : await fetchAdminUserIds(db as never);
 
-  let found: DeskProfile | null = null;
+  let found: DeskProfile[] = [];
   let listed: DeskProfile[] = [];
   let readyCount = 0;
   let incompleteCount = 0;
@@ -147,10 +147,10 @@ export default async function DeskProfilesPage({
     const code = q.toUpperCase();
     const byId = UUID.test(q);
     const { data } = byId
-      ? await db.from("profiles").select(SELECT).eq("id", q).maybeSingle()
-      : await db.from("profiles").select(SELECT).eq("member_code", code).maybeSingle();
-    if (data && (desk.admin || !adminIds.has(String(data.created_by)))) found = data;
-    else missing = true;
+      ? await db.from("profiles").select(SELECT).eq("id", q)
+      : await db.from("profiles").select(SELECT).ilike("member_code", `%${code}%`).order("member_code").limit(50);
+    found = (data ?? []).filter((row) => desk.admin || !adminIds.has(String(row.created_by)));
+    missing = found.length === 0;
   } else {
     const readyQuery = () =>
       excludeAdmins(
@@ -187,7 +187,7 @@ export default async function DeskProfilesPage({
           <p className="browse-kicker">Profiles</p>
           <h2>Review queue</h2>
         </div>
-        <p>{q ? (found ? "1 found" : "No match") : `${view === "ready" ? readyCount : incompleteCount} shown`}</p>
+        <p>{q ? (found.length ? `${found.length} found` : "No match") : `${view === "ready" ? readyCount : incompleteCount} shown`}</p>
       </header>
       <form className="desk-id-search" action="/desk/profiles" method="get">
         <label className="sr-only" htmlFor="desk-profile-id">
@@ -198,7 +198,7 @@ export default async function DeskProfilesPage({
           className={inputClass}
           name="q"
           defaultValue={q}
-          placeholder="Member ID"
+          placeholder="Member ID or part of an ID"
           autoComplete="off"
         />
         <button className={btnPrimary} type="submit">
@@ -211,9 +211,11 @@ export default async function DeskProfilesPage({
         ) : null}
       </form>
       {q ? (
-        found ? (
+        found.length ? (
           <ul className="desk-ticket-list">
-            <ProfileDeskRow row={found} queue={found.is_complete ? "ready" : "incomplete"} />
+            {found.map((row) => (
+              <ProfileDeskRow key={row.id} row={row} queue={row.is_complete ? "ready" : "incomplete"} />
+            ))}
           </ul>
         ) : missing ? (
           <p className="desk-empty">No profile for that ID.</p>
