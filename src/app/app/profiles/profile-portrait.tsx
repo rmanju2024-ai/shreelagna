@@ -154,7 +154,7 @@ export function ProfilePortrait({
                   k: "Email ID",
                   required: true,
                   v: contact.revealed ? contact.email : "Hidden",
-                  extra: contact.revealed ? <VerifyFlag on label="Gmail verified" /> : null,
+                  extra: contact.revealed ? <VerifyFlag on label="Gmail sign-in" /> : null,
                 },
               ]
             : []
@@ -182,7 +182,7 @@ export function ProfilePortrait({
                 k: "Email ID",
                 required: true,
                 v: loginEmail?.trim() || "—",
-                extra: <VerifyFlag on={Boolean(loginEmail?.trim())} label="Gmail verified" />,
+                extra: <VerifyFlag on={Boolean(loginEmail?.trim())} label="Gmail sign-in" />,
               },
             ]),
       ],

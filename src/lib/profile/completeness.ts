@@ -259,7 +259,7 @@ export function completenessChecks(p: CompletenessInput): CompletenessItem[] {
       filled: introChoiceCount(p) >= 1,
     },
     { key: "photo", label: "A photograph", section: "album", mandatory: true, filled: p.hasApprovedPhoto },
-    { key: "email", label: "Verified Gmail", section: "personal", mandatory: true, filled: p.emailOtpVerified },
+    { key: "email", label: "Gmail sign-in", section: "personal", mandatory: true, filled: p.emailOtpVerified },
     { key: "mobile", label: "Mobile number", section: "personal", mandatory: true, filled: mobileOk },
   );
   if (mobileOk && p.smsOtpRequired) {

@@ -47,7 +47,9 @@ export async function setProfileTrustTier(formData: FormData) {
   if (!desk.allowed) return;
   const id = String(formData.get("id") ?? "");
   const trustTier = String(formData.get("trust_tier") ?? "");
-  if (!id || !["submitted", "mobile_confirmed", "details_reviewed", "identity_checked"].includes(trustTier)) return;
+  // Identity checks need a dedicated evidence-review workflow; desk staff can only
+  // publish the states this screen can substantiate today.
+  if (!id || !["submitted", "mobile_confirmed", "details_reviewed"].includes(trustTier)) return;
   const db = createServiceClient() ?? desk.supabase;
   const { data: profile } = await db.from("profiles").select("id, created_by").eq("id", id).maybeSingle();
   if (!profile) return;

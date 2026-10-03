@@ -5811,6 +5811,29 @@ a.browse-view {
 .app-route-loading-card { height: 10rem; border-radius: 1.1rem; }
 @keyframes route-shimmer { to { background-position: -220% 0; } }
 
+.account-hub { width: min(100%, 74rem); margin: 0 auto; }
+.account-hub-head { padding: clamp(1rem, 3vw, 1.8rem); border-radius: 1.4rem; background: color-mix(in srgb, var(--paper) 88%, var(--accent)); }
+.account-hub-head h1 { margin: 0.25rem 0; color: var(--ink); font-family: var(--font-display), serif; }
+.account-hub-head p:last-child { margin: 0; color: var(--muted); }
+.account-hub-layout { display: grid; grid-template-columns: 12rem minmax(0, 1fr); gap: 1.1rem; margin-top: 1.1rem; }
+.account-hub-rail { position: sticky; top: 1rem; align-self: start; display: grid; gap: 0.35rem; padding: 0.5rem; border: 1px solid var(--line); border-radius: 1rem; background: var(--paper); }
+.account-hub-rail a { padding: 0.6rem 0.7rem; border-radius: 0.7rem; color: var(--ink); font-size: 0.84rem; font-weight: 800; text-decoration: none; }
+.account-hub-rail a:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.account-hub-content { display: grid; gap: 1.4rem; }
+.account-hub-section h2 { margin: 0 0 0.65rem; color: var(--ink); font-family: var(--font-display), serif; font-size: 1.2rem; }
+.account-hub-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+.account-hub-card { display: block; min-height: 9rem; padding: 1rem; color: var(--ink); text-decoration: none; transition: transform 0.18s ease, border-color 0.18s ease; }
+.account-hub-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+.account-hub-card h3 { margin: 0; }
+.account-hub-card p { margin: 0.5rem 0 0.85rem; color: var(--muted); font-size: 0.88rem; line-height: 1.45; }
+.account-hub-card span { color: var(--accent); font-size: 0.8rem; font-weight: 850; }
+@media (max-width: 700px) {
+  .account-hub-layout { grid-template-columns: 1fr; }
+  .account-hub-rail { position: static; display: flex; overflow-x: auto; padding: 0.35rem; }
+  .account-hub-rail a { white-space: nowrap; }
+  .account-hub-grid { grid-template-columns: 1fr; }
+}
+
 .profile-trust {
   display: inline-flex;
   align-items: center;

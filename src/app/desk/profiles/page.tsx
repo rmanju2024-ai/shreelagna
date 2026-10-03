@@ -114,7 +114,6 @@ function ProfileDeskRow({ row, queue }: { row: DeskProfile; queue: QueueView }) 
             <option value="submitted">Submitted</option>
             <option value="mobile_confirmed">Mobile confirmed</option>
             <option value="details_reviewed">Details reviewed</option>
-            <option value="identity_checked">Identity checked</option>
           </select>
           <button className={btnGhost} type="submit">Set trust</button>
         </form>

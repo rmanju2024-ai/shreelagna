@@ -52,7 +52,7 @@ describe("Discover mobile tabs", () => {
   it("keeps every Discover option available", () => {
     show();
     for (const label of [
-      "Best match",
+      "Today",
       "They like you",
       "Kundali",
       "Nearby",
