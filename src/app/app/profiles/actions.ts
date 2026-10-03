@@ -536,6 +536,47 @@ export async function setActiveProfile(formData: FormData) {
   redirect("/app");
 }
 
+export async function deleteOwnProfile(
+  _previousState: { ok: boolean; error?: string },
+  formData: FormData,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const { supabase, me } = await requireMember();
+  const profileId = String(formData.get("profile_id") ?? "");
+  if (String(formData.get("confirmation") ?? "").trim().toUpperCase() !== "DELETE") {
+    return { ok: false, error: 'Type DELETE to confirm.' };
+  }
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id, created_by")
+    .eq("id", profileId)
+    .maybeSingle();
+  if (!profile || profile.created_by !== me.id) {
+    return { ok: false, error: "This profile is no longer available." };
+  }
+  const { data: media, error: mediaError } = await supabase
+    .from("media")
+    .select("storage_path")
+    .eq("profile_id", profileId);
+  if (mediaError) return { ok: false, error: "This profile could not be deleted just now." };
+  const paths = (media ?? []).map((item) => item.storage_path).filter((path): path is string => Boolean(path));
+  if (paths.length) {
+    const { error: storageError } = await supabase.storage.from("profile-media").remove(paths);
+    if (storageError) return { ok: false, error: "Profile media could not be removed. Please try again." };
+  }
+  const { error } = await supabase.from("profiles").delete().eq("id", profileId);
+  if (error) return { ok: false, error: "This profile could not be deleted just now. Please try again." };
+  await writeAudit({
+    actorUserId: me.id,
+    actorRole: me.role,
+    action: "profile.delete.self",
+    entityType: "profile",
+    entityId: profileId,
+  });
+  revalidatePath("/app");
+  revalidatePath("/browse");
+  return { ok: true };
+}
+
 export async function sendInterest(formData: FormData) {
   const { supabase, me } = await requireMember();
   const toId = String(formData.get("to_profile_id") ?? "");

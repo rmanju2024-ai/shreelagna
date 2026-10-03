@@ -1,6 +1,7 @@
 "use client";
 
 import { saveProfileSettings } from "@/app/app/match/actions";
+import { ProfileDeleteControl } from "@/app/app/profiles/profile-delete-control";
 import type { ProfileSettings } from "@/lib/match/profile-settings";
 import { btnHero } from "@/lib/ui/classes";
 
@@ -34,7 +35,8 @@ export function SettingsForm({
   values: ProfileSettings;
 }) {
   return (
-    <form action={saveProfileSettings} className="set-panel">
+    <div className="set-panel">
+      <form action={saveProfileSettings}>
       <input type="hidden" name="profile_id" value={profileId} />
       <p className="set-kicker">Premium settings</p>
       <h2>Privacy, discovery and alerts</h2>
@@ -101,6 +103,13 @@ export function SettingsForm({
       <button type="submit" className={`${btnHero} set-save`}>
         Save settings
       </button>
-    </form>
+      </form>
+
+      <section className="settings-danger-zone">
+        <h3>Delete profile</h3>
+        <p>Use this only if you want to permanently remove this matrimonial profile.</p>
+        <ProfileDeleteControl profileId={profileId} />
+      </section>
+    </div>
   );
 }

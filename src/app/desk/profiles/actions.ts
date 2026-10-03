@@ -39,6 +39,41 @@ export async function setProfileStatus(formData: FormData) {
   refresh();
 }
 
+export async function deleteDeskProfile(
+  _previousState: { ok: boolean; error?: string },
+  formData: FormData,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const desk = await requireDesk("/desk/profiles");
+  if (!desk.allowed) return { ok: false, error: "Not allowed." };
+  const id = String(formData.get("profile_id") ?? "");
+  if (String(formData.get("confirmation") ?? "").trim().toUpperCase() !== "DELETE") {
+    return { ok: false, error: 'Type DELETE to confirm.' };
+  }
+  const db = createServiceClient() ?? desk.supabase;
+  const { data: profile } = await db.from("profiles").select("id, created_by").eq("id", id).maybeSingle();
+  if (!profile) return { ok: false, error: "Profile not found." };
+  const { data: owner } = await db.from("app_users").select("role").eq("id", profile.created_by).maybeSingle();
+  if (owner?.role === "admin" && !desk.admin) return { ok: false, error: "Not allowed." };
+  const { data: media, error: mediaError } = await db.from("media").select("storage_path").eq("profile_id", id);
+  if (mediaError) return { ok: false, error: "Profile could not be deleted just now." };
+  const paths = (media ?? []).map((item) => item.storage_path).filter((path): path is string => Boolean(path));
+  if (paths.length) {
+    const { error: storageError } = await db.storage.from("profile-media").remove(paths);
+    if (storageError) return { ok: false, error: "Profile media could not be removed. Please try again." };
+  }
+  const { error } = await db.from("profiles").delete().eq("id", id);
+  if (error) return { ok: false, error: "Profile could not be deleted just now. Please try again." };
+  await writeAudit({
+    actorUserId: desk.me?.id,
+    actorRole: desk.me?.role,
+    action: "profile.delete.desk",
+    entityType: "profile",
+    entityId: id,
+  });
+  refresh();
+  return { ok: true };
+}
+
 async function loadDeskProfile(id: string) {
   const desk = await requireDesk("/desk/profiles");
   if (!desk.allowed) return { error: "Not allowed." as const };

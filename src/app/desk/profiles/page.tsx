@@ -8,6 +8,7 @@ import { activeContactFlags, contentFlagLabel } from "@/lib/moderation/content-f
 import { formatIstDateTime } from "@/lib/time/ist";
 import { btnGhost, btnPrimary, cardClass, inputClass } from "@/lib/ui/classes";
 import Link from "next/link";
+import { ProfileDeleteControl } from "@/app/app/profiles/profile-delete-control";
 
 const SELECT =
   "id, member_code, subject_full_name, status, is_complete, profile_type, created_by, created_at, about";
@@ -106,6 +107,7 @@ function ProfileDeskRow({ row, queue }: { row: DeskProfile; queue: QueueView }) 
             </button>
           </form>
         ) : null}
+        <ProfileDeleteControl profileId={row.id} staff compact />
       </span>
     </li>
   );

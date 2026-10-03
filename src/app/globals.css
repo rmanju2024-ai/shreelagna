@@ -5578,6 +5578,65 @@ a.browse-view {
   line-height: 1.35;
 }
 
+.settings-danger-zone {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 1px solid #dc2626;
+  border-radius: 1rem;
+  background: color-mix(in srgb, #dc2626 7%, var(--paper));
+}
+
+.settings-danger-zone h3,
+.settings-danger-zone p {
+  margin: 0;
+}
+
+.settings-danger-zone p {
+  margin-top: 0.35rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.profile-delete-control {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.85rem;
+}
+
+.profile-delete-control label {
+  display: grid;
+  gap: 0.3rem;
+  max-width: 22rem;
+  font-size: 0.88rem;
+}
+
+.profile-delete-control input:not(.sr-only) {
+  min-height: 2.4rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid color-mix(in srgb, #dc2626 45%, transparent);
+  border-radius: 0.65rem;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.profile-delete-control button {
+  width: fit-content;
+  border-color: #dc2626;
+  color: #b91c1c;
+}
+
+.profile-delete-control.is-compact {
+  display: inline-flex;
+  margin: 0;
+}
+
+.profile-delete-error {
+  margin: 0;
+  color: #b91c1c;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
 .desk-section-title {
   margin: 0.85rem 0 0.3rem;
   font-family: var(--font-display), Georgia, serif;
