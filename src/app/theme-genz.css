@@ -1306,6 +1306,33 @@ html[data-scene="couple"] .app-main {
   padding: 0.34rem 0.62rem; border: 1px solid rgb(255 255 255 / 24%); border-radius: 999px;
   background: rgb(0 0 0 / 17%); color: #fffaf2; font-size: 0.74rem; font-weight: 700;
 }
+.home-artwork { background: #2a1710; }
+.home-welcome {
+  position: relative; z-index: 12; width: 100%;
+  background:
+    radial-gradient(circle at 8% 12%, color-mix(in srgb, var(--theme-accent) 14%, transparent), transparent 26rem),
+    linear-gradient(120deg, var(--theme-surface), var(--theme-surface-alt));
+  border-block: 1px solid color-mix(in srgb, var(--theme-accent) 22%, white);
+}
+.home-welcome-inner {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+  padding-block: clamp(1.4rem, 4vw, 3rem);
+}
+.home-welcome .home-hero-kicker {
+  border-color: color-mix(in srgb, var(--theme-accent) 28%, transparent);
+  background: var(--theme-accent-soft); color: var(--theme-accent);
+}
+.home-welcome-title {
+  margin: 0.55rem 0 0; color: var(--theme-ink); font-size: clamp(2rem, 4.5vw, 3.8rem); line-height: 1;
+}
+.home-welcome-sub { max-width: 38rem; margin: 0.7rem 0 0; color: var(--muted); font-size: clamp(0.95rem, 1.5vw, 1.1rem); }
+.home-welcome-action { display: grid; justify-items: end; gap: 0.8rem; }
+.home-welcome .home-hero-chips { justify-content: flex-end; margin: 0; }
+.home-welcome .home-hero-chips li {
+  border-color: color-mix(in srgb, var(--theme-accent) 22%, transparent);
+  background: rgb(255 255 255 / 68%); color: var(--theme-ink);
+}
+.home-welcome-buttons { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.65rem; }
 .home-language-banner {
   position: relative; z-index: 15; width: 100%; overflow: hidden;
   border-block: 1px solid color-mix(in srgb, var(--theme-accent, var(--accent)) 35%, white);
@@ -1347,6 +1374,9 @@ html[data-scene="couple"] .app-main {
   .home-hero-title { font-size: clamp(2.15rem, 12vw, 3.25rem); }
   .home-language-track { animation-duration: 32s; }
   .home-language-track p { padding: 0.7rem 0.9rem; }
+  .home-artwork { min-height: 28rem; height: min(70svh, 38rem); }
+  .home-welcome-inner { align-items: flex-start; flex-direction: column; gap: 1rem; }
+  .home-welcome-action, .home-welcome .home-hero-chips, .home-welcome-buttons { justify-items: start; justify-content: flex-start; }
   .help-genz-form { grid-template-columns: minmax(0, 1fr); }
   .help-genz-form label, .help-genz-form label:nth-of-type(5), .help-genz-form label:nth-of-type(6), .help-genz-form > :last-child { grid-column: auto; }
   .help-genz-form button { width: 100%; }

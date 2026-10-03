@@ -25,36 +25,39 @@ export default async function HomePage() {
 
   return (
     <PageShell bleed overlay>
-      <section className="relative h-[100svh] min-h-[640px] w-full overflow-hidden lg:min-h-[780px]">
-        <KalyanBanner intensity="hero" presentation="complete" />
-        <div
-          className={`${pageInner} relative z-10 flex h-full min-h-[640px] flex-col justify-end pb-12 pt-36 lg:min-h-[780px] lg:pb-16 lg:pt-44`}
-        >
-          <div className="home-hero-copy max-w-2xl">
-            <p className="home-hero-kicker">✦ Private introductions · India</p>
-            <h1 className="home-hero-title mt-4 font-[family-name:var(--font-display)]">
-              Families, gathered with grace.
+      <section className="home-artwork relative h-[100svh] min-h-[640px] w-full overflow-hidden lg:min-h-[780px]">
+        <KalyanBanner intensity="hero" presentation="complete" veil={false} />
+      </section>
+
+      <section className="home-welcome">
+        <div className={`${pageInner} home-welcome-inner`}>
+          <div>
+            <p className="home-hero-kicker">✦ Shree Lagna · Bharat</p>
+            <h1 className="home-welcome-title font-[family-name:var(--font-display)]">
+              A sacred beginning.
             </h1>
-            <p className="home-hero-sub mt-5 max-w-xl">
+            <p className="home-welcome-sub">
               {user
-                ? "Welcome back. Continue your profile, or search with care."
-                : "A quiet house for Indian families. Sign in with Gmail to begin."}
+                ? "Welcome back. Your next step awaits."
+                : "Meet with dignity. Begin with a trusted introduction."}
             </p>
+          </div>
+          <div className="home-welcome-action">
             <ul className="home-hero-chips" aria-label="Shree Lagna promises">
-              <li>🔒 Private by default</li>
-              <li>✨ Family-first</li>
-              <li>🇮🇳 Made for India</li>
+              <li>🪔 Sanskar</li>
+              <li>🤝 Saath</li>
+              <li>🔒 Maryada</li>
             </ul>
-            <div className="mt-8 flex flex-wrap items-center gap-4">
+            <div className="home-welcome-buttons">
               {user ? (
                 <Link href="/app" className={btnHero}>
-                  My profile
+                  My profile →
                 </Link>
               ) : (
                 <GoogleSignIn label="Continue with Gmail" tone="ivory" size="lg" />
               )}
               <Link href="/browse" className={btnHeroGhost}>
-                Search matches
+                Discover →
               </Link>
             </div>
           </div>
