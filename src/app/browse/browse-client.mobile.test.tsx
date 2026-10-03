@@ -14,8 +14,6 @@ const views: BrowseView[] = [
   "kundali",
   "nearby",
   "community",
-  "viewed_you",
-  "you_viewed",
   "custom",
 ];
 const lists = Object.fromEntries(views.map((view) => [view, []])) as Record<BrowseView, []>;
@@ -57,8 +55,6 @@ describe("Discover mobile tabs", () => {
       "Kundali",
       "Nearby",
       "Same community",
-      "Who viewed you",
-      "You viewed",
       "Advanced filter",
     ]) {
       expect(screen.getByRole("button", { name: new RegExp(label, "i") })).toBeTruthy();

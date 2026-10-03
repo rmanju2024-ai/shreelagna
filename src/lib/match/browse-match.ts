@@ -15,8 +15,6 @@ export const BROWSE_VIEWS = [
   "kundali",
   "nearby",
   "community",
-  "viewed_you",
-  "you_viewed",
   "custom",
 ] as const;
 
@@ -31,8 +29,6 @@ export function emptyBrowseBuckets<T>(): Record<BrowseView, T[]> {
     kundali: [],
     nearby: [],
     community: [],
-    viewed_you: [],
-    you_viewed: [],
     custom: [],
   };
 }

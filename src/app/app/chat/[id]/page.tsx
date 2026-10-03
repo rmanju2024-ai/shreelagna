@@ -100,9 +100,14 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
   return (
     <PageShell>
       <LiveRefresh table="messages" filter={`thread_id=eq.${id}`} />
-      <div className="wc-shell has-thread">
-      <ChatSidebar activeId={id} />
-      <article className="wa-app wc-pane">
+      <div className="inbox-unified">
+        <nav className="inbox-switcher" aria-label="Inbox sections">
+          <Link href="/app/chat" className="is-on" aria-current="page">💬 Chats</Link>
+          <Link href="/app/chat?tab=alerts">🔔 Alerts</Link>
+        </nav>
+        <div className="wc-shell has-thread">
+        <ChatSidebar activeId={id} />
+        <article className="wa-app wc-pane">
         <header className="wa-head">
           <Link href="/app/chat" className="wa-back" aria-label="All chats">
             ‹
@@ -134,7 +139,8 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
             A live plan is needed to keep chatting. <Link href="/app/plans">Open plans</Link>
           </p>
         ) : null}
-      </article>
+        </article>
+        </div>
       </div>
     </PageShell>
   );

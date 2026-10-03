@@ -18,7 +18,6 @@ import {
   BROWSE_PROFILE_SELECT_STAR,
   loadBrowsePhotoMap,
 } from "@/lib/match/browse-query";
-import { formatIstDate, parseInstant } from "@/lib/time/ist";
 import { yearsFromDob } from "@/lib/profile/completeness";
 import { loadFaithCatalog } from "@/lib/profile/load-form-lists";
 import { formatHeightImperial, matchSelfFromProfile } from "@/lib/profile/match-compare";
@@ -40,12 +39,6 @@ function nestedName(value: unknown): string | null {
 
 function asText(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value : null;
-}
-
-function viewedWhen(iso: string | null | undefined): string {
-  const at = parseInstant(iso);
-  if (!at) return "Viewed";
-  return `Viewed ${formatIstDate(at, false)}`;
 }
 
 function cardFromRow(row: Record<string, unknown>, photoMap: Map<string, string>, now: number): BrowseCardNote {
@@ -170,7 +163,6 @@ export default async function BrowsePage({
         lookingFor = want ? profileKindLabel(want) : null;
         const mediaClient = createServiceClient() ?? supabase;
         const mineId = String(mine.id);
-        type Visit = { viewer_profile_id: string; viewed_profile_id: string; viewed_at: string };
         // One database call (supabase/migrations/058_browse_bundle.sql); falls back to the older multi-call path.
         const rpc = await timed(
           "browse_bundle",
@@ -185,7 +177,7 @@ export default async function BrowsePage({
         );
         const bundle =
           !rpc.error && rpc.data && typeof rpc.data === "object"
-            ? (rpc.data as { rows: Record<string, unknown>[]; viewed_you: Visit[]; you_viewed: Visit[] })
+            ? (rpc.data as { rows: Record<string, unknown>[] })
             : null;
         const legacy = async () => {
         const listQuery = async (cols: string) => {
@@ -199,31 +191,16 @@ export default async function BrowsePage({
           const result = want ? await query.eq("profile_type", want) : await query;
           return result as { data: Record<string, unknown>[] | null; error: { message?: string } | null };
         };
-        const viewCols = "viewer_profile_id, viewed_profile_id, viewed_at";
-        const viewedYouPromise = db
-          .from("profile_views")
-          .select(viewCols)
-          .eq("viewed_profile_id", mineId)
-          .order("viewed_at", { ascending: false })
-          .limit(40);
-        const youViewedPromise = db
-          .from("profile_views")
-          .select(viewCols)
-          .eq("viewer_profile_id", mineId)
-          .order("viewed_at", { ascending: false })
-          .limit(40);
         const adminPromise =
           me.role === "admin" ? Promise.resolve(new Set<string>()) : fetchAdminUserIds(mediaClient as never);
         const listPromise = listQuery(BROWSE_PROFILE_SELECT).then((result) =>
           result.error ? listQuery(BROWSE_PROFILE_SELECT_STAR) : result,
         );
-        const [listData, viewedYou, youViewed, adminIds] = await Promise.all([
+        const [listData, adminIds] = await Promise.all([
           listPromise,
-          viewedYouPromise,
-          youViewedPromise,
           adminPromise,
         ]);
-        return { listData, viewedYou, youViewed, adminIds };
+        return { listData, adminIds };
         };
         const loaded = bundle
           ? {
@@ -231,17 +208,14 @@ export default async function BrowsePage({
                 data: bundle.rows.filter((row) => row.is_extra !== true) as Record<string, unknown>[] | null,
                 error: null as { message?: string } | null,
               },
-              viewedYou: { data: bundle.viewed_you as Visit[] | null },
-              youViewed: { data: bundle.you_viewed as Visit[] | null },
               adminIds: new Set<string>(),
             }
           : await legacy();
-        const { listData, viewedYou, youViewed, adminIds } = loaded;
+        const { listData, adminIds } = loaded;
         if (listData.error) {
           notice = "Matches could not load just now. Please try again shortly.";
         } else {
           const rows = listData.data ?? [];
-          const listedIds = new Set(rows.map((row) => String(row.id)));
           const myPlace = { city: asText(mine.current_city), state: asText(mine.current_state) };
           const myCommunity = nestedName(mine.communities);
           if (!myPlace.city) {
@@ -249,21 +223,6 @@ export default async function BrowsePage({
           }
           if (!myCommunity) {
             viewNotes.community = "Add your community on the profile to use this list.";
-          }
-          const viewRows = [...(viewedYou.data ?? []), ...(youViewed.data ?? [])];
-          const extraIds = new Set<string>();
-          for (const visit of viewRows) {
-            const other =
-              visit.viewer_profile_id === mineId ? visit.viewed_profile_id : visit.viewer_profile_id;
-            if (other && other !== mineId && !listedIds.has(other)) extraIds.add(other);
-          }
-          let extra: Record<string, unknown>[] = bundle ? bundle.rows.filter((row) => row.is_extra === true) : [];
-          if (!bundle && extraIds.size) {
-            const extraQuery = (cols: string) =>
-              db.from("profiles").select(cols).eq("status", "active").in("id", [...extraIds]);
-            const extraSlim = await extraQuery(BROWSE_PROFILE_SELECT);
-            extra = ((extraSlim.error ? await extraQuery(BROWSE_PROFILE_SELECT_STAR) : extraSlim).data ??
-              []) as unknown as Record<string, unknown>[];
           }
           const [blockedByMe, blockedMe] = await Promise.all([
             db.from("member_blocks").select("blocker_profile_id, blocked_profile_id").eq("blocker_profile_id", mineId).order("created_at", { ascending: false }).limit(100),
@@ -283,17 +242,15 @@ export default async function BrowsePage({
             String(row.created_by) === me.id ||
             (!(row.by_admin === true || adminIds.has(String(row.created_by))) && !blockedIds.has(String(row.id)));
           const listed = rows.filter(keepHouse);
-          extra = extra.filter(keepHouse);
-          const allRows = [...listed, ...extra];
           const photoMap: Map<string, string> = bundle
             ? new Map(
-                allRows
+                listed
                   .filter((row) => typeof row.photo_path === "string" && row.photo_path)
                   .map((row) => [String(row.id), String(row.photo_path)] as [string, string]),
               )
             : await loadBrowsePhotoMap(
                 mediaClient,
-                allRows.map((row) => String(row.id)),
+                listed.map((row) => String(row.id)),
               );
           const now = Date.now();
           const mySelf = matchSelfFromProfile(mine, {
@@ -319,18 +276,6 @@ export default async function BrowsePage({
               if (!rank.pass) return;
               lists[key].push({ id: card.id, score: rank.label });
             });
-          }
-          for (const row of extra) {
-            const card = cardFromRow(row, photoMap, now);
-            catalog[card.id] = card;
-          }
-          for (const visit of viewRows) {
-            if (visit.viewed_profile_id === mineId && catalog[visit.viewer_profile_id]) {
-              lists.viewed_you.push({ id: visit.viewer_profile_id, score: viewedWhen(visit.viewed_at) });
-            }
-            if (visit.viewer_profile_id === mineId && catalog[visit.viewed_profile_id]) {
-              lists.you_viewed.push({ id: visit.viewed_profile_id, score: viewedWhen(visit.viewed_at) });
-            }
           }
           (["fits", "prefers", "kundali"] as BrowseView[]).forEach((key) => {
             lists[key].sort((a, b) => Number.parseInt(b.score ?? "0", 10) - Number.parseInt(a.score ?? "0", 10));

@@ -57,20 +57,6 @@ const EXTRA_VIEWS: ViewItem[] = [
     empty: "No one from your community yet",
   },
   {
-    id: "viewed_you",
-    label: "Who viewed you",
-    short: "Who viewed you",
-    hint: "They opened your profile",
-    empty: "No one has viewed your profile yet",
-  },
-  {
-    id: "you_viewed",
-    label: "You viewed",
-    short: "You viewed",
-    hint: "Profiles you opened",
-    empty: "You have not opened other profiles yet",
-  },
-  {
     id: "custom",
     label: "Advanced filter",
     short: "Advanced filter",
@@ -157,8 +143,6 @@ export function BrowseClient({
       kundali: 0,
       nearby: 0,
       community: 0,
-      viewed_you: 0,
-      you_viewed: 0,
       custom: 0,
     };
     (Object.keys(tally) as BrowseView[]).forEach((key) => {

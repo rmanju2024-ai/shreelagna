@@ -55,8 +55,6 @@ describe("browse match views", () => {
     expect(parseBrowseView("more")).toBe("fits");
     expect(parseBrowseView("nearby")).toBe("nearby");
     expect(parseBrowseView("community")).toBe("community");
-    expect(parseBrowseView("viewed_you")).toBe("viewed_you");
-    expect(parseBrowseView("you_viewed")).toBe("you_viewed");
     expect(parseBrowseView("custom")).toBe("custom");
   });
 
