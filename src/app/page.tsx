@@ -86,8 +86,8 @@ export default async function HomePage() {
         <ul className={`${pageInner} grid gap-4 pb-10 sm:grid-cols-3`}>
           {[
             ["🪔", "Sanskar", "Respect for every family, every step."],
-            ["🔒", "Nijta", "Your story stays in trusted hands."],
-            ["🤝", "Apnapan", "Real guidance when you need it."],
+            ["🔒", "Vishwas", "Your story stays in trusted hands."],
+            ["🤝", "Sambandh", "Real guidance when you need it."],
           ].map(([icon, t, d], index) => (
             <li key={t} className="home-value-card">
               <span className="home-value-number" aria-hidden>{icon}</span>
