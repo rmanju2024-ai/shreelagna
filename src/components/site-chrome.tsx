@@ -150,6 +150,7 @@ export function SiteFooter({ glass = false }: { glass?: boolean }) {
           <Link href="/terms">Terms</Link>
           <Link href="/privacy">Privacy</Link>
           <Link href="/community-rules">Community Rules</Link>
+          <Link href="/verification">Verification</Link>
           <Link href="/refunds">Refunds</Link>
         </nav>
         <p>Adults only · Indian families · Private introductions</p>
