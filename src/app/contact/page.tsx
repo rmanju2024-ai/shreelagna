@@ -36,6 +36,7 @@ export default async function ContactPage() {
               <li><span aria-hidden>🔒</span><div><b>Safety & privacy</b><small>Keep your details in your control</small></div></li>
               <li><span aria-hidden>💬</span><div><b>Matches & chats</b><small>Help with introductions</small></div></li>
             </ul>
+            <p className="help-genz-legal">Need policy details? Read our <Link href="/privacy">Privacy Policy</Link>, <Link href="/terms">Terms</Link>, or <Link href="/community-rules">Community Rules</Link>.</p>
           </aside>
           <div className={`${cardClass} help-genz-form-card`}>
             <div className="help-genz-form-head">

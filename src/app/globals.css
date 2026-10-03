@@ -7023,6 +7023,15 @@ a.browse-view {
   gap: 0.28rem;
 }
 
+.legal-page { max-width: 58rem; }
+.legal-effective { margin: 0; color: var(--muted); font-size: 0.84rem; }
+.legal-effective a, .help-genz-legal a { color: var(--theme-accent); font-weight: 800; }
+.legal-sections { display: grid; gap: 0.8rem; margin-top: 0.5rem; }
+.legal-section { padding: 1rem 1.1rem; border: 1px solid var(--stroke); border-radius: 1rem; background: var(--theme-card); }
+.legal-section h2 { margin: 0; color: var(--theme-ink); font-size: 1.06rem; }
+.legal-section p { margin: 0.55rem 0 0; color: var(--muted); font-size: 0.92rem; line-height: 1.65; }
+.help-genz-legal { margin: 1rem 0 0; color: var(--muted); font-size: 0.78rem; line-height: 1.55; }
+
 .inbox-unified { display: grid; gap: 0.75rem; }
 .inbox-switcher {
   display: inline-flex;

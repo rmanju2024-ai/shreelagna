@@ -147,6 +147,10 @@ export function SiteFooter({ glass = false }: { glass?: boolean }) {
         <nav className="site-footer-links" aria-label="Footer">
           <Link href="/about">About</Link>
           <Link href="/contact">Help</Link>
+          <Link href="/terms">Terms</Link>
+          <Link href="/privacy">Privacy</Link>
+          <Link href="/community-rules">Community Rules</Link>
+          <Link href="/refunds">Refunds</Link>
         </nav>
         <p>Adults only · Indian families · Private introductions</p>
       </div>
