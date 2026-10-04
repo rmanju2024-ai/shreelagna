@@ -38,7 +38,9 @@ export async function AlertsFeed() {
     for (const row of photos ?? []) if (!photoMap.has(row.profile_id) && row.storage_path) photoMap.set(row.profile_id, row.storage_path);
   }
   const readAt = new Date().toISOString();
-  const marked = await supabase.from("notices").update({ read_at: readAt }).eq("user_id", me.id).neq("kind", "chat").is("read_at", null);
+  // Scoped to this member's own alerts; the service client guarantees the update is not silently blocked.
+  const writer = createServiceClient() ?? supabase;
+  const marked = await writer.from("notices").update({ read_at: readAt }).eq("user_id", me.id).neq("kind", "chat").is("read_at", null);
   const shownAlerts = marked.error ? alerts : alerts.map((alert) => ({ ...alert, read_at: alert.read_at ?? readAt }));
   return (
     <div className="alerts-genz inbox-alerts">

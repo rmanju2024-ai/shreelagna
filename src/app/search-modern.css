@@ -222,3 +222,19 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
 .sx-row .inbox-actions form{display:contents}
 .sx-row .inbox-actions :is(button,a){width:100%;min-height:2rem;padding:.3rem .4rem;font-size:.72rem;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}
 .sx-row .inbox-decline{grid-column:1 / -1}
+
+/* Readability on photo scenes: solid, high-contrast surfaces for tabs, hints and small text */
+.inbox-unified .inbox-switcher{background:rgb(255 255 255 / 94%);border:1px solid rgb(63 14 13 / 18%);box-shadow:0 6px 18px rgb(20 6 5 / 18%)}
+.inbox-unified .inbox-switcher a{color:#2b1a14;background:transparent;text-shadow:none}
+.inbox-unified .inbox-switcher a:hover{background:rgb(184 137 76 / 18%)}
+.inbox-unified .inbox-switcher a.is-on{background:#7a1f2b;color:#fff}
+.inbox-unified .inbox-alerts-panel{background:rgb(255 255 255 / 93%);color:#2b1a14}
+.inbox-unified .inbox-alerts-panel > header p{color:#5a4338;font-size:.85rem}
+.inbox-unified .inbox-alerts-panel > header h1{color:#2b1a14}
+.inbox-unified .alerts-genz-hint{color:#4a3a31;font-size:.88rem}
+.inbox-unified .alert-card{background:#fff;color:#2b1a14}
+.inbox-unified .alerts-genz-meta,.inbox-unified .alerts-genz-meta *{color:#5a4338}
+.sx-stage .sx-eyebrow{color:#fff8e7;text-shadow:0 1px 3px rgb(20 6 5 / 55%)}
+.sx-stage .sx-note,.sx-stage .sx-results-head p{color:#2b1a14;background:rgb(255 255 255 / 88%);padding:.3rem .65rem;border-radius:.6rem;width:fit-content}
+.sx-stage .sx-empty h3{color:#2b1a14}
+.sx-view-all-center .sx-view-all{box-shadow:0 4px 12px rgb(20 6 5 / 30%)}

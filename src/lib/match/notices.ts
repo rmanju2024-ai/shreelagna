@@ -38,7 +38,17 @@ export async function recordMatchNotices(
     .neq("id", profileId)
     .order("updated_at", { ascending: false })
     .limit(40);
+  // Never re-announce a profile this member was already told about (read or not);
+  // otherwise every visit to Alerts created fresh unread notices and the badge came back.
+  const { data: known } = await client
+    .from("notices")
+    .select("match_profile_id")
+    .eq("user_id", userId)
+    .eq("kind", "match")
+    .not("match_profile_id", "is", null);
+  const told = new Set<string>((known ?? []).map((row: { match_profile_id: string }) => String(row.match_profile_id)));
   for (const other of others ?? []) {
+    if (told.has(String(other.id))) continue;
     const candidate = matchSelfFromProfile(other, {
       religion: nestedName(other.religions),
       community: nestedName(other.communities),
