@@ -7,32 +7,19 @@ import { EMPTY_BROWSE_FILTERS } from "@/lib/match/browse-filters";
 import type { BrowseView } from "@/lib/match/browse-match";
 
 const scrollBy = vi.fn();
-const scrollIntoView = vi.fn();
-const views: BrowseView[] = [
-  "fits",
-  "prefers",
-  "kundali",
-  "nearby",
-  "community",
-  "custom",
-];
+const views: BrowseView[] = ["fits", "prefers", "kundali", "nearby", "community", "custom"];
 const lists = Object.fromEntries(views.map((view) => [view, []])) as Record<BrowseView, []>;
 
 afterEach(cleanup);
 
 beforeEach(() => {
   scrollBy.mockClear();
-  scrollIntoView.mockClear();
   Object.defineProperty(HTMLElement.prototype, "scrollBy", { configurable: true, value: scrollBy });
-  Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
-    configurable: true,
-    value: scrollIntoView,
-  });
 });
 
-describe("Discover mobile tabs", () => {
-  function show() {
-    return render(
+describe("Discover feed", () => {
+  it("shows every category as its own row", () => {
+    render(
       <BrowseClient
         lookingFor="Bride / Vadhu"
         notice={null}
@@ -45,36 +32,32 @@ describe("Discover mobile tabs", () => {
         communities={[]}
       />,
     );
-  }
-
-  it("keeps every Discover option available", () => {
-    show();
-    for (const label of [
-      "Today",
-      "They like you",
-      "Kundali",
-      "Nearby",
-      "Same community",
-      "Advanced filter",
-    ]) {
-      expect(screen.getByRole("button", { name: new RegExp(label, "i") })).toBeTruthy();
+    for (const label of ["Today’s picks", "They like you", "Kundali match", "Nearby", "Same community", "Advanced filter"]) {
+      expect(screen.getByRole("heading", { name: label })).toBeTruthy();
     }
+    expect(screen.getByText(/choose filters, then tap apply/i)).toBeTruthy();
   });
 
-  it("moves the options with both arrow controls", () => {
-    show();
-    fireEvent.click(screen.getByRole("button", { name: "Show more Discover options" }));
-    expect(scrollBy).toHaveBeenCalledWith({ left: 260, behavior: "smooth" });
-
-    fireEvent.click(screen.getByRole("button", { name: "Show previous Discover options" }));
-    expect(scrollBy).toHaveBeenCalledWith({ left: -260, behavior: "smooth" });
-  });
-
-  it("centres a selected option", () => {
-    show();
-    const nearby = screen.getByRole("button", { name: /nearby/i });
-    fireEvent.click(nearby);
-    expect(nearby.getAttribute("aria-current")).toBe("page");
-    expect(scrollIntoView).toHaveBeenCalled();
+  it("scrolls a category row with both arrows", () => {
+    render(
+      <BrowseClient
+        lookingFor="Bride / Vadhu"
+        notice={null}
+        user
+        initialView="fits"
+        initialFilters={EMPTY_BROWSE_FILTERS}
+        catalog={{
+          a: { id: "a", href: "/browse/a", name: "A" },
+          b: { id: "b", href: "/browse/b", name: "B" },
+        }}
+        lists={{ ...lists, fits: [{ id: "a", score: null }, { id: "b", score: null }] }}
+        religions={[]}
+        communities={[]}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Show more Today’s picks profiles" }));
+    expect(scrollBy).toHaveBeenCalledWith({ left: 280, behavior: "smooth" });
+    fireEvent.click(screen.getByRole("button", { name: "Show previous Today’s picks profiles" }));
+    expect(scrollBy).toHaveBeenCalledWith({ left: -280, behavior: "smooth" });
   });
 });
