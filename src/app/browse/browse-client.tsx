@@ -200,6 +200,7 @@ export function BrowseClient({
     }
     return `/browse/results?${params}`;
   })();
+  const discoverHref = resultHref.replace("/browse/results", "/browse");
 
   return (
     <div className="sx-stage">
@@ -208,6 +209,7 @@ export function BrowseClient({
           <p className="sx-eyebrow">Search</p>
           <h1>{fullResults ? currentView.label : lookingFor ? `Find your ${lookingFor}` : "Find your match"}</h1>
         </div>
+        {fullResults ? <Link href={discoverHref} className="sx-back-to-discover">← Back to Discover</Link> : null}
         {!notice ? (
           <p className="sx-hero-count">
             <b>{counts[view]}</b>

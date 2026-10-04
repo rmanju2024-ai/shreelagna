@@ -38,6 +38,7 @@
 .sx-results { display: grid; gap: 0.9rem; transition: opacity 0.15s; }
 .sx-results[data-pending] { opacity: 0.55; }
 .sx-results-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.3rem 1rem; }
+.sx-back-to-discover { display: inline-flex; align-items: center; width: fit-content; padding: 0.5rem 0.75rem; border: 1px solid color-mix(in srgb, var(--theme-ink) 18%, transparent); border-radius: 999px; background: color-mix(in srgb, var(--theme-card) 88%, transparent); color: var(--theme-ink); font-size: 0.78rem; font-weight: 800; text-decoration: none; }
 .sx-results-head h2 { margin: 0; font-size: 1.3rem; font-family: var(--font-display), ui-serif, serif; }
 .sx-results-head p { margin: 0; font-size: 0.85rem; color: var(--muted); }
 .sx-note { margin: 0; padding: 0.7rem 1rem; border-radius: 0.9rem; font-size: 0.85rem; background: rgb(245 200 76 / 18%); border: 1px solid rgb(184 137 76 / 35%); }
