@@ -109,6 +109,7 @@ export function BrowseClient({
   viewNotes,
   religions,
   communities,
+  fullResults = false,
 }: {
   lookingFor: string | null;
   notice: string | null;
@@ -121,6 +122,7 @@ export function BrowseClient({
   viewNotes?: Partial<Record<BrowseView, string>>;
   religions: string[];
   communities: string[];
+  fullResults?: boolean;
 }) {
   const [view, setView] = useState<BrowseView>(initialView);
   const [filters, setFilters] = useState<BrowseFilters>(
@@ -128,13 +130,15 @@ export function BrowseClient({
   );
   const [page, setPage] = useState(1);
   const [pending, startTransition] = useTransition();
+  const [customApplied, setCustomApplied] = useState(initialView === "custom" && JSON.stringify(initialFilters) !== JSON.stringify(EMPTY_BROWSE_FILTERS));
   const tabsRef = useRef<HTMLElement>(null);
 
   const ranked = useMemo(() => {
     const rows = notesFor(catalog, lists[view]);
     if (view !== "custom") return rows;
+    if (!customApplied) return [];
     return rows.filter((note) => fitsCustom(note, filters));
-  }, [catalog, lists, view, filters]);
+  }, [catalog, lists, view, filters, customApplied]);
 
   const counts = useMemo(() => {
     const tally: Record<BrowseView, number> = {
@@ -148,15 +152,15 @@ export function BrowseClient({
     (Object.keys(tally) as BrowseView[]).forEach((key) => {
       tally[key] =
         key === "custom"
-          ? notesFor(catalog, lists.custom).filter((note) => fitsCustom(note, filters)).length
+          ? customApplied ? notesFor(catalog, lists.custom).filter((note) => fitsCustom(note, filters)).length : 0
           : (lists[key] ?? []).length;
     });
     return tally;
-  }, [catalog, lists, filters]);
+  }, [catalog, lists, filters, customApplied]);
 
-  const pages = pageCount(ranked.length);
+  const pages = fullResults ? pageCount(ranked.length, 10) : 1;
   const currentPage = Math.min(page, pages);
-  const shown = pageItems(ranked, currentPage);
+  const shown = fullResults ? pageItems(ranked, currentPage, 10) : ranked.slice(0, 5);
   const currentView = ALL_VIEWS.find((item) => item.id === view) ?? DEFAULT_VIEWS[0];
   const gate = viewNotes?.[view];
 
@@ -164,6 +168,7 @@ export function BrowseClient({
     startTransition(() => {
       setView(next);
       setPage(1);
+      if (next === "custom") setCustomApplied(false);
     });
   }
 
@@ -238,10 +243,12 @@ export function BrowseClient({
             onApply={(next) => {
               setFilters(next);
               setPage(1);
+              setCustomApplied(true);
             }}
             onClear={() => {
               setFilters(EMPTY_BROWSE_FILTERS);
               setPage(1);
+              setCustomApplied(false);
             }}
           />
         ) : null}
@@ -275,16 +282,21 @@ export function BrowseClient({
             </header>
             {gate && shown.length ? <p className="sx-note">{gate}</p> : null}
             {shown.length ? (
-              <ul className="sx-grid">
+              <ul className={`sx-grid${fullResults ? " is-results-list" : ""}`}>
                 {shown.map((note, index) => (
                   <BrowseCard key={`${view}-${note.id}`} note={note} priority={index < 3} />
                 ))}
               </ul>
             ) : (
               <div className="sx-empty">
-                <h3>{gate || currentView.empty}</h3>
+                <h3>{gate || (view === "custom" && !customApplied ? "Choose filters, then tap Apply to see profiles." : currentView.empty)}</h3>
               </div>
             )}
+            {!fullResults && ranked.length > 5 ? (
+              <Link className="sx-view-all" href={`/browse/results?view=${view}`}>
+                View all {ranked.length} profiles <span aria-hidden>→</span>
+              </Link>
+            ) : null}
             {pages > 1 ? (
               <nav className="sx-pager" aria-label="Search pages">
                 {currentPage > 1 ? (
