@@ -1,5 +1,5 @@
 import { ChatSidebarSkeleton } from "@/app/app/chat/chat-sidebar";
-import { PageShell } from "@/components/site-chrome";
+import { InnerShell as PageShell } from "@/components/chrome-layout";
 
 /** Shows the chat frame at once while the conversation list loads. */
 export default function Loading() {

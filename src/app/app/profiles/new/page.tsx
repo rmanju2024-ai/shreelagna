@@ -1,4 +1,4 @@
-import { PageShell } from "@/components/site-chrome";
+import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { KalyanBanner } from "@/components/home/kalyan-banner";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { findOwnProfile } from "@/lib/profile/own-profile";

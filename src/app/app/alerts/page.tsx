@@ -1,6 +1,6 @@
 import { AlertsFeed } from "@/app/app/alerts/alerts-feed";
 import { InboxSwitcher } from "@/components/inbox-switcher";
-import { PageShell } from "@/components/site-chrome";
+import { InnerShell as PageShell } from "@/components/chrome-layout";
 
 export default function AlertsPage() {
   return (

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PageShell } from "@/components/site-chrome";
+import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { ProfileForm } from "@/app/app/profiles/profile-form";
 import { AlbumViewer } from "@/app/app/profiles/album-viewer";
 import { IntroductionEditor } from "@/app/app/profiles/introduction-editor";

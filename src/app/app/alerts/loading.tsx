@@ -1,5 +1,5 @@
 import { InboxSwitcher } from "@/components/inbox-switcher";
-import { PageShell } from "@/components/site-chrome";
+import { InnerShell as PageShell } from "@/components/chrome-layout";
 
 /** Shown at once when Alerts is tapped: the right tab is already highlighted, with a plain "Loading". */
 export default function Loading() {

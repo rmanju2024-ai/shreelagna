@@ -1,6 +1,6 @@
 import { BackToAccount } from "@/components/back-to-account";
 import Link from "next/link";
-import { PageShell } from "@/components/site-chrome";
+import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { redirect } from "next/navigation";
 import { cardClass } from "@/lib/ui/classes";

@@ -1,5 +1,5 @@
 import { InboxSwitcher } from "@/components/inbox-switcher";
-import { PageShell } from "@/components/site-chrome";
+import { InnerShell as PageShell } from "@/components/chrome-layout";
 
 /** Likes opens with its own tab highlighted and a plain "Loading", never the chat skeleton. */
 export default function Loading() {

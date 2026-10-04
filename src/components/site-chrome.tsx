@@ -19,7 +19,7 @@ import { parseScene, SCENE_COOKIE } from "@/lib/ui/scenes";
 export const pageInner = "mx-auto w-full max-w-[115rem] px-6 sm:px-8 lg:px-12";
 export const pageFull = "mx-auto w-full px-4 sm:px-6 lg:px-8";
 
-async function readScene() {
+export async function readScene() {
   return parseScene((await cookies()).get(SCENE_COOKIE)?.value);
 }
 
@@ -119,7 +119,7 @@ export async function SiteHeader({ overlay = false, glass = false }: { overlay?:
   );
 }
 
-function HeaderSkeleton({ overlay }: { overlay: boolean }) {
+export function HeaderSkeleton({ overlay }: { overlay: boolean }) {
   return (
     <header
       className={

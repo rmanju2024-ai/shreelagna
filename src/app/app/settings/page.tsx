@@ -1,7 +1,7 @@
 import { BackToAccount } from "@/components/back-to-account";
 import { cookies } from "next/headers";
 import { SettingsForm } from "@/app/app/profiles/settings-form";
-import { PageShell } from "@/components/site-chrome";
+import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { ScenePicker } from "@/components/scene-picker";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { readProfileSettings } from "@/lib/match/profile-settings";

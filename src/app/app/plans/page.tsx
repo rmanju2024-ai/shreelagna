@@ -1,6 +1,6 @@
 import { BackToAccount } from "@/components/back-to-account";
 import { requestPlan } from "@/app/app/plans/actions";
-import { PageShell } from "@/components/site-chrome";
+import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { WELCOME_INTEREST_LIMIT, formatInr, planByCode } from "@/lib/membership/catalog";
 import { fetchPendingPlanCode, fetchPlans, loadInterestQuota, loadMembership } from "@/lib/membership/load";

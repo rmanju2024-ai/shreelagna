@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ChatSidebar, firstChatId } from "@/app/app/chat/chat-sidebar";
 import { InboxSwitcher } from "@/components/inbox-switcher";
 import { LiveRefresh } from "@/components/live-refresh";
-import { PageShell } from "@/components/site-chrome";
+import { InnerShell as PageShell } from "@/components/chrome-layout";
 
 export default async function ChatListPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const { tab } = await searchParams;

@@ -1,6 +1,6 @@
 import { BrowseClient } from "@/app/browse/browse-client";
 import type { BrowseCardNote } from "@/app/browse/browse-card";
-import { PageShell } from "@/components/site-chrome";
+import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { parseBrowseFilters } from "@/lib/match/browse-filters";
 import {

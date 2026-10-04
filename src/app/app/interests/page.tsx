@@ -5,7 +5,7 @@ import { LikesSeen } from "@/components/likes-seen";
 import { InboxBoard } from "@/app/app/interests/inbox-board";
 import { SECTIONS, type SectionId } from "@/lib/match/likes-sections";
 import { expireStaleInterests } from "@/app/app/match/actions";
-import { PageShell } from "@/components/site-chrome";
+import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import {
   effectiveInterestStatus,
