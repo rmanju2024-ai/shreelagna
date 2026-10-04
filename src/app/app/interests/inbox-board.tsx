@@ -303,7 +303,7 @@ function NoteList({
 
   return (
     <div>
-      <ul className="sx-grid inbox-list">
+      <ul className="sx-grid is-results-list inbox-list">
         {shown.map((note) => {
           const href = profileHref(note);
           return (

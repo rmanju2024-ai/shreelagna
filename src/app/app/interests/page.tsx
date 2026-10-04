@@ -1,6 +1,5 @@
 import { InboxBoard } from "@/app/app/interests/inbox-board";
 import { expireStaleInterests } from "@/app/app/match/actions";
-import { PageHero } from "@/components/page-hero";
 import { PageShell } from "@/components/site-chrome";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import {
@@ -260,7 +259,13 @@ export default async function InterestsPage() {
 
   return (
     <PageShell>
-      <PageHero kicker="Inbox" title="Likes" sub="Received, sent, and history with date and time." />
+      <div className="sx-stage">
+      <header className="sx-hero">
+        <div className="sx-hero-copy">
+          <p className="sx-eyebrow">Inbox</p>
+          <h1>Likes</h1>
+        </div>
+      </header>
       <InboxBoard
         received={inbox.map((i) =>
           cardFor(i.from_profile_id, {
@@ -320,6 +325,7 @@ export default async function InterestsPage() {
             }),
           )}
       />
+      </div>
     </PageShell>
   );
 }

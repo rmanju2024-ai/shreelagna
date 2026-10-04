@@ -183,3 +183,11 @@
 .sx-filter-link:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(212,160,23,.3)}
 @media (max-width:640px){.sx-filter-link span{display:none}.sx-filter-link{padding:.55rem}}
 @media (prefers-reduced-motion:reduce){.sx-filter-link{transition:none}}
+
+/* Likes uses the same list cards as Discover results */
+.inbox-list.sx-grid.is-results-list{grid-template-columns:minmax(0,56rem);gap:.8rem}
+.inbox-list.sx-grid.is-results-list .sx-card-link{display:grid;grid-template-columns:10rem minmax(0,1fr);min-height:10rem}
+.inbox-list.sx-grid.is-results-list .sx-photo{aspect-ratio:auto;min-height:10rem}
+.inbox-list.sx-grid.is-results-list .sx-body{padding:1rem 1.15rem}
+.inbox-list.sx-grid.is-results-list .inbox-actions{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.6rem}
+@media (max-width:640px){.inbox-list.sx-grid.is-results-list{grid-template-columns:1fr}.inbox-list.sx-grid.is-results-list .sx-card-link{grid-template-columns:7rem minmax(0,1fr);min-height:8rem}.inbox-list.sx-grid.is-results-list .sx-photo{min-height:8rem}}
