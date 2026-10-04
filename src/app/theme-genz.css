@@ -384,7 +384,7 @@ table { max-width: 100%; }
   .sx-hero-sub { font-size: 0.88rem; }
   .sx-stage { padding-inline: 0.75rem; }
   .sx-tabs { overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }
-  .sx-row { padding-inline: 0.2rem 0.4rem; grid-auto-columns: minmax(14rem, 70vw); }
+  .sx-row { padding-inline: 0.2rem 0.4rem; grid-auto-columns: minmax(11.2rem, 52vw); }
   .sx-feed-head { align-items: flex-start; }
   .sx-tab { flex: none; }
   .sx-pager { flex-wrap: wrap; justify-content: center; }

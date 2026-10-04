@@ -104,7 +104,8 @@ function CategoryRow({
     <section className="sx-feed-row" aria-labelledby={`discover-${item.id}`}>
       <header className="sx-feed-head">
         <div>
-          <h2 id={`discover-${item.id}`}>{item.label}</h2>
+          <p className="sx-feed-kicker">{item.short}</p>
+          <h2 id={`discover-${item.id}`}><span>{item.label}</span></h2>
           <p>{count} {count === 1 ? "profile" : "profiles"} · {item.hint}</p>
         </div>
         {count > 5 ? (
@@ -279,7 +280,8 @@ export function BrowseClient({
             <section className="sx-feed-row" aria-labelledby="discover-custom">
               <header className="sx-feed-head">
                 <div>
-                  <h2 id="discover-custom">Advanced filter</h2>
+                  <p className="sx-feed-kicker">Filter</p>
+                  <h2 id="discover-custom"><span>Advanced filter</span></h2>
                   <p>Set what you want, then Apply. Nothing lists until you do.</p>
                 </div>
                 {customApplied && rankedByView.custom.length > 5 ? (

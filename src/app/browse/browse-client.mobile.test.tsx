@@ -35,6 +35,7 @@ describe("Discover feed", () => {
     for (const label of ["Today’s picks", "They like you", "Kundali match", "Nearby", "Same community", "Advanced filter"]) {
       expect(screen.getByRole("heading", { name: label })).toBeTruthy();
     }
+    expect(screen.getByText("Today")).toBeTruthy();
     expect(screen.getByText(/choose filters, then tap apply/i)).toBeTruthy();
   });
 
