@@ -178,3 +178,8 @@
 @media (prefers-reduced-motion: reduce) {
   .sx-card-link, .sx-photo img, .sx-skel, .sx-3d-banner::after, .sx-star { transition: none; animation: none; }
 }
+
+.sx-filter-link{display:inline-flex;align-items:center;gap:.45rem;padding:.5rem .9rem;border-radius:999px;font-weight:700;font-size:.85rem;color:inherit;text-decoration:none;border:1px solid rgba(212,160,23,.55);background:linear-gradient(135deg,rgba(255,224,130,.35),rgba(255,255,255,.08));transition:transform .2s,box-shadow .2s}
+.sx-filter-link:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(212,160,23,.3)}
+@media (max-width:640px){.sx-filter-link span{display:none}.sx-filter-link{padding:.55rem}}
+@media (prefers-reduced-motion:reduce){.sx-filter-link{transition:none}}

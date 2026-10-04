@@ -232,6 +232,14 @@ export function BrowseClient({
           <h1>{listMode ? currentView.label : lookingFor ? `Find your ${lookingFor}` : "Find your match"}</h1>
           {listMode ? <Link href={discoverHref} className="sx-back-to-discover">← Back to Discover</Link> : null}
         </div>
+        {!notice && !listMode ? (
+          <a className="sx-filter-link" href={ADVANCED_FILTER_HREF} aria-label="Open advanced filter">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+              <path d="M4 6h16M7 12h10M10 18h4" />
+            </svg>
+            <span>Advanced filter</span>
+          </a>
+        ) : null}
         {!notice ? (
           <p className="sx-hero-count">
             <b>{listMode ? ranked.length : totalShown}</b>
@@ -323,18 +331,6 @@ export function BrowseClient({
                 gate={viewNotes?.[item.id]}
               />
             ))}
-            <section className="sx-feed-row" aria-labelledby="discover-custom">
-              <header className="sx-feed-head">
-                <FeedBanner
-                  id="discover-custom"
-                  label="Advanced filter"
-                  meaning="Refine by age, city, community and lifestyle — precision matchmaking, your way"
-                />
-                <a className="sx-view-all" href={ADVANCED_FILTER_HREF}>
-                  Open advanced filter <span aria-hidden>→</span>
-                </a>
-              </header>
-            </section>
           </div>
         )}
       </div>

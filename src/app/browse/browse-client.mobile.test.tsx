@@ -77,7 +77,7 @@ describe("discoverResultsHref", () => {
 describe("Discover feed", () => {
   it("shows every category as its own row", () => {
     show();
-    for (const label of ["Today’s picks", "They like you", "Kundali match", "Nearby", "Same community", "Advanced filter"]) {
+    for (const label of ["Today’s picks", "They like you", "Kundali match", "Nearby", "Same community"]) {
       expect(screen.getAllByRole("heading", { name: label })).toHaveLength(1);
     }
     expect(screen.queryByRole("link", { name: /view all/i })).toBeNull();
@@ -111,6 +111,7 @@ describe("Discover feed", () => {
     show({ catalog, lists: { ...emptyLists(), custom: rows } });
     expect(screen.queryByRole("link", { name: /name 0/i })).toBeNull();
     expect(screen.queryByRole("button", { name: /^apply$/i })).toBeNull();
+    expect(screen.queryByRole("heading", { name: "Advanced filter" })).toBeNull();
     expect(screen.getByRole("link", { name: /open advanced filter/i }).getAttribute("href")).toBe("/browse/filter");
   });
 
