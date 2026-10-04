@@ -1,5 +1,5 @@
 import { BackToAccount } from "@/components/back-to-account";
-import { PageShell } from "@/components/site-chrome";
+import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { ProfilePortrait } from "@/app/app/profiles/profile-portrait";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { canEditMemberProfile, isStaffRole } from "@/lib/desk/access";

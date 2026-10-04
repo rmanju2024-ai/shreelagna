@@ -1,5 +1,5 @@
 import { BrowseProfileView } from "@/app/browse/browse-profile-view";
-import { PageShell } from "@/components/site-chrome";
+import { InnerShell as PageShell } from "@/components/chrome-layout";
 
 export default async function BrowseProfilePage({
   params,

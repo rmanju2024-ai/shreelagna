@@ -5,7 +5,7 @@ import { LiveRefresh } from "@/components/live-refresh";
 import { after } from "next/server";
 import { ThreadView } from "@/app/app/chat/[id]/thread-view";
 import { ChatAvatar } from "@/app/app/chat/chat-avatar";
-import { PageShell } from "@/components/site-chrome";
+import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { publicMediaUrl } from "@/lib/match/inbox-card";
 import { lastOnlineLine } from "@/lib/profile/last-seen";
