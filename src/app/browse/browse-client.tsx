@@ -33,6 +33,7 @@ const ALL_VIEWS = [...DEFAULT_VIEWS, ...EXTRA_VIEWS];
 const PREVIEW_VIEWS = ALL_VIEWS.filter((item) => item.id !== "custom");
 export const DISCOVER_PREVIEW_LIMIT = 5;
 export const DISCOVER_RESULTS_PAGE_SIZE = 10;
+export const ADVANCED_FILTER_HREF = "/browse/filter";
 
 function fitsCustom(note: BrowseCardNote, filters: BrowseFilters): boolean {
   return profileFitsBrowse(
@@ -180,6 +181,7 @@ export function BrowseClient({
   religions,
   communities,
   fullResults = false,
+  filterPage = false,
 }: {
   lookingFor: string | null;
   notice: string | null;
@@ -193,6 +195,7 @@ export function BrowseClient({
   religions: string[];
   communities: string[];
   fullResults?: boolean;
+  filterPage?: boolean;
 }) {
   const [filters, setFilters] = useState<BrowseFilters>(
     initialView === "custom" ? initialFilters : EMPTY_BROWSE_FILTERS,
@@ -211,6 +214,7 @@ export function BrowseClient({
     return next;
   }, [catalog, lists, filters, customApplied]);
 
+  const listMode = fullResults || filterPage;
   const currentView = ALL_VIEWS.find((item) => item.id === initialView) ?? DEFAULT_VIEWS[0];
   const ranked = currentView.id === "custom" && !customApplied ? [] : rankedByView[currentView.id] ?? [];
   const pages = pageCount(ranked.length, DISCOVER_RESULTS_PAGE_SIZE);
@@ -218,20 +222,20 @@ export function BrowseClient({
   const shown = pageItems(ranked, currentPage, DISCOVER_RESULTS_PAGE_SIZE);
   const resultHref = discoverResultsHref(currentView.id, filters);
   const totalShown = PREVIEW_VIEWS.reduce((sum, item) => sum + (rankedByView[item.id]?.length ?? 0), 0);
-  const discoverHref = resultHref.replace("/browse/results", "/browse");
+  const discoverHref = filterPage ? "/browse" : resultHref.replace("/browse/results", "/browse");
 
   return (
     <div className="sx-stage">
       <header className="sx-hero">
         <div className="sx-hero-copy">
           <p className="sx-eyebrow">Search</p>
-          <h1>{fullResults ? currentView.label : lookingFor ? `Find your ${lookingFor}` : "Find your match"}</h1>
-          {fullResults ? <Link href={discoverHref} className="sx-back-to-discover">← Back to Discover</Link> : null}
+          <h1>{listMode ? currentView.label : lookingFor ? `Find your ${lookingFor}` : "Find your match"}</h1>
+          {listMode ? <Link href={discoverHref} className="sx-back-to-discover">← Back to Discover</Link> : null}
         </div>
         {!notice ? (
           <p className="sx-hero-count">
-            <b>{fullResults ? ranked.length : totalShown}</b>
-            <span>{(fullResults ? ranked.length : totalShown) === 1 ? "profile" : "profiles"}</span>
+            <b>{listMode ? ranked.length : totalShown}</b>
+            <span>{(listMode ? ranked.length : totalShown) === 1 ? "profile" : "profiles"}</span>
           </p>
         ) : null}
       </header>
@@ -258,8 +262,25 @@ export function BrowseClient({
               <Link href="/contact" className={btnGhost}>Write to us</Link>
             </div>
           </div>
-        ) : fullResults ? (
+        ) : listMode ? (
           <section className="sx-results" aria-live="polite">
+            {filterPage ? (
+              <BrowseFilterDesk
+                filters={filters}
+                religions={religions}
+                communities={communities}
+                onApply={(next) => {
+                  setFilters(next);
+                  setPage(1);
+                  setCustomApplied(true);
+                }}
+                onClear={() => {
+                  setFilters(EMPTY_BROWSE_FILTERS);
+                  setPage(1);
+                  setCustomApplied(false);
+                }}
+              />
+            ) : null}
             <header className="sx-results-head">
               <p>{ranked.length} {ranked.length === 1 ? "profile" : "profiles"} · {currentView.hint}</p>
             </header>
@@ -307,44 +328,12 @@ export function BrowseClient({
                 <FeedBanner
                   id="discover-custom"
                   label="Advanced filter"
-                  meaning="Set what you want, then Apply. Nothing lists until you do."
+                  meaning="Refine by age, city, community and lifestyle — precision matchmaking, your way"
                 />
-                {customApplied && rankedByView.custom.length > DISCOVER_PREVIEW_LIMIT ? (
-                  <a className="sx-view-all" href={discoverResultsHref("custom", filters)}>
-                    View all {rankedByView.custom.length} profiles <span aria-hidden>→</span>
-                  </a>
-                ) : (
-                  <span className="sx-view-all-slot" aria-hidden />
-                )}
+                <a className="sx-view-all" href={ADVANCED_FILTER_HREF}>
+                  Open advanced filter <span aria-hidden>→</span>
+                </a>
               </header>
-              <BrowseFilterDesk
-                filters={filters}
-                religions={religions}
-                communities={communities}
-                onApply={(next) => {
-                  setFilters(next);
-                  setPage(1);
-                  setCustomApplied(true);
-                }}
-                onClear={() => {
-                  setFilters(EMPTY_BROWSE_FILTERS);
-                  setPage(1);
-                  setCustomApplied(false);
-                }}
-              />
-              {customApplied ? (
-                rankedByView.custom.length ? (
-                  <ul className="sx-row">
-                    {rankedByView.custom.slice(0, DISCOVER_PREVIEW_LIMIT).map((note) => (
-                      <BrowseCard key={`custom-${note.id}`} note={note} />
-                    ))}
-                  </ul>
-                ) : (
-                  <div className="sx-empty is-compact"><h3>No profiles match these choices</h3></div>
-                )
-              ) : (
-                <div className="sx-empty is-compact"><h3>Choose filters, then tap Apply to see profiles.</h3></div>
-              )}
             </section>
           </div>
         )}

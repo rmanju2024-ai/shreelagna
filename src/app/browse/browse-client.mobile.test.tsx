@@ -80,7 +80,6 @@ describe("Discover feed", () => {
     for (const label of ["Today’s picks", "They like you", "Kundali match", "Nearby", "Same community", "Advanced filter"]) {
       expect(screen.getAllByRole("heading", { name: label })).toHaveLength(1);
     }
-    expect(screen.getByText(/choose filters, then tap apply/i)).toBeTruthy();
     expect(screen.queryByRole("link", { name: /view all/i })).toBeNull();
   });
 
@@ -107,10 +106,19 @@ describe("Discover feed", () => {
     expect(viewAll.getAttribute("href")).toBe("/browse/results?view=fits");
   });
 
-  it("does not list advanced-filter profiles until Apply", () => {
+  it("links to the advanced filter page without listing profiles", () => {
     const { catalog, rows } = makeProfiles(3, "c");
     show({ catalog, lists: { ...emptyLists(), custom: rows } });
     expect(screen.queryByRole("link", { name: /name 0/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: /^apply$/i })).toBeNull();
+    expect(screen.getByRole("link", { name: /open advanced filter/i }).getAttribute("href")).toBe("/browse/filter");
+  });
+
+  it("filter page lists nothing until Apply", () => {
+    const { catalog, rows } = makeProfiles(3, "c");
+    show({ catalog, lists: { ...emptyLists(), custom: rows }, initialView: "custom", filterPage: true });
+    expect(screen.queryByRole("link", { name: /name 0/i })).toBeNull();
+    expect(screen.getByRole("link", { name: /back to discover/i }).getAttribute("href")).toBe("/browse");
     fireEvent.click(screen.getByRole("button", { name: /^apply$/i }));
     expect(screen.getByRole("link", { name: /name 0/i })).toBeTruthy();
   });

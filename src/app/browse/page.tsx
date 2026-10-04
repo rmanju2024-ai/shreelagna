@@ -90,6 +90,7 @@ export async function BrowsePage({
     education?: string;
     income?: string;
     all?: string;
+    filterPage?: string;
   }>;
 }) {
   const params = await searchParams;
@@ -308,6 +309,7 @@ export async function BrowsePage({
         religions={[...new Set(faith.religions.map((row) => row.name).filter(Boolean))]}
         communities={[...new Set(faith.communities.map((row) => row.name).filter(Boolean))]}
         fullResults={params.all === "1"}
+        filterPage={params.filterPage === "1"}
       />
     </PageShell>
   );
