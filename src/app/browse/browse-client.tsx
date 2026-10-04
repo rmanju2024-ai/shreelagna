@@ -190,12 +190,23 @@ export function BrowseClient({
     );
   }
 
+  const resultHref = (() => {
+    const params = new URLSearchParams({ view });
+    if (view === "custom") {
+      if (filters.ageMin) params.set("age_min", String(filters.ageMin));
+      if (filters.ageMax) params.set("age_max", String(filters.ageMax));
+      const keys = ["country", "state", "city", "religion", "community", "lifestyle", "education", "income"] as const;
+      keys.forEach((key) => { if (filters[key].length) params.set(key, filters[key].join(",")); });
+    }
+    return `/browse/results?${params}`;
+  })();
+
   return (
     <div className="sx-stage">
       <header className="sx-hero">
         <div>
           <p className="sx-eyebrow">Search</p>
-          <h1>{lookingFor ? `Find your ${lookingFor}` : "Find your match"}</h1>
+          <h1>{fullResults ? currentView.label : lookingFor ? `Find your ${lookingFor}` : "Find your match"}</h1>
         </div>
         {!notice ? (
           <p className="sx-hero-count">
@@ -213,7 +224,7 @@ export function BrowseClient({
       ) : null}
 
       <div className="sx-board">
-        <div className="sx-tab-shell">
+        {!fullResults ? <div className="sx-tab-shell">
           <button
             type="button"
             className="sx-tab-scroll is-left"
@@ -233,7 +244,7 @@ export function BrowseClient({
           >
             ›
           </button>
-        </div>
+        </div> : null}
 
         {view === "custom" && !notice ? (
           <BrowseFilterDesk
@@ -293,7 +304,7 @@ export function BrowseClient({
               </div>
             )}
             {!fullResults && ranked.length > 5 ? (
-              <Link className="sx-view-all" href={`/browse/results?view=${view}`}>
+              <Link className="sx-view-all" href={resultHref}>
                 View all {ranked.length} profiles <span aria-hidden>→</span>
               </Link>
             ) : null}
