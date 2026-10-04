@@ -240,12 +240,6 @@ export function BrowseClient({
             <span>Advanced filter</span>
           </a>
         ) : null}
-        {!notice ? (
-          <p className="sx-hero-count">
-            <b>{listMode ? ranked.length : totalShown}</b>
-            <span>{(listMode ? ranked.length : totalShown) === 1 ? "profile" : "profiles"}</span>
-          </p>
-        ) : null}
       </header>
 
       {error === "need_profile" ? (
