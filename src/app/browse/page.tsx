@@ -5,6 +5,8 @@ import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { parseBrowseFilters } from "@/lib/match/browse-filters";
 import {
   browseRank,
+  PREFERENCE_POINTS,
+  preferencePoints,
   emptyBrowseBuckets,
   parseBrowseView,
   type BrowseScoreRow,
@@ -266,6 +268,10 @@ export async function BrowsePage({
               community,
             });
             const card = cardFromRow(row, photoMap, now);
+            // One overall match % per profile (both directions), identical in every category.
+            const mutual =
+              preferencePoints(mine, theirSelf) + preferencePoints(row, mySelf);
+            card.matchPercent = Math.max(1, Math.min(100, Math.round((mutual / (2 * PREFERENCE_POINTS)) * 100)));
             catalog[card.id] = card;
             lists.custom.push({ id: card.id, score: null });
             const km = kmApart(myPlace, { city: card.city, state: card.state });

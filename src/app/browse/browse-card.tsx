@@ -16,6 +16,7 @@ export type BrowseCardNote = {
   education?: string | null;
   occupation?: string | null;
   score?: string | null;
+  matchPercent?: number | null;
   date_of_birth?: string | null;
   current_country?: string | null;
   diet?: string | null;
@@ -37,7 +38,7 @@ function matchPercent(score?: string | null): number | null {
 }
 
 export function BrowseCard({ note, priority = false }: { note: BrowseCardNote; priority?: boolean }) {
-  const percent = matchPercent(note.score);
+  const percent = note.matchPercent ?? matchPercent(note.score);
   const place = [note.city, note.state].filter(Boolean).join(", ");
   const facts = [note.age, note.height].filter(Boolean).join(" · ");
   return (
