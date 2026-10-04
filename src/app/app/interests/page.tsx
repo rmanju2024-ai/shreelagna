@@ -1,4 +1,7 @@
+import Link from "next/link";
+import { LikesSeen } from "@/components/likes-seen";
 import { InboxBoard } from "@/app/app/interests/inbox-board";
+import { SECTIONS, type SectionId } from "@/lib/match/likes-sections";
 import { expireStaleInterests } from "@/app/app/match/actions";
 import { PageShell } from "@/components/site-chrome";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
@@ -55,6 +58,10 @@ type InterestRow = {
 };
 
 export default async function InterestsPage() {
+  return <InterestsView />;
+}
+
+export async function InterestsView({ only }: { only?: SectionId } = {}) {
   const { supabase, user } = await getAuth();
   if (!supabase || !user) redirect("/login?next=/app/interests");
   const me = await ensureAppUser(supabase, user);
@@ -263,10 +270,13 @@ export default async function InterestsPage() {
       <header className="sx-hero">
         <div className="sx-hero-copy">
           <p className="sx-eyebrow">Inbox</p>
-          <h1>Likes</h1>
+          <h1>{only ? SECTIONS.find((item) => item.id === only)?.label ?? "Likes" : "Likes"}</h1>
+          {only ? <Link href="/app/interests" className="sx-back-to-discover">← Back to Likes</Link> : null}
         </div>
       </header>
+      <LikesSeen />
       <InboxBoard
+        only={only}
         received={inbox.map((i) =>
           cardFor(i.from_profile_id, {
             id: i.id,

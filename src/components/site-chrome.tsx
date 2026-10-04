@@ -74,8 +74,14 @@ export async function SiteHeader({ overlay = false, glass = false }: { overlay?:
           ? await supabase.from("profiles").select("id, status").in("id", senderIds)
           : { data: [] as { id: string; status: string }[] };
         const live = new Set((senders ?? []).filter((p) => isPublicProfileStatus(p.status)).map((p) => p.id));
+        // Only interests that arrived after the member last opened Likes count as new.
+        const seenRaw = (await cookies()).get("sl_likes_seen")?.value;
+        const seenAt = seenRaw ? Date.parse(seenRaw) : 0;
         likesPending = (waiting ?? []).filter(
-          (row) => live.has(row.from_profile_id) && effectiveInterestStatus(row.status, row.created_at) === "pending",
+          (row) =>
+            live.has(row.from_profile_id) &&
+            effectiveInterestStatus(row.status, row.created_at) === "pending" &&
+            (!seenAt || Number.isNaN(seenAt) || Date.parse(row.created_at) > seenAt),
         ).length;
       }
     }

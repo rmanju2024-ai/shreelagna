@@ -48,10 +48,13 @@ describe("Likes sections", () => {
   it("previews five cards and expands on View all", () => {
     render(<InboxBoard received={[]} sent={many(7)} accepted={[]} history={[]} />);
     expect(screen.getAllByRole("link", { name: /name n\d/i })).toHaveLength(5);
-    fireEvent.click(screen.getByRole("button", { name: /view all 7 profiles/i }));
+    expect(screen.getByRole("link", { name: /view all 7 profiles/i }).getAttribute("href")).toBe("/app/interests/all?s=sent");
+  });
+
+  it("lists one section vertically on its own page", () => {
+    render(<InboxBoard only="sent" received={[]} sent={many(7)} accepted={[]} history={[]} />);
     expect(screen.getAllByRole("link", { name: /name n\d/i })).toHaveLength(7);
-    fireEvent.click(screen.getByRole("button", { name: /show less/i }));
-    expect(screen.getAllByRole("link", { name: /name n\d/i })).toHaveLength(5);
+    expect(screen.queryByRole("heading", { name: "Received" })).toBeNull();
   });
 
   it("scrolls a row with both arrows", () => {

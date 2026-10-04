@@ -37,16 +37,7 @@ export type InboxNote = {
 
 export type InboxView = InboxNote;
 
-const SECTIONS = [
-  { id: "received", label: "Received", meaning: "Families who showed interest in you", empty: "No pending interests right now" },
-  { id: "sent", label: "Sent", meaning: "Interests you have sent, awaiting a reply", empty: "No pending interests sent" },
-  { id: "accepted", label: "Accepted", meaning: "Mutual interest, ready to talk", empty: "No accepted interests yet" },
-  { id: "viewed", label: "Who viewed you", meaning: "Recent visitors to your profile", empty: "No one has viewed you yet" },
-  { id: "visited", label: "You viewed", meaning: "Profiles you recently opened", empty: "You have not viewed anyone yet" },
-  { id: "history", label: "History", meaning: "Expired, declined or closed", empty: "No expired, declined, or deleted notes." },
-] as const;
-
-type SectionId = (typeof SECTIONS)[number]["id"];
+import { SECTIONS, type SectionId } from "@/lib/match/likes-sections";
 export const LIKES_PREVIEW_LIMIT = 5;
 
 export function InboxBoard({
@@ -56,7 +47,9 @@ export function InboxBoard({
   history,
   viewed = [],
   visited = [],
+  only,
 }: {
+  only?: SectionId;
   received: InboxNote[];
   sent: InboxNote[];
   accepted: InboxNote[];
@@ -85,6 +78,17 @@ export function InboxBoard({
     ),
   };
 
+  if (only) {
+    const section = SECTIONS.find((item) => item.id === only);
+    if (section) {
+      return (
+        <article className="sx-board inbox-modern">
+          <NoteList empty={section.empty} notes={notes[only]} actions={actions[only]} />
+        </article>
+      );
+    }
+  }
+
   return (
     <article className="sx-feed inbox-modern">
       {SECTIONS.map((section) => (
@@ -104,7 +108,6 @@ function LikesSection({
   actions?: (note: InboxNote) => ReactNode;
 }) {
   const scroller = useRef<HTMLUListElement>(null);
-  const [expanded, setExpanded] = useState(false);
   const count = notes.length;
   const id = `likes-${section.id}`;
   return (
@@ -125,8 +128,6 @@ function LikesSection({
         <div className="sx-empty is-compact">
           <h3>{section.empty}</h3>
         </div>
-      ) : expanded ? (
-        <NoteList empty={section.empty} notes={notes} actions={actions} />
       ) : (
         <div className="sx-row-shell">
           <button
@@ -154,9 +155,9 @@ function LikesSection({
       )}
       {count > LIKES_PREVIEW_LIMIT ? (
         <div className="sx-view-all-center">
-          <button type="button" className="sx-view-all" onClick={() => setExpanded((open) => !open)}>
-            {expanded ? "Show less" : `View all ${count} profiles`} <span aria-hidden>{expanded ? "↑" : "→"}</span>
-          </button>
+          <a className="sx-view-all" href={`/app/interests/all?s=${section.id}`}>
+            View all {count} profiles <span aria-hidden>→</span>
+          </a>
         </div>
       ) : null}
     </section>
