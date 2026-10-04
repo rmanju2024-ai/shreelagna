@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { after } from "next/server";
 import { ChatAvatar } from "@/app/app/chat/chat-avatar";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { alertHeadline, alertWhen } from "@/lib/match/alert-copy";
@@ -19,12 +20,20 @@ const alertStyle = (kind: string) => {
 /** Activity feed used by the Alerts page and the Inbox Alerts tab. */
 export async function AlertsFeed() {
   const { supabase, user } = await getAuth();
-  if (!supabase || !user) redirect("/login?next=/app/chat?tab=alerts");
+  if (!supabase || !user) redirect("/login?next=/app/alerts");
   const me = await ensureAppUser(supabase, user);
   if (!me) redirect("/login?error=account");
   if (me.active_profile_id) {
-    const { recordMatchNotices } = await import("@/lib/match/notices");
-    await recordMatchNotices(supabase, me.active_profile_id, me.id);
+    // Scanning for new matches is slow; do it after the page is sent so Alerts opens at once.
+    const profileId = me.active_profile_id;
+    after(async () => {
+      try {
+        const { recordMatchNotices } = await import("@/lib/match/notices");
+        await recordMatchNotices(supabase, profileId, me.id);
+      } catch {
+        /* a missed scan is retried on the next visit */
+      }
+    });
   }
   const { data: notices } = await supabase.from("notices").select("id, kind, title, body, href, created_at, read_at, match_profile_id").eq("user_id", me.id).neq("kind", "chat").order("created_at", { ascending: false }).limit(50);
   const collapsed = collapseNotices(notices ?? []);
