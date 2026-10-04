@@ -304,9 +304,9 @@ export function BrowseClient({
               </div>
             )}
             {!fullResults && ranked.length > 5 ? (
-              <Link className="sx-view-all" href={resultHref}>
+              <a className="sx-view-all" href={resultHref}>
                 View all {ranked.length} profiles <span aria-hidden>→</span>
-              </Link>
+              </a>
             ) : null}
             {pages > 1 ? (
               <nav className="sx-pager" aria-label="Search pages">
