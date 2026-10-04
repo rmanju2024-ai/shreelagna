@@ -1,5 +1,5 @@
 import { BackToAccount } from "@/components/back-to-account";
-import { PageShell } from "@/components/site-chrome";
+import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { ContactForm } from "./contact-form";
 import { cardClass } from "@/lib/ui/classes";
 import { getAuth } from "@/lib/auth/session";

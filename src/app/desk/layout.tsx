@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { PageHero } from "@/components/page-hero";
-import { PageShell } from "@/components/site-chrome";
+import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { DeskNav } from "@/app/desk/desk-nav";
 import { DeskPaneFallback } from "@/app/desk/desk-fallback";
 import { requireDesk } from "@/lib/desk/access";

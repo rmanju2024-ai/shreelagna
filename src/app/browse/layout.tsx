@@ -1,6 +1,4 @@
-import { ChromeLayout } from "@/components/chrome-layout";
-
-export default function BrowseLayout({
+﻿export default function BrowseLayout({
   children,
   modal,
 }: {
@@ -8,9 +6,9 @@ export default function BrowseLayout({
   modal: React.ReactNode;
 }) {
   return (
-    <ChromeLayout>
+    <>
       {children}
       {modal}
-    </ChromeLayout>
+    </>
   );
 }

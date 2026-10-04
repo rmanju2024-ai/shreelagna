@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { PageHero } from "@/components/page-hero";
-import { PageShell } from "@/components/site-chrome";
+import { InnerShell as PageShell } from "@/components/chrome-layout";
 
 type Section = { title: string; body: string[] };
 

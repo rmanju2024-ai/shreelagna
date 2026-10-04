@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { GoogleSignIn } from "@/app/login/google-button";
-import { PageShell } from "@/components/site-chrome";
+import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { PageHero } from "@/components/page-hero";
 import { getAuth } from "@/lib/auth/session";
 import { btnPrimary, cardClass } from "@/lib/ui/classes";

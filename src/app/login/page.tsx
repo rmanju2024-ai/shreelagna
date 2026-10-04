@@ -1,4 +1,4 @@
-import { PageShell } from "@/components/site-chrome";
+import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { GoogleSignIn } from "./google-button";
 import { getAuth } from "@/lib/auth/session";
 import { safeNextPath } from "@/lib/auth/safe-next";
@@ -20,7 +20,7 @@ export default async function LoginPage({
   if (user && !error) redirect(dest);
 
   return (
-    <PageShell bleed atmosphere={false}>
+    <PageShell bleed>
       <div className="login-genz grid min-h-dvh flex-1 lg:grid-cols-2">
         <section className="login-genz-visual relative min-h-[42vh] overflow-hidden lg:min-h-full">
           <KalyanBanner intensity="hero" />

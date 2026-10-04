@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { GoogleSignIn } from "@/app/login/google-button";
 import { KalyanBanner } from "@/components/home/kalyan-banner";
-import { PageShell, pageInner } from "@/components/site-chrome";
+import { InnerShell as PageShell } from "@/components/chrome-layout";
+import { pageInner } from "@/components/site-chrome";
 import { getAuth } from "@/lib/auth/session";
 import { btnHero, btnHeroGhost } from "@/lib/ui/classes";
 
@@ -24,7 +25,7 @@ export default async function HomePage() {
   const { user } = await getAuth();
 
   return (
-    <PageShell bleed overlay>
+    <PageShell bleed>
       <section className="home-artwork relative h-[100svh] min-h-[640px] w-full overflow-hidden lg:min-h-[780px]">
         <KalyanBanner intensity="hero" presentation="complete" veil={false} />
       </section>
