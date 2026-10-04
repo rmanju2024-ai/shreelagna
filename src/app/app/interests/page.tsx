@@ -1,3 +1,4 @@
+import { BackToAccount } from "@/components/back-to-account";
 import Link from "next/link";
 import { InboxSwitcher } from "@/components/inbox-switcher";
 import { LikesSeen } from "@/components/likes-seen";
@@ -267,7 +268,7 @@ export async function InterestsView({ only }: { only?: SectionId } = {}) {
 
   return (
     <PageShell>
-      <div className="sx-stage">
+      <div className="sx-stage">{only ? null : <BackToAccount />}
       <div className="inbox-unified"><InboxSwitcher active="likes" /></div>
       <header className="sx-hero">
         <div className="sx-hero-copy">

@@ -1,3 +1,4 @@
+import { BackToAccount } from "@/components/back-to-account";
 import { PageShell } from "@/components/site-chrome";
 import { ContactForm } from "./contact-form";
 import { cardClass } from "@/lib/ui/classes";
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 export default async function ContactPage() {
   const { user } = await getAuth();
   return (
-    <PageShell>
+    <PageShell>{user ? <BackToAccount /> : null}
       <div className="sx-stage public-stage">
         <PageHero
           kicker="Help centre · real humans"

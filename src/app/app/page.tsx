@@ -1,3 +1,4 @@
+import { BackToAccount } from "@/components/back-to-account";
 import { PageShell } from "@/components/site-chrome";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { btnPrimary, cardClass } from "@/lib/ui/classes";
@@ -29,7 +30,7 @@ export default async function AppHome() {
   }
 
   return (
-    <PageShell>
+    <PageShell><BackToAccount />
       <div className="sx-stage public-stage">
       <PageHero
         kicker="You’re signed in"

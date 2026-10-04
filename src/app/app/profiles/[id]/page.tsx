@@ -1,3 +1,4 @@
+import { BackToAccount } from "@/components/back-to-account";
 import { PageShell } from "@/components/site-chrome";
 import { ProfilePortrait } from "@/app/app/profiles/profile-portrait";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
@@ -92,7 +93,7 @@ export default async function ProfilePage({
   const communityName = nestedName(profile.communities);
 
   return (
-    <PageShell full>
+    <PageShell full><BackToAccount />
       <ProfilePortrait
         profile={profile}
         memberCode={memberCode}
