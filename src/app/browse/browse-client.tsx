@@ -100,22 +100,16 @@ function FeedBanner({
   meaning: string;
   count?: number;
 }) {
-  const line = `${label}   ·   ${meaning}`;
   return (
     <div className="sx-3d-banner">
       <span className="sx-star is-a" aria-hidden>✦</span>
       <span className="sx-star is-b" aria-hidden>✧</span>
       <span className="sx-star is-c" aria-hidden>✦</span>
-      <h2 id={id} className="sx-visually-hidden">{label}</h2>
-      <div className="sx-3d-track" aria-hidden>
-        <div className="sx-3d-run">
-          <p>{line}</p>
-          <p>{line}</p>
-        </div>
+      <div className="sx-3d-copy">
+        <h2 id={id}>{label}</h2>
+        <p>{meaning}</p>
       </div>
-      {count != null ? (
-        <small>{count} {count === 1 ? "profile" : "profiles"}</small>
-      ) : null}
+      {count != null ? <small>{count} {count === 1 ? "profile" : "profiles"}</small> : null}
     </div>
   );
 }

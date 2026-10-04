@@ -78,10 +78,16 @@ describe("Discover feed", () => {
   it("shows every category as its own row", () => {
     show();
     for (const label of ["Today’s picks", "They like you", "Kundali match", "Nearby", "Same community", "Advanced filter"]) {
-      expect(screen.getByRole("heading", { name: label })).toBeTruthy();
+      expect(screen.getAllByRole("heading", { name: label })).toHaveLength(1);
     }
     expect(screen.getByText(/choose filters, then tap apply/i)).toBeTruthy();
     expect(screen.queryByRole("link", { name: /view all/i })).toBeNull();
+  });
+
+  it("prints each category title once", () => {
+    show();
+    expect(screen.getAllByText("Today’s picks")).toHaveLength(1);
+    expect(screen.getAllByText("Curated from your preference")).toHaveLength(1);
   });
 
   it("scrolls a category row with both arrows", () => {
