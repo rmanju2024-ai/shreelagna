@@ -10,7 +10,9 @@ export function ProfilePeek({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   function close() {
-    router.back();
+    const cameFromHere = document.referrer.startsWith(window.location.origin);
+    if (cameFromHere && window.history.length > 1) router.back();
+    else router.push("/browse");
   }
 
   useEffect(() => {

@@ -23,7 +23,7 @@ export async function blockProfile(formData: FormData) {
   if (!targetId || targetId === me.active_profile_id) redirect("/browse");
   const { error } = await db.from("member_blocks").upsert(
     { blocker_profile_id: me.active_profile_id, blocked_profile_id: targetId },
-    { onConflict: "blocker_profile_id,blocked_profile_id" },
+    { onConflict: "blocker_profile_id,blocked_profile_id", ignoreDuplicates: true },
   );
   if (error) redirect(`${returnTo}?safety=block_error`);
   revalidatePath("/browse");

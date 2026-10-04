@@ -1,3 +1,4 @@
+import { SafetyFlash } from "@/app/browse/safety-flash";
 import { BrowseClient } from "@/app/browse/browse-client";
 import type { BrowseCardNote } from "@/app/browse/browse-card";
 import { InnerShell as PageShell } from "@/components/chrome-layout";
@@ -100,6 +101,7 @@ export async function BrowsePage({
     income?: string;
     all?: string;
     filterPage?: string;
+    safety?: string;
   }>;
 }) {
   const params = await searchParams;
@@ -322,6 +324,7 @@ export async function BrowsePage({
 
   return (
     <PageShell>
+      <SafetyFlash code={params.safety} />
       <BrowseClient
         lookingFor={lookingFor}
         notice={notice}

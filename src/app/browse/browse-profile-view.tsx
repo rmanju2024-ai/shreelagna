@@ -1,4 +1,4 @@
-﻿import { toggleShortlist, viewContact } from "@/app/app/profiles/actions";
+import { viewContact } from "@/app/app/profiles/actions";
 import { BirdDock } from "@/app/browse/bird-dock";
 import { PromoBubble } from "@/app/browse/promo-bubble";
 import { MatchBar } from "@/app/browse/match-bar";
@@ -14,7 +14,9 @@ import { lastOnlineLine } from "@/lib/profile/last-seen";
 import { effectiveInterestStatus, interestThreadState, openInterestBlocksSend, orderedProfilePair } from "@/lib/match/interest-status";
 import { matchSelfFromProfile } from "@/lib/profile/match-compare";
 import { canEditMemberProfile } from "@/lib/desk/access";
-import { SafetyProfileControl } from "@/app/app/safety/safety-profile-control";
+import { ProfileHero, type ProfileHeroData } from "@/app/browse/profile-hero";
+import { SafetyFlash } from "@/app/browse/safety-flash";
+import { ageFromDob } from "@/lib/profile/completeness";
 import { canViewProfile, isPublicProfileStatus, type ProfileType } from "@/lib/profile/visibility";
 import { complimentaryPaidProfileAccess, pairPlanLive } from "@/lib/membership/access";
 import { loadInterestQuota, loadMembership } from "@/lib/membership/load";
@@ -63,10 +65,10 @@ export async function BrowseProfileView({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; sent?: string; contact?: string; wa?: string }>;
+  searchParams: Promise<{ error?: string; sent?: string; contact?: string; wa?: string; safety?: string }>;
 }) {
   const { id } = await params;
-  const { error, sent, contact, wa } = await searchParams;
+  const { error, sent, contact, wa, safety } = await searchParams;
   const { supabase, user } = await getAuth();
   if (!supabase || !user) redirect(`/login?next=/browse/${id}`);
   const me = await ensureAppUser(supabase, user);
@@ -164,6 +166,17 @@ export async function BrowseProfileView({
     );
   } else if (own) {
     viewerType = asProfileType(profile.profile_type);
+  }
+
+  if (!own && !isStaff && mine) {
+    const { data: blocks } = await db
+      .from("member_blocks")
+      .select("blocker_profile_id")
+      .or(
+        `and(blocker_profile_id.eq.${String(mine.id)},blocked_profile_id.eq.${id}),and(blocker_profile_id.eq.${id},blocked_profile_id.eq.${String(mine.id)})`,
+      )
+      .limit(1);
+    if (blocks?.length) return <UnavailableBrowse />;
   }
 
   const targetType = asProfileType(profile.profile_type);
@@ -324,8 +337,24 @@ export async function BrowseProfileView({
     typeof profile.subject_mobile === "string" && profile.subject_mobile.trim() ? profile.subject_mobile.trim() : "—";
   const email = typeof owner?.email === "string" && owner.email.trim() ? owner.email.trim() : "—";
 
+  const dobText = typeof profile.date_of_birth === "string" ? profile.date_of_birth : "";
+  const heroData: ProfileHeroData = {
+    id: String(profile.id),
+    name: displayFirstName(typeof profile.subject_full_name === "string" ? profile.subject_full_name : "Member"),
+    photoUrl: publicMediaUrl(photos[0]?.storage_path),
+    age: dobText ? (ageFromDob(dobText)?.years ?? null) : null,
+    place: [profile.current_city, profile.current_state].filter((v) => typeof v === "string" && v).join(", "),
+    work: typeof profile.occupation === "string" ? profile.occupation : "",
+    faith: [religionName, communityName].filter(Boolean).join(" · "),
+    lastSeen: hideLastSeen ? null : lastOnlineLine(typeof profile.last_seen_at === "string" ? profile.last_seen_at : null, asProfileType(profile.profile_type) ?? undefined),
+    kundali: kundali ? `${kundali.total}/${kundali.max}` : null,
+    memberCode,
+  };
+
   return (
     <div className="browse-profile-view">
+      <ProfileHero data={heroData} showActions={!own && Boolean(user)} />
+      <SafetyFlash code={safety} />
       <ProfilePortrait
         profile={hideLastSeen ? { ...profile, last_seen_at: null } : profile}
         memberCode={memberCode}
@@ -421,12 +450,6 @@ export async function BrowseProfileView({
       />
       {!own && user ? (
         <>
-          <form action={toggleShortlist} className="safety-profile-control">
-            <input type="hidden" name="profile_id" value={profile.id} />
-            <input type="hidden" name="return_to" value={`/browse/${profile.id}`} />
-            <button className={btnGhost} type="submit">Shortlist</button>
-          </form>
-          <SafetyProfileControl profileId={String(profile.id)} returnTo={`/browse/${profile.id}`} />
           {planLocked || needPlan ? (
             <PromoBubble name={displayFirstName(typeof profile.subject_full_name === "string" ? profile.subject_full_name : "This profile")} />
           ) : null}

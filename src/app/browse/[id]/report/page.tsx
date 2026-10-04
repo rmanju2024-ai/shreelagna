@@ -2,7 +2,7 @@ import { reportProfile } from "@/app/app/safety/actions";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { displayFirstName } from "@/lib/profile/options";
-import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { redirect } from "next/navigation";
 
 const REASONS = [
@@ -27,7 +27,7 @@ export default async function ReportProfilePage({ params }: { params: Promise<{ 
   return (
     <PageShell>
       <section className="report-page">
-        <Link href={back} className="report-back">← Back to profile</Link>
+        <BackLink fallback={back} className="report-back">← Back to profile</BackLink>
         <div className="report-card">
           <p className="report-kicker">Confidential · only our safety team sees this</p>
           <h1>Report {name}</h1>
@@ -52,7 +52,7 @@ export default async function ReportProfilePage({ params }: { params: Promise<{ 
             </label>
             <div className="report-actions">
               <button type="submit" className="report-send">Send confidential report</button>
-              <Link href={back} className="report-cancel">Cancel</Link>
+              <BackLink fallback={back} className="report-cancel">Cancel</BackLink>
             </div>
           </form>
         </div>
