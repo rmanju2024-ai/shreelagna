@@ -45,7 +45,7 @@ export async function ProfileEditScreen({
 
   return (
     <PageShell>
-      <div>
+      <div className="page-head-panel">
         <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)]">
           Edit {heading.toLowerCase()}
           {memberCode ? ` · ${memberCode}` : ""}

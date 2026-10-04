@@ -264,3 +264,16 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
 .back-to-account a{display:inline-flex;align-items:center;gap:.35rem;padding:.4rem .85rem;border-radius:999px;background:rgb(255 255 255 / 94%);color:#2b1a14;font-size:.85rem;font-weight:800;text-decoration:none;box-shadow:0 4px 14px rgb(20 6 5 / 22%)}
 .back-to-account a:hover{background:#fff;transform:translateX(-2px)}
 @media (max-width:640px){.back-to-account{padding:.5rem 1rem 0}}
+
+/* Page headings sit on a solid panel so the photo scene never fights the text */
+.page-head-panel{padding:1rem 1.25rem;border-radius:1.1rem;background:rgb(255 255 255 / 94%);box-shadow:0 10px 30px rgb(20 6 5 / 22%);max-width:62rem}
+.page-head-panel .browse-kicker{color:#8a3b12;margin:0}
+.page-head-panel h1{margin:.2rem 0 .4rem;color:#2b1a14}
+.page-head-panel p{color:#3d2a22;font-size:.95rem;margin:0}
+.sx-stage > .legal-effective,.sx-stage > .set-lead,.public-stage > .legal-effective{width:fit-content;max-width:100%;padding:.4rem .8rem;border-radius:.7rem;background:rgb(255 255 255 / 92%);color:#3d2a22}
+.sx-hero .sx-hero-sub{color:#2b1a14;background:rgb(255 255 255 / 80%);width:fit-content;padding:.3rem .65rem;border-radius:.6rem}
+.gz-state-card{padding:1.4rem 1.6rem;border-radius:1.2rem;background:rgb(255 255 255 / 94%);color:#2b1a14;box-shadow:0 12px 34px rgb(20 6 5 / 25%)}
+.gz-state-card h1{color:#2b1a14}
+.gz-state-card p{color:#3d2a22}
+.page-head-panel h1{font-size:clamp(1.6rem,3vw,2.2rem)}
+.page-head-panel p[class*="text-"]{color:#8a3b12}

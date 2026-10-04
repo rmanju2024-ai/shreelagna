@@ -22,9 +22,9 @@ export default async function SafetyPage() {
   return (
     <PageShell><BackToAccount />
       <main className="sx-stage safety-centre">
-        <p className="browse-kicker">Trust & safety</p>
+        <header className="page-head-panel"><p className="browse-kicker">Trust & safety</p>
         <h1>Your safety comes first</h1>
-        <p className="set-lead">Keep conversations on Shree Lagna until you are comfortable. Never share OTPs, UPI PINs, passwords, bank details, or money.</p>
+        <p className="set-lead">Keep conversations on Shree Lagna until you are comfortable. Never share OTPs, UPI PINs, passwords, bank details, or money.</p></header>
         <section className={`${cardClass} safety-guidance`}>
           <h2>When to report</h2>
           <ul>
