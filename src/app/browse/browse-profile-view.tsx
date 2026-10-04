@@ -1,5 +1,6 @@
 ﻿import { toggleShortlist, viewContact } from "@/app/app/profiles/actions";
 import { BirdDock } from "@/app/browse/bird-dock";
+import { PromoBubble } from "@/app/browse/promo-bubble";
 import { MatchBar } from "@/app/browse/match-bar";
 import { profileViewedCopy } from "@/lib/match/alert-copy";
 import { canAlertProfileView } from "@/lib/match/profile-settings";
@@ -426,6 +427,9 @@ export async function BrowseProfileView({
             <button className={btnGhost} type="submit">Shortlist</button>
           </form>
           <SafetyProfileControl profileId={String(profile.id)} returnTo={`/browse/${profile.id}`} />
+          {planLocked || needPlan ? (
+            <PromoBubble name={displayFirstName(typeof profile.subject_full_name === "string" ? profile.subject_full_name : "This profile")} />
+          ) : null}
           <BirdDock
             profileId={String(profile.id)}
             interestId={interestId}

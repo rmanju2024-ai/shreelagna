@@ -277,3 +277,37 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
 .gz-state-card p{color:#3d2a22}
 .page-head-panel h1{font-size:clamp(1.6rem,3vw,2.2rem)}
 .page-head-panel p[class*="text-"]{color:#8a3b12}
+
+/* Report page + premium promo bubble */
+.report-page { max-width: 38rem; margin: 0 auto; padding: 1rem 0 2rem; display: grid; gap: 0.8rem; }
+.report-back { color: #fff; font-weight: 800; text-decoration: none; text-shadow: 0 1px 6px rgb(0 0 0 / 55%); }
+.report-card { padding: clamp(1.1rem, 4vw, 1.8rem); border-radius: 1.6rem; background: rgb(255 253 248 / 96%); color: #3f0e0d; box-shadow: 0 24px 50px -24px rgb(63 14 13 / 60%); }
+.report-kicker { margin: 0; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #9a3412; }
+.report-card h1 { margin: 0.3rem 0 0; font-size: clamp(1.6rem, 5vw, 2.1rem); color: #3f0e0d; }
+.report-sub { margin: 0.4rem 0 1rem; color: #5b4a43; }
+.report-form { display: grid; gap: 1rem; }
+.report-form fieldset { border: 0; padding: 0; margin: 0; }
+.report-form legend { font-weight: 800; margin-bottom: 0.5rem; }
+.report-reasons { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 0.5rem; }
+.report-reason input { position: absolute; opacity: 0; pointer-events: none; }
+.report-reason span { display: block; padding: 0.7rem 0.9rem; border-radius: 999px; border: 1.5px solid rgb(184 137 76 / 45%); background: #fff; font-weight: 700; cursor: pointer; transition: transform 0.15s, background 0.15s; }
+.report-reason span:hover { transform: translateY(-1px); }
+.report-reason input:checked + span { color: #fff; border-color: transparent; background: linear-gradient(135deg, #c2415a, #7c2d12); }
+.report-reason input:focus-visible + span { outline: 3px solid #e8b84a; outline-offset: 2px; }
+.report-details { display: grid; gap: 0.4rem; font-weight: 800; }
+.report-details textarea { min-height: 7rem; padding: 0.8rem; border-radius: 1rem; border: 1.5px solid rgb(184 137 76 / 45%); font: inherit; color: #3f0e0d; background: #fff; }
+.report-actions { display: flex; flex-wrap: wrap; gap: 0.7rem; align-items: center; }
+.report-send { flex: 1 1 14rem; min-height: 3rem; border: 0; border-radius: 999px; font-weight: 900; color: #fff; cursor: pointer; background: linear-gradient(135deg, #c2415a, #7c2d12); box-shadow: 0 12px 24px -12px rgb(194 65 90 / 80%); }
+.report-cancel { color: #7c2d12; font-weight: 800; text-decoration: none; padding: 0.7rem 1rem; }
+
+.promo-bubble { position: fixed; z-index: 250; right: max(0.9rem, env(safe-area-inset-right)); bottom: calc(env(safe-area-inset-bottom) + 8.5rem); display: grid; justify-items: end; gap: 0.6rem; }
+.promo-fab { position: relative; width: 3.4rem; height: 3.4rem; border-radius: 50%; border: 0; font-size: 1.5rem; cursor: pointer; background: linear-gradient(135deg, #25d366, #128c7e); box-shadow: 0 10px 24px -8px rgb(18 140 126 / 80%); animation: promo-pulse 2.2s ease-in-out infinite; }
+.promo-fab i { position: absolute; top: -0.2rem; right: -0.2rem; min-width: 1.15rem; height: 1.15rem; border-radius: 999px; background: #e11d48; color: #fff; font-size: 0.68rem; font-style: normal; font-weight: 800; display: grid; place-items: center; }
+.promo-card { position: relative; width: min(18.5rem, calc(100vw - 2rem)); padding: 0.9rem 1rem 1rem; border-radius: 1.2rem 1.2rem 0.3rem 1.2rem; background: #fff; color: #3f0e0d; box-shadow: 0 20px 40px -16px rgb(0 0 0 / 55%); animation: promo-in 0.35s ease both; }
+.promo-from { margin: 0 0 0.35rem; font-size: 0.72rem; font-weight: 800; color: #128c7e; display: flex; align-items: center; gap: 0.35rem; }
+.promo-dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: #25d366; }
+.promo-msg { margin: 0 0 0.75rem; font-size: 0.88rem; line-height: 1.4; }
+.promo-cta { display: block; text-align: center; padding: 0.65rem; border-radius: 999px; font-weight: 900; text-decoration: none; color: #fff; background: linear-gradient(135deg, #c2415a, #7c2d12); }
+.promo-x { position: absolute; top: 0.3rem; right: 0.5rem; border: 0; background: none; font-size: 1.3rem; color: #7c2d12; cursor: pointer; }
+@keyframes promo-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgb(37 211 102 / 55%); } 50% { box-shadow: 0 0 0 12px rgb(37 211 102 / 0%); } }
+@keyframes promo-in { from { opacity: 0; transform: translateY(10px) scale(0.96); } }
