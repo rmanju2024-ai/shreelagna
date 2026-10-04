@@ -38,19 +38,23 @@ export async function AlertsFeed() {
   const { data: notices } = await supabase.from("notices").select("id, kind, title, body, href, created_at, read_at, match_profile_id").eq("user_id", me.id).neq("kind", "chat").order("created_at", { ascending: false }).limit(50);
   const collapsed = collapseNotices(notices ?? []);
   const profileIds = [...new Set(collapsed.map((row) => row.match_profile_id).filter(Boolean))] as string[];
-  const { data: visibleProfiles } = profileIds.length ? await supabase.from("profiles").select("id").in("id", profileIds).eq("status", "active") : { data: [] as { id: string }[] };
+  const media = createServiceClient() ?? supabase;
+  // Independent lookups run together instead of one after another.
+  const [{ data: visibleProfiles }, { data: photos }] = profileIds.length
+    ? await Promise.all([
+        supabase.from("profiles").select("id").in("id", profileIds).eq("status", "active"),
+        media.from("media").select("profile_id, storage_path, created_at").eq("kind", "photo").eq("status", "approved").in("profile_id", profileIds).order("created_at"),
+      ])
+    : [{ data: [] as { id: string }[] }, { data: [] as { profile_id: string; storage_path: string | null }[] }];
   const alerts = noticesForActiveProfiles(collapsed, new Set((visibleProfiles ?? []).map((row) => row.id)));
   const photoMap = new Map<string, string>();
-  if (profileIds.length) {
-    const media = createServiceClient() ?? supabase;
-    const { data: photos } = await media.from("media").select("profile_id, storage_path, created_at").eq("kind", "photo").eq("status", "approved").in("profile_id", profileIds).order("created_at");
-    for (const row of photos ?? []) if (!photoMap.has(row.profile_id) && row.storage_path) photoMap.set(row.profile_id, row.storage_path);
-  }
+  for (const row of photos ?? []) if (!photoMap.has(row.profile_id) && row.storage_path) photoMap.set(row.profile_id, row.storage_path);
   const readAt = new Date().toISOString();
-  // Scoped to this member's own alerts; the service client guarantees the update is not silently blocked.
-  const writer = createServiceClient() ?? supabase;
-  const marked = await writer.from("notices").update({ read_at: readAt }).eq("user_id", me.id).neq("kind", "chat").is("read_at", null);
-  const shownAlerts = marked.error ? alerts : alerts.map((alert) => ({ ...alert, read_at: alert.read_at ?? readAt }));
+  // Marking as read happens after the page is sent; it is scoped to this member and never blocks the view.
+  after(async () => {
+    await media.from("notices").update({ read_at: readAt }).eq("user_id", me.id).neq("kind", "chat").is("read_at", null);
+  });
+  const shownAlerts = alerts; // unread ones stay highlighted this visit
   return (
     <div className="alerts-genz inbox-alerts">
       {shownAlerts.length ? <p className="alerts-genz-hint">Everything here is private to you. Tap an update to see what’s next.</p> : null}

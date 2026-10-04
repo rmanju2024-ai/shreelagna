@@ -76,6 +76,20 @@ export async function InterestsView({ only }: { only?: SectionId } = {}) {
   const ids = (mine ?? []).map((p) => p.id);
   const idSet = new Set(ids);
 
+  // Start every query that only needs this member's profile ids now, so they run together.
+  type ViewRow = { viewer_profile_id: string; viewed_profile_id: string; viewed_at: string };
+  const archivedPromise = supabase
+    .from("interest_archive")
+    .select("id, from_profile_id, to_profile_id, from_user_id, to_user_id, from_name, to_name, status, created_at, closed_at")
+    .or(`from_user_id.eq.${me.id},to_user_id.eq.${me.id}`)
+    .order("closed_at", { ascending: false });
+  const viewsPromise = ids.length
+    ? supabase.from("profile_views").select("viewer_profile_id, viewed_profile_id, viewed_at").in("viewed_profile_id", ids).order("viewed_at", { ascending: false }).limit(30)
+    : Promise.resolve({ data: [] as ViewRow[] });
+  const visitsPromise = ids.length
+    ? supabase.from("profile_views").select("viewer_profile_id, viewed_profile_id, viewed_at").in("viewer_profile_id", ids).order("viewed_at", { ascending: false }).limit(30)
+    : Promise.resolve({ data: [] as ViewRow[] });
+
   let received: InterestRow[] = [];
   let sent: InterestRow[] = [];
   if (ids.length) {
@@ -94,11 +108,7 @@ export async function InterestsView({ only }: { only?: SectionId } = {}) {
     }
   }
 
-  const archivedQuery = await supabase
-    .from("interest_archive")
-    .select("id, from_profile_id, to_profile_id, from_user_id, to_user_id, from_name, to_name, status, created_at, closed_at")
-    .or(`from_user_id.eq.${me.id},to_user_id.eq.${me.id}`)
-    .order("closed_at", { ascending: false });
+  const [archivedQuery, { data: views }, { data: visits }] = await Promise.all([archivedPromise, viewsPromise, visitsPromise]);
   const archived = archivedQuery.error ? [] : archivedQuery.data;
 
   const otherIds = [
@@ -111,40 +121,20 @@ export async function InterestsView({ only }: { only?: SectionId } = {}) {
   ];
   const profileSelect =
     "id, subject_full_name, status, date_of_birth, current_city, current_state, native_state, last_seen_at, hide_last_seen, hide_photo_until_accept, height_cm, qualification, occupation, religions(name), communities(name)";
-  let names: ProfileSnap[] = [];
-  if (otherIds.length) {
-    const rich = await supabase.from("profiles").select(profileSelect).in("id", otherIds);
-    if (rich.error) {
-      const plain = await supabase.from("profiles").select("id, subject_full_name, status").in("id", otherIds);
-      names = (plain.data ?? []) as ProfileSnap[];
-    } else {
-      names = (rich.data ?? []) as ProfileSnap[];
-    }
-  }
-  const nameMap = new Map(names.map((n) => [n.id, n]));
-
-  const [{ data: views }, { data: visits }] = await Promise.all([
-    ids.length
-      ? supabase.from("profile_views").select("viewer_profile_id, viewed_profile_id, viewed_at").in("viewed_profile_id", ids).order("viewed_at", { ascending: false }).limit(30)
-      : Promise.resolve({ data: [] as { viewer_profile_id: string; viewed_profile_id: string; viewed_at: string }[] }),
-    ids.length
-      ? supabase.from("profile_views").select("viewer_profile_id, viewed_profile_id, viewed_at").in("viewer_profile_id", ids).order("viewed_at", { ascending: false }).limit(30)
-      : Promise.resolve({ data: [] as { viewer_profile_id: string; viewed_profile_id: string; viewed_at: string }[] }),
-  ]);
+  const loadProfiles = async (wanted: string[]): Promise<ProfileSnap[]> => {
+    if (!wanted.length) return [];
+    const rich = await supabase.from("profiles").select(profileSelect).in("id", wanted);
+    if (!rich.error) return (rich.data ?? []) as ProfileSnap[];
+    const plain = await supabase.from("profiles").select("id, subject_full_name, status").in("id", wanted);
+    return (plain.data ?? []) as ProfileSnap[];
+  };
   const viewIds = [...new Set([
     ...(views ?? []).map((v) => v.viewer_profile_id),
     ...(visits ?? []).map((v) => v.viewed_profile_id),
   ])];
-  let viewers: ProfileSnap[] = [];
-  if (viewIds.length) {
-    const rich = await supabase.from("profiles").select(profileSelect).in("id", viewIds);
-    if (rich.error) {
-      const plain = await supabase.from("profiles").select("id, subject_full_name, status").in("id", viewIds);
-      viewers = (plain.data ?? []) as ProfileSnap[];
-    } else {
-      viewers = (rich.data ?? []) as ProfileSnap[];
-    }
-  }
+  // Both profile lookups run together.
+  const [names, viewers] = await Promise.all([loadProfiles(otherIds), loadProfiles(viewIds)]);
+  const nameMap = new Map(names.map((n) => [n.id, n]));
   const viewerRows = viewers.filter((n) => isPublicProfileStatus(n.status));
   const viewerMap = new Map(viewerRows.map((n) => [n.id, n]));
 
