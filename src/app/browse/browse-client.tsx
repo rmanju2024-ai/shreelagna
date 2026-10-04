@@ -31,6 +31,8 @@ const EXTRA_VIEWS: ViewItem[] = [
 
 const ALL_VIEWS = [...DEFAULT_VIEWS, ...EXTRA_VIEWS];
 const PREVIEW_VIEWS = ALL_VIEWS.filter((item) => item.id !== "custom");
+export const DISCOVER_PREVIEW_LIMIT = 5;
+export const DISCOVER_RESULTS_PAGE_SIZE = 10;
 
 function fitsCustom(note: BrowseCardNote, filters: BrowseFilters): boolean {
   return profileFitsBrowse(
@@ -59,7 +61,7 @@ function notesFor(catalog: Record<string, BrowseCardNote>, rows: BrowseScoreRow[
   return out;
 }
 
-function resultsHref(view: BrowseView, filters: BrowseFilters) {
+export function discoverResultsHref(view: BrowseView, filters: BrowseFilters = EMPTY_BROWSE_FILTERS) {
   const params = new URLSearchParams({ view });
   if (view === "custom") {
     if (filters.ageMin) params.set("age_min", String(filters.ageMin));
@@ -87,6 +89,37 @@ function RowArrow({
   );
 }
 
+function FeedBanner({
+  id,
+  label,
+  meaning,
+  count,
+}: {
+  id: string;
+  label: string;
+  meaning: string;
+  count?: number;
+}) {
+  const line = `${label}   ·   ${meaning}`;
+  return (
+    <div className="sx-3d-banner">
+      <span className="sx-star is-a" aria-hidden>✦</span>
+      <span className="sx-star is-b" aria-hidden>✧</span>
+      <span className="sx-star is-c" aria-hidden>✦</span>
+      <h2 id={id} className="sx-visually-hidden">{label}</h2>
+      <div className="sx-3d-track" aria-hidden>
+        <div className="sx-3d-run">
+          <p>{line}</p>
+          <p>{line}</p>
+        </div>
+      </div>
+      {count != null ? (
+        <small>{count} {count === 1 ? "profile" : "profiles"}</small>
+      ) : null}
+    </div>
+  );
+}
+
 function CategoryRow({
   item,
   notes,
@@ -99,20 +132,18 @@ function CategoryRow({
   gate?: string;
 }) {
   const scroller = useRef<HTMLUListElement>(null);
-  const preview = notes.slice(0, 5);
+  const preview = notes.slice(0, DISCOVER_PREVIEW_LIMIT);
   return (
     <section className="sx-feed-row" aria-labelledby={`discover-${item.id}`}>
       <header className="sx-feed-head">
-        <div>
-          <p className="sx-feed-kicker">{item.short}</p>
-          <h2 id={`discover-${item.id}`}><span>{item.label}</span></h2>
-          <p>{count} {count === 1 ? "profile" : "profiles"} · {item.hint}</p>
-        </div>
-        {count > 5 ? (
-          <a className="sx-view-all" href={resultsHref(item.id, EMPTY_BROWSE_FILTERS)}>
+        <FeedBanner id={`discover-${item.id}`} label={item.label} meaning={item.hint} count={count} />
+        {count > DISCOVER_PREVIEW_LIMIT ? (
+          <a className="sx-view-all" href={discoverResultsHref(item.id)}>
             View all {count} profiles <span aria-hidden>→</span>
           </a>
-        ) : null}
+        ) : (
+          <span className="sx-view-all-slot" aria-hidden />
+        )}
       </header>
       {gate && preview.length ? <p className="sx-note">{gate}</p> : null}
       {preview.length ? (
@@ -134,7 +165,7 @@ function CategoryRow({
           />
         </div>
       ) : (
-        <div className="sx-empty">
+        <div className="sx-empty is-compact">
           <h3>{gate || item.empty}</h3>
         </div>
       )}
@@ -188,21 +219,21 @@ export function BrowseClient({
 
   const currentView = ALL_VIEWS.find((item) => item.id === initialView) ?? DEFAULT_VIEWS[0];
   const ranked = currentView.id === "custom" && !customApplied ? [] : rankedByView[currentView.id] ?? [];
-  const pages = pageCount(ranked.length, 10);
+  const pages = pageCount(ranked.length, DISCOVER_RESULTS_PAGE_SIZE);
   const currentPage = Math.min(page, pages);
-  const shown = pageItems(ranked, currentPage, 10);
+  const shown = pageItems(ranked, currentPage, DISCOVER_RESULTS_PAGE_SIZE);
+  const resultHref = discoverResultsHref(currentView.id, filters);
   const totalShown = PREVIEW_VIEWS.reduce((sum, item) => sum + (rankedByView[item.id]?.length ?? 0), 0);
-  const resultHref = resultsHref(currentView.id, filters);
   const discoverHref = resultHref.replace("/browse/results", "/browse");
 
   return (
     <div className="sx-stage">
       <header className="sx-hero">
-        <div>
+        <div className="sx-hero-copy">
           <p className="sx-eyebrow">Search</p>
           <h1>{fullResults ? currentView.label : lookingFor ? `Find your ${lookingFor}` : "Find your match"}</h1>
+          {fullResults ? <Link href={discoverHref} className="sx-back-to-discover">← Back to Discover</Link> : null}
         </div>
-        {fullResults ? <Link href={discoverHref} className="sx-back-to-discover">← Back to Discover</Link> : null}
         {!notice ? (
           <p className="sx-hero-count">
             <b>{fullResults ? ranked.length : totalShown}</b>
@@ -279,16 +310,18 @@ export function BrowseClient({
             ))}
             <section className="sx-feed-row" aria-labelledby="discover-custom">
               <header className="sx-feed-head">
-                <div>
-                  <p className="sx-feed-kicker">Filter</p>
-                  <h2 id="discover-custom"><span>Advanced filter</span></h2>
-                  <p>Set what you want, then Apply. Nothing lists until you do.</p>
-                </div>
-                {customApplied && rankedByView.custom.length > 5 ? (
-                  <a className="sx-view-all" href={resultsHref("custom", filters)}>
+                <FeedBanner
+                  id="discover-custom"
+                  label="Advanced filter"
+                  meaning="Set what you want, then Apply. Nothing lists until you do."
+                />
+                {customApplied && rankedByView.custom.length > DISCOVER_PREVIEW_LIMIT ? (
+                  <a className="sx-view-all" href={discoverResultsHref("custom", filters)}>
                     View all {rankedByView.custom.length} profiles <span aria-hidden>→</span>
                   </a>
-                ) : null}
+                ) : (
+                  <span className="sx-view-all-slot" aria-hidden />
+                )}
               </header>
               <BrowseFilterDesk
                 filters={filters}
@@ -308,15 +341,15 @@ export function BrowseClient({
               {customApplied ? (
                 rankedByView.custom.length ? (
                   <ul className="sx-row">
-                    {rankedByView.custom.slice(0, 5).map((note) => (
+                    {rankedByView.custom.slice(0, DISCOVER_PREVIEW_LIMIT).map((note) => (
                       <BrowseCard key={`custom-${note.id}`} note={note} />
                     ))}
                   </ul>
                 ) : (
-                  <div className="sx-empty"><h3>No profiles match these choices</h3></div>
+                  <div className="sx-empty is-compact"><h3>No profiles match these choices</h3></div>
                 )
               ) : (
-                <div className="sx-empty"><h3>Choose filters, then tap Apply to see profiles.</h3></div>
+                <div className="sx-empty is-compact"><h3>Choose filters, then tap Apply to see profiles.</h3></div>
               )}
             </section>
           </div>
