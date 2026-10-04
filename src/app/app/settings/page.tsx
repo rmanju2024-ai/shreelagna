@@ -1,3 +1,4 @@
+import { BackToAccount } from "@/components/back-to-account";
 import { cookies } from "next/headers";
 import { SettingsForm } from "@/app/app/profiles/settings-form";
 import { PageShell } from "@/components/site-chrome";
@@ -46,7 +47,7 @@ export default async function SettingsPage({
   const scene = parseScene((await cookies()).get(SCENE_COOKIE)?.value);
 
   return (
-    <PageShell>
+    <PageShell><BackToAccount />
       <div className="settings-page sx-stage">
         <PageHero kicker="Account" title="Settings" sub="Look, alerts and privacy." />
         {error === "save" ? (
@@ -55,7 +56,7 @@ export default async function SettingsPage({
           </p>
         ) : null}
         <ScenePicker initial={scene} />
-        <SettingsForm profileId={profile.id} values={readProfileSettings(profile, account)} />
+        <SettingsForm profileId={profile.id} values={readProfileSettings(profile, account)} canDelete={me.role !== "admin"} />
       </div>
     </PageShell>
   );

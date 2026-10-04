@@ -30,9 +30,11 @@ function Toggle({
 export function SettingsForm({
   profileId,
   values,
+  canDelete = true,
 }: {
   profileId: string;
   values: ProfileSettings;
+  canDelete?: boolean;
 }) {
   return (
     <div className="set-panel">
@@ -121,11 +123,13 @@ export function SettingsForm({
       </button>
       </form>
 
-      <section className="settings-danger-zone">
-        <h3>Delete profile</h3>
-        <p>Use this only if you want to permanently remove this matrimonial profile.</p>
-        <ProfileDeleteControl profileId={profileId} />
-      </section>
+      {canDelete ? (
+        <section className="settings-danger-zone">
+          <h3>Delete profile</h3>
+          <p>Use this only if you want to permanently remove this matrimonial profile.</p>
+          <ProfileDeleteControl profileId={profileId} />
+        </section>
+      ) : null}
     </div>
   );
 }

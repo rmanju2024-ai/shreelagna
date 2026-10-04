@@ -1,3 +1,4 @@
+import { BackToAccount } from "@/components/back-to-account";
 import Link from "next/link";
 import { PageShell } from "@/components/site-chrome";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
@@ -19,7 +20,7 @@ export default async function SafetyPage() {
     .limit(20);
 
   return (
-    <PageShell>
+    <PageShell><BackToAccount />
       <main className="sx-stage safety-centre">
         <p className="browse-kicker">Trust & safety</p>
         <h1>Your safety comes first</h1>

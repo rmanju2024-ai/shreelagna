@@ -1,3 +1,4 @@
+import { BackToAccount } from "@/components/back-to-account";
 import Link from "next/link";
 import { PageShell } from "@/components/site-chrome";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
@@ -45,7 +46,7 @@ export default async function MemberVerificationPage({ searchParams }: { searchP
     fileCount.set(item.id, listed?.data?.length ?? 0);
   }
   return (
-    <PageShell>
+    <PageShell><BackToAccount />
       <section className="sx-stage public-stage verify-page">
         <div className="verify-panel">
           <p className="browse-kicker">Optional trust checks</p>

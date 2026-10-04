@@ -1,3 +1,4 @@
+import { BackToAccount } from "@/components/back-to-account";
 import { requestPlan } from "@/app/app/plans/actions";
 import { PageShell } from "@/components/site-chrome";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
@@ -39,7 +40,7 @@ export default async function PlansPage({
   const house = access.kind === "house";
 
   return (
-    <PageShell>
+    <PageShell><BackToAccount />
       <section className="plans-stage">
         <PageHero kicker="Membership" title="Plans" sub="Welcome gift on joining. Paid cover thereafter. Chat after accept." />
 
