@@ -20,6 +20,13 @@ import {
   BROWSE_PROFILE_SELECT_STAR,
   loadBrowsePhotoMap,
 } from "@/lib/match/browse-query";
+import {
+  activityTier,
+  incomeRank,
+  isSubscribedRow,
+  sortByPriority,
+  type BrowsePriority,
+} from "@/lib/match/browse-priority";
 import { yearsFromDob } from "@/lib/profile/completeness";
 import { loadFaithCatalog } from "@/lib/profile/load-form-lists";
 import { formatHeightImperial, matchSelfFromProfile } from "@/lib/profile/match-compare";
@@ -261,6 +268,8 @@ export async function BrowsePage({
             religion: nestedName(mine.religions),
             community: myCommunity,
           });
+          const priority = new Map<string, BrowsePriority>();
+          const myAge = yearsFromDob(String(mine.date_of_birth ?? ""));
           for (const row of listed) {
             const community = nestedName(row.communities);
             const theirSelf = matchSelfFromProfile(row, {
@@ -273,6 +282,13 @@ export async function BrowsePage({
               preferencePoints(mine, theirSelf) + preferencePoints(row, mySelf);
             card.matchPercent = Math.max(1, Math.min(100, Math.round((mutual / (2 * PREFERENCE_POINTS)) * 100)));
             catalog[card.id] = card;
+            const theirAge = yearsFromDob(String(row.date_of_birth ?? ""));
+            priority.set(card.id, {
+              subscribed: isSubscribedRow(row),
+              activity: activityTier(row.last_seen_at, Boolean(row.hide_last_seen), now),
+              income: incomeRank(row.income_band),
+              ageGap: theirAge != null && myAge != null ? Math.abs(theirAge - myAge) : 99,
+            });
             lists.custom.push({ id: card.id, score: null });
             const km = kmApart(myPlace, { city: card.city, state: card.state });
             if (km != null && km <= 100) lists.nearby.push({ id: card.id, score: nearbyLabel(km) });
@@ -292,6 +308,10 @@ export async function BrowsePage({
             const ka = a.score === "Same city" ? 0 : Number.parseInt(a.score ?? "999", 10);
             const kb = b.score === "Same city" ? 0 : Number.parseInt(b.score ?? "999", 10);
             return ka - kb;
+          });
+          // Same priority order in every category; the list's own score/distance order breaks ties.
+          (Object.keys(lists) as BrowseView[]).forEach((key) => {
+            lists[key] = sortByPriority(lists[key], priority);
           });
         }
       }
