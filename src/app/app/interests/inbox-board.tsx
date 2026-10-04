@@ -37,16 +37,17 @@ export type InboxNote = {
 
 export type InboxView = InboxNote;
 
-const TABS = [
-  { id: "received", label: "Received", short: "In" },
-  { id: "sent", label: "Sent", short: "Sent" },
-  { id: "accepted", label: "Accepted", short: "Yes" },
-  { id: "history", label: "History", short: "Past" },
-  { id: "viewed", label: "Who viewed you", short: "Them" },
-  { id: "visited", label: "You viewed", short: "You" },
+const SECTIONS = [
+  { id: "received", label: "Received", meaning: "Families who showed interest in you", empty: "No pending interests right now" },
+  { id: "sent", label: "Sent", meaning: "Interests you have sent, awaiting a reply", empty: "No pending interests sent" },
+  { id: "accepted", label: "Accepted", meaning: "Mutual interest, ready to talk", empty: "No accepted interests yet" },
+  { id: "history", label: "History", meaning: "Expired, declined or closed", empty: "No expired, declined, or deleted notes." },
+  { id: "viewed", label: "Who viewed you", meaning: "Recent visitors to your profile", empty: "No one has viewed you yet" },
+  { id: "visited", label: "You viewed", meaning: "Profiles you recently opened", empty: "You have not viewed anyone yet" },
 ] as const;
 
-type TabId = (typeof TABS)[number]["id"];
+type SectionId = (typeof SECTIONS)[number]["id"];
+export const LIKES_PREVIEW_LIMIT = 5;
 
 export function InboxBoard({
   received,
@@ -63,95 +64,118 @@ export function InboxBoard({
   viewed?: InboxView[];
   visited?: InboxView[];
 }) {
-  const [tab, setTab] = useState<TabId>("received");
-  const tabsRef = useRef<HTMLDivElement>(null);
-  const counts: Record<TabId, number> = {
-    received: received.length,
-    sent: sent.length,
-    accepted: accepted.length,
-    history: history.length,
-    viewed: viewed.length,
-    visited: visited.length,
+  const notes: Record<SectionId, InboxNote[]> = { received, sent, accepted, history, viewed, visited };
+  const actions: Partial<Record<SectionId, (note: InboxNote) => ReactNode>> = {
+    received: (note) => (
+      <>
+        <form action={respondInterest}>
+          <input type="hidden" name="interest_id" value={note.id} />
+          <input type="hidden" name="decision" value="accepted" />
+          <button type="submit" className={btnPrimary}>
+            Accept
+          </button>
+        </form>
+        <DeclineForm interestId={note.id} />
+      </>
+    ),
+    accepted: () => (
+      <Link href="/app/chat" className={`${btnPrimary} inbox-chat-btn`}>
+        Open chat
+      </Link>
+    ),
   };
 
   return (
-    <article className="sx-board inbox-modern">
-      <aside aria-label="Inbox sections">
-        <div className="inbox-tab-shell">
+    <article className="sx-feed inbox-modern">
+      {SECTIONS.map((section) => (
+        <LikesSection key={section.id} section={section} notes={notes[section.id]} actions={actions[section.id]} />
+      ))}
+    </article>
+  );
+}
+
+function LikesSection({
+  section,
+  notes,
+  actions,
+}: {
+  section: (typeof SECTIONS)[number];
+  notes: InboxNote[];
+  actions?: (note: InboxNote) => ReactNode;
+}) {
+  const scroller = useRef<HTMLUListElement>(null);
+  const [expanded, setExpanded] = useState(false);
+  const count = notes.length;
+  const id = `likes-${section.id}`;
+  return (
+    <section className="sx-feed-row" aria-labelledby={id}>
+      <header className="sx-feed-head">
+        <div className="sx-3d-banner">
+          <span className="sx-star is-a" aria-hidden>✦</span>
+          <span className="sx-star is-b" aria-hidden>✧</span>
+          <span className="sx-star is-c" aria-hidden>✦</span>
+          <div className="sx-3d-copy">
+            <h2 id={id}>{section.label}</h2>
+            <p>{section.meaning}</p>
+          </div>
+          <small>{count} {count === 1 ? "profile" : "profiles"}</small>
+        </div>
+        {count > LIKES_PREVIEW_LIMIT ? (
+          <button type="button" className="sx-view-all" onClick={() => setExpanded((open) => !open)}>
+            {expanded ? "Show less" : `View all ${count} profiles`} <span aria-hidden>{expanded ? "↑" : "→"}</span>
+          </button>
+        ) : (
+          <span className="sx-view-all-slot" aria-hidden />
+        )}
+      </header>
+      {!count ? (
+        <div className="sx-empty is-compact">
+          <h3>{section.empty}</h3>
+        </div>
+      ) : expanded ? (
+        <NoteList empty={section.empty} notes={notes} actions={actions} />
+      ) : (
+        <div className="sx-row-shell">
           <button
             type="button"
-            className="inbox-tab-scroll is-left"
-            aria-label="Show previous Likes options"
-            onClick={() => tabsRef.current?.scrollBy({ left: -220, behavior: "smooth" })}
+            className="sx-row-arrow is-left"
+            aria-label={`Show previous ${section.label} profiles`}
+            onClick={() => scroller.current?.scrollBy({ left: -280, behavior: "smooth" })}
           >
             ‹
           </button>
-          <div className="sx-tabs inbox-tabs" role="tablist" ref={tabsRef}>
-          {TABS.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              role="tab"
-              aria-selected={tab === item.id}
-              className={`sx-tab${tab === item.id ? " is-on" : ""}`}
-              onClick={(event) => {
-                setTab(item.id);
-                event.currentTarget.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-              }}
-            >
-              <b>{item.label}</b>
-              <em>{counts[item.id]}</em>
-            </button>
-          ))}
-          </div>
+          <ul className="sx-row" ref={scroller}>
+            {notes.slice(0, LIKES_PREVIEW_LIMIT).map((note) => (
+              <PreviewCard key={note.id} note={note} actions={actions} />
+            ))}
+          </ul>
           <button
             type="button"
-            className="inbox-tab-scroll is-right"
-            aria-label="Show more Likes options"
-            onClick={() => tabsRef.current?.scrollBy({ left: 220, behavior: "smooth" })}
+            className="sx-row-arrow is-right"
+            aria-label={`Show more ${section.label} profiles`}
+            onClick={() => scroller.current?.scrollBy({ left: 280, behavior: "smooth" })}
           >
             ›
           </button>
         </div>
-      </aside>
-      <div className="inbox-pane-modern">
-        {tab === "received" ? (
-          <NoteList
-            empty="None pending."
-            notes={received}
-            actions={(note) => (
-              <>
-                <form action={respondInterest}>
-                  <input type="hidden" name="interest_id" value={note.id} />
-                  <input type="hidden" name="decision" value="accepted" />
-                  <button type="submit" className={btnPrimary}>
-                    Accept
-                  </button>
-                </form>
-                <DeclineForm interestId={note.id} />
-              </>
-            )}
-          />
-        ) : null}
-        {tab === "sent" ? <NoteList empty="None pending." notes={sent} /> : null}
-        {tab === "accepted" ? (
-          <NoteList
-            empty="None yet."
-            notes={accepted}
-            actions={() => (
-              <Link href="/app/chat" className={`${btnPrimary} inbox-chat-btn`}>
-                Open chat
-              </Link>
-            )}
-          />
-        ) : null}
-        {tab === "history" ? (
-          <NoteList empty="No expired, declined, or deleted notes." notes={history} />
-        ) : null}
-        {tab === "viewed" ? <NoteList empty="No one has viewed you yet." notes={viewed} /> : null}
-        {tab === "visited" ? <NoteList empty="You have not viewed anyone yet." notes={visited} /> : null}
-      </div>
-    </article>
+      )}
+    </section>
+  );
+}
+
+function PreviewCard({ note, actions }: { note: InboxNote; actions?: (note: InboxNote) => ReactNode }) {
+  const router = useRouter();
+  const href = profileHref(note);
+  return (
+    <li
+      className={`sx-card inbox-card inbox-profile${href ? " is-openable" : ""}`}
+      onClick={(event) => {
+        if (!href || (event.target as HTMLElement).closest(".inbox-actions, a.inbox-open")) return;
+        router.push(href);
+      }}
+    >
+      <CardFace note={note} actions={actions ? actions(note) : null} />
+    </li>
   );
 }
 

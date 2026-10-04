@@ -191,3 +191,5 @@
 .inbox-list.sx-grid.is-results-list .sx-body{padding:1rem 1.15rem}
 .inbox-list.sx-grid.is-results-list .inbox-actions{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.6rem}
 @media (max-width:640px){.inbox-list.sx-grid.is-results-list{grid-template-columns:1fr}.inbox-list.sx-grid.is-results-list .sx-card-link{grid-template-columns:7rem minmax(0,1fr);min-height:8rem}.inbox-list.sx-grid.is-results-list .sx-photo{min-height:8rem}}
+
+button.sx-view-all{font:inherit;cursor:pointer;background:none;border:0}

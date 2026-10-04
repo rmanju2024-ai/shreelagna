@@ -32,37 +32,39 @@ beforeEach(() => {
   });
 });
 
-describe("Likes mobile tabs", () => {
-  it("keeps every section available in the horizontal tab list", () => {
-    render(<InboxBoard received={[]} sent={[]} accepted={[]} history={[]} viewed={[]} visited={[]} />);
+describe("Likes sections", () => {
+  const note = (id: string) => ({ id, name: `Name ${id}`, when: "today", href: `/browse/${id}` });
+  const many = (count: number) => Array.from({ length: count }, (_, i) => note(`n${i}`));
 
+  it("shows every section as its own row with a count", () => {
+    render(<InboxBoard received={[]} sent={many(1)} accepted={[]} history={[]} viewed={many(1)} visited={many(1)} />);
     for (const label of ["Received", "Sent", "Accepted", "History", "Who viewed you", "You viewed"]) {
-      expect(screen.getByRole("tab", { name: new RegExp(label, "i") })).toBeTruthy();
+      expect(screen.getAllByRole("heading", { name: label })).toHaveLength(1);
     }
+    expect(screen.getAllByText("1 profile")).toHaveLength(3);
+    expect(screen.getAllByText("0 profiles")).toHaveLength(3);
   });
 
-  it("moves the tab strip with the mobile arrow controls", () => {
-    render(<InboxBoard received={[]} sent={[]} accepted={[]} history={[]} />);
-
-    fireEvent.click(screen.getByRole("button", { name: "Show more Likes options" }));
-    expect(scrollBy).toHaveBeenCalledWith({ left: 220, behavior: "smooth" });
-
-    fireEvent.click(screen.getByRole("button", { name: "Show previous Likes options" }));
-    expect(scrollBy).toHaveBeenCalledWith({ left: -220, behavior: "smooth" });
+  it("previews five cards and expands on View all", () => {
+    render(<InboxBoard received={[]} sent={many(7)} accepted={[]} history={[]} />);
+    expect(screen.getAllByRole("link", { name: /name n\d/i })).toHaveLength(5);
+    fireEvent.click(screen.getByRole("button", { name: /view all 7 profiles/i }));
+    expect(screen.getAllByRole("link", { name: /name n\d/i })).toHaveLength(7);
+    fireEvent.click(screen.getByRole("button", { name: /show less/i }));
+    expect(screen.getAllByRole("link", { name: /name n\d/i })).toHaveLength(5);
   });
 
-  it("selects and centres the chosen section", () => {
-    render(<InboxBoard received={[]} sent={[]} accepted={[]} history={[]} />);
+  it("scrolls a row with both arrows", () => {
+    render(<InboxBoard received={[]} sent={many(2)} accepted={[]} history={[]} />);
+    fireEvent.click(screen.getByRole("button", { name: "Show more Sent profiles" }));
+    expect(scrollBy).toHaveBeenCalledWith({ left: 280, behavior: "smooth" });
+    fireEvent.click(screen.getByRole("button", { name: "Show previous Sent profiles" }));
+    expect(scrollBy).toHaveBeenCalledWith({ left: -280, behavior: "smooth" });
+  });
 
-    const history = screen.getByRole("tab", { name: /history/i });
-    fireEvent.click(history);
-
-    expect(history.getAttribute("aria-selected")).toBe("true");
-    expect(scrollIntoView).toHaveBeenCalledWith({
-      behavior: "smooth",
-      inline: "center",
-      block: "nearest",
-    });
-    expect(screen.getByText("No expired, declined, or deleted notes.")).toBeTruthy();
+  it("offers Accept and Decline on received cards", () => {
+    render(<InboxBoard received={many(1)} sent={[]} accepted={[]} history={[]} />);
+    expect(screen.getByRole("button", { name: "Accept" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Decline" })).toBeTruthy();
   });
 });
