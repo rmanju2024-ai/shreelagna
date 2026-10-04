@@ -11,6 +11,8 @@ const { data: users, error } = await supabase.auth.admin.listUsers({ page: 1, pe
 if (error) throw error;
 const demos = users.users.filter((user) => user.email?.match(/^demo-2026-\d+@example\.invalid$/));
 for (const user of demos) {
+  // Deleting a profile archives its interests into History; drop those demo archive rows too.
+  await supabase.from("interest_archive").delete().or(`from_user_id.eq.${user.id},to_user_id.eq.${user.id}`);
   const { error: profileError } = await supabase.from("profiles").delete().eq("created_by", user.id);
   if (profileError) throw profileError;
   const { error: userError } = await supabase.auth.admin.deleteUser(user.id);
