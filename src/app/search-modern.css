@@ -193,3 +193,17 @@
 @media (max-width:640px){.inbox-list.sx-grid.is-results-list{grid-template-columns:1fr}.inbox-list.sx-grid.is-results-list .sx-card-link{grid-template-columns:7rem minmax(0,1fr);min-height:8rem}.inbox-list.sx-grid.is-results-list .sx-photo{min-height:8rem}}
 
 button.sx-view-all{font:inherit;cursor:pointer;background:none;border:0}
+
+/* Compact preview cards (Discover + Likes rows) */
+.sx-row{grid-auto-columns:minmax(9.4rem,10.2rem);gap:.55rem}
+.sx-row .sx-photo{aspect-ratio:1 / 1.05}
+.sx-row .sx-photo-copy h3{font-size:.92rem}
+.sx-row .sx-photo-copy p{font-size:.66rem}
+.sx-row .sx-body{gap:.25rem;padding:.4rem .5rem .5rem}
+.sx-row .sx-place{font-size:.68rem}
+.sx-row .sx-tags{gap:.25rem}
+.sx-row .sx-tags li{font-size:.6rem;padding:.08rem .36rem}
+.sx-row .sx-tags li:nth-child(n+3){display:none}
+.sx-row .sx-why-match{font-size:.62rem}
+.sx-row .sx-foot{font-size:.6rem;padding-top:.25rem}
+@media (max-width:640px){.sx-row{grid-auto-columns:minmax(9rem,44vw)}}
