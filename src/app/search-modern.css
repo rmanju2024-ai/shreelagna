@@ -207,3 +207,6 @@ button.sx-view-all{font:inherit;cursor:pointer;background:none;border:0}
 .sx-row .sx-why-match{font-size:.62rem}
 .sx-row .sx-foot{font-size:.6rem;padding-top:.25rem}
 @media (max-width:640px){.sx-row{grid-auto-columns:minmax(9rem,44vw)}}
+
+.sx-view-all-center{display:flex;justify-content:center;margin:.35rem 0 .2rem}
+.sx-view-all-center .sx-view-all{margin:0}

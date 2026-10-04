@@ -120,13 +120,6 @@ function LikesSection({
           </div>
           <small>{count} {count === 1 ? "profile" : "profiles"}</small>
         </div>
-        {count > LIKES_PREVIEW_LIMIT ? (
-          <button type="button" className="sx-view-all" onClick={() => setExpanded((open) => !open)}>
-            {expanded ? "Show less" : `View all ${count} profiles`} <span aria-hidden>{expanded ? "↑" : "→"}</span>
-          </button>
-        ) : (
-          <span className="sx-view-all-slot" aria-hidden />
-        )}
       </header>
       {!count ? (
         <div className="sx-empty is-compact">
@@ -159,6 +152,13 @@ function LikesSection({
           </button>
         </div>
       )}
+      {count > LIKES_PREVIEW_LIMIT ? (
+        <div className="sx-view-all-center">
+          <button type="button" className="sx-view-all" onClick={() => setExpanded((open) => !open)}>
+            {expanded ? "Show less" : `View all ${count} profiles`} <span aria-hidden>{expanded ? "↑" : "→"}</span>
+          </button>
+        </div>
+      ) : null}
     </section>
   );
 }

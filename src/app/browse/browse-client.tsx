@@ -132,13 +132,6 @@ function CategoryRow({
     <section className="sx-feed-row" aria-labelledby={`discover-${item.id}`}>
       <header className="sx-feed-head">
         <FeedBanner id={`discover-${item.id}`} label={item.label} meaning={item.hint} count={count} />
-        {count > DISCOVER_PREVIEW_LIMIT ? (
-          <a className="sx-view-all" href={discoverResultsHref(item.id)}>
-            View all {count} profiles <span aria-hidden>→</span>
-          </a>
-        ) : (
-          <span className="sx-view-all-slot" aria-hidden />
-        )}
       </header>
       {gate && preview.length ? <p className="sx-note">{gate}</p> : null}
       {preview.length ? (
@@ -164,6 +157,13 @@ function CategoryRow({
           <h3>{gate || item.empty}</h3>
         </div>
       )}
+      {count > DISCOVER_PREVIEW_LIMIT ? (
+        <div className="sx-view-all-center">
+          <a className="sx-view-all" href={discoverResultsHref(item.id)}>
+            View all {count} profiles <span aria-hidden>→</span>
+          </a>
+        </div>
+      ) : null}
     </section>
   );
 }
