@@ -192,7 +192,7 @@
 .inbox-list.sx-grid.is-results-list .inbox-actions{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.6rem}
 @media (max-width:640px){.inbox-list.sx-grid.is-results-list{grid-template-columns:1fr}.inbox-list.sx-grid.is-results-list .sx-card-link{grid-template-columns:7rem minmax(0,1fr);min-height:8rem}.inbox-list.sx-grid.is-results-list .sx-photo{min-height:8rem}}
 
-button.sx-view-all{font:inherit;cursor:pointer;background:none;border:0}
+button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;border:0;background:var(--accent);color:#fff}
 
 /* Compact preview cards (Discover + Likes rows) */
 .sx-row{grid-auto-columns:minmax(9.4rem,10.2rem);gap:.55rem}
@@ -210,3 +210,15 @@ button.sx-view-all{font:inherit;cursor:pointer;background:none;border:0}
 
 .sx-view-all-center{display:flex;justify-content:center;margin:.35rem 0 .2rem}
 .sx-view-all-center .sx-view-all{margin:0}
+
+/* Equal-height cards; Accept/Decline always pinned to the bottom, side by side */
+.sx-row{align-items:stretch}
+.sx-row .sx-card{display:flex}
+.sx-row .sx-card-link{display:flex;flex-direction:column;width:100%}
+.sx-row .sx-body{flex:1;display:flex;flex-direction:column}
+.sx-row .sx-foot{margin-top:auto}
+.sx-row .inbox-actions{display:grid;grid-template-columns:1fr 1fr;gap:.35rem;margin-top:.4rem}
+.sx-row .inbox-actions:has(> :only-child){grid-template-columns:1fr}
+.sx-row .inbox-actions form{display:contents}
+.sx-row .inbox-actions :is(button,a){width:100%;min-height:2rem;padding:.3rem .4rem;font-size:.72rem;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}
+.sx-row .inbox-decline{grid-column:1 / -1}
