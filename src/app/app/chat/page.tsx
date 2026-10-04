@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { AlertsFeed } from "@/app/app/alerts/alerts-feed";
 import { ChatSidebar, firstChatId } from "@/app/app/chat/chat-sidebar";
+import { InboxSwitcher } from "@/components/inbox-switcher";
 import { LiveRefresh } from "@/components/live-refresh";
 import { PageShell } from "@/components/site-chrome";
 
@@ -21,10 +22,7 @@ export default async function ChatListPage({ searchParams }: { searchParams: Pro
     <PageShell>
       <LiveRefresh table="messages" />
       <div className={`inbox-unified${alertsTab ? " is-alerts" : ""}`}>
-        <nav className="inbox-switcher" aria-label="Inbox sections">
-          <Link href="/app/chat" className={!alertsTab ? "is-on" : undefined} aria-current={!alertsTab ? "page" : undefined}>💬 Chats</Link>
-          <Link href="/app/chat?tab=alerts" className={alertsTab ? "is-on" : undefined} aria-current={alertsTab ? "page" : undefined}>🔔 Alerts</Link>
-        </nav>
+        <InboxSwitcher active={alertsTab ? "alerts" : "chats"} />
         {alertsTab ? (
           <section className="inbox-alerts-panel" aria-label="Alerts">
             <header><p>Your private inbox</p><h1>Updates</h1></header>

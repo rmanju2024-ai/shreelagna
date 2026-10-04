@@ -44,7 +44,7 @@ describe("mobile primary navigation", () => {
     const menu = screen.getByRole("menu");
     expect(menu.parentElement).toBe(document.body);
     expect(menu.className).toContain("is-mobile-sheet");
-    for (const label of ["About", "Help", "Alerts", "Account", "Sign out"]) {
+    for (const label of ["About", "Help", "Account", "Sign out"]) {
       expect(screen.getByText(label)).toBeTruthy();
     }
   });
@@ -62,10 +62,10 @@ describe("mobile primary navigation", () => {
     expect(screen.queryByRole("menu")).toBeNull();
   });
 
-  it("keeps all seven member destinations available", () => {
+  it("keeps every member destination available (Likes and Alerts live inside Inbox)", () => {
     render(<HeaderNav overlay={false} user staff />);
     const nav = screen.getByRole("navigation", { name: "Primary" });
-    for (const label of ["Home", "Discover", "Likes", "Inbox", "Profile", "Desk", "More"]) {
+    for (const label of ["Home", "Discover", "Inbox", "Profile", "Desk", "More"]) {
       expect(nav.textContent).toContain(label);
     }
   });

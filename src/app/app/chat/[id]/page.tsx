@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ChatSidebar } from "@/app/app/chat/chat-sidebar";
+import { InboxSwitcher } from "@/components/inbox-switcher";
 import { LiveRefresh } from "@/components/live-refresh";
 import { after } from "next/server";
 import { ThreadView } from "@/app/app/chat/[id]/thread-view";
@@ -101,10 +102,7 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
     <PageShell>
       <LiveRefresh table="messages" filter={`thread_id=eq.${id}`} />
       <div className="inbox-unified">
-        <nav className="inbox-switcher" aria-label="Inbox sections">
-          <Link href="/app/chat" className="is-on" aria-current="page">💬 Chats</Link>
-          <Link href="/app/chat?tab=alerts">🔔 Alerts</Link>
-        </nav>
+        <InboxSwitcher active="chats" />
         <div className="wc-shell has-thread">
         <ChatSidebar activeId={id} />
         <article className="wa-app wc-pane">

@@ -169,11 +169,6 @@ export function HeaderNav({
     { href: "/contact", label: "Help", icon: "help" },
   ];
   const desk: NavItem = { href: "/desk", label: "Desk", icon: "staff" };
-  const inbox: NavItem[] = [
-    { href: "/app/interests", label: "Inbox", icon: "inbox" },
-    { href: "/app/chat", label: "Chats", icon: "chat", badge: chatUnread },
-    { href: "/app/chat?tab=alerts", label: "Alerts", icon: "alerts", badge: alertUnread },
-  ];
   const accountHub: NavItem = { href: "/app/account", label: "Account", icon: "settings" };
   const registerHere = pathMatches(pathname, "/login", tab);
   const moreOn = more.some((item) => pathMatches(pathname, item.href, tab));
@@ -185,10 +180,7 @@ export function HeaderNav({
         <NavChip item={{ href: "/", label: "Home", icon: "home" }} overlay={overlay} current={pathMatches(pathname, "/", tab)} />
         <NavChip item={{ href: "/browse", label: "Discover", icon: "browse" }} overlay={overlay} current={pathMatches(pathname, "/browse", tab)} />
         {user ? (
-          <NavChip item={{ href: "/app/interests", label: "Likes", icon: "inbox", badge: likesPending }} overlay={overlay} current={pathMatches(pathname, "/app/interests", tab)} />
-        ) : null}
-        {user ? (
-          <NavChip item={{ href: "/app/chat", label: "Inbox", icon: "chat", badge: chatUnread }} overlay={overlay} current={pathMatches(pathname, "/app/chat", tab)} />
+          <NavChip item={{ href: "/app/chat", label: "Inbox", icon: "chat", badge: chatUnread + alertUnread + likesPending }} overlay={overlay} current={pathMatches(pathname, "/app/chat", tab) || pathMatches(pathname, "/app/interests", tab)} />
         ) : (
           <Link href="/login" aria-current={registerHere ? "page" : undefined} className={`nav-3d${overlay ? " is-overlay" : ""}${registerHere ? " is-on" : ""}`}>
             <span className="nav-3d-ico">
@@ -204,10 +196,8 @@ export function HeaderNav({
           icon="more"
           overlay={overlay}
           current={moreOn}
-          badge={pathname === "/app/chat" && tab === "alerts" ? 0 : alertUnread}
         >
           {more.map((item) => <MenuLink key={item.href} item={item} current={pathMatches(pathname, item.href, tab)} />)}
-          {user ? <MenuLink item={inbox[2]} current={pathname === "/app/chat" && tab === "alerts"} /> : null}
           {user ? <MenuLink item={accountHub} current={accountOn} /> : null}
           {user ? <SignOutButton className="nav-menu-item" icon /> : null}
         </NavGroup>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { InboxSwitcher } from "@/components/inbox-switcher";
 import { LikesSeen } from "@/components/likes-seen";
 import { InboxBoard } from "@/app/app/interests/inbox-board";
 import { SECTIONS, type SectionId } from "@/lib/match/likes-sections";
@@ -267,6 +268,7 @@ export async function InterestsView({ only }: { only?: SectionId } = {}) {
   return (
     <PageShell>
       <div className="sx-stage">
+      <div className="inbox-unified"><InboxSwitcher active="likes" /></div>
       <header className="sx-hero">
         <div className="sx-hero-copy">
           <p className="sx-eyebrow">Inbox</p>
