@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   experimental: {
     optimizePackageImports: ["@supabase/supabase-js"],
+    serverActions: { bodySizeLimit: "6mb" },
     staleTimes: {
       dynamic: 30,
       static: 180,
