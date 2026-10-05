@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { toggleShortlist, viewContact } from "@/app/app/profiles/actions";
+import { revealContact, saveShortlist } from "@/app/app/profiles/actions";
 import { SafetyProfileControl } from "@/app/app/safety/safety-profile-control";
 import { BirdDock, type PeekChatNote } from "@/app/browse/bird-dock";
 import type { InterestThread } from "@/lib/match/interest-status";
@@ -132,31 +132,54 @@ function ContactPanel({
   contact: NonNullable<ProfileData["contact"]>;
 }) {
   const [ask, setAsk] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [fail, setFail] = useState<string | null>(null);
+  const [shown, setShown] = useState<{ mobile: string; email: string } | null>(
+    contact.revealed ? { mobile: contact.mobile, email: contact.email } : null,
+  );
+  const [quota, setQuota] = useState({ used: contact.used, left: contact.left, limit: contact.limit });
   const quotaLine =
-    contact.limit != null
-      ? `Used ${contact.used} of ${contact.limit} · ${contact.left ?? 0} left`
+    quota.limit != null
+      ? `Used ${quota.used} of ${quota.limit} · ${quota.left ?? 0} left`
       : "No monthly cap on this plan";
+
+  function onConfirm() {
+    setAsk(false);
+    setBusy(true);
+    setFail(null);
+    setShown({ mobile: "…", email: "…" });
+    void revealContact(profileId).then((res) => {
+      setBusy(false);
+      if (!res.ok) {
+        setShown(null);
+        setAsk(true);
+        setFail("Could not show contact just now. Try again.");
+        return;
+      }
+      setShown({ mobile: res.mobile || "Not on file", email: res.email || "Not on file" });
+      if (res.limit != null) setQuota({ used: res.used ?? quota.used, left: res.left ?? quota.left, limit: res.limit });
+    });
+  }
+
   return (
     <section className="pv-contact">
       <p className="pv-contact-title">{contact.self ? "Your mobile & email" : "Mobile & email"}</p>
       {contact.self ? null : (
         <p className="pv-contact-quota">{quotaLine}. Send request or contact on one profile counts as 1.</p>
       )}
-      {contact.revealed ? (
+      {shown ? (
         <>
-          {contact.limit != null && !contact.self ? (
-            <p className="pv-contact-left">
-              {contact.left ?? 0} left after this profile
-            </p>
+          {quota.limit != null && !contact.self ? (
+            <p className="pv-contact-left">{quota.left ?? 0} left after this profile</p>
           ) : null}
           <ul>
             <li>
               <span>Mobile</span>
-              <strong>{contact.mobile || "Not on file"}</strong>
+              <strong>{shown.mobile || "Not on file"}</strong>
             </li>
             <li>
               <span>Email</span>
-              <strong>{contact.email || "Not on file"}</strong>
+              <strong>{shown.email || "Not on file"}</strong>
             </li>
           </ul>
         </>
@@ -168,20 +191,22 @@ function ContactPanel({
         </p>
       ) : contact.canReveal ? (
         ask ? (
-          <form action={viewContact} className="pv-contact-ask">
-            <input type="hidden" name="to_profile_id" value={profileId} />
+          <div className="pv-contact-ask">
             <p>
               {contact.counted
                 ? "This profile is already on your count. Showing contact will not use another."
                 : `Showing mobile and email uses 1 for this profile. A send request here will not use another. ${
-                    contact.limit != null ? `You will have ${Math.max(0, (contact.left ?? 1) - 1)} left.` : ""
+                    quota.limit != null ? `You will have ${Math.max(0, (quota.left ?? 1) - 1)} left.` : ""
                   }`}
             </p>
-            <button type="submit">Yes, show contact</button>
+            {fail ? <p className="pv-contact-note">{fail}</p> : null}
+            <button type="button" onClick={onConfirm} disabled={busy}>
+              Yes, show contact
+            </button>
             <button type="button" onClick={() => setAsk(false)}>
               Not now
             </button>
-          </form>
+          </div>
         ) : (
           <button type="button" className="pv-contact-open" onClick={() => setAsk(true)}>
             Show contact
@@ -211,6 +236,9 @@ function PlanLock({ on, children }: { on: boolean; children: React.ReactNode }) 
 
 export function ProfileRedesign(props: ProfileData) {
   const [shortlistMsg, setShortlistMsg] = useState<string | null>(null);
+  const [listed, setListed] = useState(props.shortlisted);
+  const shortlistGen = useRef(0);
+  const toastTimer = useRef(0);
   const [hero, setHero] = useState(0);
   const [lightbox, setLightbox] = useState<number | null>(null);
   const photos = props.photoUrls?.length ? props.photoUrls : props.photoUrl ? [props.photoUrl] : [];
@@ -244,8 +272,31 @@ export function ProfileRedesign(props: ProfileData) {
         left == null ? "Contact shown. This profile counts as 1." : `Contact shown. This profile counts as 1 · ${left} left.`,
       );
     }
-    if (code || contact === "1") window.setTimeout(() => setShortlistMsg(null), 3200);
+    if (code || contact === "1") {
+      window.clearTimeout(toastTimer.current);
+      toastTimer.current = window.setTimeout(() => setShortlistMsg(null), 3200);
+    }
   }, []);
+
+  function flashShortlist(text: string) {
+    setShortlistMsg(text);
+    window.clearTimeout(toastTimer.current);
+    toastTimer.current = window.setTimeout(() => setShortlistMsg(null), 2200);
+  }
+
+  function onShortlistClick() {
+    const next = !listed;
+    const gen = ++shortlistGen.current;
+    setListed(next);
+    flashShortlist(next ? "Added to shortlist" : "Removed from shortlist");
+    void saveShortlist(props.id, next).then((res) => {
+      if (gen !== shortlistGen.current) return;
+      if (!res.ok) {
+        setListed(!next);
+        flashShortlist("Could not update shortlist");
+      }
+    });
+  }
 
   useEffect(() => {
     if (lightbox === null) return;
@@ -304,19 +355,16 @@ export function ProfileRedesign(props: ProfileData) {
         </div>
         {!props.own && props.user ? (
           <div className="pv-top-actions">
-            <form action={toggleShortlist}>
-              <input type="hidden" name="profile_id" value={props.id} />
-              <input type="hidden" name="return_to" value={`/browse/${props.id}`} />
-              <button
-                type="submit"
-                className={`pv-ico-btn pv-short${props.shortlisted ? " is-on" : ""}`}
-                aria-label={props.shortlisted ? "Shortlisted" : "Shortlist"}
-                title={props.shortlisted ? "Shortlisted" : "Shortlist"}
-                data-tip={props.shortlisted ? "Shortlisted" : "Shortlist"}
-              >
-                {props.shortlisted ? "♥" : "♡"}
-              </button>
-            </form>
+            <button
+              type="button"
+              className={`pv-ico-btn pv-short${listed ? " is-on" : ""}`}
+              aria-label={listed ? "Shortlisted" : "Shortlist"}
+              title={listed ? "Shortlisted" : "Shortlist"}
+              data-tip={listed ? "Shortlisted" : "Shortlist"}
+              onClick={onShortlistClick}
+            >
+              {listed ? "♥" : "♡"}
+            </button>
             <SafetyProfileControl icons profileId={props.id} returnTo={`/browse/${props.id}`} name={props.name} />
           </div>
         ) : props.editHref ? (

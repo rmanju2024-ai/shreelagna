@@ -34,6 +34,7 @@ import { readSessionFromCookies, restInsertProfile } from "@/lib/supabase/user-r
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { redirect } from "next/navigation";
 
 async function requireMember() {
@@ -578,11 +579,31 @@ export async function deleteOwnProfile(
   return { ok: true };
 }
 
-export async function toggleShortlist(formData: FormData) {
+export async function saveShortlist(profileId: string, want: boolean): Promise<{ ok: boolean; on: boolean }> {
   const { supabase, me } = await requireMember();
+  if (!profileId || !me.active_profile_id || profileId === me.active_profile_id) return { ok: false, on: false };
+  const db = createServiceClient() ?? supabase;
+  const { data: existing } = await db
+    .from("profile_shortlists")
+    .select("owner_profile_id")
+    .eq("owner_profile_id", me.active_profile_id)
+    .eq("shortlisted_profile_id", profileId)
+    .maybeSingle();
+  const on = Boolean(existing);
+  if (want === on) return { ok: true, on };
+  const result = want
+    ? await db.from("profile_shortlists").insert({ owner_profile_id: me.active_profile_id, shortlisted_profile_id: profileId })
+    : await db.from("profile_shortlists").delete().eq("owner_profile_id", me.active_profile_id).eq("shortlisted_profile_id", profileId);
+  if (result.error) return { ok: false, on };
+  revalidatePath("/app/shortlist");
+  return { ok: true, on: want };
+}
+
+export async function toggleShortlist(formData: FormData) {
   const profileId = String(formData.get("profile_id") ?? "");
   const returnTo = String(formData.get("return_to") ?? "/browse");
   const flag = (code: string) => `${returnTo}${returnTo.includes("?") ? "&" : "?"}safety=${code}`;
+  const { supabase, me } = await requireMember();
   if (!profileId || !me.active_profile_id || profileId === me.active_profile_id) redirect("/browse");
   const db = createServiceClient() ?? supabase;
   const { data: existing } = await db
@@ -591,12 +612,9 @@ export async function toggleShortlist(formData: FormData) {
     .eq("owner_profile_id", me.active_profile_id)
     .eq("shortlisted_profile_id", profileId)
     .maybeSingle();
-  const result = existing
-    ? await db.from("profile_shortlists").delete().eq("owner_profile_id", me.active_profile_id).eq("shortlisted_profile_id", profileId)
-    : await db.from("profile_shortlists").insert({ owner_profile_id: me.active_profile_id, shortlisted_profile_id: profileId });
-  revalidatePath("/app/shortlist");
-  if (result.error) redirect(flag("shortlist_error"));
-  redirect(flag(existing ? "unshortlisted" : "shortlisted"));
+  const result = await saveShortlist(profileId, !existing);
+  if (!result.ok) redirect(flag("shortlist_error"));
+  redirect(flag(result.on ? "shortlisted" : "unshortlisted"));
 }
 
 export async function sendInterest(formData: FormData) {
@@ -734,130 +752,143 @@ export async function cancelInterest(formData: FormData) {
   redirect(`/browse/${toId}`);
 }
 
-export async function viewContact(formData: FormData) {
+export async function revealContact(toId: string): Promise<{
+  ok: boolean;
+  mobile?: string;
+  email?: string;
+  used?: number;
+  left?: number | null;
+  limit?: number | null;
+  error?: string;
+}> {
   const { supabase, me } = await requireMember();
-  const toId = String(formData.get("to_profile_id") ?? "");
-  if (!toId || !me.active_profile_id) redirect("/browse?error=need_profile");
-
-  const { data: mine } = await supabase
-    .from("profiles")
-    .select("id, is_complete, status, subject_full_name")
-    .eq("id", me.active_profile_id)
-    .maybeSingle();
-  if (!mine?.is_complete || mine.status !== "active") {
-    redirect(`/browse/${toId}?error=incomplete`);
-  }
-  if (mine.id === toId) redirect(`/browse/${toId}`);
-
-  const access = await loadMembership(supabase, me);
+  if (!toId || !me.active_profile_id) return { ok: false, error: "need_profile" };
   const db = createServiceClient() ?? supabase;
-  let guestPass = false;
-  if (access.kind === "none" || access.kind === "welcome") {
-    const { data: targetOwner } = await db.from("profiles").select("created_by").eq("id", toId).maybeSingle();
-    const ownerId = typeof targetOwner?.created_by === "string" ? targetOwner.created_by : "";
-    const { data: ownerRow } = ownerId
-      ? await db.from("app_users").select("id, role, welcome_started_at, welcome_days").eq("id", ownerId).maybeSingle()
-      : { data: null };
-    const targetAccess = ownerRow ? await loadMembership(db, ownerRow) : null;
-    const { data: links } = await db
-      .from("interests")
-      .select("status, created_at")
-      .or(
-        `and(from_profile_id.eq.${mine.id},to_profile_id.eq.${toId}),and(from_profile_id.eq.${toId},to_profile_id.eq.${mine.id})`,
-      )
-      .limit(8);
-    const interestOpen = (links ?? []).some((row) =>
-      openInterestBlocksSend(effectiveInterestStatus(row.status, row.created_at ?? "")),
-    );
-    guestPass = complimentaryPaidProfileAccess({
-      viewerKind: access.kind,
-      targetKind: targetAccess?.kind,
-      interestOpen,
-      pairLive: pairPlanLive(access.live, targetAccess?.live),
-    });
-  }
-  if (!access.live && !guestPass) redirect(`/browse/${toId}?error=plan`);
-  const { data: alreadyInterest } = await db
-    .from("interests")
-    .select("id")
-    .eq("from_profile_id", mine.id)
-    .eq("to_profile_id", toId)
-    .limit(1)
-    .maybeSingle();
-  const { data: alreadyView } = await db
-    .from("contact_views")
-    .select("id")
-    .eq("viewer_profile_id", mine.id)
-    .eq("viewed_profile_id", toId)
-    .maybeSingle();
-  const alreadyCounted = Boolean(alreadyInterest || alreadyView);
-  if (!guestPass && !alreadyCounted) {
-    const quota = await loadInterestQuota(supabase, me, access, [mine.id]);
-    if (!quota.canSend) redirect(`/browse/${toId}?error=quota`);
-  }
+  const mineId = me.active_profile_id;
+  const [mineRes, viewRes, interestRes, targetRes] = await Promise.all([
+    supabase.from("profiles").select("id, is_complete, status, subject_full_name").eq("id", mineId).maybeSingle(),
+    db.from("contact_views").select("id").eq("viewer_profile_id", mineId).eq("viewed_profile_id", toId).maybeSingle(),
+    db.from("interests").select("id").eq("from_profile_id", mineId).eq("to_profile_id", toId).limit(1).maybeSingle(),
+    db.from("profiles").select("id, status, subject_mobile, created_by, contact_release_mode").eq("id", toId).maybeSingle(),
+  ]);
+  const mine = mineRes.data;
+  const target = targetRes.data;
+  if (!mine?.is_complete || mine.status !== "active") return { ok: false, error: "incomplete" };
+  if (mine.id === toId) return { ok: false, error: "own" };
+  if (!target || target.status !== "active") return { ok: false, error: "unavailable" };
+  if (target.contact_release_mode === "never") return { ok: false, error: "contact_private" };
 
-  const { data: target } = await db
-    .from("profiles")
-    .select("id, status, subject_mobile, created_by, contact_release_mode")
-    .eq("id", toId)
-    .maybeSingle();
-  if (!target || target.status !== "active") redirect("/browse?error=unavailable");
-  if (target.contact_release_mode === "never") {
-    redirect(`/browse/${toId}?error=contact_private`);
-  }
-  const { data: owner } = await db.from("app_users").select("email").eq("id", target.created_by).maybeSingle();
-  const mobile = typeof target.subject_mobile === "string" ? target.subject_mobile.trim() : "";
-  const email = typeof owner?.email === "string" ? owner.email.trim() : "";
-  if (!mobile && !email) redirect(`/browse/${toId}`);
-
-  const { error } = await supabase.from("contact_views").upsert(
-    {
-      viewer_profile_id: mine.id,
-      viewed_profile_id: toId,
-    },
-    { onConflict: "viewer_profile_id,viewed_profile_id", ignoreDuplicates: true },
-  );
-  if (error) redirect(`/browse/${toId}?error=could_not_send`);
-
-  if (me.role !== "admin" && me.role !== "service") {
-    const copy = contactViewedCopy(displayFirstName(mine.subject_full_name ?? "A member"));
-    const now = new Date().toISOString();
-    const { data: existing } = await db
-      .from("notices")
-      .select("id")
-      .eq("user_id", target.created_by)
-      .eq("kind", "contact_view")
-      .eq("match_profile_id", mine.id)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (existing?.id) {
-      await db
-        .from("notices")
-        .update({
-          created_at: now,
-          read_at: null,
-          title: copy.title,
-          body: copy.body,
-          href: `/browse/${mine.id}`,
-        })
-        .eq("id", existing.id);
-    } else {
-      await db.from("notices").insert({
-        user_id: target.created_by,
-        kind: copy.kind,
-        title: copy.title,
-        body: copy.body,
-        href: `/browse/${mine.id}`,
-        match_profile_id: mine.id,
+  const alreadyCounted = Boolean(viewRes.data || interestRes.data);
+  let used = 0;
+  let left: number | null = null;
+  let limit: number | null = null;
+  if (!alreadyCounted) {
+    const access = await loadMembership(supabase, me);
+    if (!access.live) {
+      const ownerId = typeof target.created_by === "string" ? target.created_by : "";
+      const { data: ownerRow } = ownerId
+        ? await db.from("app_users").select("id, role, welcome_started_at, welcome_days").eq("id", ownerId).maybeSingle()
+        : { data: null };
+      const targetAccess = ownerRow ? await loadMembership(db, ownerRow) : null;
+      const { data: links } = await db
+        .from("interests")
+        .select("status, created_at")
+        .or(
+          `and(from_profile_id.eq.${mine.id},to_profile_id.eq.${toId}),and(from_profile_id.eq.${toId},to_profile_id.eq.${mine.id})`,
+        )
+        .limit(8);
+      const interestOpen = (links ?? []).some((row) =>
+        openInterestBlocksSend(effectiveInterestStatus(row.status, row.created_at ?? "")),
+      );
+      const guestPass = complimentaryPaidProfileAccess({
+        viewerKind: access.kind,
+        targetKind: targetAccess?.kind,
+        interestOpen,
+        pairLive: pairPlanLive(access.live, targetAccess?.live),
       });
+      if (!guestPass) return { ok: false, error: "plan" };
+    } else {
+      const quota = await loadInterestQuota(supabase, me, access, [mine.id]);
+      if (!quota.canSend) return { ok: false, error: "quota" };
+      used = quota.used + 1;
+      left = quota.left == null ? null : Math.max(0, quota.left - 1);
+      limit = quota.limit;
     }
   }
 
-  revalidatePath(`/browse/${toId}`);
-  revalidatePath("/app/plans");
-  revalidatePath("/app/alerts");
-  revalidatePath("/", "layout");
+  const { data: owner } = await db.from("app_users").select("email").eq("id", target.created_by).maybeSingle();
+  const mobile = typeof target.subject_mobile === "string" ? target.subject_mobile.trim() : "";
+  const email = typeof owner?.email === "string" ? owner.email.trim() : "";
+
+  if (!viewRes.data) {
+    const { error } = await supabase.from("contact_views").upsert(
+      { viewer_profile_id: mine.id, viewed_profile_id: toId },
+      { onConflict: "viewer_profile_id,viewed_profile_id", ignoreDuplicates: true },
+    );
+    if (error) return { ok: false, error: "could_not_send" };
+  }
+
+  if (me.role !== "admin" && me.role !== "service") {
+    const copy = contactViewedCopy(displayFirstName(mine.subject_full_name ?? "A member"));
+    const ownerUserId = target.created_by;
+    after(async () => {
+      revalidatePath("/app/plans");
+      revalidatePath("/app/alerts");
+      const now = new Date().toISOString();
+      const { data: existing } = await db
+        .from("notices")
+        .select("id")
+        .eq("user_id", ownerUserId)
+        .eq("kind", "contact_view")
+        .eq("match_profile_id", mine.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (existing?.id) {
+        await db
+          .from("notices")
+          .update({
+            created_at: now,
+            read_at: null,
+            title: copy.title,
+            body: copy.body,
+            href: `/browse/${mine.id}`,
+          })
+          .eq("id", existing.id);
+      } else {
+        await db.from("notices").insert({
+          user_id: ownerUserId,
+          kind: copy.kind,
+          title: copy.title,
+          body: copy.body,
+          href: `/browse/${mine.id}`,
+          match_profile_id: mine.id,
+        });
+      }
+    });
+  } else {
+    after(() => {
+      revalidatePath("/app/plans");
+      revalidatePath("/app/alerts");
+    });
+  }
+
+  return { ok: true, mobile, email, used, left, limit };
+}
+
+export async function viewContact(formData: FormData) {
+  const toId = String(formData.get("to_profile_id") ?? "");
+  const result = await revealContact(toId);
+  if (!result.ok) {
+    if (result.error === "need_profile") redirect("/browse?error=need_profile");
+    if (result.error === "incomplete") redirect(`/browse/${toId}?error=incomplete`);
+    if (result.error === "plan") redirect(`/browse/${toId}?error=plan`);
+    if (result.error === "quota") redirect(`/browse/${toId}?error=quota`);
+    if (result.error === "contact_private") redirect(`/browse/${toId}?error=contact_private`);
+    if (result.error === "unavailable") redirect("/browse?error=unavailable");
+    if (result.error === "could_not_send") redirect(`/browse/${toId}?error=could_not_send`);
+    redirect(`/browse/${toId}`);
+  }
   redirect(`/browse/${toId}?contact=1`);
 }
 
