@@ -110,6 +110,7 @@ export function BirdDock({
   quotaLeft,
   finishHref,
   chat,
+  inline = false,
 }: {
   profileId: string;
   interestId: string | null;
@@ -120,6 +121,7 @@ export function BirdDock({
   awaitingReview?: boolean;
   quotaLeft: number | null;
   finishHref: string;
+  inline?: boolean;
   chat?: {
     myProfileId: string | null;
     threadId: string | null;
@@ -373,7 +375,7 @@ export function BirdDock({
                     : "Finish profile";
 
   const dock = (
-    <div className={`bird-dock${open ? " is-open" : ""}${wide ? " is-wide" : ""}`} data-phase={phase} data-thread={thread}>
+    <div className={`bird-dock${open ? " is-open" : ""}${wide ? " is-wide" : ""}${inline ? " is-inline" : ""}`} data-phase={phase} data-thread={thread}>
       {wide ? <button type="button" className="bird-wa-scrim" aria-label="Restore chat" onClick={() => setWide(false)} /> : null}
       {open && showChat ? (
         <section className={`bird-wa${wide ? " is-max" : ""}`} aria-label="Chat">
@@ -550,5 +552,5 @@ export function BirdDock({
     </div>
   );
 
-  return mounted ? createPortal(dock, document.body) : dock;
+  return inline || !mounted ? dock : createPortal(dock, document.body);
 }

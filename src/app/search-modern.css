@@ -990,7 +990,70 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
 .pv-shell .pv-chat-head { display: flex; gap: 0.5rem; align-items: center; }
 .pv-shell .pv-chat h3 { margin: 0; font-size: 0.88rem; color: #3f0e0d; }
 .pv-shell .pv-chat p { margin: 0.1rem 0 0; font-size: 0.72rem; color: #7d6b63; }
-.pv-shell .pv-chat.is-locked { opacity: 0.78; }
+.pv-shell .pv-lock { position: relative; isolation: isolate; }
+.pv-shell .pv-lock-body { filter: blur(5px); pointer-events: none; user-select: none; max-height: 12rem; overflow: hidden; }
+.pv-shell .pv-lock-veil {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 0.45rem;
+  padding: 1rem;
+  text-align: center;
+  background: rgb(255 250 243 / 78%);
+  border-radius: 1rem;
+}
+.pv-shell .pv-lock-veil p { margin: 0; font-size: 0.82rem; font-weight: 700; color: #7c2d12; }
+.pv-shell .pv-lock-veil a {
+  display: inline-flex;
+  justify-content: center;
+  min-height: 2.2rem;
+  align-items: center;
+  padding: 0 0.9rem;
+  border-radius: 999px;
+  background: linear-gradient(145deg, #c2415a, #7c2d12);
+  color: #fff8e7;
+  font-weight: 800;
+  text-decoration: none;
+}
+.pv-shell .pv-spark-box {
+  padding: 0.45rem;
+  border-radius: 0.85rem;
+  background: #fff;
+  border: 1px solid rgb(184 137 76 / 28%);
+  box-shadow: 0 3px 0 rgb(124 45 18 / 10%);
+}
+.pv-shell .pv-lightbox {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+.pv-shell .pv-lightbox-spark {
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: min(22rem, 100%);
+}
+.bird-dock.is-inline {
+  position: static;
+  z-index: 1;
+  right: auto;
+  bottom: auto;
+  width: 100%;
+  justify-items: stretch;
+  gap: 0.35rem;
+}
+.bird-dock.is-inline .bird-chirp {
+  position: static;
+  max-width: none;
+  text-align: center;
+  font-size: 0.72rem;
+  margin: 0;
+}
+.bird-dock.is-inline .bird-dock-actor { display: none; }
+.bird-dock.is-inline .bird-dock-stage {
+  padding-top: 0;
+  justify-items: stretch;
+}
+.bird-dock.is-inline .bird-dock-cta,
+.bird-dock.is-inline form { width: 100%; }
 @media (max-width: 900px) {
   .pv-shell .pv-grid { grid-template-columns: 1fr; }
   .pv-shell .pv-hero { aspect-ratio: auto; grid-template-columns: 1fr; }
@@ -998,12 +1061,9 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
   .pv-shell .pv-layout { grid-template-columns: 1fr; }
   .pv-shell .pv-media-col { position: static; }
 }
-body:has(.pv-shell) .bird-dock:not(.is-wide) {
+body:has(.pv-shell) .bird-dock:not(.is-wide):not(.is-inline) {
   right: auto;
   left: max(0.9rem, env(safe-area-inset-left));
-  justify-items: start;
-}
-body:has(.pv-shell) .bird-dock:not(.is-wide) .bird-dock-stage {
   justify-items: start;
 }
 
