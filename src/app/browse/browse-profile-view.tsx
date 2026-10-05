@@ -390,26 +390,10 @@ export async function BrowseProfileView({
     {
       icon: "✦",
       title: "Personal",
+      wide: true,
       lead: hasValue(fullName) ? { text: fullName, caption: "Name" } : undefined,
       lines: linesOf(
-        bornOn ? `Born on ${bornOn}` : null,
         profile.height_cm ? `${who} is ${profile.height_cm} cm tall` : null,
-        spoken ? `${who} speaks ${spoken}` : null,
-      ),
-      items: factsOf(
-        fact("Marital status", marital),
-        fact("Diet", profile.diet),
-        fact("Blood group", profile.blood_group),
-        fact("Disability", profile.physical_status),
-        fact("Health", profile.health_notes),
-        hobbies ? { k: "Hobbies", v: hobbies } : null,
-      ),
-      note: about,
-    },
-    {
-      icon: "🕉",
-      title: "Faith & language",
-      lines: linesOf(
         religion && community
           ? `${who} is ${religion} and belongs to the ${community} community`
           : religion
@@ -418,12 +402,30 @@ export async function BrowseProfileView({
               ? `${who} belongs to the ${community} community`
               : null,
         hasValue(profile.mother_tongue) ? `Mother tongue is ${dash(profile.mother_tongue)}` : null,
+        spoken ? `${who} speaks ${spoken}` : null,
+        grew ? `${who} grew up in ${grew}` : null,
+        liveNow ? `${who} now lives in ${liveNow}` : null,
+        yesNo(profile.willing_to_relocate) === "Yes"
+          ? `${who} is open to relocating`
+          : yesNo(profile.willing_to_relocate) === "No"
+            ? `${who} is not looking to relocate`
+            : null,
       ),
       items: factsOf(
+        fact("Marital status", marital),
+        fact("Diet", profile.diet),
+        fact("Blood group", profile.blood_group),
+        fact("Disability", profile.physical_status),
+        fact("Health", profile.health_notes),
+        hobbies ? { k: "Hobbies", v: hobbies } : null,
         fact("Sub-community", profile.sub_community),
         fact("Gothra", profile.gotra),
         fact("Kuladevata", profile.kuladevata),
+        fact("Living arrangement", profile.living_arrangement),
+        fact("Citizenship", profile.citizenship),
+        fact("Pin code", profile.pin_code),
       ),
+      note: about,
     },
     {
       icon: "◎",
@@ -464,27 +466,11 @@ export async function BrowseProfileView({
       note: familyAbout,
     },
     {
-      icon: "⌖",
-      title: "Place",
-      lines: linesOf(
-        grew ? `${who} grew up in ${grew}` : null,
-        liveNow ? `${who} now lives in ${liveNow}` : null,
-        yesNo(profile.willing_to_relocate) === "Yes"
-          ? `${who} is open to relocating`
-          : yesNo(profile.willing_to_relocate) === "No"
-            ? `${who} is not looking to relocate`
-            : null,
-      ),
-      items: factsOf(
-        fact("Living arrangement", profile.living_arrangement),
-        fact("Citizenship", profile.citizenship),
-        fact("Pin code", profile.pin_code),
-      ),
-    },
-    {
       icon: "☽",
       title: "Kundali",
+      wide: true,
       lines: linesOf(
+        bornOn ? `Date of birth is ${bornOn}` : null,
         hasValue(profile.birth_city) && hasValue(profile.birth_time)
           ? `Born in ${dash(profile.birth_city)} at ${dash(profile.birth_time)}`
           : hasValue(profile.birth_city)

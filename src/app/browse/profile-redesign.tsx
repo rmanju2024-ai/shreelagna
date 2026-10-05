@@ -10,6 +10,7 @@ import type { InterestThread } from "@/lib/match/interest-status";
 type DetailGroup = {
   icon: string;
   title: string;
+  wide?: boolean;
   lead?: { text: string; caption: string };
   lines?: string[];
   items?: { k: string; v: string }[];
@@ -157,7 +158,7 @@ export function ProfileRedesign(props: ProfileData) {
                 </div>
                 <div className="pv-grid">
                   {props.details.map((group) => (
-                    <article key={group.title} className="pv-tile">
+                    <article key={group.title} className={`pv-tile${group.wide ? " is-wide" : ""}`}>
                       <h2>
                         <i>{group.icon}</i>
                         {group.title}
