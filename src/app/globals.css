@@ -498,6 +498,10 @@ a.card-premium:hover,
   width: 100%;
 }
 
+.select-3d.is-open {
+  z-index: 40;
+}
+
 .select-3d-native {
   position: absolute;
   width: 1px;
@@ -508,6 +512,7 @@ a.card-premium:hover,
   white-space: nowrap;
   border: 0;
   padding: 0;
+  pointer-events: none;
 }
 
 .select-3d-trigger {
@@ -547,8 +552,13 @@ a.card-premium:hover,
 }
 
 .select-3d-menu {
-  position: fixed;
-  z-index: 520;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 0.35rem);
+  z-index: 50;
+  width: 100%;
+  max-height: min(22rem, 70vh);
   display: flex;
   flex-direction: column;
   overflow: hidden;

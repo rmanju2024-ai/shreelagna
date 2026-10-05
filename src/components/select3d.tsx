@@ -5,17 +5,14 @@ import {
   isValidElement,
   useEffect,
   useId,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
   type ChangeEvent,
   type KeyboardEvent as ReactKeyboardEvent,
   type ReactNode,
-  type CSSProperties,
   type SelectHTMLAttributes,
 } from "react";
-import { createPortal } from "react-dom";
 
 type Item = { value: string; label: string; disabled?: boolean };
 
@@ -70,7 +67,6 @@ export function Select3d({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
-  const [menuStyle, setMenuStyle] = useState<CSSProperties>();
   const [active, setActive] = useState(0);
   const [inner, setInner] = useState(String(defaultValue ?? value ?? ""));
   const [innerList, setInnerList] = useState<string[]>(values ?? []);
@@ -79,7 +75,6 @@ export function Select3d({
   const pickedSet = useMemo(() => new Set(picked), [picked]);
   const selected = useMemo(() => options.find((item) => item.value === current), [options, current]);
   const selectedMany = useMemo(() => options.filter((item) => pickedSet.has(item.value)), [options, pickedSet]);
-  const shown = options;
 
   useEffect(() => {
     if (value != null) setInner(String(value));
@@ -109,35 +104,6 @@ export function Select3d({
     return () => {
       document.removeEventListener("mousedown", onDoc);
       document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
-
-  useLayoutEffect(() => {
-    if (!open) {
-      setMenuStyle(undefined);
-      return;
-    }
-    function place() {
-      const el = triggerRef.current;
-      if (!el) return;
-      const box = el.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - box.bottom;
-      const openUp = spaceBelow < 240 && box.top > spaceBelow;
-      const menuWidth = Math.min(Math.max(box.width, 13 * 16), window.innerWidth - 16);
-      setMenuStyle({
-        left: Math.min(Math.max(8, box.left), window.innerWidth - menuWidth - 8),
-        width: menuWidth,
-        maxHeight: Math.min(20 * 16, Math.max(8 * 16, openUp ? box.top - 16 : spaceBelow - 12)),
-        top: openUp ? undefined : box.bottom + 6,
-        bottom: openUp ? window.innerHeight - box.top + 6 : undefined,
-      });
-    }
-    place();
-    window.addEventListener("scroll", place, true);
-    window.addEventListener("resize", place);
-    return () => {
-      window.removeEventListener("scroll", place, true);
-      window.removeEventListener("resize", place);
     };
   }, [open]);
 
@@ -176,13 +142,13 @@ export function Select3d({
   function onMenuKey(event: ReactKeyboardEvent<HTMLDivElement>) {
     if (event.key === "ArrowDown") {
       event.preventDefault();
-      setActive((i) => Math.min(shown.length - 1, i + 1));
+      setActive((i) => Math.min(options.length - 1, i + 1));
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
       setActive((i) => Math.max(0, i - 1));
     } else if (event.key === "Enter") {
       event.preventDefault();
-      const item = shown[active];
+      const item = options[active];
       if (item) choose(item);
     }
   }
@@ -195,7 +161,7 @@ export function Select3d({
         : `${selectedMany.length} chosen`;
 
   return (
-    <div className={`select-3d${disabled ? " is-disabled" : ""}${multiple ? " is-multi" : ""}`}>
+    <div className={`select-3d${disabled ? " is-disabled" : ""}${multiple ? " is-multi" : ""}${open ? " is-open" : ""}`}>
       {multiple
         ? picked.map((item) => <input key={item} type="hidden" name={name} value={item} />)
         : (
@@ -240,16 +206,13 @@ export function Select3d({
         </span>
         <i aria-hidden />
       </button>
-      {open && menuStyle
-        ? createPortal(
+      {open ? (
             <div
               ref={menuRef}
               id={listId}
               className={`select-3d-menu${multiple ? " is-multi" : ""}`}
               role="listbox"
-              tabIndex={-1}
               aria-label={ariaLabel}
-              style={menuStyle}
               onKeyDown={onMenuKey}
             >
               {multiple ? (
@@ -261,8 +224,8 @@ export function Select3d({
                 </button>
               ) : null}
               <div className="select-3d-options">
-                {shown.length ? (
-                  shown.map((item, index) => (
+                {options.length ? (
+                  options.map((item, index) => (
                     <button
                       key={item.value}
                       type="button"
@@ -285,10 +248,8 @@ export function Select3d({
                   <p className="select-3d-empty">No choices</p>
                 )}
               </div>
-            </div>,
-            document.body,
-          )
-        : null}
+            </div>
+          ) : null}
     </div>
   );
 }
