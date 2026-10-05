@@ -33,7 +33,6 @@ export type ProfileData = {
   familyAbout?: string | null;
   details?: DetailGroup[];
   hope?: HopeItem[];
-  hopeSummary?: string;
   kundali?: { total?: number; max?: number; label?: string } | null;
   shortlisted: boolean;
   own: boolean;
@@ -216,7 +215,6 @@ export function ProfileRedesign(props: ProfileData) {
                 <span className="pv-ico">♡</span>
                 <span>Looking for</span>
               </div>
-              {props.hopeSummary ? <p className="pv-summary pv-hope-summary">{props.hopeSummary}</p> : null}
               <div className="pv-hope">
                 {props.hope.map((item) => (
                   <div key={item.k} className="pv-chip">
