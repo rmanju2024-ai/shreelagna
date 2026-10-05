@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { FieldHelp } from "@/app/app/profiles/field-help";
 import { compareLabel } from "@/lib/profile/form-lists";
@@ -58,6 +58,7 @@ export function HopePicker({
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<string[]>(start);
   const [query, setQuery] = useState("");
+  const rootRef = useRef<HTMLDivElement>(null);
 
   const q = query.trim().toLowerCase();
   const draftSet = useMemo(() => new Set(draft), [draft]);
@@ -129,9 +130,17 @@ export function HopePicker({
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") setOpen(false);
     }
+    function onDoc(e: MouseEvent) {
+      if (rootRef.current?.contains(e.target as Node)) return;
+      apply();
+    }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+    document.addEventListener("mousedown", onDoc);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onDoc);
+    };
+  }, [open, draft]);
 
   const submitted = open ? draft : picked;
   const chips = picked.map((value) =>
@@ -139,7 +148,7 @@ export function HopePicker({
   );
 
   return (
-    <div className={`hope-picker field-3d ${className}${disabled ? " is-disabled" : ""}`}>
+    <div ref={rootRef} className={`hope-picker field-3d ${className}${disabled ? " is-disabled" : ""}${open ? " is-open" : ""}`}>
       <span className="field-3d-label">
         {label}
         {help ? <FieldHelp text={help} /> : null}
@@ -162,63 +171,55 @@ export function HopePicker({
       </div>
       {disabled && disabledHint ? <p className="hope-picker-note">{disabledHint}</p> : null}
       {open ? (
-        <div className="hope-dialog-scrim" role="presentation" onClick={apply}>
-          <div
-            className="hope-dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-label={label}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <p className="hope-dialog-kicker">Several may be chosen</p>
-            <h3>{label}</h3>
-            <p className="hope-dialog-hint">Tick only the ones that matter. Leave the rest unselected.</p>
-            <input
-              type="search"
-              className="hope-dialog-search"
-              placeholder="Find a choice"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            <div className="hope-dialog-quick">
-              {anyValue ? (
-                <button type="button" className={anyOn ? "is-on" : undefined} onClick={chooseAny}>
-                  {anyText}
-                </button>
-              ) : null}
-              <button type="button" onClick={clearDraft}>
-                Clear all
+        <div className="hope-dialog" role="dialog" aria-label={label}>
+          <p className="hope-dialog-kicker">Several may be chosen</p>
+          <h3>{label}</h3>
+          <p className="hope-dialog-hint">Tick only the ones that matter. Leave the rest unselected.</p>
+          <input
+            type="search"
+            className="hope-dialog-search"
+            placeholder="Find a choice"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          <div className="hope-dialog-quick">
+            {anyValue ? (
+              <button type="button" className={anyOn ? "is-on" : undefined} onClick={chooseAny}>
+                {anyText}
               </button>
-            </div>
-            <div className="hope-dialog-list">
-              {anyValue ? (
-              <label className={`hope-dialog-any ${anyOn ? "is-on" : ""}`}>
-                <input type="checkbox" checked={anyOn} onChange={() => toggle(anyValue)} />
-                <span>{anyText}</span>
+            ) : null}
+            <button type="button" onClick={clearDraft}>
+              Clear all
+            </button>
+          </div>
+          <div className="hope-dialog-list">
+            {anyValue ? (
+            <label className={`hope-dialog-any ${anyOn ? "is-on" : ""}`}>
+              <input type="checkbox" checked={anyOn} onChange={() => toggle(anyValue)} />
+              <span>{anyText}</span>
+            </label>
+            ) : null}
+            {shown.map((item) => (
+              <label key={item.value} className={draftSet.has(item.value) ? "is-on" : undefined}>
+                <input
+                  type="checkbox"
+                  checked={draftSet.has(item.value)}
+                  onChange={() => toggle(item.value)}
+                />
+                <span>{item.label}</span>
               </label>
-              ) : null}
-              {shown.map((item) => (
-                <label key={item.value} className={draftSet.has(item.value) ? "is-on" : undefined}>
-                  <input
-                    type="checkbox"
-                    checked={draftSet.has(item.value)}
-                    onChange={() => toggle(item.value)}
-                  />
-                  <span>{item.label}</span>
-                </label>
-              ))}
-              {hiddenCount > 0 ? (
-                <p className="hope-dialog-hint">Type to find {hiddenCount} more choices.</p>
-              ) : null}
-            </div>
-            <div className="hope-dialog-actions">
-              <button type="button" className="hope-dialog-cancel" onClick={() => setOpen(false)}>
-                Cancel
-              </button>
-              <button type="button" className="hope-dialog-done" onClick={apply}>
-                Use these choices
-              </button>
-            </div>
+            ))}
+            {hiddenCount > 0 ? (
+              <p className="hope-dialog-hint">Type to find {hiddenCount} more choices.</p>
+            ) : null}
+          </div>
+          <div className="hope-dialog-actions">
+            <button type="button" className="hope-dialog-cancel" onClick={() => setOpen(false)}>
+              Cancel
+            </button>
+            <button type="button" className="hope-dialog-done" onClick={apply}>
+              Use these choices
+            </button>
           </div>
         </div>
       ) : null}

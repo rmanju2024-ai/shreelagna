@@ -5000,26 +5000,33 @@ a.card-premium:hover,
   gap: 0.45rem;
 }
 
+.hope-picker {
+  position: relative;
+  z-index: 1;
+}
+.hope-picker.is-open {
+  z-index: 40;
+}
+
 .hope-dialog-scrim {
-  position: fixed;
-  inset: 0;
-  z-index: 80;
-  display: grid;
-  place-items: center;
-  padding: 1rem;
-  background: rgba(26, 12, 10, 0.45);
+  display: none;
 }
 
 .hope-dialog {
-  width: min(36rem, 100%);
-  max-height: min(36rem, 88vh);
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 0.35rem);
+  z-index: 50;
+  width: 100%;
+  max-height: min(22rem, 70vh);
   display: flex;
   flex-direction: column;
-  border-radius: 1.3rem;
+  border-radius: 1.05rem;
   border: 1px solid rgba(184, 137, 76, 0.4);
   background: #fffaf2;
-  padding: 1.15rem 1.15rem 1rem;
-  box-shadow: 0 24px 50px rgba(26, 12, 10, 0.28);
+  padding: 0.75rem 0.8rem 0.7rem;
+  box-shadow: 0 16px 32px rgba(26, 12, 10, 0.22);
 }
 
 .hope-dialog-kicker {

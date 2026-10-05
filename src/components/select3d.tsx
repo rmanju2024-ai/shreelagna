@@ -6,12 +6,14 @@ import {
   useDeferredValue,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
   type ChangeEvent,
   type KeyboardEvent as ReactKeyboardEvent,
   type ReactNode,
+  type CSSProperties,
   type SelectHTMLAttributes,
 } from "react";
 import { createPortal } from "react-dom";
@@ -72,6 +74,7 @@ export function Select3d({
   const menuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
+  const [menuStyle, setMenuStyle] = useState<CSSProperties>();
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query);
   const [active, setActive] = useState(0);
@@ -137,6 +140,35 @@ export function Select3d({
     };
   }, [open]);
 
+  useLayoutEffect(() => {
+    if (!open) {
+      setMenuStyle(undefined);
+      return;
+    }
+    function place() {
+      const el = triggerRef.current;
+      if (!el) return;
+      const box = el.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - box.bottom;
+      const openUp = spaceBelow < 240 && box.top > spaceBelow;
+      const menuWidth = Math.min(Math.max(box.width, 13 * 16), window.innerWidth - 16);
+      setMenuStyle({
+        left: Math.min(Math.max(8, box.left), window.innerWidth - menuWidth - 8),
+        width: menuWidth,
+        maxHeight: Math.min(20 * 16, Math.max(8 * 16, openUp ? box.top - 16 : spaceBelow - 12)),
+        top: openUp ? undefined : box.bottom + 6,
+        bottom: openUp ? window.innerHeight - box.top + 6 : undefined,
+      });
+    }
+    place();
+    window.addEventListener("scroll", place, true);
+    window.addEventListener("resize", place);
+    return () => {
+      window.removeEventListener("scroll", place, true);
+      window.removeEventListener("resize", place);
+    };
+  }, [open]);
+
   function emit(next: string) {
     setInner(next);
     onChange?.({
@@ -183,20 +215,6 @@ export function Select3d({
       if (item) choose(item);
     }
   }
-
-  const box = triggerRef.current?.getBoundingClientRect();
-  const spaceBelow = box ? window.innerHeight - box.bottom : 240;
-  const openUp = Boolean(box && spaceBelow < 240 && box.top > spaceBelow);
-  const menuWidth = box ? Math.min(Math.max(box.width, 13 * 16), window.innerWidth - 16) : 240;
-  const menuStyle = box
-    ? {
-        left: Math.min(Math.max(8, box.left), window.innerWidth - menuWidth - 8),
-        width: menuWidth,
-        maxHeight: Math.min(20 * 16, openUp ? box.top - 16 : spaceBelow - 12),
-        top: openUp ? undefined : box.bottom + 6,
-        bottom: openUp ? window.innerHeight - box.top + 6 : undefined,
-      }
-    : undefined;
 
   const multiLabel =
     selectedMany.length === 0
@@ -252,7 +270,7 @@ export function Select3d({
         </span>
         <i aria-hidden />
       </button>
-      {open
+      {open && menuStyle
         ? createPortal(
             <div
               ref={menuRef}

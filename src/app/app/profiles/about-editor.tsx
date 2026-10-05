@@ -28,7 +28,7 @@ export function AboutEditor({
   const initial = aboutPlainText(defaultValue);
   const [count, setCount] = useState(initial.length);
   const short = count > 0 && min > 0 && count < min;
-  const full = count >= max;
+  const full = count > max;
 
   return (
     <div className={`about-editor${locked ? " is-locked" : ""}`}>

@@ -1,7 +1,7 @@
 export const ABOUT_MIN = 80;
 export const ABOUT_MAX = 1200;
 export const ABOUT_HTML_MAX = 8000;
-export const FAMILY_NOTE_MAX = 600;
+export const FAMILY_NOTE_MAX = 1200;
 export const FAMILY_NOTE_HTML_MAX = 8000;
 export const HOPE_NOTE_MAX = 600;
 export const HOPE_NOTE_HTML_MAX = 8000;
