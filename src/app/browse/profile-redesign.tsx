@@ -49,7 +49,7 @@ export type ProfileData = {
 };
 
 export function ProfileRedesign(props: ProfileData) {
-  const [open, setOpen] = useState({ details: true, hope: false, media: false });
+  const [open, setOpen] = useState({ details: true, hope: true, media: false });
   const [shortlistMsg, setShortlistMsg] = useState<string | null>(null);
   const [hero, setHero] = useState(0);
   const photos = props.photoUrls?.length ? props.photoUrls : props.photoUrl ? [props.photoUrl] : [];
@@ -80,7 +80,6 @@ export function ProfileRedesign(props: ProfileData) {
           ) : (
             <div className="pv-photo is-blank">{props.name.slice(0, 1)}</div>
           )}
-          <span className="pv-photo-gem" aria-hidden />
           {photos.length > 1 ? (
             <div className="pv-thumbs">
               {photos.map((src, i) => (
