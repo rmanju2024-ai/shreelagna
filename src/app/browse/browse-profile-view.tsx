@@ -21,6 +21,8 @@ import { after } from "next/server";
 import { redirect } from "next/navigation";
 import { ageFromDob } from "@/lib/profile/completeness";
 import { asStringList, hopeDisplay, hopeValues } from "@/lib/profile/multi-values";
+import { aboutPlainText } from "@/lib/profile/about-html";
+import { maritalLabel } from "@/lib/profile/options";
 
 function nestedName(value: unknown): string | undefined {
   if (Array.isArray(value) && value[0] && typeof value[0] === "object" && "name" in value[0]) {
@@ -271,7 +273,8 @@ export async function BrowseProfileView({
   const dobText = typeof profile.date_of_birth === "string" ? profile.date_of_birth : "";
   const age = dobText ? (ageFromDob(dobText)?.years ?? null) : null;
   const place = [profile.current_city, profile.current_state].filter((v) => typeof v === "string" && v).join(", ");
-  const about = typeof profile.about === "string" ? profile.about : null;
+  const about = aboutPlainText(typeof profile.about === "string" ? profile.about : null) || null;
+  const familyAbout = aboutPlainText(typeof profile.siblings_note === "string" ? profile.siblings_note : null) || null;
   const lastSeen = lastOnlineLine(
     typeof profile.last_seen_at === "string" ? profile.last_seen_at : null,
     asProfileType(profile.profile_type) ?? undefined,
@@ -289,40 +292,54 @@ export async function BrowseProfileView({
     shortlisted = Boolean(shortRow);
   }
 
+  const yesNo = (value: unknown) => {
+    if (value === true || value === "true") return "Yes";
+    if (value === false || value === "false") return "No";
+    return dash(value);
+  };
+
   const details = [
     {
       icon: "✦",
-      title: "Lifestyle",
+      title: "Personal",
       items: [
+        { k: "Full name", v: dash(profile.subject_full_name) },
+        { k: "Surname", v: dash(profile.surname) },
+        { k: "Date of birth", v: dash(profile.date_of_birth) },
+        { k: "Marital status", v: maritalLabel(typeof profile.marital_status === "string" ? profile.marital_status : "") || dash(profile.marital_status) },
         { k: "Height", v: profile.height_cm ? `${profile.height_cm} cm` : "—" },
-        { k: "Diet", v: dash(profile.diet) },
-        { k: "Health", v: dash(profile.health_notes) },
         { k: "Blood group", v: dash(profile.blood_group) },
-        { k: "Hobbies", v: asStringList(profile.hobby_list).join(", ") || "—" },
+        { k: "Diet", v: dash(profile.diet) },
+        { k: "Disability", v: dash(profile.physical_status) },
+        { k: "Health", v: dash(profile.health_notes) },
+        { k: "Hobbies", v: asStringList(profile.hobby_list).join(", ") || dash(profile.hobbies) },
       ],
     },
     {
       icon: "🕉",
-      title: "Faith",
+      title: "Faith & language",
       items: [
         { k: "Religion", v: nestedName(profile.religions) || "—" },
         { k: "Community", v: nestedName(profile.communities) || "—" },
         { k: "Sub-community", v: dash(profile.sub_community) },
         { k: "Gothra", v: dash(profile.gotra) },
+        { k: "Kuladevata", v: dash(profile.kuladevata) },
         { k: "Mother tongue", v: dash(profile.mother_tongue) },
         { k: "Languages", v: asStringList(profile.known_languages).join(", ") || "—" },
       ],
     },
     {
       icon: "◎",
-      title: "Work",
+      title: "Education & work",
       items: [
         { k: "Education", v: dash(profile.qualification) },
         { k: "College", v: dash(profile.college_name) },
         { k: "Occupation", v: dash(profile.occupation) },
-        { k: "Employer", v: dash(profile.employer_name) },
         { k: "Employed in", v: dash(profile.employed_in) },
+        { k: "Employer", v: dash(profile.employer_name) },
         { k: "Income", v: dash(profile.income_band) },
+        { k: "Settle abroad", v: dash(profile.settle_abroad) },
+        { k: "Ambition", v: dash(profile.future_ambition) },
       ],
     },
     {
@@ -330,35 +347,48 @@ export async function BrowseProfileView({
       title: "Family",
       items: [
         { k: "Family type", v: dash(profile.family_type) },
-        { k: "Family status", v: dash(profile.family_status) },
+        { k: "Living standard", v: dash(profile.family_status) },
+        { k: "Family lives in", v: dash(profile.family_location) },
         { k: "Father", v: dash(profile.father_name) },
+        { k: "Father's work", v: dash(profile.father_occupation) },
         { k: "Mother", v: dash(profile.mother_name) },
+        { k: "Mother's work", v: dash(profile.mother_occupation) },
         { k: "Brothers", v: dash(profile.brothers_count) },
+        { k: "Brothers married", v: dash(profile.brothers_married_count) },
         { k: "Sisters", v: dash(profile.sisters_count) },
+        { k: "Sisters married", v: dash(profile.sisters_married_count) },
       ],
     },
     {
       icon: "⌖",
       title: "Place",
       items: [
-        { k: "City", v: dash(profile.current_city) },
-        { k: "State", v: dash(profile.current_state) },
-        { k: "Country", v: dash(profile.current_country) },
-        { k: "Native", v: dash(profile.native_state) },
         { k: "Grew up in", v: dash(profile.grew_up_in) },
-        { k: "Willing to relocate", v: dash(profile.willing_to_relocate) },
+        { k: "Native country", v: dash(profile.native_country) },
+        { k: "Native state", v: dash(profile.native_state) },
+        { k: "Native city", v: dash(profile.native_city) },
+        { k: "Current country", v: dash(profile.current_country) },
+        { k: "Current state", v: dash(profile.current_state) },
+        { k: "Current city", v: dash(profile.current_city) },
+        { k: "Pin code", v: dash(profile.pin_code) },
+        { k: "Citizenship", v: dash(profile.citizenship) },
+        { k: "Living arrangement", v: dash(profile.living_arrangement) },
+        { k: "Willing to relocate", v: yesNo(profile.willing_to_relocate) },
       ],
     },
     {
       icon: "☽",
       title: "Kundali",
       items: [
-        { k: "Rashi", v: dash(profile.rashi) },
-        { k: "Nakshatra", v: dash(profile.nakshatra) },
-        { k: "Lagna", v: dash(profile.lagna) },
-        { k: "Mangalik", v: dash(profile.manglik) },
-        { k: "Gana", v: dash(profile.gana) },
+        { k: "Birth city", v: dash(profile.birth_city) },
         { k: "Birth time", v: dash(profile.birth_time) },
+        { k: "Rashi", v: dash(profile.rashi) },
+        { k: "Lagna", v: dash(profile.lagna) },
+        { k: "Nakshatra", v: dash(profile.nakshatra) },
+        { k: "Nakshatra pada", v: dash(profile.nakshatra_pada) },
+        { k: "Gana", v: dash(profile.gana) },
+        { k: "Yoni", v: dash(profile.yoni_animal) },
+        { k: "Mangalik", v: dash(profile.manglik) },
       ],
     },
   ];
@@ -367,10 +397,19 @@ export async function BrowseProfileView({
     { k: "Age", v: profile.pref_age_min && profile.pref_age_max ? `${profile.pref_age_min}–${profile.pref_age_max}` : "—" },
     { k: "Height", v: profile.pref_height_min && profile.pref_height_max ? `${profile.pref_height_min}–${profile.pref_height_max} cm` : "—" },
     { k: "Marital status", v: hopeDisplay(hopeValues(profile, "pref_maritals"), "Any") },
+    { k: "Languages", v: hopeDisplay(hopeValues(profile, "pref_tongues"), "Any") },
     { k: "Religion", v: hopeDisplay(hopeValues(profile, "pref_religions"), "Any") },
+    { k: "Community", v: hopeDisplay(hopeValues(profile, "pref_communities"), "Any") },
+    { k: "Country", v: hopeDisplay(hopeValues(profile, "pref_countries"), "Any") },
+    { k: "State", v: hopeDisplay(hopeValues(profile, "pref_states"), "Any") },
+    { k: "City", v: hopeDisplay(hopeValues(profile, "pref_cities"), "Any") },
     { k: "Education", v: hopeDisplay(hopeValues(profile, "pref_educations"), "Any") },
     { k: "Occupation", v: hopeDisplay(hopeValues(profile, "pref_occupations"), "Any") },
-    { k: "Location", v: hopeDisplay(hopeValues(profile, "pref_countries"), "Any") },
+    { k: "Employed in", v: hopeDisplay(hopeValues(profile, "pref_employed"), "Any") },
+    { k: "Income", v: hopeDisplay(hopeValues(profile, "pref_incomes"), "Any") },
+    { k: "Diet", v: hopeDisplay(hopeValues(profile, "pref_diets"), "Any") },
+    { k: "Horoscope", v: dash(profile.pref_horoscope) },
+    { k: "Notes", v: aboutPlainText(typeof profile.pref_notes === "string" ? profile.pref_notes : "") || "—" },
   ];
 
   const photoUrls = photos.map((p) => publicMediaUrl(p.storage_path)).filter((url): url is string => Boolean(url));
@@ -391,6 +430,7 @@ export async function BrowseProfileView({
     voiceUrls,
     memberCode,
     about,
+    familyAbout,
     shortlisted,
     own,
     user,

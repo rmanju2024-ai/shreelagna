@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toggleShortlist } from "@/app/app/profiles/actions";
 import { SafetyProfileControl } from "@/app/app/safety/safety-profile-control";
 import { BirdDock, type PeekChatNote } from "@/app/browse/bird-dock";
@@ -23,6 +23,7 @@ export type ProfileData = {
   voiceUrls?: string[];
   memberCode?: string;
   about?: string | null;
+  familyAbout?: string | null;
   details?: DetailGroup[];
   hope?: HopeItem[];
   kundali?: { total?: number; max?: number; label?: string } | null;
@@ -49,11 +50,22 @@ export type ProfileData = {
 };
 
 export function ProfileRedesign(props: ProfileData) {
-  const [open, setOpen] = useState({ details: true, hope: true, media: false });
   const [shortlistMsg, setShortlistMsg] = useState<string | null>(null);
   const [hero, setHero] = useState(0);
+  const [lightbox, setLightbox] = useState<number | null>(null);
   const photos = props.photoUrls?.length ? props.photoUrls : props.photoUrl ? [props.photoUrl] : [];
   const chatUnlocked = props.thread === "sent" || props.thread === "received" || props.thread === "accepted";
+
+  useEffect(() => {
+    if (lightbox === null) return;
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") setLightbox(null);
+      if (event.key === "ArrowRight") setLightbox((i) => (i == null ? i : (i + 1) % photos.length));
+      if (event.key === "ArrowLeft") setLightbox((i) => (i == null ? i : (i - 1 + photos.length) % photos.length));
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [lightbox, photos.length]);
 
   async function handleShortlist(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -73,12 +85,126 @@ export function ProfileRedesign(props: ProfileData) {
       {shortlistMsg ? <div className="pv-toast">{shortlistMsg}</div> : null}
 
       <header className="pv-hero">
-        <div className="pv-photo-stack">
+        <div className="pv-intro">
+          <p className="pv-kicker">{props.memberCode ? `ID ${props.memberCode}` : "Member"}</p>
+          <h1>
+            {props.name}
+            {props.surname ? ` ${props.surname}` : ""}
+          </h1>
+          <p className="pv-meta">{[props.age ? `${props.age} yrs` : null, props.place || null].filter(Boolean).join(" · ")}</p>
+          {props.lastSeen ? <p className="pv-live">{props.lastSeen}</p> : null}
+          {props.kundali?.total != null ? (
+            <p className="pv-match-chip">
+              Kundali {props.kundali.total}/{props.kundali.max ?? 36}
+              {props.kundali.label ? ` · ${props.kundali.label}` : ""}
+            </p>
+          ) : null}
+        </div>
+        {!props.own && props.user ? (
+          <div className="pv-top-actions">
+            <form action={toggleShortlist} onSubmit={handleShortlist}>
+              <input type="hidden" name="profile_id" value={props.id} />
+              <input type="hidden" name="return_to" value={`/browse/${props.id}`} />
+              <button type="submit" className={`pv-short${props.shortlisted ? " is-on" : ""}`}>
+                {props.shortlisted ? "♥ Shortlisted" : "♡ Shortlist"}
+              </button>
+            </form>
+            <SafetyProfileControl profileId={props.id} returnTo={`/browse/${props.id}`} name={props.name} />
+          </div>
+        ) : null}
+      </header>
+
+      <div className="pv-layout">
+        <div className="pv-main">
+          {props.about ? (
+            <section className="pv-panel">
+              <div className="pv-panel-head">
+                <span className="pv-ico">✎</span>
+                <span>About</span>
+              </div>
+              <p className="pv-story">{props.about}</p>
+            </section>
+          ) : null}
+
+          {props.familyAbout ? (
+            <section className="pv-panel">
+              <div className="pv-panel-head">
+                <span className="pv-ico">⌂</span>
+                <span>About the family</span>
+              </div>
+              <p className="pv-story">{props.familyAbout}</p>
+            </section>
+          ) : null}
+
+          {props.details?.length ? (
+            <section className="pv-panel">
+              <div className="pv-panel-head">
+                <span className="pv-ico">▣</span>
+                <span>Profile details</span>
+              </div>
+              <div className="pv-grid">
+                {props.details.map((group) => (
+                  <article key={group.title} className="pv-tile">
+                    <h2>
+                      <i>{group.icon}</i>
+                      {group.title}
+                    </h2>
+                    <ul>
+                      {group.items.map((item) => (
+                        <li key={item.k}>
+                          <span>{item.k}</span>
+                          <strong>{item.v}</strong>
+                        </li>
+                      ))}
+                    </ul>
+                  </article>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          {props.hope?.length ? (
+            <section className="pv-panel">
+              <div className="pv-panel-head">
+                <span className="pv-ico">♡</span>
+                <span>Looking for</span>
+              </div>
+              <div className="pv-hope">
+                {props.hope.map((item) => (
+                  <div key={item.k} className="pv-chip">
+                    <span>{item.k}</span>
+                    <strong>{item.v}</strong>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          <section className={`pv-chat${chatUnlocked ? " is-open" : " is-locked"}`}>
+            <div className="pv-chat-head">
+              <span className="pv-ico">✉</span>
+              <div>
+                <h3>Chat & request</h3>
+                <p>
+                  {chatUnlocked
+                    ? "Write from the bird on the left after sending a request."
+                    : "Send a request from the bird on the left. Chat stays locked until then."}
+                </p>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <aside className="pv-media-col">
+          <p className="pv-media-title">Photos, video & voice</p>
           {photos.length ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={photos[hero] ?? photos[0]} alt={props.name} className="pv-photo" />
+            <button type="button" className="pv-media-hero" onClick={() => setLightbox(hero)} aria-label="Enlarge photo">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={photos[hero] ?? photos[0]} alt={props.name} />
+              <span>View larger</span>
+            </button>
           ) : (
-            <div className="pv-photo is-blank">{props.name.slice(0, 1)}</div>
+            <div className="pv-media-hero is-blank">{props.name.slice(0, 1)}</div>
           )}
           {photos.length > 1 ? (
             <div className="pv-thumbs">
@@ -88,6 +214,7 @@ export function ProfileRedesign(props: ProfileData) {
                   type="button"
                   className={`pv-thumb${hero === i ? " is-on" : ""}`}
                   onClick={() => setHero(i)}
+                  onDoubleClick={() => setLightbox(i)}
                   aria-label={`Photo ${i + 1}`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -96,113 +223,49 @@ export function ProfileRedesign(props: ProfileData) {
               ))}
             </div>
           ) : null}
-        </div>
-
-        <div className="pv-intro">
-          <p className="pv-kicker">{props.memberCode ? `ID ${props.memberCode}` : "Member"}</p>
-          <h1>{props.name}{props.surname ? ` ${props.surname}` : ""}</h1>
-          <p className="pv-meta">
-            {[props.age ? `${props.age} yrs` : null, props.place || null].filter(Boolean).join(" · ")}
-          </p>
-          {props.lastSeen ? <p className="pv-live">{props.lastSeen}</p> : null}
-          {props.about ? <p className="pv-bio">{props.about}</p> : null}
-          {props.kundali?.total != null ? (
-            <p className="pv-match-chip">
-              Kundali {props.kundali.total}/{props.kundali.max ?? 36}
-              {props.kundali.label ? ` · ${props.kundali.label}` : ""}
-            </p>
+          {props.videoUrls?.map((src, i) => (
+            <video key={src} className="pv-video" controls src={src} aria-label={`Video ${i + 1}`} />
+          ))}
+          {props.voiceUrls?.map((src, i) => (
+            <audio key={src} className="pv-audio" controls src={src} aria-label={`Voice ${i + 1}`} />
+          ))}
+          {!photos.length && !props.videoUrls?.length && !props.voiceUrls?.length ? (
+            <p className="pv-media-empty">No photo, video or voice yet.</p>
           ) : null}
-        </div>
-      </header>
+        </aside>
+      </div>
 
-      <section className="pv-panel">
-        <button type="button" className="pv-panel-head" onClick={() => setOpen((s) => ({ ...s, details: !s.details }))}>
-          <span className="pv-ico">▣</span>
-          <span>Profile details</span>
-          <b>{open.details ? "–" : "+"}</b>
-        </button>
-        {open.details && props.details?.length ? (
-          <div className="pv-grid">
-            {props.details.map((group) => (
-              <article key={group.title} className="pv-tile">
-                <h2>
-                  <i>{group.icon}</i>
-                  {group.title}
-                </h2>
-                <ul>
-                  {group.items.map((item) => (
-                    <li key={item.k}>
-                      <span>{item.k}</span>
-                      <strong>{item.v}</strong>
-                    </li>
-                  ))}
-                </ul>
-              </article>
-            ))}
-          </div>
-        ) : null}
-      </section>
-
-      <section className="pv-panel">
-        <button type="button" className="pv-panel-head" onClick={() => setOpen((s) => ({ ...s, hope: !s.hope }))}>
-          <span className="pv-ico">♡</span>
-          <span>Looking for</span>
-          <b>{open.hope ? "–" : "+"}</b>
-        </button>
-        {open.hope && props.hope?.length ? (
-          <div className="pv-hope">
-            {props.hope.map((item) => (
-              <div key={item.k} className="pv-chip">
-                <span>{item.k}</span>
-                <strong>{item.v}</strong>
-              </div>
-            ))}
-          </div>
-        ) : null}
-      </section>
-
-      {(photos.length > 1 || props.videoUrls?.length || props.voiceUrls?.length) ? (
-        <section className="pv-panel">
-          <button type="button" className="pv-panel-head" onClick={() => setOpen((s) => ({ ...s, media: !s.media }))}>
-            <span className="pv-ico">▶</span>
-            <span>Photos, video & voice</span>
-            <b>{open.media ? "–" : "+"}</b>
+      {lightbox !== null && photos[lightbox] ? (
+        <div className="pv-lightbox" role="dialog" aria-label="Enlarged photo" onClick={() => setLightbox(null)}>
+          <button
+            type="button"
+            className="pv-lightbox-nav"
+            onClick={(e) => {
+              e.stopPropagation();
+              setLightbox((i) => (i == null ? 0 : (i - 1 + photos.length) % photos.length));
+            }}
+            aria-label="Previous photo"
+          >
+            ‹
           </button>
-          {open.media ? (
-            <div className="pv-media">
-              {props.videoUrls?.map((src, i) => (
-                <video key={src} className="pv-video" controls src={src} aria-label={`Video ${i + 1}`} />
-              ))}
-              {props.voiceUrls?.map((src, i) => (
-                <audio key={src} className="pv-audio" controls src={src} aria-label={`Voice ${i + 1}`} />
-              ))}
-            </div>
-          ) : null}
-        </section>
-      ) : null}
-
-      {!props.own && props.user ? (
-        <section className="pv-actions">
-          <form action={toggleShortlist} onSubmit={handleShortlist}>
-            <input type="hidden" name="profile_id" value={props.id} />
-            <input type="hidden" name="return_to" value={`/browse/${props.id}`} />
-            <button type="submit" className={`pv-short${props.shortlisted ? " is-on" : ""}`}>
-              {props.shortlisted ? "♥ Shortlisted" : "♡ Shortlist"}
-            </button>
-          </form>
-          <SafetyProfileControl profileId={props.id} returnTo={`/browse/${props.id}`} name={props.name} />
-        </section>
-      ) : null}
-
-      <section className={`pv-chat${chatUnlocked ? " is-open" : " is-locked"}`}>
-        <div className="pv-chat-head">
-          <span className="pv-ico">✉</span>
-          <div>
-            <h3>Chat</h3>
-            <p>{chatUnlocked ? "You can write after a request is sent." : "Chat stays locked until you send a request."}</p>
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={photos[lightbox]} alt={`${props.name} photo ${lightbox + 1}`} onClick={(e) => e.stopPropagation()} />
+          <button
+            type="button"
+            className="pv-lightbox-nav"
+            onClick={(e) => {
+              e.stopPropagation();
+              setLightbox((i) => (i == null ? 0 : (i + 1) % photos.length));
+            }}
+            aria-label="Next photo"
+          >
+            ›
+          </button>
+          <button type="button" className="pv-lightbox-close" onClick={() => setLightbox(null)} aria-label="Close">
+            Close
+          </button>
         </div>
-      </section>
+      ) : null}
 
       {!props.own && props.user ? (
         <BirdDock
