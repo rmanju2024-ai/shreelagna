@@ -484,7 +484,7 @@ export function BirdDock({
         </span>
 
         {localThread === "none" && canSend ? (
-          <form action={sendInterest} onSubmit={onSpark}>
+          <form onSubmit={onSpark}>
             <input type="hidden" name="to_profile_id" value={profileId} />
             <button type="submit" className="bird-dock-cta">
               {perchLabel}
@@ -518,7 +518,7 @@ export function BirdDock({
         ) : null}
 
         {localThread === "closed" && canSend ? (
-          <form action={sendInterest} onSubmit={onSpark}>
+          <form onSubmit={onSpark}>
             <input type="hidden" name="to_profile_id" value={profileId} />
             <button type="submit" className="bird-dock-cta">
               {perchLabel}

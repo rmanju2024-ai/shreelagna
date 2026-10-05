@@ -679,7 +679,7 @@ export async function sendInterest(formData: FormData): Promise<{ ok: boolean; i
   if (inserted.error && !inserted.error.message.toLowerCase().includes("duplicate")) {
     return { ok: false, error: "could_not_send" };
   }
-  const interestId = typeof inserted.data?.id === "string" ? inserted.data.id : open?.id ?? null;
+  const interestId = typeof inserted.data?.id === "string" ? inserted.data.id : null;
   const [a, b] = mine.id < toId ? [mine.id, toId] : [toId, mine.id];
   void supabase.from("threads").insert({ profile_a: a, profile_b: b });
 
