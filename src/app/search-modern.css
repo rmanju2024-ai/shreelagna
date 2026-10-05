@@ -354,6 +354,12 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
 .list-card-photo { flex: none; width: 3.6rem; height: 3.6rem; border-radius: 50%; overflow: hidden; background: #f3e2c8; display: grid; place-items: center; font-size: 1.4rem; }
 .list-card-photo img { width: 100%; height: 100%; object-fit: cover; }
 .list-card-copy { display: grid; min-width: 0; }
+.list-card-copy strong,
+.list-card-copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .list-card-copy small { color: #5b4a43; }
 .list-card-btn { min-height: 2.4rem; padding: 0 1rem; border-radius: 999px; font-weight: 800; cursor: pointer; color: #7c2d12; background: #fff; border: 1.5px solid rgb(184 137 76 / 55%); }
 

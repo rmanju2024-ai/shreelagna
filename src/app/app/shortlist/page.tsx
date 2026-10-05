@@ -4,7 +4,8 @@ import { BackToAccount } from "@/components/back-to-account";
 import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { publicMediaUrl } from "@/lib/match/inbox-card";
-import { displayFirstName } from "@/lib/profile/options";
+import { yearsFromDob } from "@/lib/profile/completeness";
+import { displayFirstName, maritalLabel } from "@/lib/profile/options";
 import { createServiceClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -24,7 +25,9 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
   const ids = (saved ?? []).map((row) => row.shortlisted_profile_id as string);
   const [{ data: profiles }, { data: photos }] = ids.length
     ? await Promise.all([
-        db.from("profiles").select("id, subject_full_name, status, current_city, current_state, occupation").in("id", ids),
+        db.from("profiles").select(
+          "id, subject_full_name, status, current_city, current_state, current_country, occupation, date_of_birth, height_cm, qualification, mother_tongue, marital_status, employed_in",
+        ).in("id", ids),
         db.from("media").select("profile_id, storage_path, is_primary").in("profile_id", ids).eq("kind", "photo").order("created_at"),
       ])
     : [{ data: [] }, { data: [] }];
@@ -52,6 +55,20 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
               const p = byId.get(id)!;
               const photo = publicMediaUrl(photoOf.get(id));
               const name = displayFirstName(String(p.subject_full_name ?? "Member"));
+              const age = typeof p.date_of_birth === "string" ? yearsFromDob(p.date_of_birth) : null;
+              const place = [p.current_city, p.current_state, p.current_country].filter(Boolean).join(", ");
+              const marital = maritalLabel(typeof p.marital_status === "string" ? p.marital_status : "") || "";
+              const lineOne = [
+                age != null ? `${age} yrs` : null,
+                p.height_cm ? `${p.height_cm} cm` : null,
+                place || null,
+                marital || null,
+              ]
+                .filter(Boolean)
+                .join(" · ");
+              const lineTwo = [p.occupation, p.qualification, p.employed_in, p.mother_tongue]
+                .filter((bit) => typeof bit === "string" && bit.trim())
+                .join(" · ");
               return (
                 <li key={id} className="list-card">
                   <Link href={`/browse/${id}`} className="list-card-main">
@@ -65,8 +82,8 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
                     </span>
                     <span className="list-card-copy">
                       <strong>{name}</strong>
-                      <small>{[p.current_city, p.current_state].filter(Boolean).join(", ") || "India"}</small>
-                      {p.occupation ? <small>{String(p.occupation)}</small> : null}
+                      {lineOne ? <small>{lineOne}</small> : null}
+                      {lineTwo ? <small>{lineTwo}</small> : null}
                     </span>
                   </Link>
                   <form action={toggleShortlist}>
