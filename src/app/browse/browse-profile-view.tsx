@@ -16,7 +16,6 @@ import { matchSelfFromProfile } from "@/lib/profile/match-compare";
 import { canEditMemberProfile } from "@/lib/desk/access";
 import { ProfileHero, type ProfileHeroData } from "@/app/browse/profile-hero";
 import { SafetyFlash } from "@/app/browse/safety-flash";
-import { ageFromDob } from "@/lib/profile/completeness";
 import { canViewProfile, isPublicProfileStatus, type ProfileType } from "@/lib/profile/visibility";
 import { complimentaryPaidProfileAccess, pairPlanLive } from "@/lib/membership/access";
 import { loadInterestQuota, loadMembership } from "@/lib/membership/load";
@@ -337,18 +336,19 @@ export async function BrowseProfileView({
     typeof profile.subject_mobile === "string" && profile.subject_mobile.trim() ? profile.subject_mobile.trim() : "—";
   const email = typeof owner?.email === "string" && owner.email.trim() ? owner.email.trim() : "—";
 
-  const dobText = typeof profile.date_of_birth === "string" ? profile.date_of_birth : "";
+  const { data: shortRow } =
+    !own && mine
+      ? await db
+          .from("profile_shortlists")
+          .select("owner_profile_id")
+          .eq("owner_profile_id", String(mine.id))
+          .eq("shortlisted_profile_id", id)
+          .maybeSingle()
+      : { data: null };
   const heroData: ProfileHeroData = {
     id: String(profile.id),
     name: displayFirstName(typeof profile.subject_full_name === "string" ? profile.subject_full_name : "Member"),
-    photoUrl: publicMediaUrl(photos[0]?.storage_path),
-    age: dobText ? (ageFromDob(dobText)?.years ?? null) : null,
-    place: [profile.current_city, profile.current_state].filter((v) => typeof v === "string" && v).join(", "),
-    work: typeof profile.occupation === "string" ? profile.occupation : "",
-    faith: [religionName, communityName].filter(Boolean).join(" · "),
-    lastSeen: hideLastSeen ? null : lastOnlineLine(typeof profile.last_seen_at === "string" ? profile.last_seen_at : null, asProfileType(profile.profile_type) ?? undefined),
-    kundali: kundali ? `${kundali.total}/${kundali.max}` : null,
-    memberCode,
+    shortlisted: Boolean(shortRow),
   };
 
   return (

@@ -339,3 +339,20 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
 .safety-flash { margin: 0 0 0.8rem; padding: 0.75rem 1rem; border-radius: 1rem; font-weight: 800; background: #fff; color: #14532d; border: 2px solid #4ade80; }
 .safety-flash.is-warn { color: #7f1d1d; border-color: #f87171; }
 @media (max-width: 560px) { .ph-main { flex-direction: column; text-align: center; } .ph-chips { justify-content: center; } .ph-actions .safety-profile-control { margin-left: 0; } }
+
+/* Slim profile action bar (replaces the duplicated banner) */
+.ph-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; margin: 0 0 0.9rem; padding: 0.6rem 0.8rem; border-radius: 999px; background: rgb(255 253 248 / 96%); box-shadow: 0 14px 30px -20px rgb(63 14 13 / 60%); }
+.ph-bar .ph-back { color: #3f0e0d; background: #f3e2c8; }
+.ph-bar .ph-ghost, .ph-bar .safety-btn { color: #3f0e0d; background: #fff; border-color: rgb(184 137 76 / 55%); backdrop-filter: none; }
+.ph-primary.is-on { background: linear-gradient(135deg, #7c2d12, #3f0e0d); }
+.ph-bar .safety-profile-control { margin: 0 0 0 auto; }
+.portrait-peek-modal .ph-back { display: none; }
+@media (max-width: 560px) { .ph-bar { border-radius: 1.4rem; } .ph-bar .safety-profile-control { margin-left: 0; } }
+.list-cards { list-style: none; margin: 0.6rem 0 0; padding: 0; display: grid; gap: 0.6rem; }
+.list-card { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; padding: 0.6rem 0.8rem; border-radius: 1.2rem; background: #fff; color: #3f0e0d; box-shadow: 0 10px 24px -18px rgb(63 14 13 / 60%); }
+.list-card-main { display: flex; align-items: center; gap: 0.8rem; min-width: 0; color: inherit; text-decoration: none; flex: 1; }
+.list-card-photo { flex: none; width: 3.6rem; height: 3.6rem; border-radius: 50%; overflow: hidden; background: #f3e2c8; display: grid; place-items: center; font-size: 1.4rem; }
+.list-card-photo img { width: 100%; height: 100%; object-fit: cover; }
+.list-card-copy { display: grid; min-width: 0; }
+.list-card-copy small { color: #5b4a43; }
+.list-card-btn { min-height: 2.4rem; padding: 0 1rem; border-radius: 999px; font-weight: 800; cursor: pointer; color: #7c2d12; background: #fff; border: 1.5px solid rgb(184 137 76 / 55%); }

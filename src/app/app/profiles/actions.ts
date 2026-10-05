@@ -582,20 +582,21 @@ export async function toggleShortlist(formData: FormData) {
   const { supabase, me } = await requireMember();
   const profileId = String(formData.get("profile_id") ?? "");
   const returnTo = String(formData.get("return_to") ?? "/browse");
+  const flag = (code: string) => `${returnTo}${returnTo.includes("?") ? "&" : "?"}safety=${code}`;
   if (!profileId || !me.active_profile_id || profileId === me.active_profile_id) redirect("/browse");
-  const { data: existing } = await supabase
+  const db = createServiceClient() ?? supabase;
+  const { data: existing } = await db
     .from("profile_shortlists")
     .select("owner_profile_id")
     .eq("owner_profile_id", me.active_profile_id)
     .eq("shortlisted_profile_id", profileId)
     .maybeSingle();
-  if (existing) {
-    await supabase.from("profile_shortlists").delete().eq("owner_profile_id", me.active_profile_id).eq("shortlisted_profile_id", profileId);
-  } else {
-    await supabase.from("profile_shortlists").insert({ owner_profile_id: me.active_profile_id, shortlisted_profile_id: profileId });
-  }
+  const result = existing
+    ? await db.from("profile_shortlists").delete().eq("owner_profile_id", me.active_profile_id).eq("shortlisted_profile_id", profileId)
+    : await db.from("profile_shortlists").insert({ owner_profile_id: me.active_profile_id, shortlisted_profile_id: profileId });
   revalidatePath("/app/shortlist");
-  redirect(returnTo);
+  if (result.error) redirect(flag("shortlist_error"));
+  redirect(flag(existing ? "unshortlisted" : "shortlisted"));
 }
 
 export async function sendInterest(formData: FormData) {
