@@ -39,28 +39,41 @@ export default async function PlansPage({
 
   return (
     <PageShell><BackToAccount />
-      <section className="pl">
-        <div className={`pl-status is-${access.kind}`}>
-          <div className="pl-status-main">
-            <span className="pl-badge">{access.live ? "Your plan" : "No plan"}</span>
-            <h1>{access.label}</h1>
-            <p>
-              {access.live && access.until
-                ? `Until ${formatIstDate(access.until)}${access.daysLeft ? ` · ${access.daysLeft} days left` : ""}`
-                : access.live
-                  ? "Unlimited access"
-                  : "Search stays open. Sending interest or viewing contacts needs a plan."}
-            </p>
+      <section className="plans-stage">
+        <div className="plans-header">
+          <p className="browse-kicker">Membership</p>
+          <h1>Plans</h1>
+          <p className="plans-intro">Welcome gift on joining. Paid cover thereafter. Chat after accept.</p>
+        </div>
+
+        <div className={`plans-status is-${access.kind}`}>
+          <div>
+            <span className="plans-label">{access.live ? "Current plan" : "No plan"}</span>
+            <h2>{access.label}</h2>
+            {access.until ? (
+              <p>
+                Until {formatIstDate(access.until)}
+                {access.daysLeft ? ` · ${access.daysLeft}d left` : ""}
+              </p>
+            ) : null}
+            {access.live && quota.limit !== null ? (
+              <p>Used {quota.used} · {quota.left ?? 0} pending</p>
+            ) : access.live ? (
+              <p>Unlimited</p>
+            ) : (
+              <p>Search remains open. Interest or contact view needs a plan.</p>
+            )}
           </div>
-          {access.live ? (
-            <div className="pl-meter" aria-label="Interests used">
-              <b>{quota.limit === null ? "∞" : quota.left ?? 0}</b>
-              <small>{quota.limit === null ? "unlimited" : `of ${quota.limit} left`}</small>
+          {access.live && quota.limit !== null ? (
+            <div className="plans-meter">
+              <b>{quota.left ?? 0}</b>
+              <small>left</small>
             </div>
           ) : null}
         </div>
+
         {pending || requested || error ? (
-          <p className={`pl-note${error ? " is-warn" : ""}`}>
+          <p className={`plans-msg${error ? " is-error" : ""}`}>
             {error
               ? "Could not save your request. Please try again."
               : pending
@@ -69,32 +82,49 @@ export default async function PlansPage({
           </p>
         ) : null}
 
-        <ul className="pl-grid">
+        <div className="plans-welcome-banner">
+          <div>
+            <h3>🎁 Welcome offer</h3>
+            <p>{WELCOME_INTEREST_LIMIT} free interests or views for your first 2 months on any plan. Chat opens after both of you send interest and accept.</p>
+          </div>
+        </div>
+
+        <ul className="plans-grid">
+          <li className="plans-card is-welcome">
+            <span className="plans-mark">{access.kind === "welcome" ? "Active" : "Automatic"}</span>
+            <p className="plans-months">2 months</p>
+            <h2>Welcome</h2>
+            <p className="plans-price">Free <small>from joining</small></p>
+            <p className="plans-desc">Applied automatically.</p>
+            <ul className="plans-benefits">
+              <li>✔ {WELCOME_INTEREST_LIMIT} interests or views</li>
+              <li>✔ Chat after accept</li>
+            </ul>
+            <p className="plans-status-badge">{access.kind === "welcome" ? "Live now" : "Completed"}</p>
+          </li>
+
           {catalog.map((plan) => {
             const on = access.planCode === plan.code;
             const asked = pending?.code === plan.code;
             return (
-              <li key={plan.code} className={`pl-card${plan.featured ? " is-featured" : ""}${on ? " is-on" : ""}`}>
-                {plan.featured ? <span className="pl-ribbon">★ Recommended</span> : null}
-                <p className="pl-months">{plan.months} months</p>
+              <li key={plan.code} className={`plans-card${plan.featured ? " is-featured" : ""}${on ? " is-active" : ""}`}>
+                {plan.featured ? <span className="plans-mark">Recommended</span> : null}
+                <p className="plans-months">{plan.months} months</p>
                 <h2>{plan.name}</h2>
-                <p className="pl-price">
-                  {formatInr(plan.priceInr)}
-                  <small> indicative</small>
-                </p>
-                <p className="pl-tag">{plan.tagline}</p>
-                <ul className="pl-perks">
+                <p className="plans-price">{formatInr(plan.priceInr)} <small>indicative</small></p>
+                <p className="plans-desc">{plan.tagline}</p>
+                <ul className="plans-benefits">
                   <li>✔ {plan.interestLimit} interests or views</li>
                   <li>✔ Chat after accept</li>
                 </ul>
                 {house ? (
-                  <p className="pl-tag">Desk already has house access.</p>
+                  <p className="plans-note">Desk already has house access.</p>
                 ) : on ? (
-                  <p className="pl-live">● This plan is live</p>
+                  <p className="plans-status-badge">This plan is live</p>
                 ) : (
                   <form action={requestPlan}>
                     <input type="hidden" name="plan" value={plan.code} />
-                    <button type="submit" className="pl-cta">
+                    <button type="submit" className={`plans-btn${plan.featured ? " is-primary" : ""}`}>
                       {asked ? "Requested ✓" : access.kind === "paid" ? `Upgrade to ${plan.name}` : `Choose ${plan.name}`}
                     </button>
                   </form>
@@ -103,7 +133,6 @@ export default async function PlansPage({
             );
           })}
         </ul>
-        <p className="pl-foot">Welcome gift: {WELCOME_INTEREST_LIMIT} free interests or views for your first 2 months. Chat opens after a match is accepted.</p>
       </section>
     </PageShell>
   );

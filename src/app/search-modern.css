@@ -384,3 +384,42 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
 .pl-live { margin: 0; font-weight: 900; color: #15803d; }
 .pl-foot { margin: 0; text-align: center; font-size: 0.82rem; font-weight: 700; color: #fff; text-shadow: 0 1px 6px rgb(0 0 0 / 55%); }
 @media (max-width: 520px) { .pl-status { flex-direction: column; align-items: flex-start; } }
+
+/* Plans: restored card grid + welcome explanation + usage meter */
+.plans-stage { max-width: 64rem; margin: 0 auto; padding: 0 0 2rem; }
+.plans-header { text-align: center; margin-bottom: 1.2rem; }
+.plans-header .browse-kicker { margin: 0; }
+.plans-header h1 { margin: 0.3rem 0 0.5rem; font-size: clamp(1.8rem, 5vw, 2.6rem); }
+.plans-intro { margin: 0; color: var(--muted); font-size: 0.95rem; }
+
+.plans-status { display: flex; align-items: center; justify-content: space-between; gap: 1.2rem; margin: 0 0.6rem 1rem; padding: 1rem 1.3rem; border-radius: 1.5rem; color: #fff8e7; background: linear-gradient(135deg, #7c2d12, #c2415a 70%, #e8b84a); box-shadow: 0 20px 40px -24px rgb(63 14 13 / 70%); }
+.plans-label { display: inline-block; padding: 0.2rem 0.8rem; border-radius: 999px; font-size: 0.7rem; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; color: #3f0e0d; background: #ffe9a8; margin-bottom: 0.35rem; }
+.plans-status h2 { margin: 0; font-size: 1.5rem; color: #fff8e7; }
+.plans-status p { margin: 0.2rem 0 0; color: #ffe9c7; font-size: 0.9rem; }
+.plans-meter { flex: none; width: 5rem; height: 5rem; border-radius: 50%; background: rgb(255 255 255 / 18%); border: 2px solid rgb(255 255 255 / 55%); display: grid; place-items: center; text-align: center; }
+.plans-meter b { font-size: 1.7rem; font-weight: 900; color: #fff8e7; }
+.plans-meter small { font-size: 0.7rem; font-weight: 800; color: #ffe9c7; }
+
+.plans-msg { margin: 0 0.6rem 1rem; padding: 0.6rem 1rem; border-radius: 999px; font-weight: 800; background: #fff; color: #14532d; border: 2px solid #4ade80; }
+.plans-msg.is-error { color: #7f1d1d; border-color: #f87171; }
+
+.plans-welcome-banner { margin: 0 0.6rem 1.2rem; padding: 1rem 1.3rem; border-radius: 1.5rem; background: rgb(255 248 231 / 85%); border: 1.5px solid rgb(184 137 76 / 40%); }
+.plans-welcome-banner h3 { margin: 0 0 0.4rem; font-size: 1.05rem; color: #3f0e0d; }
+.plans-welcome-banner p { margin: 0; color: #5b4a43; font-size: 0.92rem; line-height: 1.5; }
+
+.plans-grid { list-style: none; margin: 0 0.6rem; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 0.9rem; }
+.plans-card { position: relative; padding: 1.2rem; border-radius: 1.4rem; background: #fff; color: #3f0e0d; border: 1.5px solid rgb(184 137 76 / 40%); box-shadow: 0 16px 30px -22px rgb(63 14 13 / 60%); display: grid; gap: 0.35rem; align-content: start; }
+.plans-card.is-featured { border-color: #c2415a; box-shadow: 0 22px 40px -22px rgb(194 65 90 / 70%); }
+.plans-card.is-active { outline: 3px solid #4ade80; }
+.plans-mark { position: absolute; top: -0.65rem; right: 0.85rem; padding: 0.15rem 0.75rem; border-radius: 999px; font-size: 0.68rem; font-weight: 900; letter-spacing: 0.05em; color: #fff; background: linear-gradient(135deg, #c2415a, #7c2d12); }
+.plans-months { margin: 0; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #9a3412; }
+.plans-card h2 { margin: 0; font-size: 1.3rem; color: #3f0e0d; }
+.plans-price { margin: 0; font-size: 1.6rem; font-weight: 900; color: #7c2d12; }
+.plans-price small { font-size: 0.65rem; font-weight: 700; color: #5b4a43; }
+.plans-desc { margin: 0; font-size: 0.85rem; color: #5b4a43; }
+.plans-benefits { list-style: none; margin: 0.4rem 0 0.6rem; padding: 0; display: grid; gap: 0.25rem; font-size: 0.86rem; font-weight: 700; }
+.plans-note { margin: 0; font-size: 0.8rem; color: #7c2d12; }
+.plans-status-badge { margin: 0; font-weight: 900; font-size: 0.82rem; color: #15803d; }
+.plans-btn { width: 100%; min-height: 2.7rem; border: 0; border-radius: 999px; font-weight: 900; font-size: 0.88rem; cursor: pointer; color: #3f0e0d; background: rgb(255 255 255 / 0%); border: 1.5px solid rgb(184 137 76 / 55%); }
+.plans-btn:hover { background: rgb(184 137 76 / 12%); }
+.plans-btn.is-primary { color: #fff; background: linear-gradient(135deg, #c2415a, #7c2d12); border: 0; }
