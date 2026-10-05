@@ -13,7 +13,12 @@ function pathMatches(pathname: string, href: string, tab: string | null) {
   if (href === "/app/settings") return pathname === "/app/settings";
   if (href === "/app/plans") return pathname === "/app/plans" || pathname.startsWith("/app/plans/");
   if (href === "/app") {
-    return pathname === "/app" || pathname.startsWith("/app/profiles");
+    return (
+      pathname === "/app" ||
+      pathname.startsWith("/app/profiles") ||
+      pathname === "/app/account" ||
+      pathname.startsWith("/app/account/")
+    );
   }
   return pathname === href || pathname.startsWith(`${href}/`);
 }
@@ -169,10 +174,8 @@ export function HeaderNav({
     { href: "/contact", label: "Help", icon: "help" },
   ];
   const desk: NavItem = { href: "/desk", label: "Desk", icon: "staff" };
-  const accountHub: NavItem = { href: "/app/account", label: "Account", icon: "settings" };
   const registerHere = pathMatches(pathname, "/login", tab);
   const moreOn = more.some((item) => pathMatches(pathname, item.href, tab));
-  const accountOn = pathMatches(pathname, accountHub.href, tab);
 
   return (
     <nav aria-label="Primary" className={`site-nav${overlay ? " is-overlay" : ""}`}>
@@ -189,7 +192,13 @@ export function HeaderNav({
             <span className="nav-3d-label">Sign in</span>
           </Link>
         )}
-        {user ? <NavChip item={{ href: "/app", label: "Profile", icon: "profile" }} overlay={overlay} current={pathMatches(pathname, "/app", tab)} /> : null}
+        {user ? (
+          <NavChip
+            item={{ href: "/app", label: "Account", icon: "profile" }}
+            overlay={overlay}
+            current={pathMatches(pathname, "/app", tab)}
+          />
+        ) : null}
         {staff ? <NavChip item={desk} overlay={overlay} current={pathMatches(pathname, desk.href, tab)} /> : null}
         <NavGroup
           label="More"
@@ -198,7 +207,6 @@ export function HeaderNav({
           current={moreOn}
         >
           {more.map((item) => <MenuLink key={item.href} item={item} current={pathMatches(pathname, item.href, tab)} />)}
-          {user ? <MenuLink item={accountHub} current={accountOn} /> : null}
           {user ? <SignOutButton className="nav-menu-item" icon /> : null}
         </NavGroup>
       </div>

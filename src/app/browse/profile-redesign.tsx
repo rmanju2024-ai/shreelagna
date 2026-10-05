@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { revealContact, saveShortlist } from "@/app/app/profiles/actions";
 import { SafetyProfileControl } from "@/app/app/safety/safety-profile-control";
@@ -252,6 +253,7 @@ function PlanLock({ on, children }: { on: boolean; children: React.ReactNode }) 
 export function ProfileRedesign(props: ProfileData) {
   const [shortlistMsg, setShortlistMsg] = useState<string | null>(null);
   const [listed, setListed] = useState(props.shortlisted);
+  const [mounted, setMounted] = useState(false);
   const shortlistGen = useRef(0);
   const toastTimer = useRef(0);
   const [hero, setHero] = useState(0);
@@ -274,6 +276,10 @@ export function ProfileRedesign(props: ProfileData) {
       chat={lightbox === null ? props.chat : undefined}
     />
   ) : null;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const code = new URLSearchParams(window.location.search).get("safety");
@@ -556,34 +562,62 @@ export function ProfileRedesign(props: ProfileData) {
         </aside>
       </div>
 
-      {lightbox !== null && visiblePhotos[lightbox] ? (
-        <div className="pv-lightbox" role="dialog" aria-label="Enlarged photo">
-          <button
-            type="button"
-            className="pv-lightbox-nav"
-            onClick={() => setLightbox((i) => (i == null ? 0 : (i - 1 + visiblePhotos.length) % visiblePhotos.length))}
-            aria-label="Previous photo"
-          >
-            ‹
-          </button>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={visiblePhotos[lightbox]} alt={`${props.name} photo ${lightbox + 1}`} />
-          <button
-            type="button"
-            className="pv-lightbox-nav"
-            onClick={() => setLightbox((i) => (i == null ? 0 : (i + 1) % visiblePhotos.length))}
-            aria-label="Next photo"
-          >
-            ›
-          </button>
-          <button type="button" className="pv-lightbox-close" onClick={() => setLightbox(null)} aria-label="Close">
-            Close
-          </button>
-          <div className="pv-lightbox-spark" onClick={(e) => e.stopPropagation()}>
-            {spark}
-          </div>
-        </div>
-      ) : null}
+      {mounted && lightbox !== null && visiblePhotos[lightbox]
+        ? createPortal(
+            <div
+              className="pv-lightbox"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Enlarged photo"
+              onClick={() => setLightbox(null)}
+            >
+              <button
+                type="button"
+                className="pv-lightbox-nav"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setLightbox((i) => (i == null ? 0 : (i - 1 + visiblePhotos.length) % visiblePhotos.length));
+                }}
+                aria-label="Previous photo"
+              >
+                ‹
+              </button>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={visiblePhotos[lightbox]}
+                alt={`${props.name} photo ${lightbox + 1}`}
+                onClick={(event) => event.stopPropagation()}
+              />
+              <button
+                type="button"
+                className="pv-lightbox-nav"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setLightbox((i) => (i == null ? 0 : (i + 1) % visiblePhotos.length));
+                }}
+                aria-label="Next photo"
+              >
+                ›
+              </button>
+              <button
+                type="button"
+                className="pv-lightbox-close"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setLightbox(null);
+                }}
+              >
+                Close
+              </button>
+              {spark ? (
+                <div className="pv-lightbox-spark" onClick={(event) => event.stopPropagation()}>
+                  {spark}
+                </div>
+              ) : null}
+            </div>,
+            document.body,
+          )
+        : null}
     </div>
   );
 }

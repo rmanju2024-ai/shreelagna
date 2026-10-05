@@ -44,9 +44,10 @@ describe("mobile primary navigation", () => {
     const menu = screen.getByRole("menu");
     expect(menu.parentElement).toBe(document.body);
     expect(menu.className).toContain("is-mobile-sheet");
-    for (const label of ["About", "Help", "Account", "Sign out"]) {
+    for (const label of ["About", "Help", "Sign out"]) {
       expect(screen.getByText(label)).toBeTruthy();
     }
+    expect(menu.textContent).not.toContain("Account");
   });
 
   it("closes the More sheet with Escape or an outside tap", () => {
@@ -65,7 +66,7 @@ describe("mobile primary navigation", () => {
   it("keeps every member destination available (Likes and Alerts live inside Inbox)", () => {
     render(<HeaderNav overlay={false} user staff />);
     const nav = screen.getByRole("navigation", { name: "Primary" });
-    for (const label of ["Home", "Discover", "Inbox", "Profile", "Desk", "More"]) {
+    for (const label of ["Home", "Discover", "Inbox", "Account", "Desk", "More"]) {
       expect(nav.textContent).toContain(label);
     }
   });
