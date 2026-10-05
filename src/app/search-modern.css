@@ -813,6 +813,9 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
   overflow: hidden;
 }
 .pv-shell .pv-match-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
   flex-shrink: 0;
   font-size: 0.62rem;
   letter-spacing: 0.12em;
@@ -820,6 +823,18 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
   font-weight: 800;
   color: #bbf7d0;
   white-space: nowrap;
+}
+.pv-shell .pv-couple {
+  width: 1.05rem;
+  height: 0.8rem;
+  display: block;
+  color: #fecdd3;
+  flex-shrink: 0;
+}
+.pv-shell .pv-ico .pv-couple {
+  width: 0.95rem;
+  height: 0.72rem;
+  color: #9a3412;
 }
 .pv-shell .pv-match-mask {
   overflow: hidden;

@@ -124,7 +124,20 @@ function RichLine({ text }: { text: string }) {
   );
 }
 
-function ContactPanel({
+function CoupleMark({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 18" aria-hidden>
+      <circle cx="7.2" cy="5.2" r="2.35" fill="currentColor" />
+      <path d="M3.2 16.2 C3.2 11.8 5 9.6 7.2 9.6 C9.4 9.6 11.2 11.8 11.2 16.2 Z" fill="currentColor" />
+      <circle cx="16.8" cy="5.2" r="2.35" fill="currentColor" />
+      <path d="M12.8 16.2 C12.8 11.8 14.6 9.6 16.8 9.6 C19 9.6 20.8 11.8 20.8 16.2 Z" fill="currentColor" />
+      <path
+        d="M12 7.1 C12 5.7 13.15 5.15 13.85 5.85 C14.55 5.15 15.7 5.7 15.7 7.1 C15.7 8.55 13.85 10.15 12 11.1 C10.15 10.15 8.3 8.55 8.3 7.1 C8.3 5.7 9.45 5.15 10.15 5.85 C10.85 5.15 12 5.7 12 7.1 Z"
+        fill="#fb7185"
+      />
+    </svg>
+  );
+}
   profileId,
   contact,
 }: {
@@ -378,7 +391,10 @@ export function ProfileRedesign(props: ProfileData) {
 
       {props.matches?.length ? (
         <div className="pv-match-banner" aria-label="Matching points">
-          <span className="pv-match-kicker">Why this fits</span>
+          <span className="pv-match-kicker">
+            <CoupleMark className="pv-couple" />
+            Why this fits
+          </span>
           <div className="pv-match-mask">
             <div className="pv-match-track">
               {[...props.matches, ...props.matches].map((item, i) => (
@@ -444,8 +460,10 @@ export function ProfileRedesign(props: ProfileData) {
           {props.hope?.length ? (
             <section className="pv-panel">
               <div className="pv-panel-head">
-                <span className="pv-ico">♡</span>
-                <span>Looking for</span>
+                <span className="pv-ico">
+                  <CoupleMark className="pv-couple" />
+                </span>
+                <span>Partner preference</span>
                 {props.fitScore && props.fitScore.total > 0 ? (
                   <em className="pv-hope-fit">
                     You match {props.fitScore.hit} of {props.fitScore.total}
