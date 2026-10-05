@@ -952,6 +952,47 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
   border: 1px solid rgb(184 137 76 / 28%);
   box-shadow: 0 8px 18px -16px rgb(63 14 13 / 50%);
 }
+.pv-shell .pv-complete-dock {
+  min-width: 0;
+}
+.pv-shell .pv-complete-dock .complete-meter {
+  margin: 0;
+  max-width: none;
+}
+.pv-shell .pv-complete-dock .complete-meter-card {
+  padding: 0.55rem 0.7rem 0.6rem;
+  gap: 0.65rem;
+  border-radius: 1.05rem;
+}
+.pv-shell .pv-complete-dock .complete-ring {
+  width: 4.15rem;
+  height: 4.15rem;
+  padding: 0.3rem;
+}
+.pv-shell .pv-complete-dock .complete-ring-face strong {
+  font-size: 0.88rem;
+}
+.pv-shell .pv-complete-dock .complete-ring-face span {
+  font-size: 0.48rem;
+  letter-spacing: 0.05em;
+}
+.pv-shell .pv-complete-dock .complete-ring-face small {
+  font-size: 0.55rem;
+}
+.pv-shell .pv-complete-dock .complete-meter-copy p {
+  font-size: 0.82rem;
+  line-height: 1.3;
+}
+.pv-shell .pv-complete-dock .complete-meter-kicker {
+  font-size: 0.6rem;
+}
+.pv-shell .pv-complete-dock .complete-meter-hint {
+  font-size: 0.6rem;
+  padding: 0.22rem 0.55rem 0.26rem;
+}
+.pv-shell .pv-complete-dock .complete-meter-rings {
+  gap: 0.45rem;
+}
 .pv-shell .pv-media-title {
   margin: 0;
   font-size: 0.72rem;

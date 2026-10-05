@@ -38,40 +38,40 @@ export function CompletenessMeter({
         onClick={() => setOpen((value) => !value)}
       >
         <div className="complete-meter-rings">
-          <Meter label="Mandatory" pct={mandatoryPct} count={`${mandatoryFilled}/${mandatoryTotal}`} tone="maroon" />
-          <Meter label="Overall" pct={overallPct} count={`${overallFilled}/${overallTotal}`} tone="gold" />
+          <Meter label="Must-have" pct={mandatoryPct} count={`${mandatoryFilled}/${mandatoryTotal}`} tone="maroon" />
+          <Meter label="Full story" pct={overallPct} count={`${overallFilled}/${overallTotal}`} tone="gold" />
         </div>
         <div className="complete-meter-copy">
-          <span className="complete-meter-kicker">Profile completeness</span>
+          <span className="complete-meter-kicker">Biodata readiness</span>
           <p>
             {pending === 0
-              ? "This biodata is fully filled."
+              ? "Every house essential is in place. This story can travel."
               : pendingMandatory.length
-                ? `${pendingMandatory.length} mandatory ${pendingMandatory.length === 1 ? "detail" : "details"} still needed.`
-                : `${pendingRecommended.length} recommended ${pendingRecommended.length === 1 ? "detail" : "details"} still empty.`}
+                ? `${pendingMandatory.length} house ${pendingMandatory.length === 1 ? "essential still awaits" : "essentials still await"} your hand.`
+                : `${pendingRecommended.length} polish ${pendingRecommended.length === 1 ? "detail would" : "details would"} make this shine.`}
           </p>
           <span className="complete-meter-hint">
-            {pending === 0 ? "View checklist" : open ? "Hide pending details" : "See pending details"}
+            {pending === 0 ? "Peek the checklist" : open ? "Fold the gap list" : "Open the gap list"}
           </span>
         </div>
       </button>
       {open ? (
         <div className="complete-meter-panel">
           {pending === 0 ? (
-            <p className="complete-meter-empty">Nothing pending on this profile.</p>
+            <p className="complete-meter-empty">This biodata is ready for the house.</p>
           ) : (
             <>
               <PendingGroup
-                title="Mandatory still needed"
+                title="House essentials still open"
                 items={pendingMandatory}
                 profileId={profileId}
-                empty="All mandatory details are filled."
+                empty="All house essentials are filled."
               />
               <PendingGroup
-                title="Recommended still empty"
+                title="Polish details still empty"
                 items={pendingRecommended}
                 profileId={profileId}
-                empty="All recommended details are filled."
+                empty="All polish details are filled."
               />
             </>
           )}

@@ -19,7 +19,13 @@ import { canViewProfile, isPublicProfileStatus, type ProfileType } from "@/lib/p
 import { createServiceClient } from "@/lib/supabase/server";
 import { after } from "next/server";
 import { redirect } from "next/navigation";
-import { ageFromDob, formatBirthTime } from "@/lib/profile/completeness";
+import {
+  ageFromDob,
+  completenessFromRecord,
+  completenessScore,
+  formatBirthTime,
+  smsOtpRequiredFromEnv,
+} from "@/lib/profile/completeness";
 import { maritalLabel, NATIVE_COUNTRIES, HOPE_ANY, MOTHER_TONGUES } from "@/lib/profile/options";
 import { asStringList, hopeDisplay, hopeValues, languagesKnown } from "@/lib/profile/multi-values";
 import { aboutPlainText } from "@/lib/profile/about-html";
@@ -770,6 +776,19 @@ export async function BrowseProfileView({
   const voiceUrls = voices.map((v) => publicMediaUrl(v.storage_path)).filter((url): url is string => Boolean(url));
 
   const headline = profileHeadline(profile.subject_full_name, profile.surname);
+  const mediaApproved = (row?: { status?: string | null } | null) =>
+    Boolean(row && (row.status === "approved" || !row.status));
+  const readiness = own
+    ? completenessScore(
+        completenessFromRecord(profile as Record<string, unknown>, {
+          hasApprovedPhoto: sortedPhotos.some((row) => mediaApproved(row)),
+          hasVideo: videos.some((row) => mediaApproved(row)),
+          hasAudio: voices.some((row) => mediaApproved(row)),
+          emailOtpVerified: Boolean(me.email_otp_verified_at || me.email),
+          smsOtpRequired: smsOtpRequiredFromEnv(),
+        }),
+      )
+    : null;
   const props: ProfileData = {
     id: String(profile.id),
     name: headline.name,
@@ -799,6 +818,7 @@ export async function BrowseProfileView({
     quotaLeft,
     contact,
     finishHref: "/app/profiles/" + (mine?.id || me.active_profile_id || ""),
+    readiness,
     details,
     matches: !own && mine ? matchBanner(mine, profile, kundali) : [],
     hope,

@@ -6,7 +6,9 @@ import Link from "next/link";
 import { revealContact, saveShortlist } from "@/app/app/profiles/actions";
 import { SafetyProfileControl } from "@/app/app/safety/safety-profile-control";
 import { BirdDock, type PeekChatNote } from "@/app/browse/bird-dock";
+import { CompletenessMeter } from "@/app/app/profiles/completeness-meter";
 import { KindMark } from "@/components/kind-mark";
+import type { CompletenessItem } from "@/lib/profile/completeness";
 import type { InterestThread } from "@/lib/match/interest-status";
 
 type DetailGroup = {
@@ -108,6 +110,16 @@ export type ProfileData = {
     seen: string | null;
   };
   finishHref: string;
+  readiness?: {
+    mandatoryPct: number;
+    overallPct: number;
+    mandatoryFilled: number;
+    mandatoryTotal: number;
+    overallFilled: number;
+    overallTotal: number;
+    pendingMandatory: CompletenessItem[];
+    pendingRecommended: CompletenessItem[];
+  } | null;
 };
 
 function RichLine({ text }: { text: string }) {
@@ -515,6 +527,21 @@ export function ProfileRedesign(props: ProfileData) {
         </div>
 
         <aside className="pv-media-col">
+          {props.own && props.readiness ? (
+            <div className="pv-complete-dock">
+              <CompletenessMeter
+                profileId={props.id}
+                mandatoryPct={props.readiness.mandatoryPct}
+                overallPct={props.readiness.overallPct}
+                mandatoryFilled={props.readiness.mandatoryFilled}
+                mandatoryTotal={props.readiness.mandatoryTotal}
+                overallFilled={props.readiness.overallFilled}
+                overallTotal={props.readiness.overallTotal}
+                pendingMandatory={props.readiness.pendingMandatory}
+                pendingRecommended={props.readiness.pendingRecommended}
+              />
+            </div>
+          ) : null}
           <p className="pv-media-title">Photos, video & voice</p>
           {visiblePhotos.length ? (
             <button type="button" className="pv-media-hero" onClick={() => setLightbox(hero)} aria-label="Enlarge photo">
