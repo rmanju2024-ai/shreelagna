@@ -1,3 +1,5 @@
+import { createServiceClient } from "@/lib/supabase/server";
+import { loadBlockedProfileIds } from "@/lib/safety/blocked";
 import { Suspense } from "react";
 import { cookies } from "next/headers";
 import Link from "next/link";
@@ -73,7 +75,8 @@ export async function SiteHeader({ overlay = false, glass = false }: { overlay?:
         const { data: senders } = senderIds.length
           ? await supabase.from("profiles").select("id, status").in("id", senderIds)
           : { data: [] as { id: string; status: string }[] };
-        const live = new Set((senders ?? []).filter((p) => isPublicProfileStatus(p.status)).map((p) => p.id));
+        const blocked = await loadBlockedProfileIds(createServiceClient() ?? supabase, [me.active_profile_id]);
+        const live = new Set((senders ?? []).filter((p) => isPublicProfileStatus(p.status) && !blocked.has(p.id)).map((p) => p.id));
         // Only interests that arrived after the member last opened Likes count as new.
         const seenRaw = (await cookies()).get("sl_likes_seen")?.value;
         const seenAt = seenRaw ? Date.parse(seenRaw) : 0;

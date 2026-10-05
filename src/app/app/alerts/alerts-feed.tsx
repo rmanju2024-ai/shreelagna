@@ -1,3 +1,4 @@
+import { loadBlockedProfileIds } from "@/lib/safety/blocked";
 import Link from "next/link";
 import { after } from "next/server";
 import { ChatAvatar } from "@/app/app/chat/chat-avatar";
@@ -46,7 +47,11 @@ export async function AlertsFeed() {
         media.from("media").select("profile_id, storage_path, created_at").eq("kind", "photo").eq("status", "approved").in("profile_id", profileIds).order("created_at"),
       ])
     : [{ data: [] as { id: string }[] }, { data: [] as { profile_id: string; storage_path: string | null }[] }];
-  const alerts = noticesForActiveProfiles(collapsed, new Set((visibleProfiles ?? []).map((row) => row.id)));
+  const blocked = await loadBlockedProfileIds(media, me.active_profile_id ? [me.active_profile_id] : []);
+  const alerts = noticesForActiveProfiles(
+    collapsed,
+    new Set((visibleProfiles ?? []).map((row) => row.id).filter((id) => !blocked.has(id))),
+  );
   const photoMap = new Map<string, string>();
   for (const row of photos ?? []) if (!photoMap.has(row.profile_id) && row.storage_path) photoMap.set(row.profile_id, row.storage_path);
   const readAt = new Date().toISOString();

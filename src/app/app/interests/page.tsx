@@ -1,3 +1,4 @@
+import { loadBlockedProfileIds } from "@/lib/safety/blocked";
 import Link from "next/link";
 import { InboxSwitcher } from "@/components/inbox-switcher";
 import { LikesSeen } from "@/components/likes-seen";
@@ -107,8 +108,22 @@ export async function InterestsView({ only }: { only?: SectionId } = {}) {
     }
   }
 
-  const [archivedQuery, { data: views }, { data: visits }] = await Promise.all([archivedPromise, viewsPromise, visitsPromise]);
-  const archived = archivedQuery.error ? [] : archivedQuery.data;
+  const [archivedQuery, { data: viewsAll }, { data: visitsAll }, blocked] = await Promise.all([
+    archivedPromise,
+    viewsPromise,
+    visitsPromise,
+    loadBlockedProfileIds(createServiceClient() ?? supabase, ids),
+  ]);
+  const other = (a: string, b: string) => (idSet.has(a) ? b : a);
+  const views = (viewsAll ?? []).filter((v) => !blocked.has(v.viewer_profile_id));
+  const visits = (visitsAll ?? []).filter((v) => !blocked.has(v.viewed_profile_id));
+  received = received.filter((i) => !blocked.has(other(i.from_profile_id, i.to_profile_id)));
+  sent = sent.filter((i) => !blocked.has(other(i.from_profile_id, i.to_profile_id)));
+  const archived = archivedQuery.error
+    ? []
+    : (archivedQuery.data ?? []).filter(
+        (row) => !blocked.has(other(String(row.from_profile_id ?? ""), String(row.to_profile_id ?? ""))),
+      );
 
   const otherIds = [
     ...new Set(

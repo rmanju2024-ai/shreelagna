@@ -1,3 +1,4 @@
+import { loadBlockedProfileIds } from "@/lib/safety/blocked";
 import { collapseNotices, noticesForActiveProfiles } from "@/lib/match/collapse-notices";
 import { pairCanChat } from "@/lib/match/interest-status";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -46,7 +47,11 @@ export async function unreadNoticeBadge(userId: string) {
   if (activeResult.error) throw activeResult.error;
   if (threadResult.error) throw threadResult.error;
   if (pairResult.error) throw pairResult.error;
-  const open = noticesForActiveProfiles(collapsed, new Set((activeResult.data ?? []).map((row) => row.id)));
+  const blocked = await loadBlockedProfileIds(db, ownIds);
+  const open = noticesForActiveProfiles(
+    collapsed,
+    new Set((activeResult.data ?? []).map((row) => row.id).filter((id) => !blocked.has(id))),
+  );
   const threads = (threadResult.data ?? []) as Thread[];
 
   // Stage 3: status of the people on the other side of each thread.
@@ -60,7 +65,7 @@ export async function unreadNoticeBadge(userId: string) {
     threads
       .filter((thread) => {
         const other = ownIds.includes(thread.profile_a) ? thread.profile_b : thread.profile_a;
-        return otherStatus.get(other) === "active" && pairCanChat((pairResult.data ?? []) as Pair[], thread.profile_a, thread.profile_b);
+        return otherStatus.get(other) === "active" && !blocked.has(other) && pairCanChat((pairResult.data ?? []) as Pair[], thread.profile_a, thread.profile_b);
       })
       .map((thread) => `/app/chat/${thread.id}`),
   );

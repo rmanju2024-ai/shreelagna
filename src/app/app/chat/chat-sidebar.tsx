@@ -1,3 +1,4 @@
+import { loadBlockedProfileIds } from "@/lib/safety/blocked";
 import Link from "next/link";
 import { cache } from "react";
 import { redirect } from "next/navigation";
@@ -65,12 +66,13 @@ const loadChatData = cache(async () => {
           )
       : Promise.resolve([]),
   ]);
+  const blocked = await loadBlockedProfileIds(media, ids);
   const nameMap = new Map((names ?? []).map((n) => [n.id, n]));
   // A hidden/deleted match cannot be opened, so it must not remain as a
   // conversation or produce an unread-message badge.
   const openThreads = acceptedThreads.filter((thread) => {
     const other = ids.includes(thread.profile_a) ? thread.profile_b : thread.profile_a;
-    return nameMap.get(other)?.status === "active";
+    return nameMap.get(other)?.status === "active" && !blocked.has(other);
   });
   const visibleThreadIds = new Set(openThreads.map((thread) => thread.id));
   const closedChatHrefs = acceptedThreads
