@@ -701,8 +701,13 @@ export async function BrowseProfileView({
       items: factsOf(
         fact("Rashi", profile.rashi),
         fact("Lagna", profile.lagna),
-        fact("Nakshatra", profile.nakshatra),
-        fact("Nakshatra pada", profile.nakshatra_pada),
+        hasValue(profile.nakshatra) && hasValue(profile.nakshatra_pada)
+          ? { k: "Nakshatra", v: `${dash(profile.nakshatra)}, pada ${dash(profile.nakshatra_pada)}` }
+          : hasValue(profile.nakshatra)
+            ? fact("Nakshatra", profile.nakshatra)
+            : hasValue(profile.nakshatra_pada)
+              ? { k: "Nakshatra", v: `Pada ${dash(profile.nakshatra_pada)}` }
+              : null,
         fact("Gana", profile.gana),
         fact("Yoni", profile.yoni_animal),
         fact("Mangalik", profile.manglik),
