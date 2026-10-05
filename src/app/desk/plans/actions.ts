@@ -96,13 +96,20 @@ export async function declinePlan(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   const db = asDb(createServiceClient() ?? desk.supabase);
-  await db.from("memberships").update({ status: "cancelled" }).eq("id", id).eq("status", "pending");
+  const { data: row } = await db
+    .from("memberships")
+    .select("id, user_id, plan_code, status")
+    .eq("id", id)
+    .maybeSingle();
+  if (!row || row.status !== "pending") return;
+  await db.from("memberships").update({ status: "cancelled" }).eq("id", String(row.id)).eq("status", "pending");
   await writeAudit({
     actorUserId: desk.me?.id,
     actorRole: desk.me?.role,
     action: "membership.decline",
     entityType: "membership",
-    entityId: id,
+    entityId: String(row.id),
+    metadata: { plan: String(row.plan_code ?? ""), user: String(row.user_id ?? "") },
   });
   refresh();
 }
@@ -144,7 +151,7 @@ export async function grantPlan(formData: FormData) {
     action: "membership.grant",
     entityType: "membership",
     entityId: String(inserted.id),
-    metadata: { plan: code, email: String(member.email ?? "") },
+    metadata: { plan: code, email: String(member.email ?? ""), user: memberId },
   });
   await notifyPlanActivated(memberId, plan.name, addMonths(new Date(), plan.months));
   refresh();

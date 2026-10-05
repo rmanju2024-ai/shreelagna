@@ -2,7 +2,8 @@ import { DeskPager } from "@/app/desk/desk-pager";
 import { requireDesk } from "@/lib/desk/access";
 import { cachedAuditPage } from "@/lib/desk/cached";
 import { auditActionLabel, houseRoleLabel } from "@/lib/desk/breakdown";
-import { auditDetails, type AuditActor, type AuditEventRow } from "@/lib/desk/audit-log";
+import { auditDetails, auditRecordLabel, type AuditActor, type AuditEventRow } from "@/lib/desk/audit-log";
+import { loadAuditSubjects, subjectKey } from "@/lib/desk/audit-subjects";
 import { deskPage, deskRange } from "@/lib/desk/pager";
 import { createServiceClient } from "@/lib/supabase/server";
 import { formatIstDateTime } from "@/lib/time/ist";
@@ -50,12 +51,13 @@ export default async function DeskAuditPage({
       : { data: [] as AuditActor[] };
     actorById = new Map((actors.data ?? []).map((row) => [row.id, row]));
   }
+  const subjects = await loadAuditSubjects(db as never, rows);
 
   return (
     <div className="desk-audit">
       <div className="desk-audit-toolbar">
         <p className="browse-saved-note">
-          Staff and Admin activity — who, what, when (IST), and which record. 20 per page, newest first.
+          Staff and Admin activity — who acted, which member profile, which plan, and where. 20 per page, newest first.
         </p>
         <a href="/desk/audit/export" className={btnGhost}>
           Export CSV
@@ -70,7 +72,7 @@ export default async function DeskAuditPage({
                 <th>Actor</th>
                 <th>Role</th>
                 <th>Action</th>
-                <th>Record</th>
+                <th>Profile</th>
                 <th>Details</th>
               </tr>
             </thead>
@@ -78,7 +80,9 @@ export default async function DeskAuditPage({
               {rows.map((row) => {
                 const actor = row.actor_user_id ? actorById.get(row.actor_user_id) : null;
                 const name = actor?.display_name || actor?.email || houseRoleLabel(row.actor_role);
-                const details = auditDetails(row.metadata);
+                const subject = subjects.get(subjectKey(row.entity_type, row.entity_id));
+                const details = auditDetails(row.metadata, subject);
+                const record = auditRecordLabel(row, subject);
                 return (
                   <tr key={row.id}>
                     <td>
@@ -94,8 +98,12 @@ export default async function DeskAuditPage({
                       <small>{row.action}</small>
                     </td>
                     <td title={row.entity_id ?? undefined}>
-                      {row.entity_type}
-                      {row.entity_id ? ` · ${row.entity_id.slice(0, 8)}` : ""}
+                      {subject?.href ? (
+                        <a href={subject.href}>{record}</a>
+                      ) : (
+                        record
+                      )}
+                      {subject?.email ? <small>{subject.email}</small> : null}
                     </td>
                     <td>{details || "—"}</td>
                   </tr>

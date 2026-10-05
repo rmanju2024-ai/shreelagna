@@ -1624,8 +1624,10 @@ html[data-scene="couple"] .app-main {
 }
 
 /* Home: 50/50 split hero */
-.home-split { display: grid; grid-template-columns: 1fr 1fr; min-height: calc(100svh - 5rem); background: linear-gradient(135deg, #fff8ef, #f6e3c8); }
-.home-split-art { position: relative; min-height: 28rem; background: #2a1710; overflow: hidden; }
+.home-split { display: grid; grid-template-columns: 1fr 1fr; align-items: center; min-height: calc(100svh - 5rem); background: linear-gradient(135deg, #fff8ef, #f6e3c8); }
+.home-split-art { position: relative; width: min(100%, calc(100svh - 5.5rem)); aspect-ratio: 1 / 1; min-height: 0; height: auto; justify-self: center; background: #2a1710; overflow: hidden; }
+.home-split-art img { position: absolute !important; inset: 0 !important; width: 100% !important; height: 100% !important; max-width: none !important; object-fit: cover !important; filter: none !important; opacity: 1 !important; }
+.home-split-art img:first-of-type { display: none; }
 .home-split-copy { display: flex; flex-direction: column; justify-content: center; gap: 1rem; padding: clamp(1.5rem, 5vw, 4rem); color: #3f0e0d; }
 .home-split-copy .home-hero-kicker { margin: 0; color: #9a3412; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; font-size: 0.78rem; }
 .home-split-title { margin: 0; font-size: clamp(2.2rem, 5vw, 4rem); line-height: 1.02; color: #3f0e0d; }
@@ -1636,7 +1638,7 @@ html[data-scene="couple"] .app-main {
 .home-split-tiles b { font-size: 1rem; color: #7c2d12; }
 .home-split-tiles small { color: #5b4a43; font-size: 0.8rem; }
 .home-split-note { margin: 0; font-size: 0.82rem; font-weight: 700; color: #7c2d12; }
-@media (max-width: 860px) { .home-split { grid-template-columns: 1fr; } .home-split-art { min-height: 20rem; height: 55vw; } }
+@media (max-width: 860px) { .home-split { grid-template-columns: 1fr; min-height: 0; } .home-split-art { width: 100%; height: auto; min-height: 0; } }
 
 .home-split-proof { display: flex; flex-wrap: wrap; gap: 0.5rem 1.1rem; margin: 0.4rem 0 0; padding: 0; list-style: none; font-size: 0.84rem; font-weight: 800; color: #7c2d12; }
 .home-steps { padding: clamp(2rem, 6vw, 4rem) 0; background: #fff8ef; color: #3f0e0d; }

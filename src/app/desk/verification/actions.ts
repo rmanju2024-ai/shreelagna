@@ -32,6 +32,25 @@ export async function reviewVerificationCase(formData: FormData) {
   if (status === "approved" && item.document_type === "identity") {
     await db.from("profiles").update({ trust_tier: "identity_checked" }).eq("id", item.profile_id);
   }
-  await writeAudit({ actorUserId: desk.me?.id, actorRole: desk.me?.role, action: "verification.case.review", entityType: "verification_case", entityId: id, metadata: { status, documentType: item.document_type } });
+  const { data: profile } = await db
+    .from("profiles")
+    .select("subject_full_name, member_code, current_city, current_state")
+    .eq("id", item.profile_id)
+    .maybeSingle();
+  const place = [profile?.current_city, profile?.current_state].filter(Boolean).join(", ");
+  await writeAudit({
+    actorUserId: desk.me?.id,
+    actorRole: desk.me?.role,
+    action: "verification.case.review",
+    entityType: "verification_case",
+    entityId: id,
+    metadata: {
+      status,
+      documentType: item.document_type,
+      profile: profile?.subject_full_name ?? undefined,
+      memberCode: profile?.member_code ?? undefined,
+      place: place || undefined,
+    },
+  });
   refreshDesk(["/desk/verification", "/desk/profiles"]);
 }

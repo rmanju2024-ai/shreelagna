@@ -24,7 +24,7 @@ export async function setProfileStatus(formData: FormData) {
   const status = String(formData.get("status") ?? "");
   if (!id || !OPS.includes(status as (typeof OPS)[number])) return;
   const db = createServiceClient() ?? desk.supabase;
-  const { data: profile } = await db.from("profiles").select("id, created_by, is_complete").eq("id", id).maybeSingle();
+  const { data: profile } = await db.from("profiles").select("id, created_by, is_complete, subject_full_name, member_code, current_city, current_state").eq("id", id).maybeSingle();
   if (!profile) return;
   const { data: owner } = await db.from("app_users").select("role").eq("id", profile.created_by).maybeSingle();
   if (owner?.role === "admin" && !desk.admin) return;
@@ -37,7 +37,12 @@ export async function setProfileStatus(formData: FormData) {
     action: "profile.status",
     entityType: "profile",
     entityId: id,
-    metadata: { status },
+    metadata: {
+      status,
+      profile: profile.subject_full_name ?? undefined,
+      memberCode: profile.member_code ?? undefined,
+      place: [profile.current_city, profile.current_state].filter(Boolean).join(", ") || undefined,
+    },
   });
   refresh();
 }

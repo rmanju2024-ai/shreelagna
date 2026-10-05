@@ -3,7 +3,10 @@ import { auditDetails, formatAuditCsvRow, toCsv } from "./audit-log";
 
 describe("desk audit log", () => {
   it("flattens useful metadata for the details column", () => {
-    expect(auditDetails({ status: "active", field: "about", junk: true })).toBe("status active · field about");
+    expect(auditDetails({ status: "active", field: "about", junk: true })).toBe("Status active · Field about");
+    expect(auditDetails({ status: "approved" }, { title: "Kavya · SL-1", email: "k@test", place: "Mysuru", plan: "Gold" })).toBe(
+      "Profile Kavya · SL-1 · Gmail k@test · Place Mysuru · Plan Gold · Status approved",
+    );
     expect(auditDetails(null)).toBe("");
   });
 
@@ -32,7 +35,7 @@ describe("desk audit log", () => {
       "Profile status",
       "profile",
       "p-123",
-      "status on_hold",
+      "Status on_hold",
     ]);
   });
 

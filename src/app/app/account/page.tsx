@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { InnerShell as PageShell } from "@/components/chrome-layout";
+import { HouseCrest } from "@/components/house-crest";
 import { FieldMark } from "@/app/app/profiles/field-mark";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
+import { findOwnProfile } from "@/lib/profile/own-profile";
+import { monthAgoIso, pulseNote, tallyMonthPulse } from "@/lib/profile/month-pulse";
 import { redirect } from "next/navigation";
 import { cardClass } from "@/lib/ui/classes";
 
@@ -41,23 +44,95 @@ const groups = [
   },
 ];
 
+function MonthPulseCard({
+  pulse,
+}: {
+  pulse: { views: number; received: number; sent: number; accepted: number; warmth: number };
+}) {
+  const ring = 2 * Math.PI * 26;
+  const drawn = (pulse.warmth / 100) * ring;
+  return (
+    <section className="account-pulse" aria-label="How your profile did in the last 30 days">
+      <div className="account-pulse-moon">
+        <svg viewBox="0 0 64 64" aria-hidden>
+          <circle className="account-pulse-track" cx="32" cy="32" r="26" />
+          <circle
+            className="account-pulse-glow"
+            cx="32"
+            cy="32"
+            r="26"
+            strokeDasharray={`${drawn} ${ring}`}
+            transform="rotate(-90 32 32)"
+          />
+        </svg>
+        <p>
+          <b>{pulse.warmth}</b>
+          <span>warmth</span>
+        </p>
+      </div>
+      <div className="account-pulse-copy">
+        <p className="browse-kicker">Last 30 days</p>
+        <h2>{pulseNote(pulse.warmth)}</h2>
+        <ul>
+          <li>
+            <strong>{pulse.views}</strong>
+            seen
+          </li>
+          <li>
+            <strong>{pulse.received}</strong>
+            received
+          </li>
+          <li>
+            <strong>{pulse.sent}</strong>
+            sent
+          </li>
+          <li>
+            <strong>{pulse.accepted}</strong>
+            accepted
+          </li>
+        </ul>
+      </div>
+    </section>
+  );
+}
+
 export default async function AccountHubPage() {
   const { supabase, user } = await getAuth();
   if (!supabase || !user) redirect("/login?next=/app/account");
   const me = await ensureAppUser(supabase, user);
   if (!me) redirect("/login?error=account");
+  const own = await findOwnProfile(supabase, me.id);
+  const profileId = me.active_profile_id || own?.id || null;
+  const since = monthAgoIso();
+  let pulse = profileId
+    ? tallyMonthPulse({ views: 0, received: [], sent: [], since })
+    : null;
+  if (profileId) {
+    const [views, received, sent] = await Promise.all([
+      supabase.from("profile_views").select("id", { count: "exact", head: true }).eq("viewed_profile_id", profileId).gte("viewed_at", since),
+      supabase.from("interests").select("created_at, status, responded_at").eq("to_profile_id", profileId).gte("created_at", since),
+      supabase.from("interests").select("created_at, status, responded_at").eq("from_profile_id", profileId).gte("created_at", since),
+    ]);
+    pulse = tallyMonthPulse({
+      views: views.count ?? 0,
+      received: received.data ?? [],
+      sent: sent.data ?? [],
+      since,
+    });
+  }
   return (
     <PageShell>
       <main className="account-hub sx-stage">
         <header className="account-hub-head">
           <span className="account-hub-crest" aria-hidden>
-            <FieldMark label="Crest" />
+            <HouseCrest />
           </span>
-          <p className="browse-kicker">Your space</p>
-          <h1>Account hub</h1>
-          <div className="gold-ornament" />
-          <p>Everything personal, private and practical — gathered in one calm house.</p>
+          <div>
+            <p className="browse-kicker">Your house</p>
+            <h1>Account hub</h1>
+          </div>
         </header>
+        {pulse ? <MonthPulseCard pulse={pulse} /> : null}
         <div className="account-hub-layout">
           <aside className="account-hub-rail" aria-label="Account sections">
             {groups.map((group) => (

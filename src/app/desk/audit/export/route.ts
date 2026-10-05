@@ -7,6 +7,7 @@ import {
   type AuditActor,
   type AuditEventRow,
 } from "@/lib/desk/audit-log";
+import { loadAuditSubjects, subjectKey } from "@/lib/desk/audit-subjects";
 import { createServiceClient } from "@/lib/supabase/server";
 import { istDayKey } from "@/lib/time/ist";
 
@@ -33,9 +34,16 @@ export async function GET() {
     for (const actor of (actors ?? []) as AuditActor[]) actorById.set(actor.id, actor);
   }
 
+  const subjects = await loadAuditSubjects(db as never, rows);
   const csv = toCsv(
     AUDIT_CSV_HEADERS,
-    rows.map((row) => formatAuditCsvRow(row, row.actor_user_id ? actorById.get(row.actor_user_id) : null)),
+    rows.map((row) =>
+      formatAuditCsvRow(
+        row,
+        row.actor_user_id ? actorById.get(row.actor_user_id) : null,
+        subjects.get(subjectKey(row.entity_type, row.entity_id)),
+      ),
+    ),
   );
   const day = istDayKey(new Date());
   return new Response(`\uFEFF${csv}`, {
