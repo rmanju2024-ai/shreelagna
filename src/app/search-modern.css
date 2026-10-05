@@ -1683,6 +1683,13 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
   .pv-shell .pv-top-actions { justify-content: flex-start; }
   .pv-shell .pv-layout { grid-template-columns: 1fr; }
   .pv-shell .pv-media-col { position: static; }
+  .pv-shell .pv-ready-banner { width: 100%; }
+  .pv-shell .pv-ready-actions { width: 100%; }
+  .pv-shell .pv-ready-banner a {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px;
+  }
 }
 body:has(.pv-shell) .bird-dock:not(.is-wide):not(.is-inline) {
   right: auto;

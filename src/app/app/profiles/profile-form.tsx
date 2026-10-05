@@ -26,7 +26,7 @@ import { ABOUT_MAX, ABOUT_MIN, FAMILY_NOTE_MAX } from "@/lib/profile/about-html"
 
 import type { ProfileFormValues } from "@/app/app/profiles/profile-form-types";
 import { Field, PlaceBlock, SaveButton, SiblingCounts } from "@/app/app/profiles/profile-form-parts";
-import { STUDIO_TABS, useStudioTab } from "@/app/app/profiles/profile-studio";
+import { useStudioTab } from "@/app/app/profiles/profile-studio";
 
 export type { ProfileFormValues };
 
@@ -154,8 +154,6 @@ export function ProfileForm({
         event.preventDefault();
         const targetStep = Number(invalid.closest<HTMLElement>(".wizard-panel")?.dataset.step ?? 1);
         if (wizard) setWizardStep(targetStep);
-        const tab = STUDIO_TABS.find((item) => "page" in item && item.page === targetStep);
-        if (tab && studio) studio.setTab(tab.id);
         window.setTimeout(() => {
           invalid.focus({ preventScroll: true });
           invalid.scrollIntoView({ block: "center", behavior: "smooth" });
@@ -203,6 +201,7 @@ export function ProfileForm({
                 type="button"
                 className={wizardStep === item.id ? "is-current" : wizardStep > item.id ? "is-done" : ""}
                 aria-current={wizardStep === item.id ? "step" : undefined}
+                disabled={item.id > wizardStep}
                 onClick={() => moveWizard(item.id)}
               >
                 <b>{wizardStep > item.id ? "✓" : <FieldMark label={item.mark} />}</b>

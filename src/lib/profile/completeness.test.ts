@@ -9,6 +9,7 @@ import {
   ageFromDob,
   formatBirthTime,
   formatBirthWithAge,
+  extrasFromMedia,
   isAdult,
   isMandatoryReadyFromRecord,
   isProfileComplete,
@@ -180,5 +181,21 @@ describe("completeness", () => {
     expect(smsOtpRequiredFromEnv("false")).toBe(false);
     expect(smsOtpRequiredFromEnv("true")).toBe(true);
     expect(smsOtpRequiredFromEnv(undefined)).toBe(false);
+  });
+
+  it("reads approved album media into completeness extras", () => {
+    const extras = extrasFromMedia(
+      [
+        { kind: "photo", status: "approved" },
+        { kind: "video", status: "pending" },
+        { kind: "audio", status: "approved" },
+      ],
+      true,
+      false,
+    );
+    expect(extras.hasApprovedPhoto).toBe(true);
+    expect(extras.hasVideo).toBe(false);
+    expect(extras.hasAudio).toBe(true);
+    expect(extras.emailOtpVerified).toBe(true);
   });
 });

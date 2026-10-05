@@ -8,6 +8,7 @@ import { SafetyProfileControl } from "@/app/app/safety/safety-profile-control";
 import { BirdDock, type PeekChatNote } from "@/app/browse/bird-dock";
 import { CompletenessMeter } from "@/app/app/profiles/completeness-meter";
 import { KindMark } from "@/components/kind-mark";
+import { otherProfileLocked } from "@/lib/profile/view-gate";
 import type { CompletenessItem } from "@/lib/profile/completeness";
 import type { InterestThread } from "@/lib/match/interest-status";
 
@@ -384,7 +385,11 @@ export function ProfileRedesign(props: ProfileData) {
   const [hero, setHero] = useState(0);
   const [lightbox, setLightbox] = useState<number | null>(null);
   const photos = props.photoUrls?.length ? props.photoUrls : props.photoUrl ? [props.photoUrl] : [];
-  const gate = Boolean(!props.own && (props.needComplete || props.needPlan));
+  const gate = otherProfileLocked({
+    own: props.own,
+    needComplete: props.needComplete,
+    needPlan: props.needPlan,
+  });
   const visiblePhotos = gate ? photos.slice(0, 1) : photos;
   const locked = gate;
   const lockHref = props.needComplete ? props.finishHref : "/app/plans";

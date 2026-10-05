@@ -585,7 +585,7 @@ table { max-width: 100%; }
     scroll-snap-type: x mandatory; scrollbar-width: none;
   }
   .profile-wizard-steps a,
-  .profile-wizard-steps button { flex: 0 0 8.25rem; scroll-snap-align: center; }
+  .profile-wizard-steps button { flex: 0 0 8.25rem; scroll-snap-align: center; min-height: 44px; }
   .profile-wizard-guide { align-items: flex-start; }
   .profile-wizard-actions {
     bottom: calc(4.7rem + env(safe-area-inset-bottom));

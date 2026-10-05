@@ -99,4 +99,10 @@ describe("shared mobile CSS contract", () => {
     expect(css).toContain(".home-language-viewport { overflow-x: auto; }");
     expect(css).toContain('.home-language-track p[aria-hidden="true"]');
   });
+
+  it("keeps amend-profile tabs thumb-sized and scrollable on phones", () => {
+    expect(css).toContain(".profile-wizard-steps.profile-studio-tabs");
+    expect(css).toContain("scroll-snap-type: x mandatory");
+    expect(css).toContain("min-height: 44px");
+  });
 });
