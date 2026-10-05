@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { toggleShortlist } from "@/app/app/profiles/actions";
+import { toggleShortlist, viewContact } from "@/app/app/profiles/actions";
 import { SafetyProfileControl } from "@/app/app/safety/safety-profile-control";
 import { BirdDock, type PeekChatNote } from "@/app/browse/bird-dock";
 import type { InterestThread } from "@/lib/match/interest-status";
@@ -74,6 +74,20 @@ export type ProfileData = {
   needQuota: boolean;
   awaitingReview?: boolean;
   quotaLeft: number | null;
+  quotaUsed?: number;
+  quotaLimit?: number | null;
+  contact?: {
+    revealed: boolean;
+    mobile: string;
+    email: string;
+    locked: boolean;
+    accepted: boolean;
+    needPlan: boolean;
+    canReveal: boolean;
+    used: number;
+    left: number | null;
+    limit: number | null;
+  };
   chat?: {
     myProfileId: string | null;
     threadId: string | null;
@@ -100,6 +114,65 @@ function RichLine({ text }: { text: string }) {
         ),
       )}
     </p>
+  );
+}
+
+function ContactPanel({
+  profileId,
+  contact,
+}: {
+  profileId: string;
+  contact: NonNullable<ProfileData["contact"]>;
+}) {
+  const [ask, setAsk] = useState(false);
+  const quotaLine =
+    contact.limit != null
+      ? `Used ${contact.used} of ${contact.limit} · ${contact.left ?? 0} left`
+      : "No monthly cap on this plan";
+  return (
+    <section className="pv-contact">
+      <p className="pv-contact-title">Mobile & email</p>
+      <p className="pv-contact-quota">{quotaLine}</p>
+      {contact.revealed ? (
+        <ul>
+          <li>
+            <span>Mobile</span>
+            <strong>{contact.mobile || "Not on file"}</strong>
+          </li>
+          <li>
+            <span>Email</span>
+            <strong>{contact.email || "Not on file"}</strong>
+          </li>
+        </ul>
+      ) : contact.locked ? (
+        <p className="pv-contact-note">They keep mobile and email private.</p>
+      ) : !contact.accepted ? (
+        <p className="pv-contact-note">Contact opens after both families accept the request.</p>
+      ) : contact.needPlan ? (
+        <p className="pv-contact-note">
+          A live plan is needed to view contact. <Link href="/app/plans">See plans</Link>
+        </p>
+      ) : contact.canReveal ? (
+        ask ? (
+          <form action={viewContact} className="pv-contact-ask">
+            <input type="hidden" name="to_profile_id" value={profileId} />
+            <p>This uses one contact view from your plan. Show mobile and email now?</p>
+            <button type="submit">Yes, show contact</button>
+            <button type="button" onClick={() => setAsk(false)}>
+              Not now
+            </button>
+          </form>
+        ) : (
+          <button type="button" className="pv-contact-open" onClick={() => setAsk(true)}>
+            Show contact
+          </button>
+        )
+      ) : (
+        <p className="pv-contact-note">
+          No contact views left this period. <Link href="/app/plans">See plans</Link>
+        </p>
+      )}
+    </section>
   );
 }
 
@@ -315,6 +388,7 @@ export function ProfileRedesign(props: ProfileData) {
             <div className="pv-media-hero is-blank">{props.name.slice(0, 1)}</div>
           )}
           {lightbox === null ? <div className="pv-spark-box">{spark}</div> : null}
+          {props.contact ? <ContactPanel profileId={props.id} contact={props.contact} /> : null}
           {visiblePhotos.length > 1 ? (
             <div className="pv-thumbs">
               {visiblePhotos.map((src, i) => (

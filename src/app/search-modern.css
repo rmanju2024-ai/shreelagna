@@ -1295,7 +1295,75 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
   font-weight: 800;
   text-decoration: none;
 }
-.pv-shell .pv-spark-box {
+.pv-shell .pv-contact {
+  padding: 0.55rem 0.6rem 0.65rem;
+  border-radius: 0.85rem;
+  background: linear-gradient(180deg, #fff, #f7efe4);
+  border: 1px solid rgb(184 137 76 / 28%);
+}
+.pv-shell .pv-contact-title {
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: #9a3412;
+}
+.pv-shell .pv-contact-quota {
+  margin: 0.2rem 0 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #7c2d12;
+}
+.pv-shell .pv-contact ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.28rem;
+}
+.pv-shell .pv-contact li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+}
+.pv-shell .pv-contact li span { color: #b45309; font-weight: 800; font-size: 0.64rem; letter-spacing: 0.06em; text-transform: uppercase; }
+.pv-shell .pv-contact li strong { color: #5c1220; }
+.pv-shell .pv-contact-note {
+  margin: 0;
+  font-size: 0.76rem;
+  color: #6b5348;
+  line-height: 1.4;
+}
+.pv-shell .pv-contact-open,
+.pv-shell .pv-contact-ask button[type="submit"] {
+  width: 100%;
+  min-height: 2.15rem;
+  border: 0;
+  border-radius: 999px;
+  font-weight: 800;
+  cursor: pointer;
+  color: #3f0e0d;
+  background: linear-gradient(180deg, #fff4d6, #e8b84a);
+}
+.pv-shell .pv-contact-ask {
+  display: grid;
+  gap: 0.35rem;
+}
+.pv-shell .pv-contact-ask p {
+  margin: 0;
+  font-size: 0.76rem;
+  color: #5b4a43;
+}
+.pv-shell .pv-contact-ask button[type="button"] {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #9a3412;
+}
   padding: 0.55rem 0.55rem 0.6rem;
   border-radius: 0.9rem;
   background:

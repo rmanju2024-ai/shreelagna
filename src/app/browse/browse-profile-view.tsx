@@ -20,9 +20,9 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { after } from "next/server";
 import { redirect } from "next/navigation";
 import { ageFromDob, formatBirthTime } from "@/lib/profile/completeness";
-import { asStringList, hopeDisplay, hopeValues } from "@/lib/profile/multi-values";
+import { maritalLabel, NATIVE_COUNTRIES, HOPE_ANY, HOBBY_OPTIONS } from "@/lib/profile/options";
+import { asStringList, hopeDisplay, hopeValues, listedOnly } from "@/lib/profile/multi-values";
 import { aboutPlainText } from "@/lib/profile/about-html";
-import { maritalLabel, NATIVE_COUNTRIES, HOPE_ANY } from "@/lib/profile/options";
 import { hopeComparisons, matchSelfFromProfile } from "@/lib/profile/match-compare";
 
 function nestedName(value: unknown): string | undefined {
@@ -259,6 +259,12 @@ function matchBanner(mine: Record<string, unknown>, theirs: Record<string, unkno
     else if (youFit) put(axis.key, `You match their hope for ${axis.label}`);
   }
   if (score?.total != null) put("kundali", `Kundali ${score.total}/${score.max ?? 36}${score.label ? ` · ${score.label}` : ""}`);
+  if (byKey.has("age") && byKey.has("height")) {
+    byKey.delete("age");
+    byKey.delete("height");
+    const rest = [...byKey.values()];
+    return ["Age and height are a match", ...rest];
+  }
   return [...byKey.values()];
 }
 
@@ -295,6 +301,8 @@ export async function BrowseProfileView({
   let needPlan = false;
   let needQuota = false;
   let quotaLeft: number | null = null;
+  let quotaUsed = 0;
+  let quotaLimit: number | null = null;
   let awaitingReview = false;
   let interestStatus: ReturnType<typeof effectiveInterestStatus> | null = null;
   let sentByMe = false;
@@ -326,6 +334,8 @@ export async function BrowseProfileView({
     viewerStatus = typeof mine.status === "string" ? mine.status : null;
     const quota = await loadInterestQuota(db, me, access, [String(mine.id)]);
     quotaLeft = quota.left;
+    quotaUsed = quota.used;
+    quotaLimit = quota.limit;
     needQuota = !quota.canSend;
     const complete = Boolean(mine.is_complete);
     const live = isPublicProfileStatus(typeof mine.status === "string" ? mine.status : null);
@@ -372,6 +382,37 @@ export async function BrowseProfileView({
   const targetType = asProfileType(profile.profile_type);
   const thread = interestThreadState(interestStatus, sentByMe || Boolean(sent));
   const linkedByInterest = thread === "sent" || thread === "received" || thread === "accepted";
+
+  let contact: ProfileData["contact"] = undefined;
+  if (!own && mine && String(mine.id) !== id) {
+    const mode = typeof profile.contact_release_mode === "string" ? profile.contact_release_mode : "";
+    const { data: viewed } = await db
+      .from("contact_views")
+      .select("id")
+      .eq("viewer_profile_id", String(mine.id))
+      .eq("viewed_profile_id", id)
+      .maybeSingle();
+    const revealed = Boolean(viewed) || isStaff;
+    let mobile = "";
+    let email = "";
+    if (revealed) {
+      mobile = typeof profile.subject_mobile === "string" ? profile.subject_mobile.trim() : "";
+      const { data: ownerMail } = await db.from("app_users").select("email").eq("id", profile.created_by).maybeSingle();
+      email = typeof ownerMail?.email === "string" ? ownerMail.email.trim() : "";
+    }
+    contact = {
+      revealed,
+      mobile,
+      email,
+      locked: mode === "never",
+      accepted,
+      needPlan,
+      canReveal: !revealed && accepted && mode !== "never" && !needPlan && (quotaLeft === null || quotaLeft > 0 || isStaff),
+      used: quotaUsed,
+      left: quotaLeft,
+      limit: quotaLimit,
+    };
+  }
   const { data: owner } = await db
     .from("app_users")
     .select("id, role, welcome_started_at, welcome_days")
@@ -506,7 +547,11 @@ export async function BrowseProfileView({
 
   const marital = maritalLabel(typeof profile.marital_status === "string" ? profile.marital_status : "") || "";
   const spoken = asStringList(profile.known_languages).join(", ");
-  const hobbies = asStringList(profile.hobby_list).join(", ") || (hasValue(profile.hobbies) ? dash(profile.hobbies) : "");
+  const spokenSet = new Set(asStringList(profile.known_languages).map((item) => item.toLowerCase()));
+  const hobbyBits = listedOnly(asStringList(profile.hobby_list), [...HOBBY_OPTIONS]).filter(
+    (item) => !spokenSet.has(item.toLowerCase()),
+  );
+  const hobbies = hobbyBits.join(", ") || "";
   const liveNow = placeLine(profile.current_city, profile.current_state, profile.current_country);
   const bornOn = formatDob(profile.date_of_birth);
   const bornAt = birthTimeLabel(profile.birth_time);
@@ -573,13 +618,13 @@ export async function BrowseProfileView({
               ? `${who} studied at ${dash(profile.college_name)}`
               : null,
         hasValue(profile.occupation) && hasValue(profile.employer_name) && hasValue(profile.employed_in)
-          ? `${who} works as ${asRole(profile.occupation)} at **${dash(profile.employer_name)}**, ${dash(profile.employed_in).toLowerCase()}`
+          ? `${who} works as **${dash(profile.occupation)}** at **${dash(profile.employer_name)}**, ${dash(profile.employed_in).toLowerCase()}`
           : hasValue(profile.occupation) && hasValue(profile.employed_in)
-            ? `${who} works as ${asRole(profile.occupation)} in a ${dash(profile.employed_in).toLowerCase()}`
+            ? `${who} works as **${dash(profile.occupation)}** in a ${dash(profile.employed_in).toLowerCase()}`
             : hasValue(profile.occupation) && hasValue(profile.employer_name)
-              ? `${who} works as ${asRole(profile.occupation)} at **${dash(profile.employer_name)}**`
+              ? `${who} works as **${dash(profile.occupation)}** at **${dash(profile.employer_name)}**`
               : hasValue(profile.occupation)
-                ? `${who} works as ${asRole(profile.occupation)}`
+                ? `${who} works as **${dash(profile.occupation)}**`
                 : hasValue(profile.employed_in)
                   ? `${who} is employed in a ${dash(profile.employed_in).toLowerCase()}`
                   : null,
@@ -595,9 +640,9 @@ export async function BrowseProfileView({
       title: "Family",
       lines: linesOf(
         hasValue(profile.family_type) && hasValue(profile.family_location)
-          ? `This is a ${asRole(profile.family_type)} family living in ${dash(profile.family_location)}`
+          ? `This is a **${asRole(profile.family_type)}** family living in ${dash(profile.family_location)}`
           : hasValue(profile.family_type)
-            ? `This is a ${asRole(profile.family_type)} family`
+            ? `This is a **${asRole(profile.family_type)}** family`
             : hasValue(profile.family_location)
               ? `The family lives in ${dash(profile.family_location)}`
               : null,
@@ -689,6 +734,7 @@ export async function BrowseProfileView({
     needQuota,
     awaitingReview,
     quotaLeft,
+    contact,
     finishHref: "/app/profiles/" + (mine?.id || me.active_profile_id || ""),
     details,
     matches: !own && mine ? matchBanner(mine, profile, kundali) : [],
