@@ -85,9 +85,15 @@ export function ProfileStudio({
             </button>
           ))}
         </nav>
-        <div className={tab === "album" ? undefined : "is-hidden-pane"}>{album}</div>
-        <div className={tab === "about" ? undefined : "is-hidden-pane"}>{about}</div>
-        <div className={formOpen ? undefined : "is-hidden-pane"}>{children}</div>
+        <div className="profile-studio-pane" hidden={tab !== "album"}>
+          {album}
+        </div>
+        <div className="profile-studio-pane" hidden={tab !== "about"}>
+          {about}
+        </div>
+        <div className="profile-studio-pane" hidden={!formOpen}>
+          {children}
+        </div>
       </div>
     </StudioCtx.Provider>
   );

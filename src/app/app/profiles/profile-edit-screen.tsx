@@ -45,9 +45,6 @@ export async function ProfileEditScreen({
         </p>
         <h1 className="mt-2 font-[family-name:var(--font-british)] text-4xl">{profile.subject_full_name}</h1>
       </div>
-      <p className="mt-4 max-w-2xl text-sm text-[var(--muted)]">
-        Switch tabs to edit each part. Partner lists open beside the field you choose.
-      </p>
       <div id="album" className="mt-8">
         <ProfileStudio
           initial={section}

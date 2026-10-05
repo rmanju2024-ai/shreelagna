@@ -484,6 +484,13 @@ table { max-width: 100%; }
   display: grid;
   gap: 1rem;
 }
+.profile-studio-pane[hidden] {
+  display: none !important;
+}
+.profile-studio-tabs {
+  position: relative;
+  z-index: 4;
+}
 .profile-studio .form-3d.is-wizard .wizard-panel.is-current {
   padding-bottom: 1.25rem;
   scroll-margin-bottom: 1.5rem;

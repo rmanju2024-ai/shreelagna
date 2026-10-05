@@ -117,12 +117,20 @@ export function ProfileForm({
   const casteNames = sortLabels([...new Set(communities.map((c) => c.name))]);
   const self = who === "self";
   const aboutDefault = values?.about ?? "";
-  const show = (id: ProfileEditSection) => (!omitAbout || id !== "about") && (!section || section === id);
   const studio = useStudioTab();
-  const wizard = mode === "create" && !section;
-  const paged = wizard || Boolean(studio);
+  const studioSection =
+    studio && studio.tab !== "album" && studio.tab !== "about"
+      ? studio.tab === "life"
+        ? "work"
+        : (studio.tab as ProfileEditSection)
+      : undefined;
+  const activeSection = studioSection ?? section;
+  const show = (id: ProfileEditSection) =>
+    (!omitAbout || id !== "about") && (!activeSection || activeSection === id);
+  const wizard = mode === "create" && !section && !studio;
+  const paged = wizard;
   const [wizardStep, setWizardStep] = useState(1);
-  const page = studio?.page ?? wizardStep;
+  const page = wizardStep;
   const panelClass = (step: number) =>
     `form-3d-panel${paged ? ` wizard-panel${page === step ? " is-current" : ""}` : ""}`;
 
@@ -157,7 +165,7 @@ export function ProfileForm({
     >
       {values?.id ? <input type="hidden" name="id" value={values.id} /> : null}
       {values?.member_code ? <input type="hidden" name="member_code" value={values.member_code} /> : null}
-      {section ? <input type="hidden" name="section" value={section} /> : null}
+      {activeSection ? <input type="hidden" name="section" value={activeSection} /> : null}
       {mode === "edit" && values?.member_code ? (
         <p className="rounded-xl border border-[var(--gold)]/40 bg-[#fff8ef] px-4 py-3 text-sm">
           Editing profile <strong className="tracking-wider">{values.member_code}</strong>
@@ -431,10 +439,10 @@ export function ProfileForm({
       {show("personal") || show("work") ? (
       <section className={panelClass(2)} data-step="2">
         <p className="form-3d-kicker">
-          {section === "work" ? "Education & work" : section === "personal" ? "Place" : mode === "edit" ? "Home and vocation" : "Step three"}
+          {activeSection === "work" ? "Education & work" : activeSection === "personal" ? "Place" : mode === "edit" ? "Home and vocation" : "Step three"}
         </p>
         <h2 className="form-3d-title">
-          {section === "work" ? "Education and work" : section === "personal" ? "Native place and residence" : "Home and vocation"}
+          {activeSection === "work" ? "Education and work" : activeSection === "personal" ? "Native place and residence" : "Home and vocation"}
         </h2>
         <div className="gold-ornament" />
         <div className="mt-6 grid gap-5 sm:grid-cols-2">
