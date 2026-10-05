@@ -624,7 +624,13 @@ export async function sendInterest(formData: FormData) {
     redirect(`/browse/${toId}?error=plan`);
   }
   const quota = await loadInterestQuota(supabase, me, access, [mine.id]);
-  if (!quota.canSend) {
+  const { data: alreadyView } = await supabase
+    .from("contact_views")
+    .select("id")
+    .eq("viewer_profile_id", mine.id)
+    .eq("viewed_profile_id", toId)
+    .maybeSingle();
+  if (!alreadyView && !quota.canSend) {
     redirect(`/browse/${toId}?error=quota`);
   }
 
@@ -771,7 +777,21 @@ export async function viewContact(formData: FormData) {
     });
   }
   if (!access.live && !guestPass) redirect(`/browse/${toId}?error=plan`);
-  if (!guestPass) {
+  const { data: alreadyInterest } = await db
+    .from("interests")
+    .select("id")
+    .eq("from_profile_id", mine.id)
+    .eq("to_profile_id", toId)
+    .limit(1)
+    .maybeSingle();
+  const { data: alreadyView } = await db
+    .from("contact_views")
+    .select("id")
+    .eq("viewer_profile_id", mine.id)
+    .eq("viewed_profile_id", toId)
+    .maybeSingle();
+  const alreadyCounted = Boolean(alreadyInterest || alreadyView);
+  if (!guestPass && !alreadyCounted) {
     const quota = await loadInterestQuota(supabase, me, access, [mine.id]);
     if (!quota.canSend) redirect(`/browse/${toId}?error=quota`);
   }
@@ -785,17 +805,6 @@ export async function viewContact(formData: FormData) {
   if (target.contact_release_mode === "never") {
     redirect(`/browse/${toId}?error=contact_private`);
   }
-  const { data: acceptedLinks } = await db
-    .from("interests")
-    .select("status, created_at")
-    .or(
-      `and(from_profile_id.eq.${mine.id},to_profile_id.eq.${toId}),and(from_profile_id.eq.${toId},to_profile_id.eq.${mine.id})`,
-    )
-    .limit(8);
-  const accepted = (acceptedLinks ?? []).some(
-    (row) => effectiveInterestStatus(row.status, row.created_at ?? "") === "accepted",
-  );
-  if (!accepted) redirect(`/browse/${toId}?error=contact_after_accept`);
   const { data: owner } = await db.from("app_users").select("email").eq("id", target.created_by).maybeSingle();
   const mobile = typeof target.subject_mobile === "string" ? target.subject_mobile.trim() : "";
   const email = typeof owner?.email === "string" ? owner.email.trim() : "";

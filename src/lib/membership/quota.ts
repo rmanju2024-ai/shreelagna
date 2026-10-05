@@ -7,6 +7,7 @@ export type InterestQuota = {
   used: number;
   left: number | null;
   canSend: boolean;
+  touchedIds: string[];
 };
 
 export function interestLimitFor(kind: Membership["kind"], planLimit?: number | null): number | null {
@@ -32,11 +33,40 @@ export function usedInterestsSince(
   }).length;
 }
 
-export function resolveQuota(limit: number | null, used: number): InterestQuota {
-  if (limit === null) return { limit: null, used, left: null, canSend: true };
+export function usedUniqueProfilesSince(
+  interests: { from_profile_id?: string | null; to_profile_id?: string | null; created_at?: string | null }[],
+  views: { viewer_profile_id?: string | null; viewed_profile_id?: string | null; created_at?: string | null }[],
+  myIds: string[],
+  since: Date | null,
+): string[] {
+  const mine = new Set(myIds);
+  const ids = new Set<string>();
+  for (const row of interests) {
+    if (!mine.has(String(row.from_profile_id ?? ""))) continue;
+    if (since) {
+      const at = parseInstant(row.created_at);
+      if (!at || at.getTime() < since.getTime()) continue;
+    }
+    const to = String(row.to_profile_id ?? "");
+    if (to) ids.add(to);
+  }
+  for (const row of views) {
+    if (!mine.has(String(row.viewer_profile_id ?? ""))) continue;
+    if (since) {
+      const at = parseInstant(row.created_at);
+      if (!at || at.getTime() < since.getTime()) continue;
+    }
+    const to = String(row.viewed_profile_id ?? "");
+    if (to) ids.add(to);
+  }
+  return [...ids];
+}
+
+export function resolveQuota(limit: number | null, used: number, touchedIds: string[] = []): InterestQuota {
+  if (limit === null) return { limit: null, used, left: null, canSend: true, touchedIds };
   const safeUsed = Math.max(0, used);
   const left = Math.max(0, limit - safeUsed);
-  return { limit, used: safeUsed, left, canSend: left > 0 };
+  return { limit, used: safeUsed, left, canSend: left > 0, touchedIds };
 }
 
 export function quotaWindowStart(

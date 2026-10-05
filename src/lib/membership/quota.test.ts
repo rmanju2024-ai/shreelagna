@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { interestLimitFor, resolveQuota, usedInterestsSince } from "./quota";
+import { interestLimitFor, resolveQuota, usedInterestsSince, usedUniqueProfilesSince } from "./quota";
 
 describe("interest quota", () => {
   it("caps welcome at 20", () => {
@@ -25,6 +25,16 @@ describe("interest quota", () => {
       new Date("2026-01-01T00:00:00.000Z"),
     );
     expect(used + views).toBe(2);
+  });
+
+  it("counts a send and a contact view on the same profile as one", () => {
+    const ids = usedUniqueProfilesSince(
+      [{ from_profile_id: "me", to_profile_id: "them", created_at: "2026-01-10T00:00:00.000Z" }],
+      [{ viewer_profile_id: "me", viewed_profile_id: "them", created_at: "2026-01-11T00:00:00.000Z" }],
+      ["me"],
+      new Date("2026-01-01T00:00:00.000Z"),
+    );
+    expect(ids).toEqual(["them"]);
   });
 
   it("leaves house access unlimited", () => {

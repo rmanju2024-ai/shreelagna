@@ -104,10 +104,10 @@ function siblingPair(brothers: unknown, brothersMarried: unknown, sisters: unkno
   const sm = asCount(sistersMarried);
   if ((b === 0 || b === null) && (s === 0 || s === null) && b !== null && s !== null) return "No brothers or sisters";
   if (b === 1 && s === 1) {
-    if (bm === 0 && sm === 0) return "One brother and one sister, neither married";
-    if (bm === 1 && sm === 1) return "One brother and one sister, both married";
-    if (bm === 0 && sm === 1) return "One brother, unmarried, and one sister, married";
-    if (bm === 1 && sm === 0) return "One brother, married, and one sister, unmarried";
+    if (bm === 0 && sm === 0) return "One brother and one sister (neither married)";
+    if (bm === 1 && sm === 1) return "One brother and one sister (both married)";
+    if (bm === 0 && sm === 1) return "One brother (unmarried) and one sister (married)";
+    if (bm === 1 && sm === 0) return "One brother (married) and one sister (unmarried)";
     return "One brother and one sister";
   }
   const parts = [siblingSummary("brother", brothers, brothersMarried), siblingSummary("sister", sisters, sistersMarried)].filter(
@@ -126,10 +126,10 @@ function siblingSummary(kind: "brother" | "sister", totalRaw: unknown, marriedRa
   const noun = total === 1 ? one : plural;
   const head = `${sayCount(total)[0].toUpperCase()}${sayCount(total).slice(1)} ${noun}`;
   if (married === null) return head;
-  if (married <= 0) return `${head}, none married`;
-  if (married >= total) return total === 1 ? `${head}, married` : total === 2 ? `${head}, both married` : `${head}, all married`;
-  if (married === 1) return `${head}, one married`;
-  return `${head}, ${sayCount(married)} married`;
+  if (married <= 0) return `${head} (none married)`;
+  if (married >= total) return total === 1 ? `${head} (married)` : `${head} (${sayCount(married)} married)`;
+  if (married === 1) return `${head} (one married)`;
+  return `${head} (${sayCount(married)} married)`;
 }
 
 function formatDob(value: unknown): string | null {
@@ -336,11 +336,9 @@ export async function BrowseProfileView({
     quotaLeft = quota.left;
     quotaUsed = quota.used;
     quotaLimit = quota.limit;
-    needQuota = !quota.canSend;
     const complete = Boolean(mine.is_complete);
     const live = isPublicProfileStatus(typeof mine.status === "string" ? mine.status : null);
     awaitingReview = complete && !live;
-    canSend = Boolean(complete && live && !needPlan && quota.canSend);
     const link = (interestRows ?? []).find(
       (row) => myIds.includes(row.from_profile_id) || myIds.includes(row.to_profile_id),
     );
@@ -348,6 +346,9 @@ export async function BrowseProfileView({
     sentByMe = Boolean(link && myIds.includes(link.from_profile_id));
     accepted = interestStatus === "accepted";
     interestId = typeof link?.id === "string" ? link.id : null;
+    const counted = quota.touchedIds.includes(id) || sentByMe;
+    needQuota = !quota.canSend && !counted;
+    canSend = Boolean(complete && live && !needPlan && (quota.canSend || counted));
     kundali = kundaliScore(
       {
         rashi: typeof mine.rashi === "string" ? mine.rashi : null,
@@ -407,7 +408,12 @@ export async function BrowseProfileView({
       locked: mode === "never",
       accepted,
       needPlan,
-      canReveal: !revealed && accepted && mode !== "never" && !needPlan && (quotaLeft === null || quotaLeft > 0 || isStaff),
+      counted: sentByMe || Boolean(viewed),
+      canReveal:
+        !revealed &&
+        mode !== "never" &&
+        !needPlan &&
+        (quotaLeft === null || quotaLeft > 0 || sentByMe || Boolean(viewed) || isStaff),
       used: quotaUsed,
       left: quotaLeft,
       limit: quotaLimit,

@@ -86,6 +86,7 @@ export type ProfileData = {
     locked: boolean;
     accepted: boolean;
     needPlan: boolean;
+    counted: boolean;
     canReveal: boolean;
     used: number;
     left: number | null;
@@ -135,22 +136,27 @@ function ContactPanel({
   return (
     <section className="pv-contact">
       <p className="pv-contact-title">Mobile & email</p>
-      <p className="pv-contact-quota">{quotaLine}</p>
+      <p className="pv-contact-quota">{quotaLine}. Send request or contact on one profile counts as 1.</p>
       {contact.revealed ? (
-        <ul>
-          <li>
-            <span>Mobile</span>
-            <strong>{contact.mobile || "Not on file"}</strong>
-          </li>
-          <li>
-            <span>Email</span>
-            <strong>{contact.email || "Not on file"}</strong>
-          </li>
-        </ul>
+        <>
+          {contact.limit != null ? (
+            <p className="pv-contact-left">
+              {contact.left ?? 0} left after this profile
+            </p>
+          ) : null}
+          <ul>
+            <li>
+              <span>Mobile</span>
+              <strong>{contact.mobile || "Not on file"}</strong>
+            </li>
+            <li>
+              <span>Email</span>
+              <strong>{contact.email || "Not on file"}</strong>
+            </li>
+          </ul>
+        </>
       ) : contact.locked ? (
         <p className="pv-contact-note">They keep mobile and email private.</p>
-      ) : !contact.accepted ? (
-        <p className="pv-contact-note">Contact opens after both families accept the request.</p>
       ) : contact.needPlan ? (
         <p className="pv-contact-note">
           A live plan is needed to view contact. <Link href="/app/plans">See plans</Link>
@@ -159,7 +165,13 @@ function ContactPanel({
         ask ? (
           <form action={viewContact} className="pv-contact-ask">
             <input type="hidden" name="to_profile_id" value={profileId} />
-            <p>This uses one contact view from your plan. Show mobile and email now?</p>
+            <p>
+              {contact.counted
+                ? "This profile is already on your count. Showing contact will not use another."
+                : `Showing mobile and email uses 1 for this profile. A send request here will not use another. ${
+                    contact.limit != null ? `You will have ${Math.max(0, (contact.left ?? 1) - 1)} left.` : ""
+                  }`}
+            </p>
             <button type="submit">Yes, show contact</button>
             <button type="button" onClick={() => setAsk(false)}>
               Not now
@@ -217,10 +229,17 @@ export function ProfileRedesign(props: ProfileData) {
 
   useEffect(() => {
     const code = new URLSearchParams(window.location.search).get("safety");
+    const contact = new URLSearchParams(window.location.search).get("contact");
     if (code === "shortlisted") setShortlistMsg("Added to shortlist");
     if (code === "unshortlisted") setShortlistMsg("Removed from shortlist");
     if (code === "shortlist_error") setShortlistMsg("Could not update shortlist");
-    if (code) window.setTimeout(() => setShortlistMsg(null), 2800);
+    if (contact === "1") {
+      const left = props.contact?.left;
+      setShortlistMsg(
+        left == null ? "Contact shown. This profile counts as 1." : `Contact shown. This profile counts as 1 · ${left} left.`,
+      );
+    }
+    if (code || contact === "1") window.setTimeout(() => setShortlistMsg(null), 3200);
   }, []);
 
   useEffect(() => {

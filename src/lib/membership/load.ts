@@ -4,7 +4,7 @@ import {
   interestLimitFor,
   quotaWindowStart,
   resolveQuota,
-  usedInterestsSince,
+  usedUniqueProfilesSince,
   type InterestQuota,
 } from "@/lib/membership/quota";
 
@@ -94,20 +94,27 @@ export async function loadInterestQuota(
     paidStartsAt: paid?.starts_at,
   });
   try {
-    const interests = await asDb(db).from("interests").select("from_profile_id, created_at").in("from_profile_id", profileIds);
+    const interests = await asDb(db)
+      .from("interests")
+      .select("from_profile_id, to_profile_id, created_at")
+      .in("from_profile_id", profileIds);
     const views = await asDb(db)
       .from("contact_views")
-      .select("viewer_profile_id, created_at")
+      .select("viewer_profile_id, viewed_profile_id, created_at")
       .in("viewer_profile_id", profileIds);
     if (interests.error || views.error) return resolveQuota(limit, limit);
-    const interestRows = (interests.data ?? []) as { from_profile_id?: string | null; created_at?: string | null }[];
-    const viewRows = ((views.data ?? []) as { viewer_profile_id?: string | null; created_at?: string | null }[]).map(
-      (row) => ({ from_profile_id: row.viewer_profile_id, created_at: row.created_at }),
-    );
-    return resolveQuota(
-      limit,
-      usedInterestsSince(interestRows, profileIds, since) + usedInterestsSince(viewRows, profileIds, since),
-    );
+    const interestRows = (interests.data ?? []) as {
+      from_profile_id?: string | null;
+      to_profile_id?: string | null;
+      created_at?: string | null;
+    }[];
+    const viewRows = (views.data ?? []) as {
+      viewer_profile_id?: string | null;
+      viewed_profile_id?: string | null;
+      created_at?: string | null;
+    }[];
+    const touchedIds = usedUniqueProfilesSince(interestRows, viewRows, profileIds, since);
+    return resolveQuota(limit, touchedIds.length, touchedIds);
   } catch {
     return resolveQuota(limit, limit);
   }

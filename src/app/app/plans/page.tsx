@@ -33,6 +33,9 @@ export default async function PlansPage({
     access,
     (mine ?? []).map((row) => row.id),
   );
+  const { data: touchRows } = quota.touchedIds.length
+    ? await db.from("profiles").select("id, subject_full_name, member_code").in("id", quota.touchedIds)
+    : { data: [] as { id: string; subject_full_name?: string | null; member_code?: string | null }[] };
   const catalog = plans.filter((plan) => plan.forSale);
   const pending = planByCode(pendingCode, catalog);
   const house = access.kind === "house";
@@ -57,11 +60,13 @@ export default async function PlansPage({
               </p>
             ) : null}
             {access.live && quota.limit !== null ? (
-              <p>Used {quota.used} · {quota.left ?? 0} pending</p>
+              <p>
+                Used {quota.used} of {quota.limit} · {quota.left ?? 0} left
+              </p>
             ) : access.live ? (
               <p>Unlimited</p>
             ) : (
-              <p>Search remains open. Interest or contact view needs a plan.</p>
+              <p>Search remains open. A send request or contact view needs a plan.</p>
             )}
           </div>
           {access.live && quota.limit !== null ? (
@@ -71,6 +76,32 @@ export default async function PlansPage({
             </div>
           ) : null}
         </div>
+
+        {access.live && quota.limit !== null ? (
+          <details className="plans-usage">
+            <summary>How this count works · click for more details</summary>
+            <p>
+              Send request, mobile, or email on the same person is one use. A later request or contact view on that
+              profile does not take another.
+            </p>
+            <p>
+              This period: {quota.used} used · {quota.left ?? 0} left of {quota.limit}.
+            </p>
+            {quota.touchedIds.length ? (
+              <ul className="plans-usage-list">
+                {(touchRows ?? []).map((row) => (
+                  <li key={row.id}>
+                    <a href={`/browse/${row.id}`}>
+                      {row.subject_full_name?.trim() || row.member_code || "Profile"}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No profiles counted yet this period.</p>
+            )}
+          </details>
+        ) : null}
 
         {pending || requested || error ? (
           <p className={`plans-msg${error ? " is-error" : ""}`}>
@@ -85,7 +116,7 @@ export default async function PlansPage({
         <div className="plans-welcome-banner">
           <div>
             <h3>🎁 Welcome offer</h3>
-            <p>{WELCOME_INTEREST_LIMIT} free interests or views for your first 2 months on any plan. Chat opens after both of you send interest and accept.</p>
+            <p>{WELCOME_INTEREST_LIMIT} free profile uses in your first 2 months. Send request or contact on one person counts as 1. Chat opens after both of you send interest and accept.</p>
           </div>
         </div>
 
