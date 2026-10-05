@@ -18,12 +18,7 @@ export type ProfileData = {
   voices?: Array<{ storage_path: string }>;
   memberCode?: string;
   about?: string | null;
-  personal?: any;
-  faith?: any;
-  work?: any;
-  family?: any;
-  residence?: any;
-  astro?: any;
+  details?: any;
   hope?: any;
   kundali?: any;
   shortlisted: boolean;
@@ -63,75 +58,55 @@ export function ProfileRedesign(props: ProfileData) {
   }
 
   return (
-    <div className="pr2-container">
-      {/* Hero Section */}
-      <section className="pr2-hero">
+    <div className="pr3-container">
+      {/* COMPACT Hero Section - Horizontal Layout */}
+      <section className="pr3-hero">
         {props.photos.length > 0 ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={props.photoUrl || ""} alt={props.name} className="pr2-hero-img" />
+          <img src={props.photoUrl || ""} alt={props.name} className="pr3-hero-img" />
         ) : (
-          <div className="pr2-hero-blank">
-            <span>{props.name.slice(0, 1)}</span>
-          </div>
+          <div className="pr3-hero-blank">{props.name.slice(0, 1)}</div>
         )}
-        <div className="pr2-hero-info">
-          <div>
-            <h1>{props.name}</h1>
-            {props.age || props.place ? (
-              <p>
-                {props.age && `${props.age}`}
-                {props.age && props.place && " • "}
-                {props.place}
-              </p>
-            ) : null}
-            {props.lastSeen ? <p className="pr2-online">🟢 {props.lastSeen}</p> : null}
-          </div>
+        <div className="pr3-hero-info">
+          <h1>{props.name}</h1>
+          {props.age || props.place ? (
+            <p>
+              {props.age && `${props.age}`}
+              {props.age && props.place && " • "}
+              {props.place}
+            </p>
+          ) : null}
+          {props.about && <p className="pr3-about">{props.about}</p>}
+          {props.lastSeen ? <p className="pr3-online">🟢 {props.lastSeen}</p> : null}
         </div>
       </section>
 
       {/* Toast */}
-      {shortlistMsg ? <div className="pr2-toast">{shortlistMsg}</div> : null}
+      {shortlistMsg ? <div className="pr3-toast">{shortlistMsg}</div> : null}
 
-      {/* Cards Grid */}
-      <section className="pr2-cards">
-        {/* About Card */}
-        {props.about && (
+      {/* COMPACT Cards */}
+      <section className="pr3-cards">
+        {/* Details Card */}
+        {props.details && props.details.length > 0 && (
           <div
-            className={`pr2-card${expanded.about ? " is-expanded" : ""}`}
-            onClick={() => toggleCard("about")}
+            className={`pr3-card${expanded.details ? " is-expanded" : ""}`}
+            onClick={() => toggleCard("details")}
           >
-            <div className="pr2-card-head">
-              <h2>👤 About</h2>
-              <span className="pr2-toggle">{expanded.about ? "−" : "+"}</span>
+            <div className="pr3-card-head">
+              <h2>ℹ️ Details</h2>
+              <span className="pr3-toggle">{expanded.details ? "−" : "+"}</span>
             </div>
-            {expanded.about && <p className="pr2-card-text">{props.about}</p>}
-          </div>
-        )}
-
-        {/* Personal Card */}
-        {props.personal && props.personal.length > 0 && (
-          <div
-            className={`pr2-card${expanded.personal ? " is-expanded" : ""}`}
-            onClick={() => toggleCard("personal")}
-          >
-            <div className="pr2-card-head">
-              <h2>💫 Personal</h2>
-              <span className="pr2-toggle">{expanded.personal ? "−" : "+"}</span>
-            </div>
-            {expanded.personal && (
-              <div className="pr2-card-body">
-                {props.personal.map((group: any, i: number) => (
-                  <div key={i} className="pr2-group">
-                    <h3>{group.title}</h3>
-                    <div className="pr2-items">
-                      {group.items.map((item: any, j: number) => (
-                        <div key={j} className="pr2-row">
-                          <span className="pr2-label">{item.k}</span>
-                          <span className="pr2-value">{item.v}</span>
-                          {item.sub && <span className="pr2-sub">{item.sub}</span>}
-                        </div>
-                      ))}
-                    </div>
+            {expanded.details && (
+              <div className="pr3-card-body">
+                {props.details.map((group: any, i: number) => (
+                  <div key={i} className="pr3-group">
+                    <h4>{group.title}</h4>
+                    {group.items.map((item: any, j: number) => (
+                      <div key={j} className="pr3-row">
+                        <span className="pr3-label">{item.k}</span>
+                        <span className="pr3-value">{item.v}</span>
+                      </div>
+                    ))}
                   </div>
                 ))}
               </div>
@@ -139,119 +114,26 @@ export function ProfileRedesign(props: ProfileData) {
           </div>
         )}
 
-        {/* Faith Card */}
-        {props.faith && props.faith.length > 0 && (
-          <div
-            className={`pr2-card${expanded.faith ? " is-expanded" : ""}`}
-            onClick={() => toggleCard("faith")}
-          >
-            <div className="pr2-card-head">
-              <h2>🙏 Faith & Values</h2>
-              <span className="pr2-toggle">{expanded.faith ? "−" : "+"}</span>
-            </div>
-            {expanded.faith && (
-              <div className="pr2-card-body">
-                {props.faith.map((group: any, i: number) => (
-                  <div key={i} className="pr2-group">
-                    <h3>{group.title}</h3>
-                    <div className="pr2-items">
-                      {group.items.map((item: any, j: number) => (
-                        <div key={j} className="pr2-row">
-                          <span className="pr2-label">{item.k}</span>
-                          <span className="pr2-value">{item.v}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Work Card */}
-        {props.work && props.work.length > 0 && (
-          <div
-            className={`pr2-card${expanded.work ? " is-expanded" : ""}`}
-            onClick={() => toggleCard("work")}
-          >
-            <div className="pr2-card-head">
-              <h2>💼 Work & Education</h2>
-              <span className="pr2-toggle">{expanded.work ? "−" : "+"}</span>
-            </div>
-            {expanded.work && (
-              <div className="pr2-card-body">
-                {props.work.map((group: any, i: number) => (
-                  <div key={i} className="pr2-group">
-                    <h3>{group.title}</h3>
-                    <div className="pr2-items">
-                      {group.items.map((item: any, j: number) => (
-                        <div key={j} className="pr2-row">
-                          <span className="pr2-label">{item.k}</span>
-                          <span className="pr2-value">{item.v}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Family Card */}
-        {props.family && props.family.length > 0 && (
-          <div
-            className={`pr2-card${expanded.family ? " is-expanded" : ""}`}
-            onClick={() => toggleCard("family")}
-          >
-            <div className="pr2-card-head">
-              <h2>👨‍👩‍👧 Family</h2>
-              <span className="pr2-toggle">{expanded.family ? "−" : "+"}</span>
-            </div>
-            {expanded.family && (
-              <div className="pr2-card-body">
-                {props.family.map((group: any, i: number) => (
-                  <div key={i} className="pr2-group">
-                    <h3>{group.title}</h3>
-                    <div className="pr2-items">
-                      {group.items.map((item: any, j: number) => (
-                        <div key={j} className="pr2-row">
-                          <span className="pr2-label">{item.k}</span>
-                          <span className="pr2-value">{item.v}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Seeking / Preferences Card */}
+        {/* Preferences Card */}
         {props.hope && props.hope.length > 0 && (
           <div
-            className={`pr2-card${expanded.hope ? " is-expanded" : ""}`}
+            className={`pr3-card${expanded.hope ? " is-expanded" : ""}`}
             onClick={() => toggleCard("hope")}
           >
-            <div className="pr2-card-head">
+            <div className="pr3-card-head">
               <h2>💕 Looking For</h2>
-              <span className="pr2-toggle">{expanded.hope ? "−" : "+"}</span>
+              <span className="pr3-toggle">{expanded.hope ? "−" : "+"}</span>
             </div>
             {expanded.hope && (
-              <div className="pr2-card-body">
+              <div className="pr3-card-body">
                 {props.hope.map((group: any, i: number) => (
-                  <div key={i} className="pr2-group">
-                    <h3>{group.title}</h3>
-                    <div className="pr2-items">
-                      {group.items.map((item: any, j: number) => (
-                        <div key={j} className="pr2-row">
-                          <span className="pr2-label">{item.k}</span>
-                          <span className="pr2-value">{item.v}</span>
-                        </div>
-                      ))}
-                    </div>
+                  <div key={i}>
+                    {group.items.map((item: any, j: number) => (
+                      <div key={j} className="pr3-row">
+                        <span className="pr3-label">{item.k}</span>
+                        <span className="pr3-value">{item.v}</span>
+                      </div>
+                    ))}
                   </div>
                 ))}
               </div>
@@ -259,178 +141,80 @@ export function ProfileRedesign(props: ProfileData) {
           </div>
         )}
 
-        {/* Residence Card */}
-        {props.residence && props.residence.length > 0 && (
-          <div
-            className={`pr2-card${expanded.residence ? " is-expanded" : ""}`}
-            onClick={() => toggleCard("residence")}
-          >
-            <div className="pr2-card-head">
-              <h2>🏠 Location & Residence</h2>
-              <span className="pr2-toggle">{expanded.residence ? "−" : "+"}</span>
-            </div>
-            {expanded.residence && (
-              <div className="pr2-card-body">
-                {props.residence.map((group: any, i: number) => (
-                  <div key={i} className="pr2-group">
-                    <h3>{group.title}</h3>
-                    <div className="pr2-items">
-                      {group.items.map((item: any, j: number) => (
-                        <div key={j} className="pr2-row">
-                          <span className="pr2-label">{item.k}</span>
-                          <span className="pr2-value">{item.v}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Astro Card */}
-        {props.astro && props.astro.length > 0 && (
-          <div
-            className={`pr2-card${expanded.astro ? " is-expanded" : ""}`}
-            onClick={() => toggleCard("astro")}
-          >
-            <div className="pr2-card-head">
-              <h2>⭐ Astrology & Birth</h2>
-              <span className="pr2-toggle">{expanded.astro ? "−" : "+"}</span>
-            </div>
-            {expanded.astro && (
-              <div className="pr2-card-body">
-                {props.astro.map((group: any, i: number) => (
-                  <div key={i} className="pr2-group">
-                    <h3>{group.title}</h3>
-                    <div className="pr2-items">
-                      {group.items.map((item: any, j: number) => (
-                        <div key={j} className="pr2-row">
-                          <span className="pr2-label">{item.k}</span>
-                          <span className="pr2-value">{item.v}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Media Card - Photos, Videos, Voice */}
+        {/* Media Card */}
         {(props.photos.length > 1 || props.videos?.length || props.voices?.length) && (
           <div
-            className={`pr2-card${expanded.media ? " is-expanded" : ""}`}
+            className={`pr3-card${expanded.media ? " is-expanded" : ""}`}
             onClick={() => toggleCard("media")}
           >
-            <div className="pr2-card-head">
-              <h2>📸 Media & Voice</h2>
-              <span className="pr2-toggle">{expanded.media ? "−" : "+"}</span>
+            <div className="pr3-card-head">
+              <h2>📸 Media</h2>
+              <span className="pr3-toggle">{expanded.media ? "−" : "+"}</span>
             </div>
             {expanded.media && (
-              <div className="pr2-card-body">
+              <div className="pr3-card-body pr3-media-body">
                 {props.photos.length > 1 && (
-                  <div className="pr2-group">
-                    <h3>📷 Photos ({props.photos.length})</h3>
-                    <div className="pr2-media-grid">
+                  <div className="pr3-media-section">
+                    <div className="pr3-media-grid">
                       {props.photos.map((photo: any, i: number) => (
-                        <div key={i} className="pr2-media-thumb">
-                          <img
-                            src={`${photo.storage_path}?w=80&h=80`}
-                            alt={`Photo ${i + 1}`}
-                            className="pr2-media-img"
-                          />
-                        </div>
+                        <img
+                          key={i}
+                          src={`${photo.storage_path}?w=60&h=60`}
+                          alt={`Photo ${i + 1}`}
+                          className="pr3-photo-thumb"
+                        />
                       ))}
                     </div>
                   </div>
                 )}
                 {props.videos && props.videos.length > 0 && (
-                  <div className="pr2-group">
-                    <h3>🎥 Videos ({props.videos.length})</h3>
-                    <div className="pr2-media-list">
-                      {props.videos.map((video: any, i: number) => (
-                        <a
-                          key={i}
-                          href={video.storage_path}
-                          className="pr2-media-link"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          ▶ Video {i + 1}
-                        </a>
-                      ))}
-                    </div>
+                  <div className="pr3-media-section">
+                    {props.videos.map((video: any, i: number) => (
+                      <a
+                        key={i}
+                        href={video.storage_path}
+                        className="pr3-media-link"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        🎥 Video {i + 1}
+                      </a>
+                    ))}
                   </div>
                 )}
                 {props.voices && props.voices.length > 0 && (
-                  <div className="pr2-group">
-                    <h3>🎤 Voice Messages ({props.voices.length})</h3>
-                    <div className="pr2-media-list">
-                      {props.voices.map((voice: any, i: number) => (
-                        <audio key={i} controls className="pr2-audio">
-                          <source src={voice.storage_path} type="audio/mpeg" />
-                        </audio>
-                      ))}
-                    </div>
+                  <div className="pr3-media-section">
+                    {props.voices.map((voice: any, i: number) => (
+                      <audio key={i} controls className="pr3-audio">
+                        <source src={voice.storage_path} type="audio/mpeg" />
+                      </audio>
+                    ))}
                   </div>
                 )}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Kundali Card */}
-        {props.kundali && (
-          <div
-            className={`pr2-card pr2-card-kundali${expanded.kundali ? " is-expanded" : ""}`}
-            onClick={() => toggleCard("kundali")}
-          >
-            <div className="pr2-card-head">
-              <h2>🌙 Kundali Match</h2>
-              <span className="pr2-toggle">{expanded.kundali ? "−" : "+"}</span>
-            </div>
-            {expanded.kundali && (
-              <div className="pr2-card-body">
-                <div className="pr2-kundali-main">
-                  <div className="pr2-kundali-score">
-                    <strong>{props.kundali.total}/{props.kundali.max}</strong>
-                    <small>{props.kundali.label}</small>
-                  </div>
-                  <div className="pr2-kundali-list">
-                    {props.kundali.parts &&
-                      props.kundali.parts.map((part: any, i: number) => (
-                        <div key={i} className="pr2-kundali-item">
-                          <span>{part.k}</span>
-                          <strong>{part.score}/{part.max}</strong>
-                        </div>
-                      ))}
-                  </div>
-                </div>
               </div>
             )}
           </div>
         )}
       </section>
 
-      {/* Action Buttons */}
-      {!props.own && props.user ? (
-        <section className="pr2-actions">
-          <form action={toggleShortlist} onSubmit={handleShortlist}>
-            <input type="hidden" name="profile_id" value={props.id} />
-            <input type="hidden" name="return_to" value={`/browse/${props.id}`} />
-            <button type="submit" className={`pr2-btn-primary${props.shortlisted ? " is-on" : ""}`}>
-              {props.shortlisted ? "♥ Shortlisted" : "♡ Shortlist"}
-            </button>
-          </form>
-          <SafetyProfileControl profileId={props.id} returnTo={`/browse/${props.id}`} name={props.name} />
-        </section>
-      ) : null}
+      {/* COMPACT Action Bar */}
+      <section className="pr3-footer">
+        <div className="pr3-actions">
+          {!props.own && props.user ? (
+            <>
+              <form action={toggleShortlist} onSubmit={handleShortlist} className="pr3-form-inline">
+                <input type="hidden" name="profile_id" value={props.id} />
+                <input type="hidden" name="return_to" value={`/browse/${props.id}`} />
+                <button type="submit" className={`pr3-btn-secondary${props.shortlisted ? " is-on" : ""}`}>
+                  {props.shortlisted ? "♥ Shortlist" : "♡ Shortlist"}
+                </button>
+              </form>
+              <SafetyProfileControl profileId={props.id} returnTo={`/browse/${props.id}`} name={props.name} />
+            </>
+          ) : null}
+        </div>
 
-      {/* Send Interest */}
-      {!props.own && props.user ? (
+        {/* Send Request Button */}
         <BirdDock
           profileId={props.id}
           interestId={props.interestId}
@@ -442,7 +226,15 @@ export function ProfileRedesign(props: ProfileData) {
           finishHref={props.finishHref}
           chat={props.chat}
         />
-      ) : null}
+      </section>
+
+      {/* Chat Section - Disabled */}
+      <section className="pr3-chat-section">
+        <div className="pr3-chat-disabled">
+          <h3>💬 Chat</h3>
+          <p className="pr3-chat-hint">Send a request first to start chatting</p>
+        </div>
+      </section>
     </div>
   );
 }

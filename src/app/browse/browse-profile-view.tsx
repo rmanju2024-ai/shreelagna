@@ -96,151 +96,72 @@ export async function BrowseProfileView({
   const videos = mediaRows.filter((m) => m.kind === "video");
   const voices = mediaRows.filter((m) => m.kind === "audio");
 
-  // Build complete profile data with ALL fields - NO SLICING
+  // Build COMPACT profile data - consolidated sections
   const text = (key: string) => String(profile[key as keyof typeof profile] ?? "—");
   
-  const personal = [
+  // COMPACT: Combine personal + faith + work + family into one section
+  const details = [
     {
-      title: "Physical",
+      title: "Physical & Lifestyle",
       items: [
         { k: "Height", v: text("height_cm") ? `${text("height_cm")} cm` : "—" },
-        { k: "Blood group", v: text("blood_group") },
-        { k: "Disability", v: text("physical_status") },
-      ],
-    },
-    {
-      title: "Lifestyle",
-      items: [
         { k: "Diet", v: text("diet") },
         { k: "Health", v: text("health_notes") },
-        { k: "Hobbies", v: asStringList(profile.hobby_list).join(", ") || "—" },
       ],
     },
-  ];
-
-  const faith = [
     {
-      title: "Religion & Community",
+      title: "Faith & Background",
       items: [
         { k: "Religion", v: nestedName(profile.religions) || "—" },
         { k: "Community", v: nestedName(profile.communities) || "—" },
-        { k: "Sub-community", v: text("sub_community") },
-        { k: "Caste", v: text("caste") },
-        { k: "Gothra", v: text("gotra") },
-      ],
-    },
-    {
-      title: "Language & Culture",
-      items: [
         { k: "Mother tongue", v: text("mother_tongue") },
-        { k: "Languages known", v: asStringList(profile.known_languages).join(", ") || "—" },
-        { k: "Grew up in", v: text("grew_up_in") },
-        { k: "Native state", v: text("native_state") },
-        { k: "Native city", v: text("native_city") },
-      ],
-    },
-  ];
-
-  const work = [
-    {
-      title: "Education",
-      items: [
-        { k: "Highest education", v: text("qualification") },
-        { k: "College", v: text("college_name") },
-        { k: "Stream", v: text("stream") },
-        { k: "City of birth", v: text("birth_city") },
+        { k: "Family type", v: text("family_type") },
       ],
     },
     {
-      title: "Career",
+      title: "Work & Education",
       items: [
+        { k: "Education", v: text("qualification") },
         { k: "Occupation", v: text("occupation") },
         { k: "Employer", v: text("employer_name") },
-        { k: "Employed in", v: text("employed_in") },
         { k: "Annual income", v: text("income_band") },
-        { k: "Settle abroad", v: text("settle_abroad") },
-        { k: "Future ambition", v: text("future_ambition") },
       ],
     },
-  ];
-
-  const family = [
     {
-      title: "Family Background",
+      title: "Location",
       items: [
-        { k: "Family type", v: text("family_type") },
-        { k: "Family status", v: text("family_status") },
-        { k: "Family location", v: text("family_location") },
-        { k: "Father", v: text("father_name") },
-        { k: "Father's occupation", v: text("father_occupation") },
-        { k: "Mother", v: text("mother_name") },
-        { k: "Mother's occupation", v: text("mother_occupation") },
-        { k: "Brothers", v: text("brothers_count") },
-        { k: "Brothers married", v: text("brothers_married_count") },
-        { k: "Sisters", v: text("sisters_count") },
-        { k: "Sisters married", v: text("sisters_married_count") },
-        { k: "Siblings note", v: text("siblings_note") },
-      ],
-    },
-  ];
-
-  const astro = [
-    {
-      title: "Birth Details",
-      items: [
-        { k: "Date of birth", v: text("date_of_birth") },
-        { k: "Time of birth", v: text("birth_time") },
-        { k: "City of birth", v: text("birth_city") },
+        { k: "Current city", v: text("current_city") },
+        { k: "State", v: text("current_state") },
+        { k: "Country", v: text("current_country") },
+        { k: "Willing to relocate", v: text("willing_to_relocate") },
       ],
     },
     {
-      title: "Horoscope",
+      title: "Astrology",
       items: [
         { k: "Rashi", v: text("rashi") },
         { k: "Nakshatra", v: text("nakshatra") },
-        { k: "Nakshatra pada", v: text("nakshatra_pada") },
-        { k: "Lagna", v: text("lagna") },
-        { k: "Gana", v: text("gana") },
-        { k: "Yoni animal", v: text("yoni_animal") },
         { k: "Mangalik", v: text("manglik") },
-      ],
-    },
-  ];
-
-  const residence = [
-    {
-      title: "Current Location",
-      items: [
-        { k: "Country", v: text("current_country") },
-        { k: "State", v: text("current_state") },
-        { k: "City", v: text("current_city") },
-        { k: "Pin code", v: text("pin_code") },
-        { k: "Living arrangement", v: text("living_arrangement") },
-        { k: "Citizenship", v: text("citizenship") },
-        { k: "Willing to relocate", v: text("willing_to_relocate") },
       ],
     },
   ];
 
   const hope = [
     {
-      title: "Partner Preferences",
+      title: "Looking For",
       items: [
-        { k: "Age", v: profile.pref_age_min && profile.pref_age_max ? `${profile.pref_age_min}–${profile.pref_age_max} years` : "—" },
+        { k: "Age", v: profile.pref_age_min && profile.pref_age_max ? `${profile.pref_age_min}–${profile.pref_age_max}` : "—" },
         { k: "Height", v: profile.pref_height_min && profile.pref_height_max ? `${profile.pref_height_min}–${profile.pref_height_max} cm` : "—" },
         { k: "Marital status", v: hopeDisplay(hopeValues(profile, "pref_maritals"), "Any") },
         { k: "Religion", v: hopeDisplay(hopeValues(profile, "pref_religions"), "Any") },
-        { k: "Languages", v: hopeDisplay(hopeValues(profile, "pref_tongues"), "Any") },
         { k: "Education", v: hopeDisplay(hopeValues(profile, "pref_educations"), "Any") },
         { k: "Occupation", v: hopeDisplay(hopeValues(profile, "pref_occupations"), "Any") },
-        { k: "Diet", v: hopeDisplay(hopeValues(profile, "pref_diets"), "Any") },
-        { k: "Income", v: hopeDisplay(hopeValues(profile, "pref_incomes"), "Any") },
         { k: "Location", v: hopeDisplay(hopeValues(profile, "pref_countries"), "Any") },
       ],
     },
   ];
 
-  // Build profile data with ALL sections and media
+  // Build COMPACT profile data
   const props: ProfileData = {
     id: String(profile.id),
     name: displayFirstName(typeof profile.subject_full_name === "string" ? profile.subject_full_name : "Member"),
@@ -265,12 +186,7 @@ export async function BrowseProfileView({
     needQuota: false,
     quotaLeft: null,
     finishHref: "/app/profiles/" + (me.active_profile_id || ""),
-    personal,
-    faith,
-    work,
-    family,
-    residence,
-    astro,
+    details,
     hope,
   };
 
