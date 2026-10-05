@@ -8,6 +8,12 @@ export type ProfileHeroData = {
   shortlisted: boolean;
 };
 
+type SafetyFormProps = {
+  profileId: string;
+  returnTo: string;
+  name: string;
+};
+
 /** Slim action bar. Name, photo, facts and Kundali already live in the profile sheet below, so they are not repeated. */
 export function ProfileHero({ data, showActions }: { data: ProfileHeroData; showActions: boolean }) {
   return (
@@ -22,7 +28,7 @@ export function ProfileHero({ data, showActions }: { data: ProfileHeroData; show
               {data.shortlisted ? "♥ Shortlisted" : "♡ Shortlist"}
             </button>
           </form>
-          <a className="ph-ghost" href="/app/plans">✨ Go premium</a>
+
           <SafetyProfileControl profileId={data.id} returnTo={`/browse/${data.id}`} name={data.name} />
         </>
       ) : null}

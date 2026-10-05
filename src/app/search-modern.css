@@ -423,3 +423,7 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
 .plans-btn { width: 100%; min-height: 2.7rem; border: 0; border-radius: 999px; font-weight: 900; font-size: 0.88rem; cursor: pointer; color: #3f0e0d; background: rgb(255 255 255 / 0%); border: 1.5px solid rgb(184 137 76 / 55%); }
 .plans-btn:hover { background: rgb(184 137 76 / 12%); }
 .plans-btn.is-primary { color: #fff; background: linear-gradient(135deg, #c2415a, #7c2d12); border: 0; }
+
+/* Shortlist toast message (replaces banner) */
+.shortlist-toast { position: fixed; bottom: clamp(1rem, env(safe-area-inset-bottom), 2rem); left: 50%; transform: translateX(-50%); padding: 0.7rem 1.2rem; border-radius: 999px; background: #fff; color: #14532d; font-weight: 800; font-size: 0.9rem; box-shadow: 0 16px 30px -12px rgb(63 14 13 / 70%); z-index: 200; animation: toast-in 0.3s ease both; }
+@keyframes toast-in { from { opacity: 0; transform: translateX(-50%) translateY(10px); } }
