@@ -11,8 +11,9 @@ type DetailGroup = {
   icon: string;
   title: string;
   lead?: { text: string; caption: string };
-  summary?: string;
+  lines?: string[];
   items?: { k: string; v: string }[];
+  note?: string | null;
 };
 type HopeItem = { k: string; v: string };
 
@@ -147,30 +148,6 @@ export function ProfileRedesign(props: ProfileData) {
 
       <div className="pv-layout">
         <div className="pv-main">
-          {props.about ? (
-            <PlanLock on={locked}>
-              <section className="pv-panel">
-                <div className="pv-panel-head">
-                  <span className="pv-ico">✎</span>
-                  <span>About</span>
-                </div>
-                <p className="pv-story">{props.about}</p>
-              </section>
-            </PlanLock>
-          ) : null}
-
-          {props.familyAbout ? (
-            <PlanLock on={locked}>
-              <section className="pv-panel">
-                <div className="pv-panel-head">
-                  <span className="pv-ico">⌂</span>
-                  <span>About the family</span>
-                </div>
-                <p className="pv-story">{props.familyAbout}</p>
-              </section>
-            </PlanLock>
-          ) : null}
-
           {props.details?.length ? (
             <PlanLock on={locked}>
               <section className="pv-panel">
@@ -191,7 +168,13 @@ export function ProfileRedesign(props: ProfileData) {
                           <span>{group.lead.caption}</span>
                         </p>
                       ) : null}
-                      {group.summary ? <p className="pv-summary">{group.summary}</p> : null}
+                      {group.lines?.length ? (
+                        <div className="pv-lines">
+                          {group.lines.map((text) => (
+                            <p key={text}>{text}</p>
+                          ))}
+                        </div>
+                      ) : null}
                       {group.items?.length ? (
                         <ul>
                           {group.items.map((item) => (
@@ -202,6 +185,7 @@ export function ProfileRedesign(props: ProfileData) {
                           ))}
                         </ul>
                       ) : null}
+                      {group.note ? <p className="pv-note">{group.note}</p> : null}
                     </article>
                   ))}
                 </div>

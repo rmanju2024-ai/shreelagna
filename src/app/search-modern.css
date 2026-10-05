@@ -962,11 +962,16 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
   color: #9a3412;
   font-weight: 800;
 }
-.pv-shell .pv-summary {
-  margin: 0 0 0.35rem;
+.pv-shell .pv-lines { display: grid; gap: 0.28rem; margin: 0 0 0.4rem; }
+.pv-shell .pv-lines p { margin: 0; color: #5b4a43; font-size: 0.86rem; line-height: 1.45; }
+.pv-shell .pv-note {
+  margin: 0.55rem 0 0;
+  padding-top: 0.45rem;
+  border-top: 1px dashed rgb(184 137 76 / 28%);
   color: #5b4a43;
-  font-size: 0.86rem;
+  font-size: 0.84rem;
   line-height: 1.5;
+  white-space: pre-wrap;
 }
 .pv-shell .pv-tile ul { margin: 0.15rem 0 0; padding: 0; list-style: none; display: grid; gap: 0.2rem; }
 .pv-shell .pv-tile li { display: flex; justify-content: space-between; gap: 0.4rem; font-size: 0.74rem; }

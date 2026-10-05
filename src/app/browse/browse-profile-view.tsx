@@ -72,11 +72,20 @@ function sayCount(n: number): string {
   return n >= 0 && n < words.length ? words[n] : String(n);
 }
 
-function sentences(...parts: Array<string | null | undefined>): string {
-  return parts
-    .filter((part): part is string => Boolean(part && part.trim()))
-    .map((part) => part.replace(/[.]+$/, ""))
-    .join(". ") + (parts.some(Boolean) ? "." : "");
+function line(text: string | null | undefined): string | null {
+  if (!text?.trim()) return null;
+  return `${text.trim().replace(/[.]+$/, "")}.`;
+}
+
+function linesOf(...parts: Array<string | null | undefined>): string[] {
+  return parts.map(line).filter((part): part is string => Boolean(part));
+}
+
+function asRole(value: unknown): string {
+  const text = dash(value);
+  if (!hasValue(text)) return text;
+  if (text === text.toUpperCase()) return text;
+  return text.charAt(0).toLowerCase() + text.slice(1);
 }
 
 function parentSentence(name: unknown, work: unknown, who: "Father" | "Mother"): string | null {
@@ -373,36 +382,40 @@ export async function BrowseProfileView({
   const nativeNow = placeLine(profile.native_city, profile.native_state, profile.native_country);
   const grew = hasValue(profile.grew_up_in) ? dash(profile.grew_up_in) : nativeNow;
   const bornOn = formatDob(profile.date_of_birth);
+  const who = asProfileType(profile.profile_type) === "vadhu" ? "She" : asProfileType(profile.profile_type) === "vara" ? "He" : "This member";
+  const religion = nestedName(profile.religions);
+  const community = nestedName(profile.communities);
 
   const details = [
     {
       icon: "✦",
       title: "Personal",
       lead: hasValue(fullName) ? { text: fullName, caption: "Name" } : undefined,
-      summary: sentences(
+      lines: linesOf(
         bornOn ? `Born on ${bornOn}` : null,
-        hasValue(marital) ? marital : null,
-        profile.height_cm ? `${profile.height_cm} cm tall` : null,
-        hasValue(profile.diet) ? `${dash(profile.diet)} by diet` : null,
-        spoken ? `Speaks ${spoken}` : null,
+        profile.height_cm ? `${who} is ${profile.height_cm} cm tall` : null,
+        spoken ? `${who} speaks ${spoken}` : null,
       ),
       items: factsOf(
+        fact("Marital status", marital),
+        fact("Diet", profile.diet),
         fact("Blood group", profile.blood_group),
         fact("Disability", profile.physical_status),
         fact("Health", profile.health_notes),
         hobbies ? { k: "Hobbies", v: hobbies } : null,
       ),
+      note: about,
     },
     {
       icon: "🕉",
       title: "Faith & language",
-      summary: sentences(
-        nestedName(profile.religions) && nestedName(profile.communities)
-          ? `Belongs to ${nestedName(profile.religions)}, ${nestedName(profile.communities)} community`
-          : nestedName(profile.religions)
-            ? `Religion is ${nestedName(profile.religions)}`
-            : nestedName(profile.communities)
-              ? `Community is ${nestedName(profile.communities)}`
+      lines: linesOf(
+        religion && community
+          ? `${who} is ${religion} and belongs to the ${community} community`
+          : religion
+            ? `${who} is ${religion}`
+            : community
+              ? `${who} belongs to the ${community} community`
               : null,
         hasValue(profile.mother_tongue) ? `Mother tongue is ${dash(profile.mother_tongue)}` : null,
       ),
@@ -415,18 +428,18 @@ export async function BrowseProfileView({
     {
       icon: "◎",
       title: "Education & work",
-      summary: sentences(
+      lines: linesOf(
         hasValue(profile.qualification) && hasValue(profile.college_name)
-          ? `Completed ${dash(profile.qualification)} from ${dash(profile.college_name)}`
+          ? `${who} completed ${dash(profile.qualification)} from ${dash(profile.college_name)}`
           : hasValue(profile.qualification)
-            ? `Education is ${dash(profile.qualification)}`
+            ? `${who} completed ${dash(profile.qualification)}`
             : hasValue(profile.college_name)
-              ? `Studied at ${dash(profile.college_name)}`
+              ? `${who} studied at ${dash(profile.college_name)}`
               : null,
         hasValue(profile.occupation) && hasValue(profile.employer_name)
-          ? `Works as ${dash(profile.occupation)} at ${dash(profile.employer_name)}`
+          ? `${who} works as ${asRole(profile.occupation)} at ${dash(profile.employer_name)}`
           : hasValue(profile.occupation)
-            ? `Works as ${dash(profile.occupation)}`
+            ? `${who} works as ${asRole(profile.occupation)}`
             : null,
       ),
       items: factsOf(
@@ -439,8 +452,8 @@ export async function BrowseProfileView({
     {
       icon: "⌂",
       title: "Family",
-      summary: sentences(
-        hasValue(profile.family_type) ? `This is a ${dash(profile.family_type)} family` : null,
+      lines: linesOf(
+        hasValue(profile.family_type) ? `This is a ${asRole(profile.family_type)} family` : null,
         hasValue(profile.family_location) ? `The family lives in ${dash(profile.family_location)}` : null,
         parentSentence(profile.father_name, profile.father_occupation, "Father"),
         parentSentence(profile.mother_name, profile.mother_occupation, "Mother"),
@@ -448,17 +461,18 @@ export async function BrowseProfileView({
         siblingSummary("sister", profile.sisters_count, profile.sisters_married_count),
       ),
       items: factsOf(fact("Living standard", profile.family_status)),
+      note: familyAbout,
     },
     {
       icon: "⌖",
       title: "Place",
-      summary: sentences(
-        grew ? `Grew up in ${grew}` : null,
-        liveNow ? `Now lives in ${liveNow}` : null,
+      lines: linesOf(
+        grew ? `${who} grew up in ${grew}` : null,
+        liveNow ? `${who} now lives in ${liveNow}` : null,
         yesNo(profile.willing_to_relocate) === "Yes"
-          ? "Open to relocating"
+          ? `${who} is open to relocating`
           : yesNo(profile.willing_to_relocate) === "No"
-            ? "Not looking to relocate"
+            ? `${who} is not looking to relocate`
             : null,
       ),
       items: factsOf(
@@ -470,7 +484,7 @@ export async function BrowseProfileView({
     {
       icon: "☽",
       title: "Kundali",
-      summary: sentences(
+      lines: linesOf(
         hasValue(profile.birth_city) && hasValue(profile.birth_time)
           ? `Born in ${dash(profile.birth_city)} at ${dash(profile.birth_time)}`
           : hasValue(profile.birth_city)
@@ -489,7 +503,7 @@ export async function BrowseProfileView({
         fact("Mangalik", profile.manglik),
       ),
     },
-  ].filter((group) => group.lead || group.summary || group.items.length);
+  ].filter((group) => group.lead || group.lines.length || group.items.length || group.note);
 
   const hope = [
     { k: "Age", v: profile.pref_age_min && profile.pref_age_max ? `${profile.pref_age_min}–${profile.pref_age_max}` : "—" },
@@ -526,8 +540,6 @@ export async function BrowseProfileView({
     videoUrls,
     voiceUrls,
     memberCode,
-    about,
-    familyAbout,
     shortlisted,
     own,
     user,
