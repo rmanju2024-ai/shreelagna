@@ -530,7 +530,7 @@ export async function BrowseProfileView({
         fact("Mangalik", profile.manglik),
       ),
     },
-  ].filter((group) => group.lead || group.lines.length || group.items.length || group.note);
+  ].filter((group) => group.lines.length || group.items.length || group.note);
 
   const hope = [
     { k: "Age", v: profile.pref_age_min && profile.pref_age_max ? `${profile.pref_age_min}–${profile.pref_age_max}` : "—" },
