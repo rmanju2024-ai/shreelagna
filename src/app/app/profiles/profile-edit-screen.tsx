@@ -52,7 +52,7 @@ export async function ProfileEditScreen({
         </p>
         <h1 className="mt-2 font-[family-name:var(--font-british)] text-4xl">{profile.subject_full_name}</h1>
       </div>
-      {error ? (
+      {error && !showForm ? (
         <p className="mt-4 max-w-2xl rounded-xl border border-red-200 bg-white px-4 py-3 text-sm text-red-800">
           {error}
         </p>

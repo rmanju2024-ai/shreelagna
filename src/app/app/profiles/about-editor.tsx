@@ -42,11 +42,14 @@ export function AboutEditor({
         required={required}
         disabled={locked}
         minLength={min > 0 ? min : undefined}
-        maxLength={max}
+        maxLength={min > 0 ? max : undefined}
         rows={7}
         placeholder={placeholder}
         value={text}
         className="input-premium about-surface"
+        onInvalid={(e) => {
+          if (min === 0) e.preventDefault();
+        }}
         onChange={(e) => clip(e.currentTarget.value)}
         onPaste={(e) => {
           e.preventDefault();

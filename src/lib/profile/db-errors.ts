@@ -57,7 +57,10 @@ export function saveErrorMessage(error: DbError): string {
   if (hay.includes("row-level security") || hay.includes("42501") || hay.includes("permission denied")) {
     return "The profile could not be saved just now. Please try Save again.";
   }
-  if (hay.includes("about") || hay.includes("profiles_about_len")) {
+  if (hay.includes("siblings_note") || hay.includes("profiles_siblings_note")) {
+    return "We could not save just now. Please try again.";
+  }
+  if (hay.includes("profiles_about_len") || (hay.includes("about") && !hay.includes("family"))) {
     return "The about section must stay within the character limit.";
   }
   if (hay.includes("religion") || hay.includes("community")) {

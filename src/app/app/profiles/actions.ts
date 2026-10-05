@@ -13,7 +13,7 @@ import {
 } from "@/lib/profile/completeness";
 import { formList } from "@/lib/profile/multi-values";
 import { loadFormLists } from "@/lib/profile/load-form-lists";
-import { ABOUT_MAX, ABOUT_MIN, aboutPlainText } from "@/lib/profile/about-html";
+import { ABOUT_MAX, ABOUT_MIN, FAMILY_NOTE_MAX, aboutPlainText } from "@/lib/profile/about-html";
 import { contactViewedCopy, interestReceivedCopy } from "@/lib/match/alert-copy";
 import { canAlertInterest } from "@/lib/match/profile-settings";
 import { canSendInterest, effectiveInterestStatus, openInterestBlocksSend } from "@/lib/match/interest-status";
@@ -320,7 +320,7 @@ export async function saveProfile(formData: FormData) {
     father_occupation: String(formData.get("father_occupation") ?? ""),
     mother_name: String(formData.get("mother_name") ?? ""),
     mother_occupation: String(formData.get("mother_occupation") ?? ""),
-    siblings_note: String(formData.get("siblings_note") ?? ""),
+    siblings_note: aboutPlainText(String(formData.get("siblings_note") ?? "")).slice(0, FAMILY_NOTE_MAX),
     family_status: String(formData.get("family_status") ?? ""),
     family_location: String(formData.get("family_location") ?? ""),
     physical_status: String(formData.get("physical_status") ?? ""),

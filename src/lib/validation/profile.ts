@@ -74,7 +74,10 @@ export const profileFormSchema = z.object({
   father_occupation: z.string().trim().max(120).optional().or(z.literal("")),
   mother_name: z.string().trim().max(80).optional().or(z.literal("")),
   mother_occupation: z.string().trim().max(120).optional().or(z.literal("")),
-  siblings_note: z.string().trim().max(ABOUT_HTML_MAX).optional().or(z.literal("")),
+  siblings_note: z.preprocess(
+    (v) => aboutPlainText(v == null ? "" : String(v)).slice(0, FAMILY_NOTE_MAX),
+    z.string().optional().or(z.literal("")),
+  ),
   family_status: z.string().trim().max(40).optional().or(z.literal("")),
   family_location: z.string().trim().max(120).optional().or(z.literal("")),
   physical_status: z.string().trim().max(40).optional().or(z.literal("")),
@@ -363,8 +366,7 @@ export function parseProfileForm(
     if (d.family_status && lists.familyStatuses.length && !lists.familyStatuses.includes(d.family_status)) {
       return { ok: false, error: "Pick family living standard from the list." };
     }
-    const familyNote = aboutPlainText(d.siblings_note ?? "").slice(0, FAMILY_NOTE_MAX);
-    parsed.data.siblings_note = familyNote;
+    parsed.data.siblings_note = aboutPlainText(d.siblings_note ?? "").slice(0, FAMILY_NOTE_MAX);
   }
   if (check(["about"])) {
     const about = aboutPlainText(d.about ?? "");

@@ -161,7 +161,7 @@ export function ProfileForm({
           Member ID <strong className="tracking-wider">{values.member_code}</strong>
         </p>
       ) : null}
-      {error ? (
+      {error && !/family within 600/i.test(error) ? (
         <p className="rounded-xl border border-red-200 bg-white px-4 py-3 text-sm text-red-800">
           {error}
         </p>
