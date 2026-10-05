@@ -18,6 +18,33 @@ type DetailGroup = {
 };
 type HopeItem = { k: string; v: string };
 
+const FACT_ICON: Record<string, string> = {
+  "Marital status": "💍",
+  Diet: "🍃",
+  "Blood group": "🩸",
+  Disability: "♿",
+  Health: "❤",
+  Hobbies: "♫",
+  "Sub-community": "◎",
+  Gothra: "ॐ",
+  Kuladevata: "🪔",
+  "Living arrangement": "⌂",
+  Citizenship: "🌐",
+  "Pin code": "📍",
+  "Employed in": "🏢",
+  Income: "₹",
+  "Settle abroad": "✈",
+  Ambition: "★",
+  "Living standard": "⌂",
+  Rashi: "☽",
+  Lagna: "☉",
+  Nakshatra: "✦",
+  "Nakshatra pada": "✧",
+  Gana: "☯",
+  Yoni: "❀",
+  Mangalik: "🔥",
+};
+
 export type ProfileData = {
   id: string;
   name: string;
@@ -190,6 +217,9 @@ export function ProfileRedesign(props: ProfileData) {
                         <ul>
                           {group.items.map((item) => (
                             <li key={item.k}>
+                              <b className="pv-fact-ico" aria-hidden>
+                                {FACT_ICON[item.k] ?? "•"}
+                              </b>
                               <span>{item.k}</span>
                               <strong>{item.v}</strong>
                             </li>
@@ -228,8 +258,12 @@ export function ProfileRedesign(props: ProfileData) {
                 <h3>Chat</h3>
                 <p>
                   {props.thread === "none"
-                    ? "Send a request under the photo. Chat stays locked until then."
-                    : "Use Send request under the photo to open chat."}
+                    ? "Send a request under the photo. Chat stays closed until the family accepts."
+                    : props.thread === "sent"
+                      ? "Your request is sent. Chat opens when they accept."
+                      : props.thread === "received"
+                        ? "They sent you a request. Reply from Interests to open chat."
+                        : "You are connected. Use chat under the photo to write."}
                 </p>
               </div>
             </div>

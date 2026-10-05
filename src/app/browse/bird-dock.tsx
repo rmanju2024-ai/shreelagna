@@ -21,16 +21,26 @@ export type PeekChatNote = {
 type Phase = "enter" | "idle" | "peck" | "send" | "deliver";
 
 const CHIRPS: Record<string, string[]> = {
-  none: ["Don't just look. Spark it.", "Cute? Then say so.", "One tap. A whole story.", "Stars like this one."],
-  sent: ["They're thinking. Say hi.", "Interest is in. Don't go quiet.", "A short note goes far."],
-  received: ["They blinked first. Reply.", "Don't freeze. Write back."],
-  accepted: ["Green light. Talk now.", "Hearts are waiting."],
-  closed: ["Fresh start. Spark again."],
-  plan: ["Unlock, then spark."],
-  quota: ["More sparks on a plan."],
-  finish: ["Finish your profile, then send a request."],
-  review: ["Your profile is complete. Waiting for review."],
-  peck: ["Tap me. I'm waiting."],
+  none: [
+    "If this profile feels right, send a request.",
+    "A warm request is how families begin talking.",
+    "One thoughtful request. That is all it takes.",
+  ],
+  sent: [
+    "Your request is with them. Give them a little time.",
+    "They have your interest. A reply may take a day or two.",
+  ],
+  received: [
+    "They sent you a request first. You can reply from Interests.",
+    "This family has already reached out. Open Interests to respond.",
+  ],
+  accepted: ["You are connected. Open chat and keep it kind.", "The request was accepted. A short hello goes a long way."],
+  closed: ["You can send a fresh request if this still feels right."],
+  plan: ["A live plan unlocks sending a request on this profile."],
+  quota: ["This month's requests are used. A plan adds more."],
+  finish: ["Complete your own profile first, then you can send a request."],
+  review: ["Your profile is complete and waiting for review. Requests open after that."],
+  peck: ["Ready when you are."],
 };
 
 function chirpPool(
