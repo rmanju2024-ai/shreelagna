@@ -357,6 +357,37 @@ export function isProfileComplete(p: CompletenessInput): boolean {
   return completenessChecks(p).filter((c) => c.mandatory).every((c) => c.filled);
 }
 
+export function mediaRowApproved(row?: { kind?: string; status?: string | null } | null): boolean {
+  return Boolean(row && (row.status === "approved" || !row.status));
+}
+
+export function isMandatoryReadyFromRecord(
+  row: Record<string, unknown>,
+  extras: {
+    hasApprovedPhoto: boolean;
+    emailOtpVerified: boolean;
+    hasVideo?: boolean;
+    hasAudio?: boolean;
+    smsOtpRequired?: boolean;
+  },
+): boolean {
+  return isProfileComplete(completenessFromRecord(row, extras));
+}
+
+export function extrasFromMedia(
+  rows: Array<{ kind?: string; status?: string | null }>,
+  emailOtpVerified: boolean,
+  smsOtpRequired = smsOtpRequiredFromEnv(),
+) {
+  return {
+    hasApprovedPhoto: rows.some((row) => row.kind === "photo" && mediaRowApproved(row)),
+    hasVideo: rows.some((row) => row.kind === "video" && mediaRowApproved(row)),
+    hasAudio: rows.some((row) => row.kind === "audio" && mediaRowApproved(row)),
+    emailOtpVerified,
+    smsOtpRequired,
+  };
+}
+
 export function introChoiceCount(p: CompletenessInput): number {
   const aboutOk = Boolean(p.about && aboutPlainText(p.about).length >= ABOUT_MIN);
   return [aboutOk, Boolean(p.hasVideo), Boolean(p.hasAudio)].filter(Boolean).length;

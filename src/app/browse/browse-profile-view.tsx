@@ -21,11 +21,13 @@ import { after } from "next/server";
 import { redirect } from "next/navigation";
 import {
   ageFromDob,
+  extrasFromMedia,
   completenessFromRecord,
   completenessScore,
   formatBirthTime,
   smsOtpRequiredFromEnv,
 } from "@/lib/profile/completeness";
+import { viewerEmailVerified } from "@/lib/profile/house-ready";
 import { maritalLabel, NATIVE_COUNTRIES, HOPE_ANY, MOTHER_TONGUES } from "@/lib/profile/options";
 import { asStringList, hopeDisplay, hopeValues, languagesKnown } from "@/lib/profile/multi-values";
 import { aboutPlainText } from "@/lib/profile/about-html";
@@ -312,6 +314,9 @@ export async function BrowseProfileView({
   let quotaUsed = 0;
   let quotaLimit: number | null = null;
   let awaitingReview = false;
+  let needComplete = false;
+  let viewerReadyPct = 0;
+  let pendingEssentials = 0;
   let interestStatus: ReturnType<typeof effectiveInterestStatus> | null = null;
   let sentByMe = false;
   let accepted = false;
@@ -342,7 +347,7 @@ export async function BrowseProfileView({
   const targetAccessP = owner ? loadMembership(db, owner) : Promise.resolve(null);
 
   if (mine && String(mine.id) !== id) {
-    const [interestRes, quota, blockRes, viewedRes, shortRes] = await Promise.all([
+    const [interestRes, quota, blockRes, viewedRes, shortRes, mineMediaRes] = await Promise.all([
       db
         .from("interests")
         .select("id, from_profile_id, to_profile_id, status, created_at")
@@ -367,6 +372,7 @@ export async function BrowseProfileView({
         .eq("owner_profile_id", String(mine.id))
         .eq("shortlisted_profile_id", id)
         .maybeSingle(),
+      db.from("media").select("kind, status").eq("profile_id", String(mine.id)),
     ]);
     if (blockRes.data?.length) return <UnavailableBrowse />;
     viewerType = asProfileType(mine.profile_type);
@@ -374,7 +380,13 @@ export async function BrowseProfileView({
     quotaLeft = quota.left;
     quotaUsed = quota.used;
     quotaLimit = quota.limit;
-    const complete = Boolean(mine.is_complete);
+    const viewerScore = completenessScore(
+      completenessFromRecord(mine as Record<string, unknown>, extrasFromMedia(mineMediaRes.data ?? [], viewerEmailVerified(me))),
+    );
+    const complete = viewerScore.mandatoryPct === 100;
+    needComplete = !complete && !isStaff;
+    viewerReadyPct = viewerScore.mandatoryPct;
+    pendingEssentials = viewerScore.pendingMandatory.length;
     const live = isPublicProfileStatus(typeof mine.status === "string" ? mine.status : null);
     awaitingReview = complete && !live;
     const link = (interestRes.data ?? []).find(
@@ -385,7 +397,7 @@ export async function BrowseProfileView({
     accepted = interestStatus === "accepted";
     interestId = typeof link?.id === "string" ? link.id : null;
     const counted = quota.touchedIds.includes(id) || sentByMe;
-    needQuota = !quota.canSend && !counted;
+    needQuota = complete && !quota.canSend && !counted;
     canSend = Boolean(complete && live && !needPlan && (quota.canSend || counted));
     kundali = kundaliScore(
       {
@@ -406,7 +418,7 @@ export async function BrowseProfileView({
 
     const mode = typeof profile.contact_release_mode === "string" ? profile.contact_release_mode : "";
     const viewed = viewedRes.data;
-    const revealed = Boolean(viewed) || isStaff;
+    const revealed = (Boolean(viewed) || isStaff) && (complete || isStaff);
     contact = {
       revealed,
       mobile: revealed && typeof profile.subject_mobile === "string" ? profile.subject_mobile.trim() : "",
@@ -414,8 +426,10 @@ export async function BrowseProfileView({
       locked: mode === "never",
       accepted,
       needPlan,
+      needComplete: !complete && !isStaff,
       counted: sentByMe || Boolean(viewed),
       canReveal:
+        complete &&
         !revealed &&
         mode !== "never" &&
         !needPlan &&
@@ -441,6 +455,8 @@ export async function BrowseProfileView({
       left: null,
       limit: null,
     };
+  } else if (!own && !isStaff) {
+    needComplete = true;
   }
 
   const targetAccess = await targetAccessP;
@@ -815,6 +831,9 @@ export async function BrowseProfileView({
     needPlan,
     needQuota,
     awaitingReview,
+    needComplete,
+    viewerReadyPct,
+    pendingEssentials,
     quotaLeft,
     contact,
     finishHref: "/app/profiles/" + (mine?.id || me.active_profile_id || ""),

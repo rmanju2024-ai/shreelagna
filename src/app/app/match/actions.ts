@@ -10,7 +10,7 @@ import { orderedProfilePair, pairCanChat, isStalePending, trimDeclineReason } fr
 import { pairPlanLive } from "@/lib/membership/access";
 import { loadMembership, loadMembershipForProfile } from "@/lib/membership/load";
 import { canSearchFamilies } from "@/lib/profile/visibility";
-import { displayFirstName } from "@/lib/profile/options";
+import { loadHouseReady, viewerEmailVerified } from "@/lib/profile/house-ready";
 import { previewText } from "@/lib/match/chat-ui";
 import { safeNextPath } from "@/lib/auth/safe-next";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
@@ -72,6 +72,10 @@ export async function respondInterest(formData: FormData) {
     .eq("id", row.to_profile_id)
     .maybeSingle();
   if (!mine || mine.status !== "active") redirect("/app/interests");
+  if (next === "accepted") {
+    const house = await loadHouseReady(supabase, mine.id, viewerEmailVerified(me));
+    if (!house?.ready) redirect("/app/interests?error=incomplete");
+  }
   let { data: other } = await supabase
     .from("profiles")
     .select("id, status, created_by, subject_full_name, notify_interest")

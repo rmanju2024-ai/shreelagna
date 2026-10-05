@@ -5,12 +5,8 @@ import { ensureAppUser } from "@/lib/auth/session";
 import { findOwnProfile } from "@/lib/profile/own-profile";
 import { isUniqueViolation, missingPayloadColumn, saveErrorMessage } from "@/lib/profile/db-errors";
 import { displayFirstName, toDbCreatorRelationship } from "@/lib/profile/options";
-import {
-  isProfileComplete,
-  nextReviewStatus,
-  smsOtpRequiredFromEnv,
-  type CompletenessInput,
-} from "@/lib/profile/completeness";
+import { isMandatoryReadyFromRecord, nextReviewStatus, smsOtpRequiredFromEnv } from "@/lib/profile/completeness";
+import { loadHouseReady, viewerEmailVerified } from "@/lib/profile/house-ready";
 import { formList } from "@/lib/profile/multi-values";
 import { loadFormLists } from "@/lib/profile/load-form-lists";
 import { ABOUT_MAX, ABOUT_MIN, FAMILY_NOTE_MAX, aboutPlainText } from "@/lib/profile/about-html";
@@ -89,93 +85,6 @@ async function recordSaveError(error: { message?: string; code?: string; details
   }
 }
 
-function toCompleteInput(
-  row: {
-    subject_full_name: string | null;
-    surname?: string | null;
-    date_of_birth: string | null;
-    current_city: string | null;
-    native_country?: string | null;
-    current_country?: string | null;
-    height_cm: number | null;
-    marital_status: string | null;
-    qualification: string | null;
-    occupation: string | null;
-    employed_in?: string | null;
-    income_band?: string | null;
-    employer_name?: string | null;
-    pref_notes?: string | null;
-    pref_age_min?: number | null;
-    pref_age_max?: number | null;
-    birth_city?: string | null;
-    birth_time?: string | null;
-    college_name?: string | null;
-    hobbies?: string | null;
-    brothers_count?: number | null;
-    sisters_count?: number | null;
-    father_name?: string | null;
-    father_occupation?: string | null;
-    mother_name?: string | null;
-    mother_occupation?: string | null;
-    family_status?: string | null;
-    living_arrangement?: string | null;
-    family_location?: string | null;
-    physical_status?: string | null;
-    about: string | null;
-    community_id: string | null;
-    prefer_not_community: boolean;
-    subject_mobile: string | null;
-    phone_otp_verified_at: string | null;
-  },
-  extras: {
-    hasApprovedPhoto: boolean;
-    emailOtpVerified: boolean;
-    hasVideo?: boolean;
-    hasAudio?: boolean;
-  },
-): CompletenessInput {
-  return {
-    subjectFullName: row.subject_full_name,
-    surname: row.surname ?? null,
-    dateOfBirth: row.date_of_birth,
-    currentCity: row.current_city,
-    nativeCountry: row.native_country ?? null,
-    currentCountry: row.current_country ?? null,
-    heightCm: row.height_cm,
-    maritalStatus: row.marital_status,
-    qualification: row.qualification,
-    occupation: row.occupation,
-    incomeBand: row.income_band,
-    employedIn: row.employed_in,
-    employerName: row.employer_name,
-    prefNotes: row.pref_notes,
-    prefAgeMin: row.pref_age_min,
-    prefAgeMax: row.pref_age_max,
-    birthCity: row.birth_city,
-    birthTime: row.birth_time,
-    collegeName: row.college_name,
-    hobbies: row.hobbies,
-    brothersCount: row.brothers_count,
-    sistersCount: row.sisters_count,
-    fatherOccupation: row.father_occupation,
-    motherOccupation: row.mother_occupation,
-    familyStatus: row.family_status,
-    familyLocation: row.family_location,
-    physicalStatus: row.physical_status,
-    livingArrangement: row.living_arrangement ?? null,
-    about: row.about,
-    communityId: row.community_id,
-    preferNotCommunity: row.prefer_not_community,
-    hasApprovedPhoto: extras.hasApprovedPhoto,
-    hasVideo: extras.hasVideo,
-    hasAudio: extras.hasAudio,
-    emailOtpVerified: extras.emailOtpVerified,
-    subjectMobile: row.subject_mobile,
-    phoneOtpVerified: Boolean(row.phone_otp_verified_at),
-    smsOtpRequired: smsOtpRequiredFromEnv(),
-  };
-}
-
 async function writeCompleteness(
   supabase: Awaited<ReturnType<typeof createClient>>,
   profileId: string,
@@ -197,23 +106,16 @@ async function writeCompleteness(
     .in("kind", ["video", "audio"])
     .eq("status", "approved");
 
-  const { data: saved } = await supabase
-    .from("profiles")
-    .select(
-      "status, subject_full_name, surname, date_of_birth, current_city, height_cm, marital_status, qualification, occupation, income_band, employed_in, pref_age_min, pref_age_max, about, community_id, prefer_not_community, subject_mobile, phone_otp_verified_at, birth_city, birth_time, college_name, hobbies, brothers_count, sisters_count, father_occupation, mother_occupation, family_status, family_location, physical_status, living_arrangement",
-    )
-    .eq("id", profileId)
-    .maybeSingle();
+  const { data: saved } = await supabase.from("profiles").select("*").eq("id", profileId).maybeSingle();
 
   if (!saved) return;
-  const complete = isProfileComplete(
-    toCompleteInput(saved, {
-      hasApprovedPhoto: Boolean(photos?.length),
-      hasVideo: Boolean(intros?.some((row) => row.kind === "video")),
-      hasAudio: Boolean(intros?.some((row) => row.kind === "audio")),
-      emailOtpVerified,
-    }),
-  );
+  const complete = isMandatoryReadyFromRecord(saved as Record<string, unknown>, {
+    hasApprovedPhoto: Boolean(photos?.length),
+    hasVideo: Boolean(intros?.some((row) => row.kind === "video")),
+    hasAudio: Boolean(intros?.some((row) => row.kind === "audio")),
+    emailOtpVerified,
+    smsOtpRequired: smsOtpRequiredFromEnv(),
+  });
   await supabase
     .from("profiles")
     .update({
@@ -621,13 +523,9 @@ export async function sendInterest(formData: FormData): Promise<{ ok: boolean; i
   const toId = String(formData.get("to_profile_id") ?? "");
   if (!toId || !me.active_profile_id) return { ok: false, error: "need_profile" };
 
-  const { data: mine } = await supabase
-    .from("profiles")
-    .select("id, is_complete, status, subject_full_name")
-    .eq("id", me.active_profile_id)
-    .maybeSingle();
+  const mine = await loadHouseReady(supabase, me.active_profile_id, viewerEmailVerified(me));
 
-  if (!mine?.is_complete || mine.status !== "active") return { ok: false, error: "incomplete" };
+  if (!mine?.ready || mine.status !== "active") return { ok: false, error: "incomplete" };
   if (!canSendInterest(mine.id, toId)) return { ok: false, error: "self" };
 
   const access = await loadMembership(supabase, me);
@@ -748,15 +646,14 @@ export async function revealContact(toId: string): Promise<{
   if (!toId || !me.active_profile_id) return { ok: false, error: "need_profile" };
   const db = createServiceClient() ?? supabase;
   const mineId = me.active_profile_id;
-  const [mineRes, viewRes, interestRes, targetRes] = await Promise.all([
-    supabase.from("profiles").select("id, is_complete, status, subject_full_name").eq("id", mineId).maybeSingle(),
+  const [mine, viewRes, interestRes, targetRes] = await Promise.all([
+    loadHouseReady(supabase, mineId, viewerEmailVerified(me)),
     db.from("contact_views").select("id").eq("viewer_profile_id", mineId).eq("viewed_profile_id", toId).maybeSingle(),
     db.from("interests").select("id").eq("from_profile_id", mineId).eq("to_profile_id", toId).limit(1).maybeSingle(),
     db.from("profiles").select("id, status, subject_mobile, created_by, contact_release_mode").eq("id", toId).maybeSingle(),
   ]);
-  const mine = mineRes.data;
   const target = targetRes.data;
-  if (!mine?.is_complete || mine.status !== "active") return { ok: false, error: "incomplete" };
+  if (!mine?.ready || mine.status !== "active") return { ok: false, error: "incomplete" };
   if (mine.id === toId) return { ok: false, error: "own" };
   if (!target || target.status !== "active") return { ok: false, error: "unavailable" };
   if (target.contact_release_mode === "never") return { ok: false, error: "contact_private" };

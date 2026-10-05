@@ -10,6 +10,7 @@ import {
   formatBirthTime,
   formatBirthWithAge,
   isAdult,
+  isMandatoryReadyFromRecord,
   isProfileComplete,
   maxDobIso,
   nextReviewStatus,
@@ -125,6 +126,27 @@ describe("completeness", () => {
     expect(canInitiateConnect({ isComplete: true, status: "active" })).toBe(
       true,
     );
+  });
+
+  it("does not treat a stale complete flag as live must-have readiness", () => {
+    expect(
+      isMandatoryReadyFromRecord(
+        {
+          subject_full_name: "Manju",
+          surname: "Iyer",
+          date_of_birth: "1995-01-01",
+          current_city: "Chennai",
+          height_cm: 165,
+          marital_status: "never_married",
+          qualification: "Graduate",
+          occupation: "Software professional",
+          about: "A".repeat(80),
+          subject_mobile: "9876543210",
+          is_complete: true,
+        },
+        { hasApprovedPhoto: true, emailOtpVerified: true },
+      ),
+    ).toBe(false);
   });
 
   it("allows inbound replies when incomplete", () => {

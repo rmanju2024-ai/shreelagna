@@ -83,6 +83,9 @@ export type ProfileData = {
   needPlan: boolean;
   needQuota: boolean;
   awaitingReview?: boolean;
+  needComplete?: boolean;
+  viewerReadyPct?: number;
+  pendingEssentials?: number;
   quotaLeft: number | null;
   quotaUsed?: number;
   quotaLimit?: number | null;
@@ -99,6 +102,7 @@ export type ProfileData = {
     used: number;
     left: number | null;
     limit: number | null;
+    needComplete?: boolean;
   };
   chat?: {
     myProfileId: string | null;
@@ -181,7 +185,11 @@ function ContactPanel({
       if (!res.ok) {
         setShown(null);
         setAsk(true);
-        setFail("Could not show contact just now. Try again.");
+        setFail(
+          res.error === "incomplete"
+            ? "Fill every house essential on your biodata first."
+            : "Could not show contact just now. Try again.",
+        );
         return;
       }
       setShown({ mobile: res.mobile || "Not on file", email: res.email || "Not on file" });
@@ -213,6 +221,11 @@ function ContactPanel({
       ) : contact.needPlan ? (
         <p className="pv-contact-note">
           A live plan is needed to view contact. <Link href="/app/plans">See plans</Link>
+        </p>
+      ) : contact.needComplete ? (
+        <p className="pv-contact-note">
+          Complete your biodata first. Then this family's mobile and email can be shown.{" "}
+          <Link href="/app/account">Complete my profile</Link>
         </p>
       ) : contact.canReveal ? (
         ask ? (
@@ -246,16 +259,119 @@ function ContactPanel({
   );
 }
 
-function PlanLock({ on, children }: { on: boolean; children: React.ReactNode }) {
+function DetailTiles({ groups }: { groups: DetailGroup[] }) {
+  return (
+    <div className="pv-grid">
+      {groups.map((group) => (
+        <article key={group.title} className={`pv-tile${group.wide ? " is-wide" : ""}`}>
+          <h2>
+            <i>{group.icon}</i>
+            {group.title}
+          </h2>
+          {group.lead ? (
+            <p className="pv-lead">
+              <strong>{group.lead.text}</strong>
+              <span>{group.lead.caption}</span>
+            </p>
+          ) : null}
+          {group.lines?.length ? (
+            <div className="pv-lines">
+              {group.lines.map((text) => (
+                <RichLine key={text} text={text} />
+              ))}
+            </div>
+          ) : null}
+          {group.items?.length ? (
+            <ul>
+              {group.items.map((item) => (
+                <li key={item.k}>
+                  <b className="pv-fact-ico" aria-hidden>
+                    {FACT_ICON[item.k] ?? "•"}
+                  </b>
+                  <span>{item.k}</span>
+                  <strong>{item.v}</strong>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {group.note ? <p className="pv-note">{group.note}</p> : null}
+        </article>
+      ))}
+    </div>
+  );
+}
+
+function PlanLock({
+  on,
+  href,
+  cta,
+  children,
+  message,
+}: {
+  on: boolean;
+  href: string;
+  cta: string;
+  message: string;
+  children: React.ReactNode;
+}) {
   if (!on) return children;
   return (
     <div className="pv-lock">
       <div className="pv-lock-body">{children}</div>
       <div className="pv-lock-veil">
-        <p>A live plan unlocks the full profile, extra photos, video and voice.</p>
-        <Link href="/app/plans">See plans</Link>
+        <p>{message}</p>
+        <Link href={href}>{cta}</Link>
       </div>
     </div>
+  );
+}
+
+function ReadyBanner({
+  needComplete,
+  needPlan,
+  pct,
+  pending,
+  finishHref,
+}: {
+  needComplete: boolean;
+  needPlan: boolean;
+  pct: number;
+  pending: number;
+  finishHref: string;
+}) {
+  const left = Math.max(0, pending);
+  const both = needComplete && needPlan;
+  const kicker = both ? "Profile and plan open this house" : needComplete ? "Your biodata opens this house" : "A live plan opens this house";
+  const title = both
+    ? "Complete your must-haves and keep a live plan to unlock education, family, kundali and contact."
+    : needComplete
+      ? "Finish your must-haves to unlock education, family, kundali and contact."
+      : "Start a live plan to unlock education, family, kundali, extra photos and contact.";
+  const body = both
+    ? `Must-have is at ${pct}%, with ${left} house ${left === 1 ? "essential" : "essentials"} still open, and there is no live plan on this account yet. Finish both, then this family's full story opens.`
+    : needComplete
+      ? pct > 0
+        ? `Must-have is at ${pct}%. ${
+            left === 0
+              ? "A little polish still waits, then the full story opens."
+              : `${left} house ${left === 1 ? "essential still waits" : "essentials still wait"} for your hand.`
+          }`
+        : "Complete your own profile first. Then this family's details, extra photos, and contact will open."
+      : "A live plan keeps the house open: full details, extra photos, video, voice, requests and contact.";
+  return (
+    <aside className="pv-ready-banner" role="status">
+      <p className="pv-ready-kicker">{kicker}</p>
+      <h2>{title}</h2>
+      <p>{body}</p>
+      <div className="pv-ready-actions">
+        {needComplete ? <Link href={finishHref}>Complete my profile</Link> : null}
+        {needPlan ? (
+          <Link href="/app/plans" className={needComplete ? "is-soft" : undefined}>
+            See plans
+          </Link>
+        ) : null}
+      </div>
+    </aside>
   );
 }
 
@@ -268,8 +384,18 @@ export function ProfileRedesign(props: ProfileData) {
   const [hero, setHero] = useState(0);
   const [lightbox, setLightbox] = useState<number | null>(null);
   const photos = props.photoUrls?.length ? props.photoUrls : props.photoUrl ? [props.photoUrl] : [];
-  const visiblePhotos = props.needPlan && !props.own ? photos.slice(0, 1) : photos;
-  const locked = Boolean(props.needPlan && !props.own);
+  const gate = Boolean(!props.own && (props.needComplete || props.needPlan));
+  const visiblePhotos = gate ? photos.slice(0, 1) : photos;
+  const locked = gate;
+  const lockHref = props.needComplete ? props.finishHref : "/app/plans";
+  const lockCta = props.needComplete ? "Complete my profile" : "See plans";
+  const lockMessage = props.needComplete
+    ? props.needPlan
+      ? "Complete your biodata and keep a live plan to open this chapter of their story."
+      : "Complete your biodata to open this chapter of their story."
+    : "A live plan unlocks the full profile, extra photos, video and voice.";
+  const personalDetails = (props.details ?? []).filter((group) => group.title === "Personal");
+  const closedDetails = (props.details ?? []).filter((group) => group.title !== "Personal");
   const spark = !props.own && props.user ? (
     <BirdDock
       inline
@@ -293,16 +419,18 @@ export function ProfileRedesign(props: ProfileData) {
   useEffect(() => {
     const code = new URLSearchParams(window.location.search).get("safety");
     const contact = new URLSearchParams(window.location.search).get("contact");
+    const err = new URLSearchParams(window.location.search).get("error");
     if (code === "shortlisted") setShortlistMsg("Added to shortlist");
     if (code === "unshortlisted") setShortlistMsg("Removed from shortlist");
     if (code === "shortlist_error") setShortlistMsg("Could not update shortlist");
+    if (err === "incomplete") setShortlistMsg("Fill every house essential first, then you can send a request or view contact.");
     if (contact === "1") {
       const left = props.contact?.left;
       setShortlistMsg(
         left == null ? "Contact shown." : `Contact shown · ${left} left.`,
       );
     }
-    if (code || contact === "1") {
+    if (code || contact === "1" || err === "incomplete") {
       window.clearTimeout(toastTimer.current);
       toastTimer.current = window.setTimeout(() => setShortlistMsg(null), 3200);
     }
@@ -367,7 +495,7 @@ export function ProfileRedesign(props: ProfileData) {
             </span>
             {props.lastSeen ? <span className="pv-live">{props.lastSeen}</span> : null}
           </p>
-          {(props.kundali?.total != null || (props.fitScore && props.fitScore.total > 0)) ? (
+          {(props.kundali?.total != null || (props.fitScore && props.fitScore.total > 0)) && !gate ? (
             <p className="pv-scores">
               {props.kundali?.total != null ? (
                 <span className="pv-match-chip">
@@ -407,7 +535,17 @@ export function ProfileRedesign(props: ProfileData) {
         ) : null}
       </header>
 
-      {props.matches?.length ? (
+      {gate ? (
+        <ReadyBanner
+          needComplete={Boolean(props.needComplete)}
+          needPlan={Boolean(props.needPlan)}
+          pct={props.viewerReadyPct ?? 0}
+          pending={props.pendingEssentials ?? 0}
+          finishHref={props.finishHref}
+        />
+      ) : null}
+
+      {props.matches?.length && !gate ? (
         <div className="pv-match-banner" aria-label="Matching points">
           <span className="pv-match-kicker">
             <CoupleMark className="pv-couple" />
@@ -427,55 +565,30 @@ export function ProfileRedesign(props: ProfileData) {
 
       <div className="pv-layout">
         <div className="pv-main">
-          {props.details?.length ? (
-            <PlanLock on={locked}>
+          {personalDetails.length ? (
+            <section className="pv-panel">
+              <div className="pv-panel-head">
+                <span className="pv-ico">▣</span>
+                <span>Profile details</span>
+              </div>
+              <DetailTiles groups={personalDetails} />
+            </section>
+          ) : null}
+
+          {closedDetails.length ? (
+            <PlanLock on={locked} href={lockHref} cta={lockCta} message={lockMessage}>
               <section className="pv-panel">
                 <div className="pv-panel-head">
                   <span className="pv-ico">▣</span>
-                  <span>Profile details</span>
+                  <span>More about this family</span>
                 </div>
-                <div className="pv-grid">
-                  {props.details.map((group) => (
-                    <article key={group.title} className={`pv-tile${group.wide ? " is-wide" : ""}`}>
-                      <h2>
-                        <i>{group.icon}</i>
-                        {group.title}
-                      </h2>
-                      {group.lead ? (
-                        <p className="pv-lead">
-                          <strong>{group.lead.text}</strong>
-                          <span>{group.lead.caption}</span>
-                        </p>
-                      ) : null}
-                      {group.lines?.length ? (
-                        <div className="pv-lines">
-                          {group.lines.map((text) => (
-                            <RichLine key={text} text={text} />
-                          ))}
-                        </div>
-                      ) : null}
-                      {group.items?.length ? (
-                        <ul>
-                          {group.items.map((item) => (
-                            <li key={item.k}>
-                              <b className="pv-fact-ico" aria-hidden>
-                                {FACT_ICON[item.k] ?? "•"}
-                              </b>
-                              <span>{item.k}</span>
-                              <strong>{item.v}</strong>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : null}
-                      {group.note ? <p className="pv-note">{group.note}</p> : null}
-                    </article>
-                  ))}
-                </div>
+                <DetailTiles groups={closedDetails} />
               </section>
             </PlanLock>
           ) : null}
 
           {props.hope?.length ? (
+            <PlanLock on={locked} href={lockHref} cta={lockCta} message={lockMessage}>
             <section className="pv-panel">
               <div className="pv-panel-head">
                 <span className="pv-ico">
@@ -503,9 +616,11 @@ export function ProfileRedesign(props: ProfileData) {
                 ))}
               </div>
             </section>
+            </PlanLock>
           ) : null}
 
           {!props.own ? (
+          <PlanLock on={locked} href={lockHref} cta={lockCta} message={lockMessage}>
           <section className={`pv-chat${props.thread === "none" ? " is-locked" : " is-open"}`}>
             <div className="pv-chat-head">
               <span className="pv-ico">✉</span>
@@ -523,6 +638,7 @@ export function ProfileRedesign(props: ProfileData) {
               </div>
             </div>
           </section>
+          </PlanLock>
           ) : null}
         </div>
 
@@ -571,16 +687,18 @@ export function ProfileRedesign(props: ProfileData) {
               ))}
             </div>
           ) : null}
-          <PlanLock on={locked}>
-            <>
-              {props.videoUrls?.map((src, i) => (
-                <video key={src} className="pv-video" controls src={src} aria-label={`Video ${i + 1}`} />
-              ))}
-              {props.voiceUrls?.map((src, i) => (
-                <audio key={src} className="pv-audio" controls src={src} aria-label={`Voice ${i + 1}`} />
-              ))}
-            </>
-          </PlanLock>
+          {props.videoUrls?.length || props.voiceUrls?.length ? (
+            <PlanLock on={locked} href={lockHref} cta={lockCta} message={lockMessage}>
+              <>
+                {props.videoUrls?.map((src, i) => (
+                  <video key={src} className="pv-video" controls src={src} aria-label={`Video ${i + 1}`} />
+                ))}
+                {props.voiceUrls?.map((src, i) => (
+                  <audio key={src} className="pv-audio" controls src={src} aria-label={`Voice ${i + 1}`} />
+                ))}
+              </>
+            </PlanLock>
+          ) : null}
           {!visiblePhotos.length && !props.videoUrls?.length && !props.voiceUrls?.length ? (
             <p className="pv-media-empty">No photo, video or voice yet.</p>
           ) : null}
