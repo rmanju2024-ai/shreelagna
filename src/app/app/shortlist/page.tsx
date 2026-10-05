@@ -50,7 +50,7 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
         </header>
         <SafetyFlash code={safety} />
         {rows.length ? (
-          <ul className="list-cards">
+          <ul className="list-cards is-hub">
             {rows.map((id) => {
               const p = byId.get(id)!;
               const photo = publicMediaUrl(photoOf.get(id));
