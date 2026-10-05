@@ -24,7 +24,7 @@ export default async function NewProfilePage({
 
   return (
     <PageShell>
-      <div className="profile-create-shell grid items-start gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)]">
+      <div className="profile-create-shell atelier grid items-start gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)]">
         <aside className="profile-create-intro relative overflow-hidden rounded-[1.8rem] border border-[var(--gold)]/35 shadow-[0_28px_50px_rgba(47,22,14,0.18)] lg:sticky lg:top-32">
           <div className="relative min-h-[280px] lg:min-h-[520px]">
             <KalyanBanner intensity="hero" />
@@ -32,7 +32,7 @@ export default async function NewProfilePage({
               <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--gold-soft)]">
                 Register a profile
               </p>
-              <h1 className="mt-3 font-[family-name:var(--font-display)] text-4xl leading-tight text-[#f7efe4] sm:text-5xl">
+              <h1 className="mt-3 font-[family-name:var(--font-british)] text-4xl leading-tight text-[#f7efe4] sm:text-5xl">
                 Present a bride or groom with grace.
               </h1>
               <p className="mt-4 max-w-md text-sm leading-relaxed text-[#f3e6d4]/88">

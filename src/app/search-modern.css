@@ -268,7 +268,13 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
 /* Page headings sit on a solid panel so the photo scene never fights the text */
 .page-head-panel{padding:1rem 1.25rem;border-radius:1.1rem;background:rgb(255 255 255 / 94%);box-shadow:0 10px 30px rgb(20 6 5 / 22%);max-width:62rem}
 .page-head-panel .browse-kicker{color:#8a3b12;margin:0}
-.page-head-panel h1{margin:.2rem 0 .4rem;color:#2b1a14}
+.page-head-panel h1 {
+  margin:.2rem 0 .4rem;
+  color:#2b1a14;
+  font-family: var(--font-british), var(--font-display), Palatino, serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
 .page-head-panel p{color:#3d2a22;font-size:.95rem;margin:0}
 .sx-stage > .legal-effective,.sx-stage > .set-lead,.public-stage > .legal-effective{width:fit-content;max-width:100%;padding:.4rem .8rem;border-radius:.7rem;background:rgb(255 255 255 / 92%);color:#3d2a22}
 .sx-hero .sx-hero-sub{color:#2b1a14;background:rgb(255 255 255 / 80%);width:fit-content;padding:.3rem .65rem;border-radius:.6rem}

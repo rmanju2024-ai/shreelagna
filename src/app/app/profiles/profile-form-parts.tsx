@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { FieldHelp } from "@/app/app/profiles/field-help";
+import { FieldMark } from "@/app/app/profiles/field-mark";
 import { Select3d } from "@/components/select3d";
 import { citiesForState, type FormLists } from "@/lib/profile/form-lists";
 import { isIndiaNative } from "@/lib/profile/options";
@@ -144,6 +145,7 @@ export function Field({
   return (
     <div className={`field-3d ${className}`}>
       <span className="field-3d-label">
+        <FieldMark label={label} />
         {label}
         {required ? (
           <span className="field-star" aria-hidden>

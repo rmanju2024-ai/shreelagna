@@ -18,7 +18,7 @@ export const SECTION_TITLES: Record<ProfileEditTarget, string> = {
   faith: "Religion & astronomy",
   work: "Education & work",
   family: "Family",
-  partner: "Partner Preference",
+  partner: "Partner preference",
   album: "Album",
 };
 

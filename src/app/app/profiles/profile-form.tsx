@@ -14,6 +14,7 @@ import {
 import { citiesForState, pickListed, sortLabels, type FormLists } from "@/lib/profile/form-lists";
 import { asStringList, hopeValues, languagesKnown } from "@/lib/profile/multi-values";
 import { FieldHelp } from "@/app/app/profiles/field-help";
+import { FieldMark } from "@/app/app/profiles/field-mark";
 import { HopePicker } from "@/app/app/profiles/hope-picker";
 import Link from "next/link";
 import { Select3d } from "@/components/select3d";
@@ -29,11 +30,11 @@ import { Field, PlaceBlock, SaveButton, SiblingCounts } from "@/app/app/profiles
 export type { ProfileFormValues };
 
 const WIZARD_STEPS = [
-  { id: 1, short: "Start", title: "Basics", hint: "Who, identity and contact" },
-  { id: 2, short: "Life", title: "Life today", hint: "Home, work and lifestyle" },
-  { id: 3, short: "Faith", title: "Faith", hint: "Birth and horoscope" },
-  { id: 4, short: "Story", title: "Your story", hint: "About and family" },
-  { id: 5, short: "Match", title: "Preferences", hint: "What you are looking for" },
+  { id: 1, short: "Start", title: "Basics", hint: "Who, identity and contact", mark: "Name" },
+  { id: 2, short: "Life", title: "Life today", hint: "Home, work and lifestyle", mark: "Occupation" },
+  { id: 3, short: "Faith", title: "Faith", hint: "Birth and horoscope", mark: "Religion" },
+  { id: 4, short: "Story", title: "Your story", hint: "About and family", mark: "About" },
+  { id: 5, short: "Match", title: "Preferences", hint: "What you are looking for", mark: "Partner" },
 ] as const;
 
 export function ProfileForm({
@@ -129,7 +130,7 @@ export function ProfileForm({
   return (
     <form
       action={saveProfile}
-      className={`form-3d${wizard ? " is-wizard" : ""}`}
+      className={`form-3d atelier${wizard ? " is-wizard" : ""}`}
       autoComplete="off"
       noValidate={wizard}
       onSubmit={(event) => {
@@ -190,7 +191,7 @@ export function ProfileForm({
                 disabled={item.id > wizardStep}
                 onClick={() => moveWizard(item.id)}
               >
-                <b>{wizardStep > item.id ? "✓" : item.id}</b>
+                <b>{wizardStep > item.id ? "✓" : <FieldMark label={item.mark} />}</b>
                 <span>
                   <strong>{item.short}</strong>
                   <small>{item.title}</small>
@@ -998,7 +999,7 @@ export function ProfileForm({
       {show("partner") ? (
       <section className={panelClass(5)} data-step="5">
         <p className="form-3d-kicker">{mode === "edit" ? "Hope for a match" : "Step five"}</p>
-        <h2 className="form-3d-title">Partner Preference</h2>
+        <h2 className="form-3d-title">Partner preference</h2>
         <div className="gold-ornament" />
         <p className="mt-3 text-sm text-[var(--muted)]">
           These are partner expectations — age, height, faith, home, education, work, diet.

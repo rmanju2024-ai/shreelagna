@@ -45,12 +45,12 @@ export async function ProfileEditScreen({
 
   return (
     <PageShell>
-      <div className="page-head-panel">
+      <div className="page-head-panel atelier">
         <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)]">
-          Edit {heading.toLowerCase()}
+          Amend {heading.toLowerCase()}
           {memberCode ? ` · ${memberCode}` : ""}
         </p>
-        <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl">{profile.subject_full_name}</h1>
+        <h1 className="mt-2 font-[family-name:var(--font-british)] text-4xl">{profile.subject_full_name}</h1>
       </div>
       {error ? (
         <p className="mt-4 max-w-2xl rounded-xl border border-red-200 bg-white px-4 py-3 text-sm text-red-800">

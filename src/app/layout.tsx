@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Source_Serif_4 } from "next/font/google";
+import { Geist, Playfair_Display, Source_Serif_4 } from "next/font/google";
 import { ChromeLayout } from "@/components/chrome-layout";
 import { WebVitals } from "@/components/web-vitals";
 import { Butterflies } from "@/components/butterflies";
@@ -15,6 +15,12 @@ const geistSans = Geist({
 
 const sourceSerif = Source_Serif_4({
   variable: "--font-source-serif",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const playfair = Playfair_Display({
+  variable: "--font-british",
   subsets: ["latin"],
   display: "swap",
 });
@@ -39,7 +45,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${sourceSerif.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${sourceSerif.variable} ${playfair.variable} h-full antialiased`}
     >
       <body className="min-h-dvh w-full overflow-x-hidden">
         <ChromeLayout>{children}</ChromeLayout>

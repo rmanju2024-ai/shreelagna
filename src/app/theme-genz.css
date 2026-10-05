@@ -491,8 +491,10 @@ table { max-width: 100%; }
   font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase;
 }
 .profile-wizard-hero h2 {
-  margin: 0; font-family: var(--font-display), ui-serif, serif;
-  font-size: clamp(1.2rem, 3vw, 1.65rem);
+  margin: 0; font-family: var(--font-british), var(--font-display), ui-serif, serif;
+  font-size: clamp(1.35rem, 3.2vw, 1.85rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 .profile-wizard-hero small { display: block; margin-top: 0.15rem; color: var(--muted); }
 .profile-wizard-steps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.4rem; }
@@ -502,11 +504,13 @@ table { max-width: 100%; }
   background: #fff; color: var(--ink); text-align: left; cursor: pointer;
 }
 .profile-wizard-steps button > b {
-  display: grid; place-items: center; flex: none; width: 1.65rem; height: 1.65rem;
+  display: grid; place-items: center; flex: none; width: 1.85rem; height: 1.85rem;
   border-radius: 50%; background: rgb(63 14 13 / 8%); font-size: 0.72rem;
 }
+.profile-wizard-steps button > b .field-mark { width: 1rem; height: 1rem; color: var(--gold); }
+.profile-wizard-steps button.is-current > b .field-mark { color: #fff8e7; }
 .profile-wizard-steps button span { display: grid; min-width: 0; }
-.profile-wizard-steps button strong { font-size: 0.76rem; }
+.profile-wizard-steps button strong { font-size: 0.82rem; font-family: var(--font-british), serif; }
 .profile-wizard-steps button small {
   overflow: hidden; color: var(--muted); font-size: 0.62rem;
   text-overflow: ellipsis; white-space: nowrap;

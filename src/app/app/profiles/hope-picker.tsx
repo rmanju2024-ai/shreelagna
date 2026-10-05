@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { FieldHelp } from "@/app/app/profiles/field-help";
+import { FieldMark } from "@/app/app/profiles/field-mark";
 import { compareLabel } from "@/lib/profile/form-lists";
 
 type Option = { value: string; label: string };
@@ -127,6 +128,7 @@ export function HopePicker({
   return (
     <div ref={rootRef} className={`hope-picker field-3d ${className}${disabled ? " is-disabled" : ""}${open ? " is-open" : ""}`}>
       <span className="field-3d-label">
+        <FieldMark label={label} />
         {label}
         {help ? <FieldHelp text={help} /> : null}
       </span>

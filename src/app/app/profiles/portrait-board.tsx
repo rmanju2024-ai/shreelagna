@@ -87,7 +87,7 @@ export function PortraitSheet({
     { id: "faith", label: "Religion & astronomy", short: "Rel & Astro" },
     { id: "work", label: "Education & work", short: "Edu & Career" },
     { id: "family", label: "Family", short: "Family" },
-    { id: "partner", label: "Partner Preference", short: "Partner Pref." },
+    { id: "partner", label: "Partner preference", short: "Partner pref." },
   ];
   const tabIds = tabs.map((t) => t.id);
   const startTab = initialTab && tabIds.includes(initialTab) ? initialTab : "personal";
@@ -323,7 +323,7 @@ function PreferenceSheet({ sheet }: { sheet: HopeSheet }) {
         <PrefPhoto src={sheet.yourPhoto} label="Your photograph" />
       </div>
       <div className="pref-sheet-head">
-        <span>Partner Preference</span>
+        <span>Partner preference</span>
         <span>You match</span>
       </div>
       <dl className="pref-sheet-list">
