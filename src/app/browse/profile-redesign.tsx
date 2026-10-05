@@ -19,6 +19,8 @@ type DetailGroup = {
 type HopeItem = { k: string; v: string };
 
 const FACT_ICON: Record<string, string> = {
+  "Mother tongue": "🗣",
+  "Languages known": "💬",
   "Marital status": "💍",
   Diet: "🍃",
   "Blood group": "🩸",
@@ -58,6 +60,7 @@ export type ProfileData = {
   videoUrls?: string[];
   voiceUrls?: string[];
   memberCode?: string;
+  house?: "staff" | "admin";
   about?: string | null;
   familyAbout?: string | null;
   details?: DetailGroup[];
@@ -241,6 +244,16 @@ export function ProfileRedesign(props: ProfileData) {
           <h1>
             {props.name}
             {props.surname ? ` ${props.surname}` : ""}
+            {props.house === "staff" ? (
+              <span className="pv-house is-staff" title="Staff" aria-label="Staff">
+                ★
+              </span>
+            ) : null}
+            {props.house === "admin" ? (
+              <span className="pv-house is-admin" title="Admin" aria-label="Admin">
+                ♔
+              </span>
+            ) : null}
           </h1>
           <p className="pv-meta">
             <span>

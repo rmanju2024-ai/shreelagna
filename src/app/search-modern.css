@@ -987,6 +987,34 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
   color: #5c1220;
   font-weight: 700;
   letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.pv-shell .pv-house {
+  display: inline-grid;
+  place-items: center;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.pv-shell .pv-house.is-staff {
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 50%;
+  font-size: 0.78rem;
+  color: #b45309;
+  background: linear-gradient(180deg, #fff7d6, #f5c84c);
+  box-shadow: 0 2px 0 rgb(124 45 18 / 18%);
+}
+.pv-shell .pv-house.is-admin {
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 0.55rem;
+  font-size: 1.35rem;
+  color: #7c2d12;
+  background: linear-gradient(145deg, #fff4d6, #e8b84a 55%, #c2415a);
+  box-shadow: 0 3px 0 rgb(124 45 18 / 22%), inset 0 1px 0 #fff;
 }
 .pv-shell .pv-kicker {
   margin: 0 0 0.08rem;

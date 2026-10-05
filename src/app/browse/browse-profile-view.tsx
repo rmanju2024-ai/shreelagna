@@ -20,8 +20,8 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { after } from "next/server";
 import { redirect } from "next/navigation";
 import { ageFromDob, formatBirthTime } from "@/lib/profile/completeness";
-import { maritalLabel, NATIVE_COUNTRIES, HOPE_ANY, HOBBY_OPTIONS } from "@/lib/profile/options";
-import { asStringList, hopeDisplay, hopeValues, listedOnly } from "@/lib/profile/multi-values";
+import { maritalLabel, NATIVE_COUNTRIES, HOPE_ANY, MOTHER_TONGUES } from "@/lib/profile/options";
+import { asStringList, hopeDisplay, hopeValues, languagesKnown } from "@/lib/profile/multi-values";
 import { aboutPlainText } from "@/lib/profile/about-html";
 import { hopeComparisons, matchSelfFromProfile } from "@/lib/profile/match-compare";
 
@@ -546,12 +546,16 @@ export async function BrowseProfileView({
   };
 
   const marital = maritalLabel(typeof profile.marital_status === "string" ? profile.marital_status : "") || "";
-  const spoken = asStringList(profile.known_languages).join(", ");
-  const spokenSet = new Set(asStringList(profile.known_languages).map((item) => item.toLowerCase()));
-  const hobbyBits = listedOnly(asStringList(profile.hobby_list), [...HOBBY_OPTIONS]).filter(
-    (item) => !spokenSet.has(item.toLowerCase()),
+  const spokenList = languagesKnown(profile);
+  const spoken = spokenList.join(", ");
+  const langSkip = new Set(
+    [...spokenList, ...(hasValue(profile.mother_tongue) ? [dash(profile.mother_tongue)] : []), ...MOTHER_TONGUES].map((item) =>
+      item.toLowerCase(),
+    ),
   );
-  const hobbies = hobbyBits.join(", ") || "";
+  const hobbies = asStringList(profile.hobby_list)
+    .filter((item) => !langSkip.has(item.toLowerCase()))
+    .join(", ");
   const liveNow = placeLine(profile.current_city, profile.current_state, profile.current_country);
   const bornOn = formatDob(profile.date_of_birth);
   const bornAt = birthTimeLabel(profile.birth_time);
@@ -565,20 +569,24 @@ export async function BrowseProfileView({
       title: "Personal",
       wide: true,
       lines: linesOf(
-        profile.height_cm && (religion || community)
-          ? `${who} is ${profile.height_cm} cm tall${religion ? `, **${religion}**` : ""}${community ? `, and belongs to the **${community}** community` : ""}`
-          : profile.height_cm
-            ? `${who} is ${profile.height_cm} cm tall`
-            : religion && community
-              ? `${who} is **${religion}** and belongs to the **${community}** community`
-              : religion
-                ? `${who} is **${religion}**`
-                : community
-                  ? `${who} belongs to the **${community}** community`
-                  : null,
+        (() => {
+          const bits: string[] = [];
+          if (age != null) bits.push(`${age} years old`);
+          if (profile.height_cm) bits.push(`${profile.height_cm} cm tall`);
+          const head = bits.length ? `${who} is ${bits.join(", ")}` : null;
+          const faith = religion && community
+            ? `**${religion}**, and belongs to the **${community}** community`
+            : religion
+              ? `**${religion}**`
+              : community
+                ? `belongs to the **${community}** community`
+                : null;
+          if (head && faith) return faith.startsWith("belongs") ? `${head} and ${faith}` : `${head}, ${faith}`;
+          if (head) return head;
+          if (faith) return faith.startsWith("belongs") ? `${who} ${faith}` : `${who} is ${faith}`;
+          return null;
+        })(),
         [
-          hasValue(profile.mother_tongue) ? `Mother tongue is **${dash(profile.mother_tongue)}**` : null,
-          spoken ? `${who} speaks ${spoken}` : null,
           liveNow ? `${who} now lives in ${liveNow}` : null,
           yesNo(profile.willing_to_relocate) === "Yes"
             ? `${who} is open to relocating`
@@ -591,6 +599,8 @@ export async function BrowseProfileView({
           .join(". ") || null,
       ),
       items: factsOf(
+        fact("Mother tongue", profile.mother_tongue),
+        spoken ? { k: "Languages known", v: spoken } : null,
         fact("Marital status", marital),
         fact("Diet", profile.diet),
         fact("Blood group", profile.blood_group),
@@ -723,6 +733,7 @@ export async function BrowseProfileView({
     videoUrls,
     voiceUrls,
     memberCode,
+    house: owner?.role === "admin" ? "admin" : owner?.role === "service" ? "staff" : undefined,
     shortlisted,
     own,
     user,
