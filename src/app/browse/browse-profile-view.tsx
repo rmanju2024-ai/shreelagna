@@ -216,8 +216,8 @@ function matchBanner(mine: Record<string, unknown>, theirs: Record<string, unkno
     religion: nestedName(theirs.religions),
     community: nestedName(theirs.communities),
   });
-  const theyAsk = hopeComparisons(theirs, mySelf);
-  const iAsk = hopeComparisons(mine, theirSelf);
+  const theyAsk = hopeComparisons(theirs, mySelf, score?.total);
+  const iAsk = hopeComparisons(mine, theirSelf, score?.total);
   const byKey = new Map<string, string>();
   const put = (key: string, text: string) => {
     if (!byKey.has(key)) byKey.set(key, text);
@@ -718,6 +718,7 @@ export async function BrowseProfileView({
             religion: nestedName(mine.religions),
             community: nestedName(mine.communities),
           }),
+          kundali?.total,
         )
       : null;
   const hopeKey = {
@@ -752,7 +753,7 @@ export async function BrowseProfileView({
     { k: "Employed in", v: hopeDisplay(hopeValues(profile, "pref_employed"), "Any") },
     { k: "Income", v: hopeDisplay(hopeValues(profile, "pref_incomes"), "Any") },
     { k: "Diet", v: hopeDisplay(hopeValues(profile, "pref_diets"), "Any") },
-    { k: "Horoscope", v: dash(profile.pref_horoscope) },
+    { k: "Horoscope", v: kundali?.total != null ? `${kundali.total}/${kundali.max ?? 36}` : dash(profile.pref_horoscope) },
   ].map((item) => ({
     ...item,
     fit: theyAsk ? theyAsk[hopeKey[item.k as keyof typeof hopeKey]]?.match ?? null : null,

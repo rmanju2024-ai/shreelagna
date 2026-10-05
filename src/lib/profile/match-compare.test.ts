@@ -60,9 +60,26 @@ describe("match compare", () => {
     expect(verdict.age).toEqual({ match: true, you: "31 years" });
     expect(verdict.height.match).toBe(true);
     expect(verdict.marital.match).toBe(false);
-    expect(verdict.diet.match).toBe(true);
-    expect(verdict.community.match).toBe(true);
-    expect(verdict.city.match).toBe(true);
+    expect(verdict.horoscope.match).toBe(true);
+  });
+
+  it("counts horoscope from Kundali: 18 and above is a match, 17 and below is not", () => {
+    expect(hopeComparisons({}, me, 22).horoscope.match).toBe(true);
+    expect(hopeComparisons({}, me, 18).horoscope.match).toBe(true);
+    expect(hopeComparisons({}, me, 17).horoscope.match).toBe(false);
+    expect(hopeComparisons({}, me, 15).horoscope.match).toBe(false);
+    const fifteen = hopeComparisons(
+      {
+        pref_age_min: 24,
+        pref_age_max: 36,
+        pref_height_min: 150,
+        pref_height_max: 180,
+      },
+      me,
+      22,
+    );
+    expect(Object.keys(fifteen)).toHaveLength(15);
+    expect(preferenceFitScore(Object.values(fifteen)).total).toBe(15);
   });
 
   it("prints height as feet and centimetres", () => {

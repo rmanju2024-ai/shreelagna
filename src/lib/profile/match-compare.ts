@@ -96,21 +96,26 @@ function youOrMissing(value: string | null, fallback = "Not on your profile"): s
   return value?.trim() || fallback;
 }
 
-export function hopeComparisons(their: Record<string, unknown>, me: MatchSelf): Record<string, HopeVerdict> {
+export function hopeComparisons(
+  their: Record<string, unknown>,
+  me: MatchSelf,
+  kundaliTotal?: number | null,
+): Record<string, HopeVerdict> {
   const ageMin = asNumber(their.pref_age_min);
   const ageMax = asNumber(their.pref_age_max);
   const heightMin = asNumber(their.pref_height_min);
   const heightMax = asNumber(their.pref_height_max);
   const maritals = hopeValues(their, "pref_maritals", "pref_marital");
   const horoscope = hopeValues(their, "pref_horoscope")[0] || "Does not matter";
+  const kundaliFit = kundaliTotal == null ? null : kundaliTotal >= 18;
 
   return {
     age: {
-      match: rangeFits(me.ageYears, ageMin, ageMax),
+      match: rangeFits(me.ageYears, ageMin, ageMax) ?? true,
       you: me.ageYears != null ? `${me.ageYears} years` : "Not on your profile",
     },
     height: {
-      match: rangeFits(me.heightCm, heightMin, heightMax),
+      match: rangeFits(me.heightCm, heightMin, heightMax) ?? true,
       you: me.heightCm != null ? `${me.heightCm} cm` : "Not on your profile",
     },
     marital: {
@@ -122,8 +127,13 @@ export function hopeComparisons(their: Record<string, unknown>, me: MatchSelf): 
       you: youOrMissing(me.diet),
     },
     horoscope: {
-      match: !horoscope || horoscope === "Does not matter" ? true : null,
-      you: horoscope === "Does not matter" || !horoscope ? "No requirement" : "Not a personal detail",
+      match: kundaliFit ?? (horoscope === "Does not matter" || !horoscope),
+      you:
+        kundaliTotal != null
+          ? `Kundali ${kundaliTotal}/36${kundaliFit ? " · match" : " · not a match"}`
+          : horoscope === "Does not matter" || !horoscope
+            ? "No Kundali score yet"
+            : "No Kundali score yet",
     },
     tongue: {
       match: listedFits(me.motherTongue, hopeValues(their, "pref_tongues"), HOPE_ANY.language),
@@ -173,8 +183,12 @@ function listedLine(values: string[], anyLabel: string): string {
   return values.join(", ");
 }
 
-export function preferenceSheetRows(their: Record<string, unknown>, me: MatchSelf): PreferenceRow[] {
-  const compared = hopeComparisons(their, me);
+export function preferenceSheetRows(
+  their: Record<string, unknown>,
+  me: MatchSelf,
+  kundaliTotal?: number | null,
+): PreferenceRow[] {
+  const compared = hopeComparisons(their, me, kundaliTotal);
   const maritals = hopeValues(their, "pref_maritals", "pref_marital");
   const maritalLine =
     !maritals.length || maritals.some((m) => m === HOPE_ANY.marital)
@@ -257,8 +271,8 @@ export function preferenceFitScore(rows: { match: boolean | null }[]): { hit: nu
   return { hit: scored.filter((row) => row.match === true).length, total: scored.length };
 }
 
-export function preferenceFits(their: Record<string, unknown>, me: MatchSelf): boolean {
-  return Object.values(hopeComparisons(their, me)).every((row) => row.match !== false);
+export function preferenceFits(their: Record<string, unknown>, me: MatchSelf, kundaliTotal?: number | null): boolean {
+  return Object.values(hopeComparisons(their, me, kundaliTotal)).every((row) => row.match !== false);
 }
 
 export function seekPronoun(profileType: string): "her" | "his" | "their" {
