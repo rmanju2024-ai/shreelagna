@@ -251,9 +251,10 @@ export async function BrowsePage({
             ),
           );
           const keepHouse = (row: Record<string, unknown>) =>
-            me.role === "admin" ||
-            String(row.created_by) === me.id ||
-            (!(row.by_admin === true || adminIds.has(String(row.created_by))) && !blockedIds.has(String(row.id)));
+            !blockedIds.has(String(row.id)) &&
+            (me.role === "admin" ||
+              String(row.created_by) === me.id ||
+              !(row.by_admin === true || adminIds.has(String(row.created_by))));
           const listed = rows.filter(keepHouse);
           const photoMap: Map<string, string> = bundle
             ? new Map(

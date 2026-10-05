@@ -57,13 +57,14 @@ export async function reportProfile(formData: FormData) {
 export async function unblockProfile(formData: FormData) {
   const { db, me } = await member();
   const targetId = String(formData.get("profile_id") ?? "");
-  if (!targetId) redirect("/app/safety");
+  const returnTo = String(formData.get("return_to") ?? "/app/blocked");
+  if (!targetId) redirect("/app/blocked");
   const { error } = await db
     .from("member_blocks")
     .delete()
     .eq("blocker_profile_id", me.active_profile_id)
     .eq("blocked_profile_id", targetId);
-  revalidatePath("/app/safety");
+  revalidatePath("/app/blocked");
   revalidatePath("/browse");
-  redirect(`/app/safety?safety=${error ? "unblock_error" : "unblocked"}`);
+  redirect(`${returnTo}${returnTo.includes("?") ? "&" : "?"}safety=${error ? "unblock_error" : "unblocked"}`);
 }

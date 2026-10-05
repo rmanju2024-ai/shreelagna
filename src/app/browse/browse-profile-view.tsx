@@ -1,3 +1,4 @@
+import { unblockProfile } from "@/app/app/safety/actions";
 import { viewContact } from "@/app/app/profiles/actions";
 import { BirdDock } from "@/app/browse/bird-dock";
 import { PromoBubble } from "@/app/browse/promo-bubble";
@@ -39,17 +40,38 @@ function asProfileType(value: unknown): ProfileType | null {
   return value === "vadhu" || value === "vara" ? value : null;
 }
 
+function BlockedByYou({ id, name }: { id: string; name: string }) {
+  return (
+    <div className="browse-profile-missing blocked-note">
+      <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)]">Blocked</p>
+      <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl">You blocked {name}</h1>
+      <p className="mt-4 max-w-xl text-sm text-[var(--muted)]">
+        You cannot see each other while the block is on. Unblock to view this profile again.
+      </p>
+      <div className="mt-6 flex flex-wrap gap-3">
+        <form action={unblockProfile}>
+          <input type="hidden" name="profile_id" value={id} />
+          <input type="hidden" name="return_to" value={`/browse/${id}`} />
+          <button type="submit" className={btnPrimary}>Unblock {name}</button>
+        </form>
+        <Link href="/app/blocked" className={btnGhost}>Blocked profiles</Link>
+        <Link href="/browse" className={btnGhost}>Back to Discover</Link>
+      </div>
+    </div>
+  );
+}
+
 function UnavailableBrowse() {
   return (
     <div className="browse-profile-missing">
       <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)]">Search</p>
       <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl">Profile not available</h1>
       <p className="mt-4 max-w-xl text-sm text-[var(--muted)]">
-        This profile cannot be opened from Alerts. It may be house, paused, or no longer on Search.
+        This profile cannot be opened. It may be paused, removed, or no longer on Search.
       </p>
       <div className="mt-6 flex flex-wrap gap-3">
         <Link href="/app/alerts" className={btnPrimary}>
-          Back to alerts
+          Back to Alerts
         </Link>
         <Link href="/browse" className={btnGhost}>
           Search
@@ -167,7 +189,7 @@ export async function BrowseProfileView({
     viewerType = asProfileType(profile.profile_type);
   }
 
-  if (!own && !isStaff && mine) {
+  if (!own && mine) {
     const { data: blocks } = await db
       .from("member_blocks")
       .select("blocker_profile_id")
@@ -175,7 +197,17 @@ export async function BrowseProfileView({
         `and(blocker_profile_id.eq.${String(mine.id)},blocked_profile_id.eq.${id}),and(blocker_profile_id.eq.${id},blocked_profile_id.eq.${String(mine.id)})`,
       )
       .limit(1);
-    if (blocks?.length) return <UnavailableBrowse />;
+    if (blocks?.length) {
+      if (blocks[0].blocker_profile_id === String(mine.id)) {
+        return (
+          <BlockedByYou
+            id={id}
+            name={displayFirstName(typeof profile.subject_full_name === "string" ? profile.subject_full_name : "this member")}
+          />
+        );
+      }
+      return <UnavailableBrowse />;
+    }
   }
 
   const targetType = asProfileType(profile.profile_type);

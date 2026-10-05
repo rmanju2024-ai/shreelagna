@@ -10,6 +10,7 @@ const groups = [
     items: [
       { href: "/app", title: "My profile", text: "Your story, media and profile completeness." },
       { href: "/app/shortlist", title: "Shortlist", text: "Private profiles you want to revisit." },
+      { href: "/app/blocked", title: "Blocked profiles", text: "Members you blocked. Unblock them any time." },
       { href: "/app/interests", title: "Interests", text: "Requests, replies and match history." },
     ],
   },

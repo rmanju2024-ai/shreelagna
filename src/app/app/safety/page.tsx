@@ -1,6 +1,4 @@
-import { unblockProfile } from "@/app/app/safety/actions";
 import { SafetyFlash } from "@/app/browse/safety-flash";
-import { displayFirstName } from "@/lib/profile/options";
 import { BackToAccount } from "@/components/back-to-account";
 import Link from "next/link";
 import { InnerShell as PageShell } from "@/components/chrome-layout";
@@ -23,17 +21,6 @@ export default async function SafetyPage({ searchParams }: { searchParams: Promi
     .order("created_at", { ascending: false })
     .limit(20);
 
-  const { data: blockRows } = await db
-    .from("member_blocks")
-    .select("blocked_profile_id, created_at")
-    .eq("blocker_profile_id", me.active_profile_id)
-    .order("created_at", { ascending: false });
-  const blockedIds = (blockRows ?? []).map((row) => row.blocked_profile_id as string);
-  const { data: blockedProfiles } = blockedIds.length
-    ? await db.from("profiles").select("id, subject_full_name, current_city").in("id", blockedIds)
-    : { data: [] };
-  const blockedName = new Map((blockedProfiles ?? []).map((row) => [row.id as string, row]));
-
   return (
     <PageShell><BackToAccount />
       <main className="sx-stage safety-centre">
@@ -41,30 +28,7 @@ export default async function SafetyPage({ searchParams }: { searchParams: Promi
         <h1>Your safety comes first</h1>
         <p className="set-lead">Keep conversations on Shree Lagna until you are comfortable. Never share OTPs, UPI PINs, passwords, bank details, or money.</p></header>
         <SafetyFlash code={safety} />
-        <section className={`${cardClass} safety-guidance`}>
-          <h2>Blocked members</h2>
-          {blockedIds.length ? (
-            <ul className="list-cards">
-              {blockedIds.map((id) => {
-                const p = blockedName.get(id);
-                return (
-                  <li key={id} className="list-card">
-                    <span className="list-card-copy">
-                      <strong>{displayFirstName(String(p?.subject_full_name ?? "Member"))}</strong>
-                      <small>{String(p?.current_city ?? "")}</small>
-                    </span>
-                    <form action={unblockProfile}>
-                      <input type="hidden" name="profile_id" value={id} />
-                      <button type="submit" className="list-card-btn">Unblock</button>
-                    </form>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <p>You have not blocked anyone.</p>
-          )}
-        </section>
+        <p><Link href="/app/blocked" className={btnPrimary}>Blocked profiles</Link></p>
         <section className={`${cardClass} safety-guidance`}>
           <h2>When to report</h2>
           <ul>
