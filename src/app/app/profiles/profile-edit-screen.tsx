@@ -8,16 +8,16 @@ import { aboutPlainText } from "@/lib/profile/about-html";
 import { isProfileEditSection, portraitTabForSection, type ProfileEditTarget } from "@/lib/profile/sections";
 import { btnHero, btnHeroGhost } from "@/lib/ui/classes";
 import { watermarkLine } from "@/lib/brand";
-import { displayFirstName } from "@/lib/profile/options";
+import { FieldMark } from "@/app/app/profiles/field-mark";
 
 const EDIT_TABS = [
-  { id: "album", label: "Album", short: "Album" },
-  { id: "personal", label: "Personal", short: "Personal" },
-  { id: "about", label: "Introduction", short: "Intro" },
-  { id: "work", label: "Education & work", short: "Education" },
-  { id: "family", label: "Family", short: "Family" },
-  { id: "faith", label: "Religion", short: "Religion" },
-  { id: "partner", label: "Partner preference", short: "Preference" },
+  { id: "album", label: "Album", short: "Album", mark: "Photograph" },
+  { id: "personal", label: "Personal", short: "Personal", mark: "Name" },
+  { id: "about", label: "Introduction", short: "Intro", mark: "Introduction" },
+  { id: "work", label: "Education & work", short: "Education", mark: "Occupation" },
+  { id: "family", label: "Family", short: "Family", mark: "Family" },
+  { id: "faith", label: "Religion", short: "Religion", mark: "Religion" },
+  { id: "partner", label: "Partner preference", short: "Preference", mark: "Partner" },
 ] as const;
 
 export async function ProfileEditScreen({
@@ -62,12 +62,16 @@ export async function ProfileEditScreen({
             <Link
               key={tab.id}
               href={`/app/profiles/${profile.id}?edit=1&section=${tab.id}`}
-              className={current === tab.id ? "is-current" : undefined}
+              className={`studio-jewel${current === tab.id ? " is-current" : ""}`}
+              data-tab={tab.id}
               aria-current={current === tab.id ? "page" : undefined}
             >
+              <b>
+                <FieldMark label={tab.mark} />
+              </b>
               <span>
                 <strong>{tab.short}</strong>
-                <small>{tab.label}</small>
+                {tab.label !== tab.short ? <small>{tab.label}</small> : null}
               </span>
             </Link>
           ))}
