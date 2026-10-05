@@ -139,7 +139,7 @@ export function HopePicker({
     function place() {
       const el = triggerRef.current;
       if (!el) return;
-      setPanelStyle(placeFloat(el, { minWidth: 22 * 16, maxHeightCap: 28 * 16 }));
+      setPanelStyle(placeFloat(el, { minWidth: 20 * 16, maxHeightCap: 26 * 16, preferUp: true }));
     }
     place();
     window.addEventListener("scroll", place, true);
@@ -188,26 +188,21 @@ export function HopePicker({
               aria-label={label}
               style={panelStyle}
             >
-              <p className="hope-dialog-kicker">Several may be chosen</p>
-              <h3>{label}</h3>
-              <p className="hope-dialog-hint">Tick only the ones that matter. Leave the rest unselected.</p>
-              <div className="hope-dialog-quick">
-                {anyValue ? (
-                  <button type="button" className={anyOn ? "is-on" : undefined} onClick={chooseAny}>
-                    {anyText}
+              <div className="hope-dialog-bar">
+                <h3>{label}</h3>
+                <p>Tick several</p>
+                <div className="hope-dialog-quick">
+                  {anyValue ? (
+                    <button type="button" className={anyOn ? "is-on" : undefined} onClick={chooseAny}>
+                      {anyText}
+                    </button>
+                  ) : null}
+                  <button type="button" onClick={clearDraft}>
+                    Clear
                   </button>
-                ) : null}
-                <button type="button" onClick={clearDraft}>
-                  Clear all
-                </button>
+                </div>
               </div>
               <div className="hope-dialog-list">
-                {anyValue ? (
-                  <label className={`hope-dialog-any ${anyOn ? "is-on" : ""}`}>
-                    <input type="checkbox" checked={anyOn} onChange={() => toggle(anyValue)} />
-                    <span>{anyText}</span>
-                  </label>
-                ) : null}
                 {items.map((item) => (
                   <label key={item.value} className={draftSet.has(item.value) ? "is-on" : undefined}>
                     <input
@@ -224,7 +219,7 @@ export function HopePicker({
                   Cancel
                 </button>
                 <button type="button" className="hope-dialog-done" onClick={apply}>
-                  Use these choices
+                  Done
                 </button>
               </div>
             </div>,
