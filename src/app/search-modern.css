@@ -427,3 +427,51 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
 /* Shortlist toast message (replaces banner) */
 .shortlist-toast { position: fixed; bottom: clamp(1rem, env(safe-area-inset-bottom), 2rem); left: 50%; transform: translateX(-50%); padding: 0.7rem 1.2rem; border-radius: 999px; background: #fff; color: #14532d; font-weight: 800; font-size: 0.9rem; box-shadow: 0 16px 30px -12px rgb(63 14 13 / 70%); z-index: 200; animation: toast-in 0.3s ease both; }
 @keyframes toast-in { from { opacity: 0; transform: translateX(-50%) translateY(10px); } }
+
+/* Profile view redesign: modern, clean, focused */
+.pv-container { max-width: 64rem; margin: 0 auto; padding: 0; background: #fff; min-height: 100vh; display: flex; flex-direction: column; }
+
+/* Full-width hero photo section */
+.pv-hero { position: relative; width: 100%; aspect-ratio: 1 / 1.25; background: #f3e2c8; overflow: hidden; display: flex; flex-direction: column; }
+.pv-gallery { flex: 1; position: relative; background: #2a1710; overflow: hidden; }
+.pv-main-photo { width: 100%; height: 100%; object-fit: cover; }
+.pv-no-photo { width: 100%; height: 100%; display: grid; place-items: center; font-size: 6rem; font-weight: 900; color: #f3e2c8; }
+.pv-gallery-dots { position: absolute; bottom: 0.8rem; left: 50%; transform: translateX(-50%); display: flex; gap: 0.35rem; }
+.pv-dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: rgba(255, 255, 255, 0.4); }
+.pv-dot.is-active { background: #fff; }
+
+/* Hero info overlay at bottom */
+.pv-hero-info { padding: 1.2rem 1.4rem; background: linear-gradient(180deg, rgba(18, 8, 6, 0) 0%, rgba(18, 8, 6, 0.8) 80%); color: #fff8e7; }
+.pv-hero-info h1 { margin: 0; font-size: clamp(1.6rem, 5vw, 2.2rem); line-height: 1.1; }
+.pv-subline { margin: 0.3rem 0 0; font-size: 0.95rem; color: #ffe9c7; }
+.pv-online { margin: 0.4rem 0 0; font-size: 0.82rem; font-weight: 800; color: #4ade80; }
+
+/* Toast message (appears above content, not blocking) */
+.pv-toast { position: sticky; top: 0; z-index: 100; padding: 0.75rem 1rem; background: #e0f2fe; color: #0c4a6e; font-weight: 800; text-align: center; font-size: 0.9rem; border-bottom: 2px solid #0ea5e9; animation: slide-down 0.3s ease both; }
+@keyframes slide-down { from { transform: translateY(-100%); opacity: 0; } }
+
+/* Content section with about and key info */
+.pv-snapshot { padding: 1.4rem 1.4rem 0; color: #3f0e0d; }
+.pv-about { margin-bottom: 1rem; }
+.pv-about p { margin: 0; line-height: 1.6; color: #5b4a43; font-size: 0.95rem; }
+
+.pv-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.8rem; margin-bottom: 1.4rem; }
+.pv-card { padding: 0.9rem; border-radius: 1rem; background: #f9f5f0; border: 1px solid rgb(184 137 76 / 30%); }
+.pv-card small { display: block; color: #9a3412; font-size: 0.7rem; font-weight: 900; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 0.3rem; }
+.pv-card strong { display: block; font-size: 1.2rem; color: #7c2d12; }
+
+/* Actions: Shortlist + Block/Report */
+.pv-actions { display: flex; gap: 0.6rem; align-items: center; padding: 1.2rem 1.4rem; border-top: 1px solid rgb(184 137 76 / 20%); flex-wrap: wrap; }
+.pv-shortlist-form { flex: 1; }
+.pv-btn-shortlist { min-height: 2.6rem; padding: 0 1.2rem; border: 0; border-radius: 999px; font-weight: 900; font-size: 0.9rem; cursor: pointer; color: #fff; background: linear-gradient(135deg, #e11d48, #c2415a); width: 100%; }
+.pv-btn-shortlist.is-on { background: linear-gradient(135deg, #7c2d12, #3f0e0d); color: #ffe9c7; }
+
+.pv-actions .safety-profile-control { display: flex; gap: 0.4rem; align-items: center; margin-left: auto; }
+.pv-actions .safety-btn { min-height: 2.6rem; padding: 0 0.9rem; font-size: 0.85rem; }
+
+@media (max-width: 640px) {
+  .pv-hero { aspect-ratio: 1 / 1.4; }
+  .pv-actions { flex-direction: column; }
+  .pv-shortlist-form { width: 100%; }
+  .pv-actions .safety-profile-control { margin-left: 0; width: 100%; }
+}
