@@ -11,6 +11,7 @@ import { pairPlanLive } from "@/lib/membership/access";
 import { loadMembership, loadMembershipForProfile } from "@/lib/membership/load";
 import { canSearchFamilies } from "@/lib/profile/visibility";
 import { loadHouseReady, viewerEmailVerified } from "@/lib/profile/house-ready";
+import { displayFirstName } from "@/lib/profile/options";
 import { previewText } from "@/lib/match/chat-ui";
 import { safeNextPath } from "@/lib/auth/safe-next";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
