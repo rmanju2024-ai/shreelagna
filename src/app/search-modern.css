@@ -724,7 +724,7 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
 .pv-shell .pv-hero {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.45rem 0.7rem;
   width: auto;
@@ -1578,7 +1578,7 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
 @media (max-width: 900px) {
   .pv-shell .pv-grid { grid-template-columns: 1fr; }
   .pv-shell .pv-tile.is-wide ul { grid-template-columns: 1fr; }
-  .pv-shell .pv-hero { aspect-ratio: auto; grid-template-columns: 1fr; }
+  .pv-shell .pv-hero { aspect-ratio: auto; grid-template-columns: auto minmax(0, 1fr) auto; }
   .pv-shell .pv-top-actions { justify-content: flex-start; }
   .pv-shell .pv-layout { grid-template-columns: 1fr; }
   .pv-shell .pv-media-col { position: static; }

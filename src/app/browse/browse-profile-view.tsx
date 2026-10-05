@@ -783,6 +783,7 @@ export async function BrowseProfileView({
     videoUrls,
     voiceUrls,
     memberCode,
+    profileType: asProfileType(profile.profile_type),
     house: owner?.role === "admin" ? "admin" : owner?.role === "service" ? "staff" : undefined,
     shortlisted,
     own,

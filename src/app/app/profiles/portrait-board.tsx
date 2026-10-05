@@ -8,6 +8,7 @@ import { type ProfileEditTarget } from "@/lib/profile/sections";
 import { AboutHtml } from "@/app/app/profiles/about-html";
 import { aboutPlainText } from "@/lib/profile/about-html";
 import { isOnlineNow, lastOnlineLine } from "@/lib/profile/last-seen";
+import { KindMark } from "@/components/kind-mark";
 
 type Fact = {
   k: string;
@@ -137,6 +138,7 @@ export function PortraitSheet({
       <div className="portrait-details">
         <div className="portrait-sheet-id">
           <div className="portrait-sheet-id-head">
+            <KindMark type={profileType} kind={kind} className="portrait-kind-mark" />
             <div className="portrait-id-slot">
               <div className="portrait-sheet-id-copy">
                 <p className="portrait-sheet-meta">

@@ -1589,9 +1589,47 @@ a.card-premium:hover,
 
 .portrait-sheet-id-head {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: start;
   gap: 0.85rem 1.1rem;
+}
+
+.kind-mark {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 0.2rem;
+  flex: none;
+  color: #be185d;
+}
+
+.kind-mark.is-groom {
+  color: #9a3412;
+}
+
+.kind-mark svg {
+  width: 5.4rem;
+  height: 6.4rem;
+  overflow: visible;
+  filter: drop-shadow(0 10px 12px rgb(63 14 13 / 22%));
+}
+
+.kind-mark b {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: inherit;
+}
+
+.pv-kind.kind-mark svg {
+  width: 4.8rem;
+  height: 5.7rem;
+}
+
+.portrait-kind-mark.kind-mark svg {
+  width: 6.2rem;
+  height: 7.4rem;
 }
 
 .portrait-id-slot {
@@ -2937,9 +2975,16 @@ a.card-premium:hover,
 
   .portrait-sheet-id-head {
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: auto minmax(0, 1fr);
     align-items: start;
     gap: 0.65rem;
+  }
+
+  .kind-mark svg,
+  .pv-kind.kind-mark svg,
+  .portrait-kind-mark.kind-mark svg {
+    width: 4.6rem;
+    height: 5.5rem;
   }
 
   .portrait-interest,

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { revealContact, saveShortlist } from "@/app/app/profiles/actions";
 import { SafetyProfileControl } from "@/app/app/safety/safety-profile-control";
 import { BirdDock, type PeekChatNote } from "@/app/browse/bird-dock";
+import { KindMark } from "@/components/kind-mark";
 import type { InterestThread } from "@/lib/match/interest-status";
 
 type DetailGroup = {
@@ -61,6 +62,7 @@ export type ProfileData = {
   videoUrls?: string[];
   voiceUrls?: string[];
   memberCode?: string;
+  profileType?: string | null;
   house?: "staff" | "admin";
   about?: string | null;
   familyAbout?: string | null;
@@ -155,9 +157,7 @@ function ContactPanel({
   );
   const [quota, setQuota] = useState({ used: contact.used, left: contact.left, limit: contact.limit });
   const quotaLine =
-    quota.limit != null
-      ? `Used ${quota.used} of ${quota.limit} · ${quota.left ?? 0} left`
-      : "No monthly cap on this plan";
+    quota.limit != null ? `${quota.left ?? 0} of ${quota.limit} left` : "No cap on this plan";
 
   function onConfirm() {
     setAsk(false);
@@ -181,13 +181,10 @@ function ContactPanel({
     <section className="pv-contact">
       <p className="pv-contact-title">{contact.self ? "Your mobile & email" : "Mobile & email"}</p>
       {contact.self ? null : (
-        <p className="pv-contact-quota">{quotaLine}. Send request or contact on one profile counts as 1.</p>
+        <p className="pv-contact-quota">{quotaLine}. One family, one count.</p>
       )}
       {shown ? (
         <>
-          {quota.limit != null && !contact.self ? (
-            <p className="pv-contact-left">{quota.left ?? 0} left after this profile</p>
-          ) : null}
           <ul>
             <li>
               <span>Mobile</span>
@@ -290,7 +287,7 @@ export function ProfileRedesign(props: ProfileData) {
     if (contact === "1") {
       const left = props.contact?.left;
       setShortlistMsg(
-        left == null ? "Contact shown. This profile counts as 1." : `Contact shown. This profile counts as 1 · ${left} left.`,
+        left == null ? "Contact shown." : `Contact shown · ${left} left.`,
       );
     }
     if (code || contact === "1") {
@@ -335,6 +332,7 @@ export function ProfileRedesign(props: ProfileData) {
       {shortlistMsg ? <div className="pv-toast">{shortlistMsg}</div> : null}
 
       <header className="pv-hero">
+        <KindMark type={props.profileType} className="pv-kind" />
         <div className="pv-intro">
           <p className="pv-kicker">{props.memberCode ? `ID ${props.memberCode}` : "Member"}</p>
           <h1>
