@@ -1669,6 +1669,25 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
   justify-items: stretch;
   gap: 0.35rem;
 }
+.bird-dock.is-inline.is-wide {
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  width: auto;
+  max-width: none;
+  right: 0;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  place-items: center;
+  justify-items: center;
+  pointer-events: none;
+}
+.bird-dock.is-inline.is-wide .bird-wa.is-max {
+  width: min(44rem, calc(100vw - 2.5rem));
+  height: min(86dvh, 54rem);
+  max-height: calc(100dvh - 1.5rem);
+}
 .bird-dock.is-inline .bird-dock-actor { display: none; }
 .bird-dock.is-inline .bird-dock-stage {
   padding-top: 0;

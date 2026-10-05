@@ -1768,6 +1768,16 @@ a.card-premium:hover,
   pointer-events: none;
 }
 
+.bird-dock.is-inline.is-wide {
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  width: auto;
+  max-width: none;
+  place-items: center;
+  justify-items: center;
+}
+
 .bird-dock.is-open,
 .bird-dock.is-wide {
   z-index: 1200;

@@ -288,6 +288,15 @@ export function BirdDock({
   }, [phase, mounted]);
 
   useEffect(() => {
+    if (!wide) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [wide]);
+
+  useEffect(() => {
     const stage = stageRef.current;
     if (!open || !stage) return;
     stage.scrollTop = stage.scrollHeight;
@@ -615,5 +624,5 @@ export function BirdDock({
     </div>
   );
 
-  return inline || !mounted ? dock : createPortal(dock, document.body);
+  return !mounted || (inline && !wide) ? dock : createPortal(dock, document.body);
 }
