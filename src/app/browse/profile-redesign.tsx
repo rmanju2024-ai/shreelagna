@@ -138,6 +138,8 @@ function CoupleMark({ className }: { className?: string }) {
     </svg>
   );
 }
+
+function ContactPanel({
   profileId,
   contact,
 }: {
