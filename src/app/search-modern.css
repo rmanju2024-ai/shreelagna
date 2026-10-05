@@ -1364,6 +1364,7 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
   font-weight: 700;
   color: #9a3412;
 }
+.pv-shell .pv-spark-box {
   padding: 0.55rem 0.55rem 0.6rem;
   border-radius: 0.9rem;
   background:
