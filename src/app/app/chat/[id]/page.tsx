@@ -13,6 +13,7 @@ import { pairCanChat } from "@/lib/match/interest-status";
 import { pairPlanLive } from "@/lib/membership/access";
 import { loadMembership, loadMembershipForProfile } from "@/lib/membership/load";
 import { displayFirstName } from "@/lib/profile/options";
+import { canSearchFamilies } from "@/lib/profile/visibility";
 import { createServiceClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 
@@ -30,16 +31,19 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
     .maybeSingle();
   if (!thread) notFound();
 
-  const { data: mine } = await supabase
+  const db = createServiceClient() ?? supabase;
+  const { data: mineRows } = await db
     .from("profiles")
     .select("id, status")
     .eq("created_by", me.id)
-    .in("id", [thread.profile_a, thread.profile_b])
-    .maybeSingle();
-  if (!mine || mine.status !== "active") notFound();
+    .in("id", [thread.profile_a, thread.profile_b]);
+  const mine =
+    mineRows?.find((row) => row.id === me.active_profile_id) ??
+    mineRows?.[0] ??
+    null;
+  if (!mine || !canSearchFamilies(mine.status)) notFound();
 
   const otherId = mine.id === thread.profile_a ? thread.profile_b : thread.profile_a;
-  const db = createServiceClient() ?? supabase;
   const [{ data: interestRows }, myAccess, otherAccess, { data: other }, { data: messages }, { data: photos }] =
     await Promise.all([
     supabase

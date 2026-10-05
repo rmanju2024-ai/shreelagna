@@ -71,8 +71,11 @@ export function InboxBoard({
         <DeclineForm interestId={note.id} />
       </>
     ),
-    accepted: () => (
-      <Link href="/app/chat" className={`${btnPrimary} inbox-chat-btn`}>
+    accepted: (note) => (
+      <Link
+        href={note.profileId ? `/app/chat?with=${note.profileId}` : "/app/chat"}
+        className={`${btnPrimary} inbox-chat-btn`}
+      >
         Open chat
       </Link>
     ),

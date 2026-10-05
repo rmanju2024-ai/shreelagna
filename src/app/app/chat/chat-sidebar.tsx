@@ -188,6 +188,18 @@ export async function firstChatId(): Promise<string | null> {
   return pickFirstChat(openThreads, ids, nameMap)?.id ?? null;
 }
 
+/** Id of an open conversation with this other profile, if any. */
+export async function threadIdWith(otherId: string): Promise<string | null> {
+  if (!otherId) return null;
+  const { ids, openThreads } = await loadChatData();
+  const hit = openThreads.find(
+    (thread) =>
+      (ids.includes(thread.profile_a) && thread.profile_b === otherId) ||
+      (ids.includes(thread.profile_b) && thread.profile_a === otherId),
+  );
+  return hit?.id ?? null;
+}
+
 /** Number of conversations that can actually be opened by the member. */
 export async function openChatCount(): Promise<number> {
   return (await loadChatData()).openThreads.length;

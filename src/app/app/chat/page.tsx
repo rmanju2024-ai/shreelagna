@@ -1,14 +1,22 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ChatSidebar, firstChatId } from "@/app/app/chat/chat-sidebar";
+import { ChatSidebar, firstChatId, threadIdWith } from "@/app/app/chat/chat-sidebar";
 import { InboxSwitcher } from "@/components/inbox-switcher";
 import { LiveRefresh } from "@/components/live-refresh";
 import { InnerShell as PageShell } from "@/components/chrome-layout";
 
-export default async function ChatListPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
-  const { tab } = await searchParams;
+export default async function ChatListPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string; with?: string }>;
+}) {
+  const { tab, with: withId } = await searchParams;
   if (tab === "alerts") redirect("/app/alerts");
+  if (withId) {
+    const match = await threadIdWith(withId);
+    if (match) redirect(`/app/chat/${match}`);
+  }
   // Desktop: open the top conversation straight away (server-side, no flash, no client hop).
   // Phones keep the list first.
   const h = await headers();

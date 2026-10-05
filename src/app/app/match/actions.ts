@@ -9,6 +9,7 @@ import { canAlertInterest } from "@/lib/match/profile-settings";
 import { orderedProfilePair, pairCanChat, isStalePending, trimDeclineReason } from "@/lib/match/interest-status";
 import { pairPlanLive } from "@/lib/membership/access";
 import { loadMembership, loadMembershipForProfile } from "@/lib/membership/load";
+import { canSearchFamilies } from "@/lib/profile/visibility";
 import { displayFirstName } from "@/lib/profile/options";
 import { previewText } from "@/lib/match/chat-ui";
 import { safeNextPath } from "@/lib/auth/safe-next";
@@ -311,7 +312,7 @@ async function postChatMessage(formData: FormData) {
     .in("id", [thread.profile_a, thread.profile_b]);
   const mine = (pair ?? []).find((p) => p.created_by === me.id);
   const other = (pair ?? []).find((p) => p.created_by !== me.id);
-  if (!mine || mine.status !== "active" || !other || other.status !== "active") {
+  if (!mine || !canSearchFamilies(mine.status) || !other || other.status !== "active") {
     return { ok: false as const, bounce, threadId };
   }
   const { data: interestRows } = await supabase
