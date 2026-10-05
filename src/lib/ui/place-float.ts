@@ -7,17 +7,22 @@ export function chromeBottomGap(): number {
 }
 
 /** Place a floating menu in the viewport, above footer/nav, flipping upward when needed. */
-export function placeFloat(trigger: HTMLElement): CSSProperties {
+export function placeFloat(
+  trigger: HTMLElement,
+  opts?: { minWidth?: number; maxHeightCap?: number },
+): CSSProperties {
   const box = trigger.getBoundingClientRect();
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   const gap = chromeBottomGap();
-  const width = Math.min(Math.max(box.width, 13 * 16), vw - 16);
+  const minWidth = opts?.minWidth ?? 13 * 16;
+  const cap = opts?.maxHeightCap ?? 22 * 16;
+  const width = Math.min(Math.max(box.width, minWidth), vw - 16);
   const left = Math.min(Math.max(8, box.left), vw - width - 8);
   const below = vh - box.bottom - gap;
   const above = box.top - 12;
-  const openUp = below < 200 && above > below;
-  const maxHeight = Math.min(22 * 16, Math.max(8 * 16, openUp ? above : below));
+  const openUp = below < 220 && above > below;
+  const maxHeight = Math.min(cap, Math.max(10 * 16, openUp ? above : below));
   return {
     position: "fixed",
     zIndex: 700,
