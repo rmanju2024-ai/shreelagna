@@ -28,13 +28,21 @@ const CHIRPS: Record<string, string[]> = {
   closed: ["Fresh start. Spark again."],
   plan: ["Unlock, then spark."],
   quota: ["More sparks on a plan."],
-  finish: ["Finish your profile. Then spark."],
+  finish: ["Finish your profile, then send a request."],
+  review: ["Your profile is complete. Waiting for review."],
   peck: ["Tap me. I'm waiting."],
 };
 
-function chirpPool(thread: InterestThread, needPlan: boolean, needQuota: boolean, canSend: boolean) {
+function chirpPool(
+  thread: InterestThread,
+  needPlan: boolean,
+  needQuota: boolean,
+  canSend: boolean,
+  awaitingReview: boolean,
+) {
   if (thread === "none" && needPlan) return CHIRPS.plan;
   if (thread === "none" && needQuota) return CHIRPS.quota;
+  if (thread === "none" && awaitingReview) return CHIRPS.review;
   if (thread === "none" && !canSend) return CHIRPS.finish;
   return CHIRPS[thread] ?? CHIRPS.none;
 }
@@ -98,6 +106,7 @@ export function BirdDock({
   canSend,
   needPlan,
   needQuota,
+  awaitingReview = false,
   quotaLeft,
   finishHref,
   chat,
@@ -108,6 +117,7 @@ export function BirdDock({
   canSend: boolean;
   needPlan: boolean;
   needQuota: boolean;
+  awaitingReview?: boolean;
   quotaLeft: number | null;
   finishHref: string;
   chat?: {
@@ -134,7 +144,7 @@ export function BirdDock({
   const storeKey = `sl-bird-chat:${profileId}`;
   const [, startTransition] = useTransition();
   const showChat = thread === "sent" || thread === "received" || thread === "accepted";
-  const pool = phase === "peck" ? CHIRPS.peck : chirpPool(thread, needPlan, needQuota, canSend);
+  const pool = phase === "peck" ? CHIRPS.peck : chirpPool(thread, needPlan, needQuota, canSend, awaitingReview);
   const chirp = pool[line % pool.length];
   const name = chat?.name ?? "Match";
   const [liveNotes, setLiveNotes] = useState<PeekChatNote[]>([]);
@@ -216,7 +226,7 @@ export function BirdDock({
 
   useEffect(() => {
     setLine(0);
-  }, [thread, needPlan, needQuota, canSend]);
+  }, [thread, needPlan, needQuota, canSend, awaitingReview]);
 
   useEffect(() => {
     const id = window.setInterval(() => setLine((n) => n + 1), 6500);
@@ -353,12 +363,14 @@ export function BirdDock({
           : thread === "received"
             ? "Reply now"
             : needPlan
-              ? "Unlock & spark"
+              ? "Unlock & send"
               : needQuota
-                ? "More sparks"
+                ? "More requests"
                 : canSend
-                  ? "Spark interest"
-                  : "Finish profile";
+                  ? "Send request"
+                  : awaitingReview
+                    ? "Awaiting review"
+                    : "Finish profile";
 
   const dock = (
     <div className={`bird-dock${open ? " is-open" : ""}${wide ? " is-wide" : ""}`} data-phase={phase} data-thread={thread}>
@@ -472,10 +484,16 @@ export function BirdDock({
           </Link>
         ) : null}
 
-        {thread === "none" && !canSend && !needPlan && !needQuota ? (
+        {thread === "none" && !canSend && !needPlan && !needQuota && !awaitingReview ? (
           <Link href={finishHref} className="bird-dock-cta">
             {perchLabel}
           </Link>
+        ) : null}
+
+        {thread === "none" && awaitingReview && !needPlan && !needQuota ? (
+          <span className="bird-dock-cta" aria-disabled>
+            {perchLabel}
+          </span>
         ) : null}
 
         {thread === "closed" && canSend ? (
