@@ -86,6 +86,23 @@ export type ProfileData = {
   finishHref: string;
 };
 
+function RichLine({ text }: { text: string }) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return (
+    <p>
+      {parts.map((part, i) =>
+        part.startsWith("**") && part.endsWith("**") ? (
+          <strong key={i} className="pv-mark">
+            {part.slice(2, -2)}
+          </strong>
+        ) : (
+          <span key={i}>{part}</span>
+        ),
+      )}
+    </p>
+  );
+}
+
 function PlanLock({ on, children }: { on: boolean; children: React.ReactNode }) {
   if (!on) return children;
   return (
@@ -225,7 +242,7 @@ export function ProfileRedesign(props: ProfileData) {
                       {group.lines?.length ? (
                         <div className="pv-lines">
                           {group.lines.map((text) => (
-                            <p key={text}>{text}</p>
+                            <RichLine key={text} text={text} />
                           ))}
                         </div>
                       ) : null}

@@ -90,10 +90,30 @@ function asRole(value: unknown): string {
 }
 
 function parentSentence(name: unknown, work: unknown, who: "Father" | "Mother"): string | null {
-  if (hasValue(name) && hasValue(work)) return `${who} is ${dash(name)}, working as ${dash(work)}`;
-  if (hasValue(name)) return `${who} is ${dash(name)}`;
+  if (hasValue(name) && hasValue(work)) return `${who} is **${dash(name)}**, working as ${dash(work)}`;
+  if (hasValue(name)) return `${who} is **${dash(name)}**`;
   if (hasValue(work)) return `${who}'s work is ${dash(work)}`;
   return null;
+}
+
+function siblingPair(brothers: unknown, brothersMarried: unknown, sisters: unknown, sistersMarried: unknown): string | null {
+  const b = asCount(brothers);
+  const s = asCount(sisters);
+  if (b === null && s === null) return null;
+  const bm = asCount(brothersMarried);
+  const sm = asCount(sistersMarried);
+  if ((b === 0 || b === null) && (s === 0 || s === null) && b !== null && s !== null) return "No brothers or sisters";
+  if (b === 1 && s === 1) {
+    if (bm === 0 && sm === 0) return "One brother and one sister, neither married";
+    if (bm === 1 && sm === 1) return "One brother and one sister, both married";
+    if (bm === 0 && sm === 1) return "One brother, unmarried, and one sister, married";
+    if (bm === 1 && sm === 0) return "One brother, married, and one sister, unmarried";
+    return "One brother and one sister";
+  }
+  const parts = [siblingSummary("brother", brothers, brothersMarried), siblingSummary("sister", sisters, sistersMarried)].filter(
+    (part): part is string => Boolean(part),
+  );
+  return parts.length ? parts.join("; ") : null;
 }
 
 function siblingSummary(kind: "brother" | "sister", totalRaw: unknown, marriedRaw: unknown): string | null {
@@ -198,7 +218,19 @@ function matchBanner(mine: Record<string, unknown>, theirs: Record<string, unkno
   });
   const theyAsk = hopeComparisons(theirs, mySelf);
   const iAsk = hopeComparisons(mine, theirSelf);
-  const hits: string[] = [];
+  const byKey = new Map<string, string>();
+  const put = (key: string, text: string) => {
+    if (!byKey.has(key)) byKey.set(key, text);
+  };
+
+  if (sameLabel(mySelf.religionName, theirSelf.religionName) && mySelf.religionName) put("religion", `Both ${mySelf.religionName}`);
+  if (sameLabel(mySelf.communityName, theirSelf.communityName) && mySelf.communityName) put("community", `Same community · ${mySelf.communityName}`);
+  if (sameLabel(mySelf.motherTongue, theirSelf.motherTongue) && mySelf.motherTongue) put("tongue", `Same mother tongue · ${mySelf.motherTongue}`);
+  if (sameLabel(mySelf.diet, theirSelf.diet) && mySelf.diet) put("diet", `Same diet · ${mySelf.diet}`);
+  if (sameLabel(mySelf.currentCity, theirSelf.currentCity) && mySelf.currentCity) put("city", `Same city · ${mySelf.currentCity}`);
+  else if (sameLabel(mySelf.currentState, theirSelf.currentState) && mySelf.currentState) put("state", `Same state · ${mySelf.currentState}`);
+  if (sameLabel(mySelf.qualification, theirSelf.qualification) && mySelf.qualification) put("education", `Same education · ${mySelf.qualification}`);
+
   const axes: Array<{
     key: keyof typeof theyAsk;
     label: string;
@@ -220,37 +252,14 @@ function matchBanner(mine: Record<string, unknown>, theirs: Record<string, unkno
     { key: "income", label: "income", set: (row) => hopeIsSet(row, ["pref_incomes"], HOPE_ANY.income) },
   ];
   for (const axis of axes) {
-    if (axis.set(theirs) && theyAsk[axis.key]?.match === true) {
-      hits.push(`You match their hope for ${axis.label}`);
-    }
-    if (axis.set(mine) && iAsk[axis.key]?.match === true) {
-      hits.push(`They match your hope for ${axis.label}`);
-    }
+    const youFit = axis.set(theirs) && theyAsk[axis.key]?.match === true;
+    const theyFit = axis.set(mine) && iAsk[axis.key]?.match === true;
+    if (youFit && theyFit) put(axis.key, `${axis.label[0].toUpperCase()}${axis.label.slice(1)} is a match for both of you`);
+    else if (theyFit) put(axis.key, `They match your hope for ${axis.label}`);
+    else if (youFit) put(axis.key, `You match their hope for ${axis.label}`);
   }
-  if (sameLabel(mySelf.religionName, theirSelf.religionName) && mySelf.religionName) {
-    hits.push(`Both ${mySelf.religionName}`);
-  }
-  if (sameLabel(mySelf.communityName, theirSelf.communityName) && mySelf.communityName) {
-    hits.push(`Same community · ${mySelf.communityName}`);
-  }
-  if (sameLabel(mySelf.motherTongue, theirSelf.motherTongue) && mySelf.motherTongue) {
-    hits.push(`Same mother tongue · ${mySelf.motherTongue}`);
-  }
-  if (sameLabel(mySelf.diet, theirSelf.diet) && mySelf.diet) {
-    hits.push(`Same diet · ${mySelf.diet}`);
-  }
-  if (sameLabel(mySelf.currentCity, theirSelf.currentCity) && mySelf.currentCity) {
-    hits.push(`Same city · ${mySelf.currentCity}`);
-  } else if (sameLabel(mySelf.currentState, theirSelf.currentState) && mySelf.currentState) {
-    hits.push(`Same state · ${mySelf.currentState}`);
-  }
-  if (sameLabel(mySelf.qualification, theirSelf.qualification) && mySelf.qualification) {
-    hits.push(`Same education · ${mySelf.qualification}`);
-  }
-  if (score?.total != null) {
-    hits.push(`Kundali ${score.total}/${score.max ?? 36}${score.label ? ` · ${score.label}` : ""}`);
-  }
-  return [...new Set(hits)];
+  if (score?.total != null) put("kundali", `Kundali ${score.total}/${score.max ?? 36}${score.label ? ` · ${score.label}` : ""}`);
+  return [...byKey.values()];
 }
 
 export async function BrowseProfileView({
@@ -512,18 +521,18 @@ export async function BrowseProfileView({
       wide: true,
       lines: linesOf(
         profile.height_cm && (religion || community)
-          ? `${who} is ${profile.height_cm} cm tall${religion ? `, ${religion}` : ""}${community ? `, and belongs to the ${community} community` : ""}`
+          ? `${who} is ${profile.height_cm} cm tall${religion ? `, **${religion}**` : ""}${community ? `, and belongs to the **${community}** community` : ""}`
           : profile.height_cm
             ? `${who} is ${profile.height_cm} cm tall`
             : religion && community
-              ? `${who} is ${religion} and belongs to the ${community} community`
+              ? `${who} is **${religion}** and belongs to the **${community}** community`
               : religion
-                ? `${who} is ${religion}`
+                ? `${who} is **${religion}**`
                 : community
-                  ? `${who} belongs to the ${community} community`
+                  ? `${who} belongs to the **${community}** community`
                   : null,
         [
-          hasValue(profile.mother_tongue) ? `Mother tongue is ${dash(profile.mother_tongue)}` : null,
+          hasValue(profile.mother_tongue) ? `Mother tongue is **${dash(profile.mother_tongue)}**` : null,
           spoken ? `${who} speaks ${spoken}` : null,
           liveNow ? `${who} now lives in ${liveNow}` : null,
           yesNo(profile.willing_to_relocate) === "Yes"
@@ -557,18 +566,18 @@ export async function BrowseProfileView({
       title: "Education & work",
       lines: linesOf(
         hasValue(profile.qualification) && hasValue(profile.college_name)
-          ? `${who} completed ${dash(profile.qualification)} from ${dash(profile.college_name)}`
+          ? `${who} completed **${dash(profile.qualification)}** from ${dash(profile.college_name)}`
           : hasValue(profile.qualification)
-            ? `${who} completed ${dash(profile.qualification)}`
+            ? `${who} completed **${dash(profile.qualification)}**`
             : hasValue(profile.college_name)
               ? `${who} studied at ${dash(profile.college_name)}`
               : null,
         hasValue(profile.occupation) && hasValue(profile.employer_name) && hasValue(profile.employed_in)
-          ? `${who} works as ${asRole(profile.occupation)} at ${dash(profile.employer_name)}, ${dash(profile.employed_in).toLowerCase()}`
+          ? `${who} works as ${asRole(profile.occupation)} at **${dash(profile.employer_name)}**, ${dash(profile.employed_in).toLowerCase()}`
           : hasValue(profile.occupation) && hasValue(profile.employed_in)
             ? `${who} works as ${asRole(profile.occupation)} in a ${dash(profile.employed_in).toLowerCase()}`
             : hasValue(profile.occupation) && hasValue(profile.employer_name)
-              ? `${who} works as ${asRole(profile.occupation)} at ${dash(profile.employer_name)}`
+              ? `${who} works as ${asRole(profile.occupation)} at **${dash(profile.employer_name)}**`
               : hasValue(profile.occupation)
                 ? `${who} works as ${asRole(profile.occupation)}`
                 : hasValue(profile.employed_in)
@@ -595,9 +604,7 @@ export async function BrowseProfileView({
         [parentSentence(profile.father_name, profile.father_occupation, "Father"), parentSentence(profile.mother_name, profile.mother_occupation, "Mother")]
           .filter(Boolean)
           .join(". ") || null,
-        [siblingSummary("brother", profile.brothers_count, profile.brothers_married_count), siblingSummary("sister", profile.sisters_count, profile.sisters_married_count)]
-          .filter(Boolean)
-          .join(". ") || null,
+        siblingPair(profile.brothers_count, profile.brothers_married_count, profile.sisters_count, profile.sisters_married_count),
       ),
       items: factsOf(fact("Living standard", profile.family_status)),
       note: familyAbout,
@@ -608,19 +615,19 @@ export async function BrowseProfileView({
       wide: true,
       lines: linesOf(
         bornOn && hasValue(profile.birth_city) && bornAt
-          ? `Date of birth is ${bornOn}, born in ${dash(profile.birth_city)} at ${bornAt}`
+          ? `Date of birth is **${bornOn}**, born in ${dash(profile.birth_city)} at **${bornAt}**`
           : bornOn && hasValue(profile.birth_city)
-            ? `Date of birth is ${bornOn}, born in ${dash(profile.birth_city)}`
+            ? `Date of birth is **${bornOn}**, born in ${dash(profile.birth_city)}`
             : bornOn && bornAt
-              ? `Date of birth is ${bornOn}, time of birth ${bornAt}`
+              ? `Date of birth is **${bornOn}**, time of birth **${bornAt}**`
               : bornOn
-                ? `Date of birth is ${bornOn}`
+                ? `Date of birth is **${bornOn}**`
                 : hasValue(profile.birth_city) && bornAt
-                  ? `Born in ${dash(profile.birth_city)} at ${bornAt}`
+                  ? `Born in ${dash(profile.birth_city)} at **${bornAt}**`
                   : hasValue(profile.birth_city)
                     ? `Born in ${dash(profile.birth_city)}`
                     : bornAt
-                      ? `Time of birth is ${bornAt}`
+                      ? `Time of birth is **${bornAt}**`
                       : null,
       ),
       items: factsOf(

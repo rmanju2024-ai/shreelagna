@@ -1140,6 +1140,16 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
   line-height: 1.55;
   font-weight: 500;
 }
+.pv-shell .pv-mark {
+  color: #9a3412;
+  font-weight: 800;
+  font-family: var(--font-display), Georgia, "Times New Roman", serif;
+  background: linear-gradient(180deg, rgb(253 224 71 / 0%), rgb(253 224 71 / 38%));
+  background-size: 100% 0.42em;
+  background-repeat: no-repeat;
+  background-position: 0 88%;
+  padding: 0 0.04rem;
+}
 .pv-shell .pv-lines p::before {
   content: "";
   position: absolute;
