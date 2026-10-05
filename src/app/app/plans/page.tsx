@@ -5,9 +5,7 @@ import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { WELCOME_INTEREST_LIMIT, formatInr, planByCode } from "@/lib/membership/catalog";
 import { fetchPendingPlanCode, fetchPlans, loadInterestQuota, loadMembership } from "@/lib/membership/load";
 import { formatIstDate } from "@/lib/time/ist";
-import { btnGhost, btnPrimary, cardClass } from "@/lib/ui/classes";
 import { createServiceClient } from "@/lib/supabase/server";
-import { PageHero } from "@/components/page-hero";
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -41,81 +39,63 @@ export default async function PlansPage({
 
   return (
     <PageShell><BackToAccount />
-      <section className="plans-stage">
-        <PageHero kicker="Membership" title="Plans" sub="Welcome gift on joining. Paid cover thereafter. Chat after accept." />
-
-        <div className={`${cardClass} card-3d plans-now is-${access.kind}`}>
-          <p className="browse-kicker">{access.live ? "Current plan" : "No plan"}</p>
-          <h2>{access.label}</h2>
-          {access.until && access.live ? (
+      <section className="pl">
+        <div className={`pl-status is-${access.kind}`}>
+          <div className="pl-status-main">
+            <span className="pl-badge">{access.live ? "Your plan" : "No plan"}</span>
+            <h1>{access.label}</h1>
             <p>
-              Until {formatIstDate(access.until)}
-              {access.daysLeft ? ` · ${access.daysLeft}d left` : ""}
+              {access.live && access.until
+                ? `Until ${formatIstDate(access.until)}${access.daysLeft ? ` · ${access.daysLeft} days left` : ""}`
+                : access.live
+                  ? "Unlimited access"
+                  : "Search stays open. Sending interest or viewing contacts needs a plan."}
             </p>
+          </div>
+          {access.live ? (
+            <div className="pl-meter" aria-label="Interests used">
+              <b>{quota.limit === null ? "∞" : quota.left ?? 0}</b>
+              <small>{quota.limit === null ? "unlimited" : `of ${quota.limit} left`}</small>
+            </div>
           ) : null}
-          {access.live && quota.limit !== null ? (
-            <p>
-              Used {quota.used} · {quota.left ?? 0} pending
-            </p>
-          ) : access.live ? (
-            <p>Unlimited</p>
-          ) : null}
-          {!access.live ? <p>Search remains open. Interest or contact view needs a plan.</p> : null}
-          {pending ? <p className="plans-pending">{pending.name} requested.</p> : null}
-          {requested ? <p className="plans-pending">Request received.</p> : null}
-          {error ? <p className="plans-warn">Could not save.</p> : null}
         </div>
+        {pending || requested || error ? (
+          <p className={`pl-note${error ? " is-warn" : ""}`}>
+            {error
+              ? "Could not save your request. Please try again."
+              : pending
+                ? `${pending.name} requested. Our team will contact you.`
+                : "Request received. Our team will contact you."}
+          </p>
+        ) : null}
 
-        <ul className="plans-grid">
-          <li className={`${cardClass} card-3d plan-card is-welcome${access.kind === "welcome" ? " is-featured" : ""}`}>
-            {access.kind === "welcome" ? <span className="plan-mark">Active</span> : null}
-            <p className="browse-kicker">2 months</p>
-            <h2>Welcome</h2>
-            <p className="plan-price">
-              Free
-              <small>from joining</small>
-            </p>
-            <p className="plan-tag">Applied automatically.</p>
-            <ul className="plan-perks">
-              <li>{WELCOME_INTEREST_LIMIT} interests or views</li>
-              <li>Chat after accept</li>
-            </ul>
-            <p className="plan-on">
-              {access.kind === "welcome"
-                ? "Live"
-                : access.kind === "paid"
-                  ? "Completed"
-                  : access.kind === "house"
-                    ? "House access"
-                    : "Ended"}
-            </p>
-          </li>
+        <ul className="pl-grid">
           {catalog.map((plan) => {
             const on = access.planCode === plan.code;
             const asked = pending?.code === plan.code;
             return (
-              <li key={plan.code} className={`${cardClass} card-3d plan-card${plan.featured ? " is-featured" : ""}`}>
-                {plan.featured ? <span className="plan-mark">Recommended</span> : null}
-                <p className="browse-kicker">{plan.months} months</p>
+              <li key={plan.code} className={`pl-card${plan.featured ? " is-featured" : ""}${on ? " is-on" : ""}`}>
+                {plan.featured ? <span className="pl-ribbon">★ Recommended</span> : null}
+                <p className="pl-months">{plan.months} months</p>
                 <h2>{plan.name}</h2>
-                <p className="plan-price">
+                <p className="pl-price">
                   {formatInr(plan.priceInr)}
-                  <small>indicative</small>
+                  <small> indicative</small>
                 </p>
-                <p className="plan-tag">{plan.tagline}</p>
-                <ul className="plan-perks">
-                  <li>{plan.interestLimit} interests or views</li>
-                  <li>Chat after accept</li>
+                <p className="pl-tag">{plan.tagline}</p>
+                <ul className="pl-perks">
+                  <li>✔ {plan.interestLimit} interests or views</li>
+                  <li>✔ Chat after accept</li>
                 </ul>
                 {house ? (
-                  <p className="plan-tag">Desk already has house access.</p>
+                  <p className="pl-tag">Desk already has house access.</p>
                 ) : on ? (
-                  <p className="plan-on">This plan is live</p>
+                  <p className="pl-live">● This plan is live</p>
                 ) : (
                   <form action={requestPlan}>
                     <input type="hidden" name="plan" value={plan.code} />
-                    <button type="submit" className={plan.featured ? btnPrimary : btnGhost}>
-                      {asked ? "Requested" : access.kind === "paid" ? `Upgrade to ${plan.name}` : `Choose ${plan.name}`}
+                    <button type="submit" className="pl-cta">
+                      {asked ? "Requested ✓" : access.kind === "paid" ? `Upgrade to ${plan.name}` : `Choose ${plan.name}`}
                     </button>
                   </form>
                 )}
@@ -123,6 +103,7 @@ export default async function PlansPage({
             );
           })}
         </ul>
+        <p className="pl-foot">Welcome gift: {WELCOME_INTEREST_LIMIT} free interests or views for your first 2 months. Chat opens after a match is accepted.</p>
       </section>
     </PageShell>
   );
