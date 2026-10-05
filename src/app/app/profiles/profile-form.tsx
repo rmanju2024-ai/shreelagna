@@ -26,6 +26,7 @@ import { ABOUT_MAX, ABOUT_MIN, FAMILY_NOTE_MAX } from "@/lib/profile/about-html"
 
 import type { ProfileFormValues } from "@/app/app/profiles/profile-form-types";
 import { Field, PlaceBlock, SaveButton, SiblingCounts } from "@/app/app/profiles/profile-form-parts";
+import { STUDIO_TABS, useStudioTab } from "@/app/app/profiles/profile-studio";
 
 export type { ProfileFormValues };
 
@@ -117,10 +118,13 @@ export function ProfileForm({
   const self = who === "self";
   const aboutDefault = values?.about ?? "";
   const show = (id: ProfileEditSection) => (!omitAbout || id !== "about") && (!section || section === id);
+  const studio = useStudioTab();
   const wizard = mode === "create" && !section;
+  const paged = wizard || Boolean(studio);
   const [wizardStep, setWizardStep] = useState(1);
+  const page = studio?.page ?? wizardStep;
   const panelClass = (step: number) =>
-    `form-3d-panel${wizard ? ` wizard-panel${wizardStep === step ? " is-current" : ""}` : ""}`;
+    `form-3d-panel${paged ? ` wizard-panel${page === step ? " is-current" : ""}` : ""}`;
 
   function moveWizard(next: number) {
     setWizardStep(Math.min(WIZARD_STEPS.length, Math.max(1, next)));
@@ -130,20 +134,23 @@ export function ProfileForm({
   return (
     <form
       action={saveProfile}
-      className={`form-3d atelier${wizard ? " is-wizard" : ""}`}
+      className={`form-3d atelier${paged ? " is-wizard" : ""}`}
       autoComplete="off"
-      noValidate={wizard}
+      noValidate={paged}
       onSubmit={(event) => {
-        if (!wizard) return;
+        if (!paged) return;
         const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
         if (submitter?.value === "draft") return;
         const invalid = event.currentTarget.querySelector<HTMLElement>(":invalid");
         if (!invalid) return;
         event.preventDefault();
         const targetStep = Number(invalid.closest<HTMLElement>(".wizard-panel")?.dataset.step ?? 1);
-        setWizardStep(targetStep);
+        if (wizard) setWizardStep(targetStep);
+        const tab = STUDIO_TABS.find((item) => "page" in item && item.page === targetStep);
+        if (tab && studio) studio.setTab(tab.id);
         window.setTimeout(() => {
-          invalid.focus();
+          invalid.focus({ preventScroll: true });
+          invalid.scrollIntoView({ block: "center", behavior: "smooth" });
           if ("reportValidity" in invalid) (invalid as HTMLInputElement).reportValidity();
         });
       }}
@@ -188,7 +195,6 @@ export function ProfileForm({
                 type="button"
                 className={wizardStep === item.id ? "is-current" : wizardStep > item.id ? "is-done" : ""}
                 aria-current={wizardStep === item.id ? "step" : undefined}
-                disabled={item.id > wizardStep}
                 onClick={() => moveWizard(item.id)}
               >
                 <b>{wizardStep > item.id ? "✓" : <FieldMark label={item.mark} />}</b>
@@ -1182,6 +1188,7 @@ export function ProfileForm({
         </div>
       </section>
       ) : null}
+
       {wizard ? (
         <div className="profile-wizard-actions">
           <button
@@ -1202,24 +1209,24 @@ export function ProfileForm({
           ) : null}
         </div>
       ) : null}
-      <section className={panelClass(5)} data-step="5">
-        {wizard ? (
-          <div className="profile-readiness">
-            <span aria-hidden>💡</span>
-            <div>
-              <h3>Save now, activate when ready</h3>
-              <p>
-                Your profile is saved as a draft until the required details, approved photo and verification
-                are complete. Draft profiles cannot send interests, chat, or reveal contact details.
-              </p>
-              <ul>
-                <li>Missing fields will be shown clearly on your Profile page.</li>
-                <li>You can return and improve every section later.</li>
-                <li>When everything required is ready, the profile goes for house review.</li>
-              </ul>
-            </div>
+      {wizard && wizardStep === 5 ? (
+        <div className="profile-readiness">
+          <span aria-hidden>💡</span>
+          <div>
+            <h3>Save now, activate when ready</h3>
+            <p>
+              Your profile is saved as a draft until the required details, approved photo and verification
+              are complete. Draft profiles cannot send interests, chat, or reveal contact details.
+            </p>
+            <ul>
+              <li>Missing fields will be shown clearly on your Profile page.</li>
+              <li>You can return and improve every section later.</li>
+              <li>When everything required is ready, the profile goes for house review.</li>
+            </ul>
           </div>
-        ) : null}
+        </div>
+      ) : null}
+      {!wizard || wizardStep === 5 ? (
         <div className="form-3d-actions">
           {error ? (
             <p className="w-full rounded-xl border border-red-200 bg-white px-4 py-3 text-sm text-red-800">
@@ -1238,7 +1245,7 @@ export function ProfileForm({
           ) : null}
           <SaveButton />
         </div>
-      </section>
+      ) : null}
     </form>
   );
 }

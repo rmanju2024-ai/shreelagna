@@ -480,6 +480,14 @@ table { max-width: 100%; }
   background: linear-gradient(135deg, rgb(255 255 255 / 90%), rgb(255 240 246 / 88%));
   box-shadow: 0 18px 35px -25px rgb(63 14 13 / 45%);
 }
+.profile-studio {
+  display: grid;
+  gap: 1rem;
+}
+.profile-studio .form-3d.is-wizard .wizard-panel.is-current {
+  padding-bottom: 1.25rem;
+  scroll-margin-bottom: 1.5rem;
+}
 .profile-wizard-hero { display: flex; align-items: center; gap: 0.8rem; }
 .profile-wizard-hero > span {
   display: grid; place-items: center; flex: none; width: 2.8rem; height: 2.8rem;
@@ -498,6 +506,7 @@ table { max-width: 100%; }
 }
 .profile-wizard-hero small { display: block; margin-top: 0.15rem; color: var(--muted); }
 .profile-wizard-steps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.4rem; }
+.profile-wizard-steps.profile-studio-tabs { grid-template-columns: repeat(7, minmax(0, 1fr)); }
 .profile-wizard-steps button {
   display: flex; align-items: center; gap: 0.45rem; min-width: 0; padding: 0.5rem;
   border: 1px solid rgb(184 137 76 / 22%); border-radius: 0.9rem;
