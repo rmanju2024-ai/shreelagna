@@ -546,12 +546,12 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
 .pr2-container { max-width: 56rem; margin: 0 auto; background: #fff; min-height: 100vh; display: flex; flex-direction: column; }
 
 /* Hero */
-.pr2-hero { position: relative; width: 100%; aspect-ratio: 1 / 1.2; background: #f3e2c8; overflow: hidden; margin-bottom: 1.2rem; }
+.pr2-hero { position: relative; width: 100%; aspect-ratio: 4 / 3; background: #f3e2c8; overflow: hidden; margin-bottom: 1.2rem; }
 .pr2-hero-img { width: 100%; height: 100%; object-fit: cover; }
-.pr2-hero-blank { width: 100%; height: 100%; background: #2a1710; display: grid; place-items: center; font-size: 7rem; font-weight: 900; color: #f3e2c8; }
-.pr2-hero-info { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(18,8,6,0.95) 100%); padding: 1.5rem; color: #fff8e7; }
-.pr2-hero-info h1 { margin: 0; font-size: clamp(1.6rem, 5vw, 2.2rem); font-weight: 900; line-height: 1.1; }
-.pr2-hero-info p { margin: 0.35rem 0 0; font-size: 1rem; color: #ffe9c7; }
+.pr2-hero-blank { width: 100%; height: 100%; background: #2a1710; display: grid; place-items: center; font-size: 5rem; font-weight: 900; color: #f3e2c8; }
+.pr2-hero-info { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(18,8,6,0.95) 100%); padding: 1.2rem; color: #fff8e7; }
+.pr2-hero-info h1 { margin: 0; font-size: clamp(1.4rem, 4vw, 1.8rem); font-weight: 900; line-height: 1.1; }
+.pr2-hero-info p { margin: 0.3rem 0 0; font-size: 0.9rem; color: #ffe9c7; }
 .pr2-online { color: #4ade80 !important; font-weight: 800 !important; }
 
 /* Toast */
@@ -590,6 +590,15 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
 
 /* Kundali Special */
 .pr2-card-kundali .pr2-kundali-main { text-align: center; }
+
+/* Media Section */
+.pr2-media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 0.8rem; margin-top: 0.8rem; }
+.pr2-media-thumb { aspect-ratio: 1 / 1; border-radius: 0.8rem; overflow: hidden; background: #f5f5f5; }
+.pr2-media-img { width: 100%; height: 100%; object-fit: cover; }
+.pr2-media-list { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.8rem; }
+.pr2-media-link { display: inline-block; padding: 0.6rem 1rem; background: #f5f5f5; border-radius: 0.6rem; text-decoration: none; color: #3f0e0d; font-weight: 500; transition: background 0.2s; }
+.pr2-media-link:hover { background: #e8dcd0; }
+.pr2-audio { width: 100%; margin-top: 0.6rem; max-width: 100%; }
 .pr2-kundali-score { margin-bottom: 1.4rem; }
 .pr2-kundali-score strong { display: block; font-size: 2.4rem; color: #c2415a; font-weight: 900; }
 .pr2-kundali-score small { display: block; color: #7c2d12; font-size: 0.95rem; font-weight: 700; margin-top: 0.3rem; }

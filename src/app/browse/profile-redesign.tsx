@@ -8,17 +8,22 @@ import { BirdDock } from "@/app/browse/bird-dock";
 export type ProfileData = {
   id: string;
   name: string;
+  surname?: string;
   age: number | null;
   place: string;
   lastSeen: string | null;
   photos: Array<{ storage_path: string }>;
   photoUrl: string | null;
+  videos?: Array<{ storage_path: string }>;
+  voices?: Array<{ storage_path: string }>;
   memberCode?: string;
   about?: string | null;
   personal?: any;
   faith?: any;
   work?: any;
   family?: any;
+  residence?: any;
+  astro?: any;
   hope?: any;
   kundali?: any;
   shortlisted: boolean;
@@ -249,6 +254,129 @@ export function ProfileRedesign(props: ProfileData) {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Residence Card */}
+        {props.residence && props.residence.length > 0 && (
+          <div
+            className={`pr2-card${expanded.residence ? " is-expanded" : ""}`}
+            onClick={() => toggleCard("residence")}
+          >
+            <div className="pr2-card-head">
+              <h2>🏠 Location & Residence</h2>
+              <span className="pr2-toggle">{expanded.residence ? "−" : "+"}</span>
+            </div>
+            {expanded.residence && (
+              <div className="pr2-card-body">
+                {props.residence.map((group: any, i: number) => (
+                  <div key={i} className="pr2-group">
+                    <h3>{group.title}</h3>
+                    <div className="pr2-items">
+                      {group.items.map((item: any, j: number) => (
+                        <div key={j} className="pr2-row">
+                          <span className="pr2-label">{item.k}</span>
+                          <span className="pr2-value">{item.v}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Astro Card */}
+        {props.astro && props.astro.length > 0 && (
+          <div
+            className={`pr2-card${expanded.astro ? " is-expanded" : ""}`}
+            onClick={() => toggleCard("astro")}
+          >
+            <div className="pr2-card-head">
+              <h2>⭐ Astrology & Birth</h2>
+              <span className="pr2-toggle">{expanded.astro ? "−" : "+"}</span>
+            </div>
+            {expanded.astro && (
+              <div className="pr2-card-body">
+                {props.astro.map((group: any, i: number) => (
+                  <div key={i} className="pr2-group">
+                    <h3>{group.title}</h3>
+                    <div className="pr2-items">
+                      {group.items.map((item: any, j: number) => (
+                        <div key={j} className="pr2-row">
+                          <span className="pr2-label">{item.k}</span>
+                          <span className="pr2-value">{item.v}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Media Card - Photos, Videos, Voice */}
+        {(props.photos.length > 1 || props.videos?.length || props.voices?.length) && (
+          <div
+            className={`pr2-card${expanded.media ? " is-expanded" : ""}`}
+            onClick={() => toggleCard("media")}
+          >
+            <div className="pr2-card-head">
+              <h2>📸 Media & Voice</h2>
+              <span className="pr2-toggle">{expanded.media ? "−" : "+"}</span>
+            </div>
+            {expanded.media && (
+              <div className="pr2-card-body">
+                {props.photos.length > 1 && (
+                  <div className="pr2-group">
+                    <h3>📷 Photos ({props.photos.length})</h3>
+                    <div className="pr2-media-grid">
+                      {props.photos.map((photo: any, i: number) => (
+                        <div key={i} className="pr2-media-thumb">
+                          <img
+                            src={`${photo.storage_path}?w=80&h=80`}
+                            alt={`Photo ${i + 1}`}
+                            className="pr2-media-img"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {props.videos && props.videos.length > 0 && (
+                  <div className="pr2-group">
+                    <h3>🎥 Videos ({props.videos.length})</h3>
+                    <div className="pr2-media-list">
+                      {props.videos.map((video: any, i: number) => (
+                        <a
+                          key={i}
+                          href={video.storage_path}
+                          className="pr2-media-link"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          ▶ Video {i + 1}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {props.voices && props.voices.length > 0 && (
+                  <div className="pr2-group">
+                    <h3>🎤 Voice Messages ({props.voices.length})</h3>
+                    <div className="pr2-media-list">
+                      {props.voices.map((voice: any, i: number) => (
+                        <audio key={i} controls className="pr2-audio">
+                          <source src={voice.storage_path} type="audio/mpeg" />
+                        </audio>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
