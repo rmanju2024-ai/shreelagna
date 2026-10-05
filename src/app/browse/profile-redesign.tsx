@@ -61,6 +61,7 @@ export type ProfileData = {
   about?: string | null;
   familyAbout?: string | null;
   details?: DetailGroup[];
+  matches?: string[];
   hope?: HopeItem[];
   kundali?: { total?: number; max?: number; label?: string } | null;
   shortlisted: boolean;
@@ -183,6 +184,21 @@ export function ProfileRedesign(props: ProfileData) {
           </div>
         ) : null}
       </header>
+
+      {props.matches?.length ? (
+        <div className="pv-match-banner" aria-label="Matching points">
+          <span className="pv-match-kicker">Why this fits</span>
+          <div className="pv-match-mask">
+            <div className="pv-match-track">
+              {[...props.matches, ...props.matches].map((item, i) => (
+                <span key={`${item}-${i}`} className="pv-match-pill">
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <div className="pv-layout">
         <div className="pv-main">

@@ -773,6 +773,56 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
   color: #5b4a43;
   font-weight: 600;
 }
+.pv-shell .pv-match-banner {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.35rem 0.45rem 0.35rem 0.55rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #14532d, #166534 28%, #3f2a14);
+  box-shadow: 0 6px 14px -12px rgb(20 83 45 / 70%);
+  overflow: hidden;
+}
+.pv-shell .pv-match-kicker {
+  flex-shrink: 0;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: #bbf7d0;
+  white-space: nowrap;
+}
+.pv-shell .pv-match-mask {
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.pv-shell .pv-match-track {
+  display: flex;
+  gap: 0.55rem;
+  width: max-content;
+  animation: pv-marquee 28s linear infinite;
+}
+.pv-shell .pv-match-track:hover { animation-play-state: paused; }
+.pv-shell .pv-match-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 12%);
+  border: 1px solid rgb(187 247 208 / 28%);
+  color: #ecfccb;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+@keyframes pv-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pv-shell .pv-match-track { animation: none; }
+}
 .pv-shell .pv-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(16rem, 20rem);
