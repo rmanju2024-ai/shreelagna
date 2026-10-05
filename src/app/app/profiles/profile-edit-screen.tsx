@@ -5,11 +5,20 @@ import { AlbumViewer } from "@/app/app/profiles/album-viewer";
 import { IntroductionEditor } from "@/app/app/profiles/introduction-editor";
 import { loadFaithCatalog, loadFormLists } from "@/lib/profile/load-form-lists";
 import { aboutPlainText } from "@/lib/profile/about-html";
-import { portraitTabForSection, type ProfileEditTarget } from "@/lib/profile/sections";
+import { isProfileEditSection, portraitTabForSection, type ProfileEditTarget } from "@/lib/profile/sections";
 import { btnHero, btnHeroGhost } from "@/lib/ui/classes";
 import { watermarkLine } from "@/lib/brand";
-import { ProfileStudio } from "@/app/app/profiles/profile-studio";
 import { displayFirstName } from "@/lib/profile/options";
+
+const EDIT_TABS = [
+  { id: "album", label: "Album", short: "Album" },
+  { id: "personal", label: "Personal", short: "Personal" },
+  { id: "about", label: "Introduction", short: "Intro" },
+  { id: "work", label: "Education & work", short: "Education" },
+  { id: "family", label: "Family", short: "Family" },
+  { id: "faith", label: "Religion", short: "Religion" },
+  { id: "partner", label: "Partner preference", short: "Preference" },
+] as const;
 
 export async function ProfileEditScreen({
   profile,
@@ -35,6 +44,8 @@ export async function ProfileEditScreen({
   const cancelHref = `/app/profiles/${profile.id}${backTab ? `?tab=${backTab}` : ""}`;
   const watermark = watermarkLine(displayFirstName(profile.subject_full_name));
   const [{ religions, communities }, lists] = await Promise.all([loadFaithCatalog(), loadFormLists()]);
+  const current = section && EDIT_TABS.some((tab) => tab.id === section) ? section : "album";
+  const formSection = isProfileEditSection(current) && current !== "about" ? current : undefined;
 
   return (
     <PageShell>
@@ -45,58 +56,75 @@ export async function ProfileEditScreen({
         </p>
         <h1 className="mt-2 font-[family-name:var(--font-british)] text-4xl">{profile.subject_full_name}</h1>
       </div>
-      <div id="album" className="mt-8">
-        <ProfileStudio
-          initial={section}
-          album={
-            <section className="form-3d-panel">
-              <p className="form-3d-kicker">Album</p>
-              <h2 className="form-3d-title">
-                Photographs
-                <span className="field-star" aria-hidden>
-                  *
-                </span>
-              </h2>
-              <div className="gold-ornament" />
-              <div className="album-trio">
-                <AlbumViewer
-                  photos={photos}
-                  profileId={profile.id}
-                  userId={me.id}
-                  editable
-                  framed
-                  watermark={watermark}
-                />
-              </div>
-              <div className="form-3d-actions mt-6">
-                <Link href={cancelHref} className={`${btnHeroGhost} form-3d-cancel`}>
-                  Cancel
-                </Link>
-                <Link href={`/app/profiles/${profile.id}?saved=1`} className={btnHero}>
-                  Done
-                </Link>
-              </div>
-            </section>
-          }
-          about={
-            <IntroductionEditor
-              profileId={profile.id}
-              userId={me.id}
-              memberCode={memberCode}
-              creatorRelationship={typeof profile.creator_relationship === "string" ? profile.creator_relationship : undefined}
-              about={aboutText}
-              introShown={typeof profile.intro_shown === "string" ? profile.intro_shown : null}
-              video={video}
-              audio={audio}
-              self={profile.creator_relationship === "self"}
-              cancelHref={cancelHref}
-              watermark={watermark}
-            />
-          }
-        >
+      <div id="album" className="profile-studio mt-8">
+        <nav className="profile-wizard-steps profile-studio-tabs" aria-label="Edit profile sections">
+          {EDIT_TABS.map((tab) => (
+            <Link
+              key={tab.id}
+              href={`/app/profiles/${profile.id}?edit=1&section=${tab.id}`}
+              className={current === tab.id ? "is-current" : undefined}
+              aria-current={current === tab.id ? "page" : undefined}
+            >
+              <span>
+                <strong>{tab.short}</strong>
+                <small>{tab.label}</small>
+              </span>
+            </Link>
+          ))}
+        </nav>
+
+        {current === "album" ? (
+          <section className="form-3d-panel">
+            <p className="form-3d-kicker">Album</p>
+            <h2 className="form-3d-title">
+              Photographs
+              <span className="field-star" aria-hidden>
+                *
+              </span>
+            </h2>
+            <div className="gold-ornament" />
+            <div className="album-trio">
+              <AlbumViewer
+                photos={photos}
+                profileId={profile.id}
+                userId={me.id}
+                editable
+                framed
+                watermark={watermark}
+              />
+            </div>
+            <div className="form-3d-actions mt-6">
+              <Link href={cancelHref} className={`${btnHeroGhost} form-3d-cancel`}>
+                Cancel
+              </Link>
+              <Link href={`/app/profiles/${profile.id}?saved=1`} className={btnHero}>
+                Save
+              </Link>
+            </div>
+          </section>
+        ) : null}
+
+        {current === "about" ? (
+          <IntroductionEditor
+            profileId={profile.id}
+            userId={me.id}
+            memberCode={memberCode}
+            creatorRelationship={typeof profile.creator_relationship === "string" ? profile.creator_relationship : undefined}
+            about={aboutText}
+            introShown={typeof profile.intro_shown === "string" ? profile.intro_shown : null}
+            video={video}
+            audio={audio}
+            self={profile.creator_relationship === "self"}
+            cancelHref={cancelHref}
+            watermark={watermark}
+          />
+        ) : null}
+
+        {formSection ? (
           <ProfileForm
             error={error}
             mode="edit"
+            section={formSection}
             cancelHref={cancelHref}
             omitAbout
             allowMobileOtp={profile.created_by === me.id}
@@ -108,7 +136,7 @@ export async function ProfileEditScreen({
             hasVideo={Boolean(video)}
             hasAudio={Boolean(audio)}
           />
-        </ProfileStudio>
+        ) : null}
       </div>
     </PageShell>
   );
