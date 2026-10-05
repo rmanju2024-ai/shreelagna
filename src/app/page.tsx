@@ -26,42 +26,45 @@ export default async function HomePage() {
 
   return (
     <PageShell bleed>
-      <section className="home-artwork relative h-[100svh] min-h-[640px] w-full overflow-hidden lg:min-h-[780px]">
-        <KalyanBanner intensity="hero" presentation="complete" veil={false} />
-      </section>
-
-      <section className="home-welcome">
-        <div className={`${pageInner} home-welcome-inner`}>
-          <div>
-            <p className="home-hero-kicker">✦ Shree Lagna · Bharat</p>
-            <h1 className="home-welcome-title font-[family-name:var(--font-display)]">
-              A sacred beginning.
-            </h1>
-            <p className="home-welcome-sub">
-              {user
-                ? "Welcome back. Your next step awaits."
-                : "Meet with dignity. Begin with a trusted introduction."}
-            </p>
-          </div>
-          <div className="home-welcome-action">
-            <ul className="home-hero-chips" aria-label="Shree Lagna promises">
-              <li>🪔 Sanskar</li>
-              <li>🤝 Saath</li>
-              <li>🔒 Maryada</li>
-            </ul>
-            <div className="home-welcome-buttons">
-              {user ? (
-                <Link href="/app" className={btnHero}>
-                  My profile →
-                </Link>
-              ) : (
-                <GoogleSignIn label="Continue with Gmail" tone="ivory" size="lg" />
-              )}
-              <Link href="/browse" className={btnHeroGhost}>
-                Discover →
+      <section className="home-split">
+        <div className="home-split-art">
+          <KalyanBanner intensity="hero" presentation="complete" veil={false} />
+        </div>
+        <div className="home-split-copy">
+          <p className="home-hero-kicker">✦ Shree Lagna · Bharat</p>
+          <h1 className="home-split-title font-[family-name:var(--font-display)]">A sacred beginning.</h1>
+          <p className="home-split-sub">
+            {user
+              ? "Welcome back. Your next step awaits."
+              : "Meet with dignity. Begin with a trusted introduction, guided by family values and verified profiles."}
+          </p>
+          <ul className="home-split-tiles">
+            {[
+              ["🪔", "Sanskar", "Respect for every family"],
+              ["🤝", "Saath", "Real guidance when needed"],
+              ["🔒", "Maryada", "Private, safe and verified"],
+              ["💍", "Sambandh", "Considered introductions"],
+            ].map(([icon, title, text]) => (
+              <li key={title}>
+                <span aria-hidden>{icon}</span>
+                <b>{title}</b>
+                <small>{text}</small>
+              </li>
+            ))}
+          </ul>
+          <div className="home-welcome-buttons">
+            {user ? (
+              <Link href="/app" className={btnHero}>
+                My profile →
               </Link>
-            </div>
+            ) : (
+              <GoogleSignIn label="Continue with Gmail" tone="ivory" size="lg" />
+            )}
+            <Link href="/browse" className={btnHeroGhost}>
+              Discover →
+            </Link>
           </div>
+          <p className="home-split-note">Adults only · Indian families · Free to begin</p>
         </div>
       </section>
 

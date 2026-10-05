@@ -1570,3 +1570,18 @@ html[data-scene="couple"] .app-main {
 @media (max-width: 420px) {
   .desk-pulse-group .desk-stats { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Home: 50/50 split hero */
+.home-split { display: grid; grid-template-columns: 1fr 1fr; min-height: calc(100svh - 5rem); background: linear-gradient(135deg, #fff8ef, #f6e3c8); }
+.home-split-art { position: relative; min-height: 28rem; background: #2a1710; overflow: hidden; }
+.home-split-copy { display: flex; flex-direction: column; justify-content: center; gap: 1rem; padding: clamp(1.5rem, 5vw, 4rem); color: #3f0e0d; }
+.home-split-copy .home-hero-kicker { margin: 0; color: #9a3412; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; font-size: 0.78rem; }
+.home-split-title { margin: 0; font-size: clamp(2.2rem, 5vw, 4rem); line-height: 1.02; color: #3f0e0d; }
+.home-split-sub { margin: 0; max-width: 34rem; font-size: clamp(1rem, 1.5vw, 1.15rem); line-height: 1.55; color: #5b4a43; }
+.home-split-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.7rem; margin: 0.4rem 0; padding: 0; list-style: none; max-width: 34rem; }
+.home-split-tiles li { display: grid; gap: 0.1rem; padding: 0.8rem 0.9rem; border-radius: 1.2rem; background: rgb(255 255 255 / 80%); border: 1px solid rgb(184 137 76 / 35%); box-shadow: 0 12px 24px -18px rgb(63 14 13 / 55%); }
+.home-split-tiles span { font-size: 1.5rem; }
+.home-split-tiles b { font-size: 1rem; color: #7c2d12; }
+.home-split-tiles small { color: #5b4a43; font-size: 0.8rem; }
+.home-split-note { margin: 0; font-size: 0.82rem; font-weight: 700; color: #7c2d12; }
+@media (max-width: 860px) { .home-split { grid-template-columns: 1fr; } .home-split-art { min-height: 20rem; height: 55vw; } }
