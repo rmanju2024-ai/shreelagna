@@ -714,7 +714,19 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
   position: relative;
   z-index: 2;
 }
-.pv-shell .pv-top-actions form { margin: 0; }
+.pv-shell .pv-edit {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.05rem;
+  padding: 0 0.9rem;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.78rem;
+  text-decoration: none;
+  color: #fff8e7;
+  background: linear-gradient(145deg, #c2415a, #7c2d12);
+  box-shadow: 0 2px 0 rgb(124 45 18 / 25%);
+}
 .pv-shell .pv-top-actions .safety-profile-control {
   display: flex;
   align-items: center;
@@ -1063,6 +1075,18 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
   color: #7c2d12;
   box-shadow: 0 2px 0 rgb(124 45 18 / 12%);
 }
+.pv-shell .pv-scores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.28rem 0 0;
+}
+.pv-shell .pv-scores .pv-match-chip { margin: 0; }
+.pv-shell .pv-match-chip.is-fit {
+  background: linear-gradient(180deg, #fff, #bbf7d0);
+  border-color: rgb(22 101 52 / 35%);
+  color: #14532d;
+}
 .pv-shell .pv-bio {
   margin: 0.35rem 0 0;
   color: #5b4a43;
@@ -1271,8 +1295,25 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
   border: 1px solid rgb(184 137 76 / 28%);
   box-shadow: 0 2px 0 rgb(124 45 18 / 10%);
 }
+.pv-shell .pv-chip.is-yes {
+  background: linear-gradient(180deg, #fff, #dcfce7);
+  border-color: rgb(22 101 52 / 28%);
+}
+.pv-shell .pv-chip.is-no {
+  background: linear-gradient(180deg, #fff, #fee2e2);
+  border-color: rgb(153 27 27 / 28%);
+}
 .pv-shell .pv-chip span { display: block; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.05em; color: #9a3412; font-weight: 800; }
+.pv-shell .pv-chip.is-yes span { color: #166534; }
+.pv-shell .pv-chip.is-no span { color: #991b1b; }
 .pv-shell .pv-chip strong { font-size: 0.78rem; color: #3f0e0d; }
+.pv-shell .pv-panel-head .pv-hope-fit {
+  margin-left: auto;
+  font-style: normal;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #14532d;
+}
 .pv-shell .pv-media { display: grid; gap: 0.45rem; padding: 0.6rem; }
 .pv-shell .pv-video { width: 100%; max-height: 180px; border-radius: 0.7rem; background: #1c0d0a; }
 .pv-shell .pv-audio { width: 100%; }

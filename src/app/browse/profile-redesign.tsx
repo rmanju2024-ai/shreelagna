@@ -16,7 +16,7 @@ type DetailGroup = {
   items?: { k: string; v: string }[];
   note?: string | null;
 };
-type HopeItem = { k: string; v: string };
+type HopeItem = { k: string; v: string; fit?: boolean | null };
 
 const FACT_ICON: Record<string, string> = {
   "Mother tongue": "🗣",
@@ -66,9 +66,11 @@ export type ProfileData = {
   details?: DetailGroup[];
   matches?: string[];
   hope?: HopeItem[];
+  fitScore?: { hit: number; total: number } | null;
   kundali?: { total?: number; max?: number; label?: string } | null;
   shortlisted: boolean;
   own: boolean;
+  editHref?: string;
   user: unknown;
   interestId: string | null;
   thread: InterestThread;
@@ -87,6 +89,7 @@ export type ProfileData = {
     accepted: boolean;
     needPlan: boolean;
     counted: boolean;
+    self?: boolean;
     canReveal: boolean;
     used: number;
     left: number | null;
@@ -135,11 +138,13 @@ function ContactPanel({
       : "No monthly cap on this plan";
   return (
     <section className="pv-contact">
-      <p className="pv-contact-title">Mobile & email</p>
-      <p className="pv-contact-quota">{quotaLine}. Send request or contact on one profile counts as 1.</p>
+      <p className="pv-contact-title">{contact.self ? "Your mobile & email" : "Mobile & email"}</p>
+      {contact.self ? null : (
+        <p className="pv-contact-quota">{quotaLine}. Send request or contact on one profile counts as 1.</p>
+      )}
       {contact.revealed ? (
         <>
-          {contact.limit != null ? (
+          {contact.limit != null && !contact.self ? (
             <p className="pv-contact-left">
               {contact.left ?? 0} left after this profile
             </p>
@@ -209,7 +214,7 @@ export function ProfileRedesign(props: ProfileData) {
   const [hero, setHero] = useState(0);
   const [lightbox, setLightbox] = useState<number | null>(null);
   const photos = props.photoUrls?.length ? props.photoUrls : props.photoUrl ? [props.photoUrl] : [];
-  const visiblePhotos = props.needPlan ? photos.slice(0, 1) : photos;
+  const visiblePhotos = props.needPlan && !props.own ? photos.slice(0, 1) : photos;
   const locked = Boolean(props.needPlan && !props.own);
   const spark = !props.own && props.user ? (
     <BirdDock
@@ -280,10 +285,20 @@ export function ProfileRedesign(props: ProfileData) {
             </span>
             {props.lastSeen ? <span className="pv-live">{props.lastSeen}</span> : null}
           </p>
-          {props.kundali?.total != null ? (
-            <p className="pv-match-chip">
-              Kundali {props.kundali.total}/{props.kundali.max ?? 36}
-              {props.kundali.label ? ` · ${props.kundali.label}` : ""}
+          {(props.kundali?.total != null || (props.fitScore && props.fitScore.total > 0)) ? (
+            <p className="pv-scores">
+              {props.kundali?.total != null ? (
+                <span className="pv-match-chip">
+                  Kundali {props.kundali.total}/{props.kundali.max ?? 36}
+                  {props.kundali.label ? ` · ${props.kundali.label}` : ""}
+                </span>
+              ) : null}
+              {props.fitScore && props.fitScore.total > 0 ? (
+                <span className="pv-match-chip is-fit">
+                  Profile {props.fitScore.hit}/{props.fitScore.total}
+                  {` · ${Math.round((props.fitScore.hit / props.fitScore.total) * 100)}% fit`}
+                </span>
+              ) : null}
             </p>
           ) : null}
         </div>
@@ -303,6 +318,12 @@ export function ProfileRedesign(props: ProfileData) {
               </button>
             </form>
             <SafetyProfileControl icons profileId={props.id} returnTo={`/browse/${props.id}`} name={props.name} />
+          </div>
+        ) : props.editHref ? (
+          <div className="pv-top-actions">
+            <Link href={props.editHref} className="pv-edit">
+              Edit profile
+            </Link>
           </div>
         ) : null}
       </header>
@@ -377,11 +398,22 @@ export function ProfileRedesign(props: ProfileData) {
               <div className="pv-panel-head">
                 <span className="pv-ico">♡</span>
                 <span>Looking for</span>
+                {props.fitScore && props.fitScore.total > 0 ? (
+                  <em className="pv-hope-fit">
+                    You match {props.fitScore.hit} of {props.fitScore.total}
+                  </em>
+                ) : null}
               </div>
               <div className="pv-hope">
                 {props.hope.map((item) => (
-                  <div key={item.k} className="pv-chip">
-                    <span>{item.k}</span>
+                  <div
+                    key={item.k}
+                    className={`pv-chip${item.fit === true ? " is-yes" : item.fit === false ? " is-no" : ""}`}
+                  >
+                    <span>
+                      {item.fit === true ? "✓ " : item.fit === false ? "✕ " : ""}
+                      {item.k}
+                    </span>
                     <strong>{item.v}</strong>
                   </div>
                 ))}
@@ -389,6 +421,7 @@ export function ProfileRedesign(props: ProfileData) {
             </section>
           ) : null}
 
+          {!props.own ? (
           <section className={`pv-chat${props.thread === "none" ? " is-locked" : " is-open"}`}>
             <div className="pv-chat-head">
               <span className="pv-ico">✉</span>
@@ -406,6 +439,7 @@ export function ProfileRedesign(props: ProfileData) {
               </div>
             </div>
           </section>
+          ) : null}
         </div>
 
         <aside className="pv-media-col">
@@ -419,7 +453,7 @@ export function ProfileRedesign(props: ProfileData) {
           ) : (
             <div className="pv-media-hero is-blank">{props.name.slice(0, 1)}</div>
           )}
-          {lightbox === null ? <div className="pv-spark-box">{spark}</div> : null}
+          {lightbox === null && spark ? <div className="pv-spark-box">{spark}</div> : null}
           {props.contact ? <ContactPanel profileId={props.id} contact={props.contact} /> : null}
           {visiblePhotos.length > 1 ? (
             <div className="pv-thumbs">

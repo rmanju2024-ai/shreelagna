@@ -252,6 +252,11 @@ export function preferenceMatchCount(rows: PreferenceRow[]): { hit: number; tota
   return { hit: rows.filter((r) => r.match === true).length, total: rows.length };
 }
 
+export function preferenceFitScore(rows: { match: boolean | null }[]): { hit: number; total: number } {
+  const scored = rows.filter((row) => row.match === true || row.match === false);
+  return { hit: scored.filter((row) => row.match === true).length, total: scored.length };
+}
+
 export function preferenceFits(their: Record<string, unknown>, me: MatchSelf): boolean {
   return Object.values(hopeComparisons(their, me)).every((row) => row.match !== false);
 }

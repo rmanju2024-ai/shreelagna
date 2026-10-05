@@ -92,6 +92,20 @@ export default async function ProfilePage({
   const religionName = nestedName(profile.religions);
   const communityName = nestedName(profile.communities);
 
+  if (own && !showForm) {
+    const { BrowseProfileView } = await import("@/app/browse/browse-profile-view");
+    return (
+      <PageShell full>
+        <BackToAccount />
+        <BrowseProfileView
+          params={Promise.resolve({ id: String(profile.id) })}
+          searchParams={Promise.resolve({})}
+          editHref={`/app/profiles/${profile.id}?edit=1`}
+        />
+      </PageShell>
+    );
+  }
+
   return (
     <PageShell full><BackToAccount />
       <ProfilePortrait

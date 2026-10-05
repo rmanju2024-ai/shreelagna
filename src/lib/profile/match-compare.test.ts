@@ -5,6 +5,7 @@ import {
   hopeComparisons,
   listedFits,
   preferenceFits,
+  preferenceFitScore,
   preferenceMatchCount,
   preferenceSheetRows,
   rangeFits,
@@ -109,6 +110,17 @@ describe("match compare", () => {
     expect(rows.find((r) => r.k === "Religion")?.match).toBe(true);
     expect(rows.find((r) => r.k === "State Living in")?.match).toBe(false);
     expect(preferenceMatchCount(rows).total).toBe(15);
+    expect(preferenceFitScore(rows)).toEqual(preferenceMatchCount(rows));
+  });
+
+  it("scores only preference rows that can be judged", () => {
+    expect(
+      preferenceFitScore([
+        { match: true },
+        { match: false },
+        { match: null },
+      ]),
+    ).toEqual({ hit: 1, total: 2 });
   });
 
   it("treats a false preference as a miss for match alerts", () => {

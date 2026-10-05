@@ -23,7 +23,7 @@ import { ageFromDob, formatBirthTime } from "@/lib/profile/completeness";
 import { maritalLabel, NATIVE_COUNTRIES, HOPE_ANY, MOTHER_TONGUES } from "@/lib/profile/options";
 import { asStringList, hopeDisplay, hopeValues, languagesKnown } from "@/lib/profile/multi-values";
 import { aboutPlainText } from "@/lib/profile/about-html";
-import { hopeComparisons, matchSelfFromProfile } from "@/lib/profile/match-compare";
+import { hopeComparisons, matchSelfFromProfile, preferenceFitScore } from "@/lib/profile/match-compare";
 
 function nestedName(value: unknown): string | undefined {
   if (Array.isArray(value) && value[0] && typeof value[0] === "object" && "name" in value[0]) {
@@ -271,9 +271,11 @@ function matchBanner(mine: Record<string, unknown>, theirs: Record<string, unkno
 export async function BrowseProfileView({
   params,
   searchParams,
+  editHref,
 }: {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ error?: string; sent?: string; contact?: string; wa?: string; safety?: string }>;
+  editHref?: string;
 }) {
   const { id } = await params;
   const { sent } = await searchParams;
@@ -418,6 +420,21 @@ export async function BrowseProfileView({
       left: quotaLeft,
       limit: quotaLimit,
     };
+  } else if (own) {
+    contact = {
+      revealed: true,
+      self: true,
+      mobile: typeof profile.subject_mobile === "string" ? profile.subject_mobile.trim() : "",
+      email: typeof me.email === "string" ? me.email.trim() : "",
+      locked: false,
+      accepted: true,
+      needPlan: false,
+      counted: true,
+      canReveal: false,
+      used: 0,
+      left: null,
+      limit: null,
+    };
   }
   const { data: owner } = await db
     .from("app_users")
@@ -448,20 +465,22 @@ export async function BrowseProfileView({
     interestOpen: openInterestBlocksSend(interestStatus),
     pairLive,
   });
-  const allowed = Boolean(
-    targetType &&
-      canViewProfile({
-        viewerType,
-        viewerStatus,
-        targetType,
-        targetStatus: typeof profile.status === "string" ? profile.status : "hidden",
-        isOwner: own,
-        isStaff,
-        linkedByInterest,
-        targetOwnerIsAdmin: owner?.role === "admin",
-        viewerIsAdmin: me.role === "admin",
-      }),
-  );
+  const allowed =
+    own ||
+    Boolean(
+      targetType &&
+        canViewProfile({
+          viewerType,
+          viewerStatus,
+          targetType,
+          targetStatus: typeof profile.status === "string" ? profile.status : "hidden",
+          isOwner: own,
+          isStaff,
+          linkedByInterest,
+          targetOwnerIsAdmin: owner?.role === "admin",
+          viewerIsAdmin: me.role === "admin",
+        }),
+    );
   if (!allowed) return <UnavailableBrowse />;
 
   if (!isStaff && me.active_profile_id && me.active_profile_id !== id && !own && mine) {
@@ -703,6 +722,33 @@ export async function BrowseProfileView({
     },
   ].filter((group) => group.lines.length || group.items.length || group.note);
 
+  const theyAsk =
+    !own && mine
+      ? hopeComparisons(
+          profile,
+          matchSelfFromProfile(mine, {
+            religion: nestedName(mine.religions),
+            community: nestedName(mine.communities),
+          }),
+        )
+      : null;
+  const hopeKey = {
+    Age: "age",
+    Height: "height",
+    "Marital status": "marital",
+    Languages: "tongue",
+    Religion: "religion",
+    Community: "community",
+    Country: "country",
+    State: "state",
+    City: "city",
+    Education: "education",
+    Occupation: "occupation",
+    "Employed in": "employed",
+    Income: "income",
+    Diet: "diet",
+    Horoscope: "horoscope",
+  } as const;
   const hope = [
     { k: "Age", v: profile.pref_age_min && profile.pref_age_max ? `${profile.pref_age_min}–${profile.pref_age_max}` : "—" },
     { k: "Height", v: profile.pref_height_min && profile.pref_height_max ? `${profile.pref_height_min}–${profile.pref_height_max} cm` : "—" },
@@ -719,7 +765,11 @@ export async function BrowseProfileView({
     { k: "Income", v: hopeDisplay(hopeValues(profile, "pref_incomes"), "Any") },
     { k: "Diet", v: hopeDisplay(hopeValues(profile, "pref_diets"), "Any") },
     { k: "Horoscope", v: dash(profile.pref_horoscope) },
-  ];
+  ].map((item) => ({
+    ...item,
+    fit: theyAsk ? theyAsk[hopeKey[item.k as keyof typeof hopeKey]]?.match ?? null : null,
+  }));
+  const fitScore = theyAsk ? preferenceFitScore(Object.values(theyAsk)) : null;
 
   const photoUrls = photos.map((p) => publicMediaUrl(p.storage_path)).filter((url): url is string => Boolean(url));
   const videoUrls = videos.map((v) => publicMediaUrl(v.storage_path)).filter((url): url is string => Boolean(url));
@@ -742,6 +792,7 @@ export async function BrowseProfileView({
     house: owner?.role === "admin" ? "admin" : owner?.role === "service" ? "staff" : undefined,
     shortlisted,
     own,
+    editHref,
     user,
     kundali,
     interestId,
@@ -756,6 +807,7 @@ export async function BrowseProfileView({
     details,
     matches: !own && mine ? matchBanner(mine, profile, kundali) : [],
     hope,
+    fitScore,
     chat: {
       myProfileId: myChatId,
       threadId: chatThreadId,
