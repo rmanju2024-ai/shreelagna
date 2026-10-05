@@ -64,6 +64,9 @@ describe("completeness", () => {
   it("prints time of birth in 12-hour form", () => {
     expect(formatBirthTime("06:30")).toBe("6:30 AM");
     expect(formatBirthTime("18:05:00")).toBe("6:05 PM");
+    expect(formatBirthTime("00:00")).toBe("12:00 AM");
+    expect(formatBirthTime("12:00")).toBe("12:00 PM");
+    expect(formatBirthTime("6:30 am")).toBe("6:30 AM");
     expect(formatBirthTime("")).toBeNull();
   });
 

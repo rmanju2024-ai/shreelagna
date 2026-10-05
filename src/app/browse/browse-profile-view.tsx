@@ -19,10 +19,10 @@ import { canViewProfile, isPublicProfileStatus, type ProfileType } from "@/lib/p
 import { createServiceClient } from "@/lib/supabase/server";
 import { after } from "next/server";
 import { redirect } from "next/navigation";
-import { ageFromDob } from "@/lib/profile/completeness";
+import { ageFromDob, formatBirthTime } from "@/lib/profile/completeness";
 import { asStringList, hopeDisplay, hopeValues } from "@/lib/profile/multi-values";
 import { aboutPlainText } from "@/lib/profile/about-html";
-import { maritalLabel } from "@/lib/profile/options";
+import { maritalLabel, NATIVE_COUNTRIES } from "@/lib/profile/options";
 
 function nestedName(value: unknown): string | undefined {
   if (Array.isArray(value) && value[0] && typeof value[0] === "object" && "name" in value[0]) {
@@ -130,6 +130,50 @@ function factsOf(...rows: Array<{ k: string; v: string } | null | undefined>) {
 function placeLine(city: unknown, state: unknown, country: unknown): string | null {
   const bits = [city, state, country].filter(hasValue).map(dash);
   return bits.length ? bits.join(", ") : null;
+}
+
+function countryKey(value: unknown): string | null {
+  if (!hasValue(value)) return null;
+  return dash(value).trim().toLowerCase().replace(/\.+$/, "").replace(/\s+/g, " ");
+}
+
+const COUNTRY_KEYS = new Set(NATIVE_COUNTRIES.map((name) => countryKey(name)).filter((name): name is string => Boolean(name)));
+
+function listedCountry(value: unknown): string | null {
+  const key = countryKey(value);
+  return key && COUNTRY_KEYS.has(key) ? key : null;
+}
+
+function grewCountryKey(grewUp: unknown, nativeCountry: unknown): string | null {
+  const native = listedCountry(nativeCountry) ?? countryKey(nativeCountry);
+  if (!hasValue(grewUp)) return native;
+  const bits = dash(grewUp)
+    .split(/[,/|]/)
+    .map((bit) => listedCountry(bit))
+    .filter((bit): bit is string => Boolean(bit));
+  return bits[0] ?? native;
+}
+
+function grewUpSentence(who: string, grewUp: unknown, nativeCountry: unknown, currentCountry: unknown): string | null {
+  const now = listedCountry(currentCountry) ?? countryKey(currentCountry);
+  const then = grewCountryKey(grewUp, nativeCountry);
+  if (now && then && now === then) return null;
+  const shown = hasValue(grewUp) ? dash(grewUp) : hasValue(nativeCountry) ? dash(nativeCountry) : null;
+  if (!shown || (now && (listedCountry(shown) ?? countryKey(shown)) === now)) return null;
+  return `${who} grew up in ${shown}`;
+}
+
+function profileHeadline(fullName: unknown, surname: unknown): { name: string; surname?: string } {
+  const raw = typeof fullName === "string" ? fullName.trim() : "";
+  const name = displayFirstName(raw || "Member");
+  const sur = typeof surname === "string" ? surname.trim() : "";
+  if (!sur || sur.toLowerCase() === name.toLowerCase()) return { name };
+  return { name, surname: sur };
+}
+
+function birthTimeLabel(value: unknown): string | null {
+  if (!hasValue(value)) return null;
+  return formatBirthTime(dash(value)) ?? dash(value);
 }
 
 export async function BrowseProfileView({
@@ -374,14 +418,12 @@ export async function BrowseProfileView({
     return dash(value);
   };
 
-  const fullName = dash(profile.subject_full_name);
   const marital = maritalLabel(typeof profile.marital_status === "string" ? profile.marital_status : "") || "";
   const spoken = asStringList(profile.known_languages).join(", ");
   const hobbies = asStringList(profile.hobby_list).join(", ") || (hasValue(profile.hobbies) ? dash(profile.hobbies) : "");
   const liveNow = placeLine(profile.current_city, profile.current_state, profile.current_country);
-  const nativeNow = placeLine(profile.native_city, profile.native_state, profile.native_country);
-  const grew = hasValue(profile.grew_up_in) ? dash(profile.grew_up_in) : nativeNow;
   const bornOn = formatDob(profile.date_of_birth);
+  const bornAt = birthTimeLabel(profile.birth_time);
   const who = asProfileType(profile.profile_type) === "vadhu" ? "She" : asProfileType(profile.profile_type) === "vara" ? "He" : "This member";
   const religion = nestedName(profile.religions);
   const community = nestedName(profile.communities);
@@ -391,7 +433,6 @@ export async function BrowseProfileView({
       icon: "✦",
       title: "Personal",
       wide: true,
-      lead: hasValue(fullName) ? { text: fullName, caption: "Name" } : undefined,
       lines: linesOf(
         profile.height_cm ? `${who} is ${profile.height_cm} cm tall` : null,
         religion && community
@@ -403,7 +444,7 @@ export async function BrowseProfileView({
               : null,
         hasValue(profile.mother_tongue) ? `Mother tongue is ${dash(profile.mother_tongue)}` : null,
         spoken ? `${who} speaks ${spoken}` : null,
-        grew ? `${who} grew up in ${grew}` : null,
+        grewUpSentence(who, profile.grew_up_in, profile.native_country, profile.current_country),
         liveNow ? `${who} now lives in ${liveNow}` : null,
         yesNo(profile.willing_to_relocate) === "Yes"
           ? `${who} is open to relocating`
@@ -471,12 +512,12 @@ export async function BrowseProfileView({
       wide: true,
       lines: linesOf(
         bornOn ? `Date of birth is ${bornOn}` : null,
-        hasValue(profile.birth_city) && hasValue(profile.birth_time)
-          ? `Born in ${dash(profile.birth_city)} at ${dash(profile.birth_time)}`
+        hasValue(profile.birth_city) && bornAt
+          ? `Born in ${dash(profile.birth_city)} at ${bornAt}`
           : hasValue(profile.birth_city)
             ? `Born in ${dash(profile.birth_city)}`
-            : hasValue(profile.birth_time)
-              ? `Time of birth is ${dash(profile.birth_time)}`
+            : bornAt
+              ? `Time of birth is ${bornAt}`
               : null,
       ),
       items: factsOf(
@@ -513,10 +554,11 @@ export async function BrowseProfileView({
   const videoUrls = videos.map((v) => publicMediaUrl(v.storage_path)).filter((url): url is string => Boolean(url));
   const voiceUrls = voices.map((v) => publicMediaUrl(v.storage_path)).filter((url): url is string => Boolean(url));
 
+  const headline = profileHeadline(profile.subject_full_name, profile.surname);
   const props: ProfileData = {
     id: String(profile.id),
-    name: displayFirstName(typeof profile.subject_full_name === "string" ? profile.subject_full_name : "Member"),
-    surname: typeof profile.surname === "string" ? profile.surname : undefined,
+    name: headline.name,
+    surname: headline.surname,
     age,
     place,
     lastSeen: Boolean(profile.hide_last_seen) && !own && !isStaff ? null : lastSeen,

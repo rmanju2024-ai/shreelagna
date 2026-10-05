@@ -63,7 +63,12 @@ const MONTHS = [
 
 export function formatBirthTime(value: string | null | undefined): string | null {
   if (!value) return null;
-  const match = /^(\d{1,2}):([0-5]\d)(?::[0-5]\d)?$/.exec(value.trim());
+  const raw = value.trim();
+  const twelve = /^(1[0-2]|0?[1-9]):([0-5]\d)(?::[0-5]\d)?\s*(AM|PM)\b/i.exec(raw);
+  if (twelve) {
+    return `${Number(twelve[1])}:${twelve[2]} ${twelve[3].toUpperCase()}`;
+  }
+  const match = /^(\d{1,2}):([0-5]\d)(?::[0-5]\d)?/.exec(raw);
   if (!match) return null;
   let hour = Number(match[1]);
   const minute = match[2];
