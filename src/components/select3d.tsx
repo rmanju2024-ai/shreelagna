@@ -5,14 +5,18 @@ import {
   isValidElement,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
   type ChangeEvent,
   type KeyboardEvent as ReactKeyboardEvent,
   type ReactNode,
+  type CSSProperties,
   type SelectHTMLAttributes,
 } from "react";
+import { createPortal } from "react-dom";
+import { placeFloat } from "@/lib/ui/place-float";
 
 type Item = { value: string; label: string; disabled?: boolean };
 
@@ -67,6 +71,8 @@ export function Select3d({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [menuStyle, setMenuStyle] = useState<CSSProperties>();
   const [active, setActive] = useState(0);
   const [inner, setInner] = useState(String(defaultValue ?? value ?? ""));
   const [innerList, setInnerList] = useState<string[]>(values ?? []);
@@ -75,6 +81,10 @@ export function Select3d({
   const pickedSet = useMemo(() => new Set(picked), [picked]);
   const selected = useMemo(() => options.find((item) => item.value === current), [options, current]);
   const selectedMany = useMemo(() => options.filter((item) => pickedSet.has(item.value)), [options, pickedSet]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (value != null) setInner(String(value));
@@ -104,6 +114,25 @@ export function Select3d({
     return () => {
       document.removeEventListener("mousedown", onDoc);
       document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  useLayoutEffect(() => {
+    if (!open) {
+      setMenuStyle(undefined);
+      return;
+    }
+    function place() {
+      const el = triggerRef.current;
+      if (!el) return;
+      setMenuStyle(placeFloat(el));
+    }
+    place();
+    window.addEventListener("scroll", place, true);
+    window.addEventListener("resize", place);
+    return () => {
+      window.removeEventListener("scroll", place, true);
+      window.removeEventListener("resize", place);
     };
   }, [open]);
 
@@ -206,13 +235,15 @@ export function Select3d({
         </span>
         <i aria-hidden />
       </button>
-      {open ? (
+      {open && mounted && menuStyle
+        ? createPortal(
             <div
               ref={menuRef}
               id={listId}
               className={`select-3d-menu${multiple ? " is-multi" : ""}`}
               role="listbox"
               aria-label={ariaLabel}
+              style={menuStyle}
               onKeyDown={onMenuKey}
             >
               {multiple ? (
@@ -248,8 +279,10 @@ export function Select3d({
                   <p className="select-3d-empty">No choices</p>
                 )}
               </div>
-            </div>
-          ) : null}
+            </div>,
+            document.body,
+          )
+        : null}
     </div>
   );
 }

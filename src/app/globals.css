@@ -552,13 +552,8 @@ a.card-premium:hover,
 }
 
 .select-3d-menu {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(100% + 0.35rem);
-  z-index: 50;
-  width: 100%;
-  max-height: min(22rem, 70vh);
+  position: fixed;
+  z-index: 700;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -5055,25 +5050,40 @@ a.card-premium:hover,
   z-index: 40;
 }
 
+.hope-dialog-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 700;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem 1rem 5.5rem;
+  pointer-events: none;
+}
+
 .hope-dialog-scrim {
-  display: none;
+  display: block;
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: rgba(26, 12, 10, 0.42);
+  cursor: pointer;
+  pointer-events: auto;
 }
 
 .hope-dialog {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(100% + 0.35rem);
-  z-index: 50;
-  width: 100%;
-  max-height: min(22rem, 70vh);
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+  width: min(32rem, 100%);
+  max-height: min(36rem, calc(100dvh - 8rem));
   display: flex;
   flex-direction: column;
-  border-radius: 1.05rem;
+  border-radius: 1.15rem;
   border: 1px solid rgba(184, 137, 76, 0.4);
   background: #fffaf2;
-  padding: 0.75rem 0.8rem 0.7rem;
-  box-shadow: 0 16px 32px rgba(26, 12, 10, 0.22);
+  padding: 0.85rem 0.9rem 0.8rem;
+  box-shadow: 0 22px 48px rgba(26, 12, 10, 0.28);
 }
 
 .hope-dialog-kicker {
@@ -5121,9 +5131,20 @@ a.card-premium:hover,
 .hope-dialog-list {
   margin-top: 0.7rem;
   overflow: auto;
+  flex: 1 1 auto;
+  min-height: 8rem;
   display: grid;
   gap: 0.25rem;
-  min-height: 10rem;
+}
+
+.hope-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+  padding-top: 0.35rem;
+  background: #fffaf2;
 }
 
 .hope-dialog-any {
@@ -5156,13 +5177,6 @@ a.card-premium:hover,
   border-color: #3f0e0d;
   background: linear-gradient(180deg, #a24a3c, #5c1816);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 4px 0 #3f0e0d;
-}
-
-.hope-dialog-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  margin-top: 0.85rem;
 }
 
 .hope-dialog-cancel,

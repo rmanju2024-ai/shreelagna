@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { FieldHelp } from "@/app/app/profiles/field-help";
 import { FieldMark } from "@/app/app/profiles/field-mark";
@@ -57,6 +58,12 @@ export function HopePicker({
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<string[]>(start);
   const rootRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const draftSet = useMemo(() => new Set(draft), [draft]);
   const anyOn = Boolean(anyValue && draftSet.has(anyValue));
@@ -105,16 +112,20 @@ export function HopePicker({
 
   useEffect(() => {
     if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") setOpen(false);
     }
     function onDoc(e: MouseEvent) {
-      if (rootRef.current?.contains(e.target as Node)) return;
+      const node = e.target as Node;
+      if (rootRef.current?.contains(node) || dialogRef.current?.contains(node)) return;
       apply();
     }
     window.addEventListener("keydown", onKey);
     document.addEventListener("mousedown", onDoc);
     return () => {
+      document.body.style.overflow = prev;
       window.removeEventListener("keydown", onKey);
       document.removeEventListener("mousedown", onDoc);
     };
@@ -149,49 +160,55 @@ export function HopePicker({
         </button>
       </div>
       {disabled && disabledHint ? <p className="hope-picker-note">{disabledHint}</p> : null}
-      {open ? (
-        <div className="hope-dialog" role="dialog" aria-label={label}>
-          <p className="hope-dialog-kicker">Several may be chosen</p>
-          <h3>{label}</h3>
-          <p className="hope-dialog-hint">Tick only the ones that matter. Leave the rest unselected.</p>
-          <div className="hope-dialog-quick">
-            {anyValue ? (
-              <button type="button" className={anyOn ? "is-on" : undefined} onClick={chooseAny}>
-                {anyText}
-              </button>
-            ) : null}
-            <button type="button" onClick={clearDraft}>
-              Clear all
-            </button>
-          </div>
-          <div className="hope-dialog-list">
-            {anyValue ? (
-            <label className={`hope-dialog-any ${anyOn ? "is-on" : ""}`}>
-              <input type="checkbox" checked={anyOn} onChange={() => toggle(anyValue)} />
-              <span>{anyText}</span>
-            </label>
-            ) : null}
-            {items.map((item) => (
-              <label key={item.value} className={draftSet.has(item.value) ? "is-on" : undefined}>
-                <input
-                  type="checkbox"
-                  checked={draftSet.has(item.value)}
-                  onChange={() => toggle(item.value)}
-                />
-                <span>{item.label}</span>
-              </label>
-            ))}
-          </div>
-          <div className="hope-dialog-actions">
-            <button type="button" className="hope-dialog-cancel" onClick={() => setOpen(false)}>
-              Cancel
-            </button>
-            <button type="button" className="hope-dialog-done" onClick={apply}>
-              Use these choices
-            </button>
-          </div>
-        </div>
-      ) : null}
+      {open && mounted
+        ? createPortal(
+            <div className="hope-dialog-layer">
+              <button type="button" className="hope-dialog-scrim" aria-label="Close" onClick={() => setOpen(false)} />
+              <div ref={dialogRef} className="hope-dialog" role="dialog" aria-label={label}>
+                <p className="hope-dialog-kicker">Several may be chosen</p>
+                <h3>{label}</h3>
+                <p className="hope-dialog-hint">Tick only the ones that matter. Leave the rest unselected.</p>
+                <div className="hope-dialog-quick">
+                  {anyValue ? (
+                    <button type="button" className={anyOn ? "is-on" : undefined} onClick={chooseAny}>
+                      {anyText}
+                    </button>
+                  ) : null}
+                  <button type="button" onClick={clearDraft}>
+                    Clear all
+                  </button>
+                </div>
+                <div className="hope-dialog-list">
+                  {anyValue ? (
+                    <label className={`hope-dialog-any ${anyOn ? "is-on" : ""}`}>
+                      <input type="checkbox" checked={anyOn} onChange={() => toggle(anyValue)} />
+                      <span>{anyText}</span>
+                    </label>
+                  ) : null}
+                  {items.map((item) => (
+                    <label key={item.value} className={draftSet.has(item.value) ? "is-on" : undefined}>
+                      <input
+                        type="checkbox"
+                        checked={draftSet.has(item.value)}
+                        onChange={() => toggle(item.value)}
+                      />
+                      <span>{item.label}</span>
+                    </label>
+                  ))}
+                </div>
+                <div className="hope-dialog-actions">
+                  <button type="button" className="hope-dialog-cancel" onClick={() => setOpen(false)}>
+                    Cancel
+                  </button>
+                  <button type="button" className="hope-dialog-done" onClick={apply}>
+                    Use these choices
+                  </button>
+                </div>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
     </div>
   );
 }
