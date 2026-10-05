@@ -124,8 +124,12 @@ export function ProfileRedesign(props: ProfileData) {
             {props.name}
             {props.surname ? ` ${props.surname}` : ""}
           </h1>
-          <p className="pv-meta">{[props.age ? `${props.age} yrs` : null, props.place || null].filter(Boolean).join(" · ")}</p>
-          {props.lastSeen ? <p className="pv-live">{props.lastSeen}</p> : null}
+          <p className="pv-meta">
+            <span>
+              {[props.age ? `${props.age} yrs` : null, props.place || null].filter(Boolean).join(" · ")}
+            </span>
+            {props.lastSeen ? <span className="pv-live">{props.lastSeen}</span> : null}
+          </p>
           {props.kundali?.total != null ? (
             <p className="pv-match-chip">
               Kundali {props.kundali.total}/{props.kundali.max ?? 36}
@@ -138,11 +142,17 @@ export function ProfileRedesign(props: ProfileData) {
             <form action={toggleShortlist}>
               <input type="hidden" name="profile_id" value={props.id} />
               <input type="hidden" name="return_to" value={`/browse/${props.id}`} />
-              <button type="submit" className={`pv-short${props.shortlisted ? " is-on" : ""}`}>
-                {props.shortlisted ? "♥ Shortlisted" : "♡ Shortlist"}
+              <button
+                type="submit"
+                className={`pv-ico-btn pv-short${props.shortlisted ? " is-on" : ""}`}
+                aria-label={props.shortlisted ? "Shortlisted" : "Shortlist"}
+                title={props.shortlisted ? "Shortlisted" : "Shortlist"}
+                data-tip={props.shortlisted ? "Shortlisted" : "Shortlist"}
+              >
+                {props.shortlisted ? "♥" : "♡"}
               </button>
             </form>
-            <SafetyProfileControl profileId={props.id} returnTo={`/browse/${props.id}`} name={props.name} />
+            <SafetyProfileControl icons profileId={props.id} returnTo={`/browse/${props.id}`} name={props.name} />
           </div>
         ) : null}
       </header>
