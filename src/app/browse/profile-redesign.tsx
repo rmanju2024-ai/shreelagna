@@ -7,7 +7,13 @@ import { SafetyProfileControl } from "@/app/app/safety/safety-profile-control";
 import { BirdDock, type PeekChatNote } from "@/app/browse/bird-dock";
 import type { InterestThread } from "@/lib/match/interest-status";
 
-type DetailGroup = { icon: string; title: string; items: { k: string; v: string }[] };
+type DetailGroup = {
+  icon: string;
+  title: string;
+  lead?: { text: string; caption: string };
+  summary?: string;
+  items?: { k: string; v: string }[];
+};
 type HopeItem = { k: string; v: string };
 
 export type ProfileData = {
@@ -27,6 +33,7 @@ export type ProfileData = {
   familyAbout?: string | null;
   details?: DetailGroup[];
   hope?: HopeItem[];
+  hopeSummary?: string;
   kundali?: { total?: number; max?: number; label?: string } | null;
   shortlisted: boolean;
   own: boolean;
@@ -179,14 +186,23 @@ export function ProfileRedesign(props: ProfileData) {
                         <i>{group.icon}</i>
                         {group.title}
                       </h2>
-                      <ul>
-                        {group.items.map((item) => (
-                          <li key={item.k}>
-                            <span>{item.k}</span>
-                            <strong>{item.v}</strong>
-                          </li>
-                        ))}
-                      </ul>
+                      {group.lead ? (
+                        <p className="pv-lead">
+                          <strong>{group.lead.text}</strong>
+                          <span>{group.lead.caption}</span>
+                        </p>
+                      ) : null}
+                      {group.summary ? <p className="pv-summary">{group.summary}</p> : null}
+                      {group.items?.length ? (
+                        <ul>
+                          {group.items.map((item) => (
+                            <li key={item.k}>
+                              <span>{item.k}</span>
+                              <strong>{item.v}</strong>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
                     </article>
                   ))}
                 </div>
@@ -200,6 +216,7 @@ export function ProfileRedesign(props: ProfileData) {
                 <span className="pv-ico">♡</span>
                 <span>Looking for</span>
               </div>
+              {props.hopeSummary ? <p className="pv-summary pv-hope-summary">{props.hopeSummary}</p> : null}
               <div className="pv-hope">
                 {props.hope.map((item) => (
                   <div key={item.k} className="pv-chip">

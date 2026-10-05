@@ -942,7 +942,33 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
   color: #fff8e7;
   box-shadow: 0 2px 0 rgb(124 45 18 / 25%);
 }
-.pv-shell .pv-tile ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.2rem; }
+.pv-shell .pv-lead {
+  margin: 0 0 0.45rem;
+}
+.pv-shell .pv-lead strong {
+  display: inline-block;
+  font-size: 1.05rem;
+  color: #3f0e0d;
+  border-bottom: 2px solid #c2415a;
+  padding-bottom: 0.08rem;
+  line-height: 1.2;
+}
+.pv-shell .pv-lead span {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9a3412;
+  font-weight: 800;
+}
+.pv-shell .pv-summary {
+  margin: 0 0 0.35rem;
+  color: #5b4a43;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+.pv-shell .pv-hope-summary { padding: 0.65rem 0.75rem 0; }
 .pv-shell .pv-tile li { display: flex; justify-content: space-between; gap: 0.4rem; font-size: 0.74rem; }
 .pv-shell .pv-tile span { color: #7d6b63; }
 .pv-shell .pv-tile strong { color: #3f0e0d; text-align: right; }

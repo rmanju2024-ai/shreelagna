@@ -56,6 +56,57 @@ function dash(value: unknown): string {
   return text === "—" || text === "null" || text === "undefined" ? "—" : text;
 }
 
+function hasValue(value: unknown): boolean {
+  const text = dash(value);
+  return text !== "—";
+}
+
+function asCount(value: unknown): number | null {
+  if (value === null || value === undefined || value === "") return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function sayCount(n: number): string {
+  const words = ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
+  return n >= 0 && n < words.length ? words[n] : String(n);
+}
+
+function sentences(...parts: Array<string | null | undefined>): string {
+  return parts
+    .filter((part): part is string => Boolean(part && part.trim()))
+    .map((part) => part.replace(/[.]+$/, ""))
+    .join(". ") + (parts.some(Boolean) ? "." : "");
+}
+
+function parentWork(name: unknown, work: unknown, label: "Father" | "Mother"): string | null {
+  if (!hasValue(name) && !hasValue(work)) return null;
+  if (hasValue(name) && hasValue(work)) return `${label} ${dash(name)} (${dash(work)})`;
+  if (hasValue(name)) return `${label} ${dash(name)}`;
+  return `${label} works as ${dash(work)}`;
+}
+
+function siblingSummary(kind: "brother" | "sister", totalRaw: unknown, marriedRaw: unknown): string | null {
+  const total = asCount(totalRaw);
+  if (total === null) return null;
+  const married = asCount(marriedRaw);
+  const plural = kind === "brother" ? "brothers" : "sisters";
+  const one = kind === "brother" ? "brother" : "sister";
+  if (total === 0) return kind === "brother" ? "No brothers" : "No sisters";
+  const noun = total === 1 ? one : plural;
+  const head = `${sayCount(total)[0].toUpperCase()}${sayCount(total).slice(1)} ${noun}`;
+  if (married === null) return head;
+  if (married <= 0) return `${head}, none married`;
+  if (married >= total) return total === 1 ? `${head}, married` : total === 2 ? `${head}, both married` : `${head}, all married`;
+  if (married === 1) return `${head}, one married`;
+  return `${head}, ${sayCount(married)} married`;
+}
+
+function placeLine(city: unknown, state: unknown, country: unknown): string | null {
+  const bits = [city, state, country].filter(hasValue).map(dash);
+  return bits.length ? bits.join(", ") : null;
+}
+
 export async function BrowseProfileView({
   params,
   searchParams,
@@ -298,102 +349,122 @@ export async function BrowseProfileView({
     return dash(value);
   };
 
+  const fullName = dash(profile.subject_full_name);
+  const marital = maritalLabel(typeof profile.marital_status === "string" ? profile.marital_status : "") || dash(profile.marital_status);
+  const langs = asStringList(profile.hobby_list).join(", ") || (hasValue(profile.hobbies) ? dash(profile.hobbies) : "");
+  const spoken = asStringList(profile.known_languages).join(", ");
+  const disability = dash(profile.physical_status);
+  const liveNow = placeLine(profile.current_city, profile.current_state, profile.current_country);
+  const nativeNow = placeLine(profile.native_city, profile.native_state, profile.native_country);
+  const grew = hasValue(profile.grew_up_in) ? dash(profile.grew_up_in) : nativeNow;
+
   const details = [
     {
       icon: "✦",
       title: "Personal",
-      items: [
-        { k: "Full name", v: dash(profile.subject_full_name) },
-        { k: "Surname", v: dash(profile.surname) },
-        { k: "Date of birth", v: dash(profile.date_of_birth) },
-        { k: "Marital status", v: maritalLabel(typeof profile.marital_status === "string" ? profile.marital_status : "") || dash(profile.marital_status) },
-        { k: "Height", v: profile.height_cm ? `${profile.height_cm} cm` : "—" },
-        { k: "Blood group", v: dash(profile.blood_group) },
-        { k: "Diet", v: dash(profile.diet) },
-        { k: "Disability", v: dash(profile.physical_status) },
-        { k: "Health", v: dash(profile.health_notes) },
-        { k: "Hobbies", v: asStringList(profile.hobby_list).join(", ") || dash(profile.hobbies) },
-      ],
+      lead: hasValue(fullName) ? { text: fullName, caption: "Name" } : undefined,
+      summary: sentences(
+        hasValue(marital) ? marital : null,
+        profile.height_cm ? `${profile.height_cm} cm` : null,
+        hasValue(profile.blood_group) ? `${dash(profile.blood_group)} blood group` : null,
+        hasValue(profile.diet) ? dash(profile.diet) : null,
+        hasValue(disability) ? (/no disability/i.test(disability) ? "No disability" : disability) : null,
+        hasValue(profile.health_notes) ? dash(profile.health_notes) : null,
+        spoken ? `Speaks ${spoken}` : null,
+        langs ? `Interests include ${langs}` : null,
+      ),
+      items: [],
     },
     {
       icon: "🕉",
       title: "Faith & language",
-      items: [
-        { k: "Religion", v: nestedName(profile.religions) || "—" },
-        { k: "Community", v: nestedName(profile.communities) || "—" },
-        { k: "Sub-community", v: dash(profile.sub_community) },
-        { k: "Gothra", v: dash(profile.gotra) },
-        { k: "Kuladevata", v: dash(profile.kuladevata) },
-        { k: "Mother tongue", v: dash(profile.mother_tongue) },
-        { k: "Languages", v: asStringList(profile.known_languages).join(", ") || "—" },
-      ],
+      summary: sentences(
+        [nestedName(profile.religions), nestedName(profile.communities), hasValue(profile.sub_community) ? dash(profile.sub_community) : null]
+          .filter(Boolean)
+          .join(" · ") || null,
+        hasValue(profile.mother_tongue) ? `Mother tongue ${dash(profile.mother_tongue)}` : null,
+        hasValue(profile.gotra) ? `Gothra ${dash(profile.gotra)}` : null,
+        hasValue(profile.kuladevata) ? `Kuladevata ${dash(profile.kuladevata)}` : null,
+      ),
+      items: [],
     },
     {
       icon: "◎",
       title: "Education & work",
-      items: [
-        { k: "Education", v: dash(profile.qualification) },
-        { k: "College", v: dash(profile.college_name) },
-        { k: "Occupation", v: dash(profile.occupation) },
-        { k: "Employed in", v: dash(profile.employed_in) },
-        { k: "Employer", v: dash(profile.employer_name) },
-        { k: "Income", v: dash(profile.income_band) },
-        { k: "Settle abroad", v: dash(profile.settle_abroad) },
-        { k: "Ambition", v: dash(profile.future_ambition) },
-      ],
+      summary: sentences(
+        hasValue(profile.qualification) && hasValue(profile.college_name)
+          ? `${dash(profile.qualification)} from ${dash(profile.college_name)}`
+          : hasValue(profile.qualification)
+            ? dash(profile.qualification)
+            : hasValue(profile.college_name)
+              ? `Studied at ${dash(profile.college_name)}`
+              : null,
+        hasValue(profile.occupation) && hasValue(profile.employer_name)
+          ? `${dash(profile.occupation)} at ${dash(profile.employer_name)}`
+          : hasValue(profile.occupation)
+            ? dash(profile.occupation)
+            : null,
+        hasValue(profile.employed_in) ? dash(profile.employed_in) : null,
+        hasValue(profile.income_band) ? dash(profile.income_band) : null,
+        hasValue(profile.settle_abroad) ? `Settle abroad: ${dash(profile.settle_abroad)}` : null,
+        hasValue(profile.future_ambition) ? dash(profile.future_ambition) : null,
+      ),
+      items: [],
     },
     {
       icon: "⌂",
       title: "Family",
-      items: [
-        { k: "Family type", v: dash(profile.family_type) },
-        { k: "Living standard", v: dash(profile.family_status) },
-        { k: "Family lives in", v: dash(profile.family_location) },
-        { k: "Father", v: dash(profile.father_name) },
-        { k: "Father's work", v: dash(profile.father_occupation) },
-        { k: "Mother", v: dash(profile.mother_name) },
-        { k: "Mother's work", v: dash(profile.mother_occupation) },
-        { k: "Brothers", v: dash(profile.brothers_count) },
-        { k: "Brothers married", v: dash(profile.brothers_married_count) },
-        { k: "Sisters", v: dash(profile.sisters_count) },
-        { k: "Sisters married", v: dash(profile.sisters_married_count) },
-      ],
+      summary: sentences(
+        hasValue(profile.family_type) || hasValue(profile.family_status)
+          ? [hasValue(profile.family_type) ? `${dash(profile.family_type)} family` : null, hasValue(profile.family_status) ? dash(profile.family_status) : null]
+              .filter(Boolean)
+              .join(", ")
+          : null,
+        hasValue(profile.family_location) ? `Lives in ${dash(profile.family_location)}` : null,
+        parentWork(profile.father_name, profile.father_occupation, "Father"),
+        parentWork(profile.mother_name, profile.mother_occupation, "Mother"),
+        siblingSummary("brother", profile.brothers_count, profile.brothers_married_count),
+        siblingSummary("sister", profile.sisters_count, profile.sisters_married_count),
+      ),
+      items: [],
     },
     {
       icon: "⌖",
       title: "Place",
-      items: [
-        { k: "Grew up in", v: dash(profile.grew_up_in) },
-        { k: "Native country", v: dash(profile.native_country) },
-        { k: "Native state", v: dash(profile.native_state) },
-        { k: "Native city", v: dash(profile.native_city) },
-        { k: "Current country", v: dash(profile.current_country) },
-        { k: "Current state", v: dash(profile.current_state) },
-        { k: "Current city", v: dash(profile.current_city) },
-        { k: "Pin code", v: dash(profile.pin_code) },
-        { k: "Citizenship", v: dash(profile.citizenship) },
-        { k: "Living arrangement", v: dash(profile.living_arrangement) },
-        { k: "Willing to relocate", v: yesNo(profile.willing_to_relocate) },
-      ],
+      summary: sentences(
+        grew ? `Grew up in ${grew}` : null,
+        liveNow ? `Now in ${liveNow}` : null,
+        hasValue(profile.living_arrangement) ? dash(profile.living_arrangement) : null,
+        hasValue(profile.citizenship) ? dash(profile.citizenship) : null,
+        yesNo(profile.willing_to_relocate) === "Yes" ? "Open to relocating" : yesNo(profile.willing_to_relocate) === "No" ? "Not looking to relocate" : null,
+      ),
+      items: hasValue(profile.pin_code) ? [{ k: "Pin code", v: dash(profile.pin_code) }] : [],
     },
     {
       icon: "☽",
       title: "Kundali",
-      items: [
-        { k: "Birth city", v: dash(profile.birth_city) },
-        { k: "Birth time", v: dash(profile.birth_time) },
-        { k: "Rashi", v: dash(profile.rashi) },
-        { k: "Lagna", v: dash(profile.lagna) },
-        { k: "Nakshatra", v: dash(profile.nakshatra) },
-        { k: "Nakshatra pada", v: dash(profile.nakshatra_pada) },
-        { k: "Gana", v: dash(profile.gana) },
-        { k: "Yoni", v: dash(profile.yoni_animal) },
-        { k: "Mangalik", v: dash(profile.manglik) },
-      ],
+      summary: sentences(
+        hasValue(profile.birth_city) && hasValue(profile.birth_time)
+          ? `Born in ${dash(profile.birth_city)} at ${dash(profile.birth_time)}`
+          : hasValue(profile.birth_city)
+            ? `Born in ${dash(profile.birth_city)}`
+            : hasValue(profile.birth_time)
+              ? `Born at ${dash(profile.birth_time)}`
+              : null,
+        hasValue(profile.rashi) ? `Rashi ${dash(profile.rashi)}` : null,
+        hasValue(profile.lagna) ? `Lagna ${dash(profile.lagna)}` : null,
+        hasValue(profile.nakshatra)
+          ? `Nakshatra ${dash(profile.nakshatra)}${hasValue(profile.nakshatra_pada) ? `, pada ${dash(profile.nakshatra_pada)}` : ""}`
+          : null,
+        hasValue(profile.gana) ? `${dash(profile.gana)} gana` : null,
+        hasValue(profile.yoni_animal) ? `Yoni ${dash(profile.yoni_animal)}` : null,
+        hasValue(profile.manglik) ? `Mangalik ${dash(profile.manglik)}` : null,
+      ),
+      items: [],
     },
-  ];
+  ].filter((group) => group.lead || group.summary || group.items.length);
 
-  const hope = [
+  const hopeItems = [
     { k: "Age", v: profile.pref_age_min && profile.pref_age_max ? `${profile.pref_age_min}–${profile.pref_age_max}` : "—" },
     { k: "Height", v: profile.pref_height_min && profile.pref_height_max ? `${profile.pref_height_min}–${profile.pref_height_max} cm` : "—" },
     { k: "Marital status", v: hopeDisplay(hopeValues(profile, "pref_maritals"), "Any") },
@@ -409,8 +480,20 @@ export async function BrowseProfileView({
     { k: "Income", v: hopeDisplay(hopeValues(profile, "pref_incomes"), "Any") },
     { k: "Diet", v: hopeDisplay(hopeValues(profile, "pref_diets"), "Any") },
     { k: "Horoscope", v: dash(profile.pref_horoscope) },
-    { k: "Notes", v: aboutPlainText(typeof profile.pref_notes === "string" ? profile.pref_notes : "") || "—" },
   ];
+  const hopeSet = hopeItems.filter((item) => hasValue(item.v) && item.v.toLowerCase() !== "any");
+  const hopeAny = hopeItems.filter((item) => item.v.toLowerCase() === "any").map((item) => item.k.toLowerCase());
+  const hopeSummary = sentences(
+    profile.pref_age_min && profile.pref_age_max ? `Age ${profile.pref_age_min}–${profile.pref_age_max}` : null,
+    profile.pref_height_min && profile.pref_height_max ? `height ${profile.pref_height_min}–${profile.pref_height_max} cm` : null,
+    hopeSet
+      .filter((item) => item.k !== "Age" && item.k !== "Height")
+      .map((item) => `${item.k.toLowerCase()} ${item.v}`)
+      .join(", ") || null,
+    hopeAny.length ? `Open on ${hopeAny.join(", ")}` : null,
+    aboutPlainText(typeof profile.pref_notes === "string" ? profile.pref_notes : "") || null,
+  );
+  const hope = hopeSet;
 
   const photoUrls = photos.map((p) => publicMediaUrl(p.storage_path)).filter((url): url is string => Boolean(url));
   const videoUrls = videos.map((v) => publicMediaUrl(v.storage_path)).filter((url): url is string => Boolean(url));
@@ -445,6 +528,7 @@ export async function BrowseProfileView({
     finishHref: "/app/profiles/" + (mine?.id || me.active_profile_id || ""),
     details,
     hope,
+    hopeSummary,
     chat: {
       myProfileId: myChatId,
       threadId: chatThreadId,
