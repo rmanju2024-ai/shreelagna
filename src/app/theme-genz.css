@@ -1585,3 +1585,16 @@ html[data-scene="couple"] .app-main {
 .home-split-tiles small { color: #5b4a43; font-size: 0.8rem; }
 .home-split-note { margin: 0; font-size: 0.82rem; font-weight: 700; color: #7c2d12; }
 @media (max-width: 860px) { .home-split { grid-template-columns: 1fr; } .home-split-art { min-height: 20rem; height: 55vw; } }
+
+.home-split-proof { display: flex; flex-wrap: wrap; gap: 0.5rem 1.1rem; margin: 0.4rem 0 0; padding: 0; list-style: none; font-size: 0.84rem; font-weight: 800; color: #7c2d12; }
+.home-steps { padding: clamp(2rem, 6vw, 4rem) 0; background: #fff8ef; color: #3f0e0d; }
+.home-steps h2 { margin: 0 0 1.4rem; font-size: clamp(1.6rem, 4vw, 2.4rem); color: #3f0e0d; }
+.home-steps ol { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem; margin: 0; padding: 0; list-style: none; }
+.home-steps li { padding: 1.2rem; border-radius: 1.4rem; background: #fff; border: 1px solid rgb(184 137 76 / 35%); box-shadow: 0 16px 30px -22px rgb(63 14 13 / 55%); }
+.home-steps li b { display: grid; place-items: center; width: 2.4rem; height: 2.4rem; border-radius: 50%; color: #fff; background: linear-gradient(135deg, #c2415a, #7c2d12); }
+.home-steps h3 { margin: 0.7rem 0 0.2rem; font-size: 1.1rem; color: #7c2d12; }
+.home-steps p { margin: 0; color: #5b4a43; font-size: 0.92rem; }
+.home-final { padding: clamp(2.2rem, 6vw, 4rem) 0; text-align: center; color: #fff8e7; background: linear-gradient(135deg, #7c2d12, #c2415a); }
+.home-final h2 { margin: 0; font-size: clamp(1.8rem, 5vw, 2.8rem); color: #fff8e7; }
+.home-final p { margin: 0.5rem 0 1.2rem; color: #ffe9c7; }
+.home-final .home-welcome-buttons { justify-content: center; }

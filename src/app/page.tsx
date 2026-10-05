@@ -38,20 +38,6 @@ export default async function HomePage() {
               ? "Welcome back. Your next step awaits."
               : "Meet with dignity. Begin with a trusted introduction, guided by family values and verified profiles."}
           </p>
-          <ul className="home-split-tiles">
-            {[
-              ["🪔", "Sanskar", "Respect for every family"],
-              ["🤝", "Saath", "Real guidance when needed"],
-              ["🔒", "Maryada", "Private, safe and verified"],
-              ["💍", "Sambandh", "Considered introductions"],
-            ].map(([icon, title, text]) => (
-              <li key={title}>
-                <span aria-hidden>{icon}</span>
-                <b>{title}</b>
-                <small>{text}</small>
-              </li>
-            ))}
-          </ul>
           <div className="home-welcome-buttons">
             {user ? (
               <Link href="/app" className={btnHero}>
@@ -64,7 +50,11 @@ export default async function HomePage() {
               Discover →
             </Link>
           </div>
-          <p className="home-split-note">Adults only · Indian families · Free to begin</p>
+          <ul className="home-split-proof" aria-label="Why members trust us">
+            <li>✔ Verified profiles</li>
+            <li>✔ Family-first</li>
+            <li>✔ Private by default</li>
+          </ul>
         </div>
       </section>
 
@@ -82,7 +72,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="home-values relative w-full border-y border-[var(--stroke)]">
+      <section className="home-values relative w-full">
         <div className={`${pageInner} home-values-intro`}>
           <p>Rooted in values. Built for today.</p>
           <h2>Tradition, with a fresh start.</h2>
@@ -92,25 +82,50 @@ export default async function HomePage() {
             ["🪔", "Sanskar", "Respect for every family, every step."],
             ["🔒", "Vishwas", "Your story stays in trusted hands."],
             ["🤝", "Sambandh", "Real guidance when you need it."],
-          ].map(([icon, t, d], index) => (
-            <li key={t} className="home-value-card">
+          ].map(([icon, title, text], index) => (
+            <li key={title} className="home-value-card">
               <span className="home-value-number" aria-hidden>{icon}</span>
               <span className="home-value-count">0{index + 1}</span>
-              <p className="font-[family-name:var(--font-display)] text-2xl">{t}</p>
-              <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">{d}</p>
+              <p className="font-[family-name:var(--font-display)] text-2xl">{title}</p>
+              <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">{text}</p>
             </li>
           ))}
         </ul>
       </section>
 
-      <section className={`${pageInner} flex w-full flex-wrap items-baseline justify-between gap-4 py-12`}>
-        <p className="max-w-xl text-sm leading-relaxed text-[var(--muted)]">
-          Adults only. Indian families. Considered introductions.
-        </p>
-        <p className="flex flex-wrap gap-5 text-sm tracking-wide text-[var(--accent)]">
-          <Link href="/about">Our story →</Link>
-          <Link href="/contact">Write to us →</Link>
-        </p>
+      <section className="home-steps">
+        <div className={pageInner}>
+          <h2 className="font-[family-name:var(--font-display)]">Three steps to a good introduction</h2>
+          <ol>
+            {[
+              ["1", "Create your profile", "Share your story, photos and what you hope for."],
+              ["2", "Discover matches", "Browse by values, community and Kundali match."],
+              ["3", "Connect with care", "Send interest, then chat once both families agree."],
+            ].map(([n, title, text]) => (
+              <li key={n}>
+                <b>{n}</b>
+                <h3>{title}</h3>
+                <p>{text}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <section className="home-final">
+        <div className={pageInner}>
+          <h2 className="font-[family-name:var(--font-display)]">Ready to begin?</h2>
+          <p>Adults only. Indian families. Considered introductions.</p>
+          <div className="home-welcome-buttons">
+            {user ? (
+              <Link href="/browse" className={btnHero}>Discover →</Link>
+            ) : (
+              <GoogleSignIn label="Continue with Gmail" tone="ivory" size="lg" />
+            )}
+            <Link href="/about" className={btnHeroGhost}>Our story</Link>
+            <Link href="/contact" className={btnHeroGhost}>Write to us</Link>
+          </div>
+        </div>
       </section>
     </PageShell>
   );
