@@ -363,10 +363,7 @@ export function parseProfileForm(
     if (d.family_status && lists.familyStatuses.length && !lists.familyStatuses.includes(d.family_status)) {
       return { ok: false, error: "Pick family living standard from the list." };
     }
-    const familyNote = aboutPlainText(d.siblings_note ?? "");
-    if (familyNote.length > FAMILY_NOTE_MAX) {
-      return { ok: false, error: `Keep about the family within ${FAMILY_NOTE_MAX} characters.` };
-    }
+    const familyNote = aboutPlainText(d.siblings_note ?? "").slice(0, FAMILY_NOTE_MAX);
     parsed.data.siblings_note = familyNote;
   }
   if (check(["about"])) {

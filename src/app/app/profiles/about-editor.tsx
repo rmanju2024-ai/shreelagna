@@ -25,10 +25,15 @@ export function AboutEditor({
   locked?: boolean;
   placeholder?: string;
 }) {
-  const initial = aboutPlainText(defaultValue);
-  const [count, setCount] = useState(initial.length);
+  const initial = aboutPlainText(defaultValue).slice(0, max);
+  const [text, setText] = useState(initial);
+  const count = text.length;
   const short = count > 0 && min > 0 && count < min;
-  const full = count > max;
+  const full = count >= max;
+
+  function clip(raw: string) {
+    setText(raw.slice(0, max));
+  }
 
   return (
     <div className={`about-editor${locked ? " is-locked" : ""}`}>
@@ -40,9 +45,17 @@ export function AboutEditor({
         maxLength={max}
         rows={7}
         placeholder={placeholder}
-        defaultValue={initial}
+        value={text}
         className="input-premium about-surface"
-        onInput={(e) => setCount(e.currentTarget.value.length)}
+        onChange={(e) => clip(e.currentTarget.value)}
+        onPaste={(e) => {
+          e.preventDefault();
+          const pasted = e.clipboardData.getData("text") ?? "";
+          const el = e.currentTarget;
+          const start = el.selectionStart ?? text.length;
+          const end = el.selectionEnd ?? text.length;
+          clip(text.slice(0, start) + pasted + text.slice(end));
+        }}
       />
       <p className={`about-count${short ? " is-short" : ""}${full ? " is-full" : ""}`}>
         {count} / {max} characters{min > 0 ? ` · at least ${min}` : ""}

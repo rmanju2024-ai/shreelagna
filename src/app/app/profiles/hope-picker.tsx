@@ -7,8 +7,6 @@ import { compareLabel } from "@/lib/profile/form-lists";
 
 type Option = { value: string; label: string };
 
-const LIST_CAP = 80;
-
 function toOptions(options: Option[] | string[], alphabetize = true): Option[] {
   const seen = new Set<string>();
   const items = options
@@ -57,28 +55,9 @@ export function HopePicker({
   const [picked, setPicked] = useState<string[]>(start);
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<string[]>(start);
-  const [query, setQuery] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
 
-  const q = query.trim().toLowerCase();
   const draftSet = useMemo(() => new Set(draft), [draft]);
-  const filtered = useMemo(() => {
-    if (!q) return items;
-    return items.filter((o) => o.label.toLowerCase().includes(q));
-  }, [items, q]);
-  const shown = useMemo(() => {
-    const head = filtered.slice(0, LIST_CAP);
-    if (head.length === filtered.length) return head;
-    const have = new Set(head.map((item) => item.value));
-    for (const item of items) {
-      if (draftSet.has(item.value) && !have.has(item.value)) {
-        head.push(item);
-        have.add(item.value);
-      }
-    }
-    return head;
-  }, [filtered, items, draftSet]);
-  const hiddenCount = Math.max(0, filtered.length - LIST_CAP);
   const anyOn = Boolean(anyValue && draftSet.has(anyValue));
 
   function commit(next: string[]) {
@@ -90,7 +69,6 @@ export function HopePicker({
   function openDialog() {
     if (disabled) return;
     setDraft(picked.length ? picked : anyValue ? [anyValue] : []);
-    setQuery("");
     setOpen(true);
   }
 
@@ -113,7 +91,6 @@ export function HopePicker({
   function chooseAny() {
     if (!anyValue) return;
     commit([anyValue]);
-    setQuery("");
   }
 
   function clearDraft() {
@@ -175,13 +152,6 @@ export function HopePicker({
           <p className="hope-dialog-kicker">Several may be chosen</p>
           <h3>{label}</h3>
           <p className="hope-dialog-hint">Tick only the ones that matter. Leave the rest unselected.</p>
-          <input
-            type="search"
-            className="hope-dialog-search"
-            placeholder="Find a choice"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
           <div className="hope-dialog-quick">
             {anyValue ? (
               <button type="button" className={anyOn ? "is-on" : undefined} onClick={chooseAny}>
@@ -199,7 +169,7 @@ export function HopePicker({
               <span>{anyText}</span>
             </label>
             ) : null}
-            {shown.map((item) => (
+            {items.map((item) => (
               <label key={item.value} className={draftSet.has(item.value) ? "is-on" : undefined}>
                 <input
                   type="checkbox"
@@ -209,9 +179,6 @@ export function HopePicker({
                 <span>{item.label}</span>
               </label>
             ))}
-            {hiddenCount > 0 ? (
-              <p className="hope-dialog-hint">Type to find {hiddenCount} more choices.</p>
-            ) : null}
           </div>
           <div className="hope-dialog-actions">
             <button type="button" className="hope-dialog-cancel" onClick={() => setOpen(false)}>

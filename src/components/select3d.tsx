@@ -3,7 +3,6 @@
 import {
   Children,
   isValidElement,
-  useDeferredValue,
   useEffect,
   useId,
   useLayoutEffect,
@@ -19,8 +18,6 @@ import {
 import { createPortal } from "react-dom";
 
 type Item = { value: string; label: string; disabled?: boolean };
-
-const LIST_CAP = 80;
 
 function readOptions(children: ReactNode): Item[] {
   const items: Item[] = [];
@@ -72,11 +69,8 @@ export function Select3d({
   const listId = `${reactId}-list`;
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-  const searchRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [menuStyle, setMenuStyle] = useState<CSSProperties>();
-  const [query, setQuery] = useState("");
-  const deferredQuery = useDeferredValue(query);
   const [active, setActive] = useState(0);
   const [inner, setInner] = useState(String(defaultValue ?? value ?? ""));
   const [innerList, setInnerList] = useState<string[]>(values ?? []);
@@ -85,27 +79,7 @@ export function Select3d({
   const pickedSet = useMemo(() => new Set(picked), [picked]);
   const selected = useMemo(() => options.find((item) => item.value === current), [options, current]);
   const selectedMany = useMemo(() => options.filter((item) => pickedSet.has(item.value)), [options, pickedSet]);
-  const searchable = options.length > 10;
-  const minChars = options.length > 80 ? 2 : 1;
-  const shown = useMemo(() => {
-    const q = deferredQuery.trim().toLowerCase();
-    const ready = q.length >= minChars;
-    let rows = options;
-    if (ready) {
-      rows = options.filter((item) => item.label.toLowerCase().includes(q) || item.value.toLowerCase().includes(q));
-    }
-    const head = rows.slice(0, LIST_CAP);
-    if (!ready) {
-      const have = new Set(head.map((item) => item.value));
-      for (const item of selectedMany) {
-        if (!have.has(item.value)) {
-          head.unshift(item);
-          have.add(item.value);
-        }
-      }
-    }
-    return { rows: head, ready, hidden: Math.max(0, rows.length - head.length) };
-  }, [options, deferredQuery, minChars, selectedMany]);
+  const shown = options;
 
   useEffect(() => {
     if (value != null) setInner(String(value));
@@ -118,7 +92,6 @@ export function Select3d({
   useEffect(() => {
     if (!open) return;
     setActive(0);
-    const t = window.setTimeout(() => searchRef.current?.focus(), 0);
     function onDoc(event: MouseEvent) {
       const node = event.target as Node;
       if (triggerRef.current?.contains(node) || menuRef.current?.contains(node)) return;
@@ -134,7 +107,6 @@ export function Select3d({
     document.addEventListener("mousedown", onDoc);
     document.addEventListener("keydown", onKey);
     return () => {
-      window.clearTimeout(t);
       document.removeEventListener("mousedown", onDoc);
       document.removeEventListener("keydown", onKey);
     };
@@ -190,7 +162,6 @@ export function Select3d({
     }
     emit(item.value);
     setOpen(false);
-    setQuery("");
     triggerRef.current?.focus();
   }
 
@@ -205,13 +176,13 @@ export function Select3d({
   function onMenuKey(event: ReactKeyboardEvent<HTMLDivElement>) {
     if (event.key === "ArrowDown") {
       event.preventDefault();
-      setActive((i) => Math.min(shown.rows.length - 1, i + 1));
+      setActive((i) => Math.min(shown.length - 1, i + 1));
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
       setActive((i) => Math.max(0, i - 1));
     } else if (event.key === "Enter") {
       event.preventDefault();
-      const item = shown.rows[active];
+      const item = shown[active];
       if (item) choose(item);
     }
   }
@@ -260,7 +231,6 @@ export function Select3d({
         aria-multiselectable={multiple || undefined}
         onClick={() => {
           if (disabled) return;
-          setQuery("");
           setOpen((next) => !next);
         }}
         onKeyDown={onTriggerKey}
@@ -282,16 +252,6 @@ export function Select3d({
               style={menuStyle}
               onKeyDown={onMenuKey}
             >
-              {searchable ? (
-                <input
-                  ref={searchRef}
-                  className="select-3d-search"
-                  type="search"
-                  placeholder={minChars > 1 ? "Type 2 letters to find" : "Find a choice"}
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                />
-              ) : null}
               {multiple ? (
                 <button type="button" className={`select-3d-option${picked.length === 0 ? " is-on" : ""}`} onClick={() => emitList([])}>
                   <em className="select-3d-tick" aria-hidden>
@@ -301,8 +261,8 @@ export function Select3d({
                 </button>
               ) : null}
               <div className="select-3d-options">
-                {shown.rows.length ? (
-                  shown.rows.map((item, index) => (
+                {shown.length ? (
+                  shown.map((item, index) => (
                     <button
                       key={item.value}
                       type="button"
@@ -322,10 +282,9 @@ export function Select3d({
                     </button>
                   ))
                 ) : (
-                  <p className="select-3d-empty">{shown.ready ? "No matches" : `Type ${minChars} letters to search`}</p>
+                  <p className="select-3d-empty">No choices</p>
                 )}
               </div>
-              {shown.hidden ? <p className="select-3d-empty">Showing {LIST_CAP}. Type more to narrow.</p> : null}
             </div>,
             document.body,
           )
