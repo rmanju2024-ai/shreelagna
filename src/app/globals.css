@@ -6151,12 +6151,27 @@ a.browse-view {
   transform: translateY(-1px);
 }
 
+@media (max-width: 820px) {
+  .desk-ticket-row {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+}
+
 .desk-ticket-row-main {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.4rem 0.5rem;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
+}
+
+.desk-ticket-row-head {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .desk-profile-row {
@@ -6200,13 +6215,6 @@ a.browse-view {
 @media (max-width: 900px) {
   .desk-profile-row { grid-template-columns: 1fr; }
   .desk-profile-actions { justify-content: flex-start; max-width: none; }
-}
-
-.desk-ticket-row-head {
-  display: inline-flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  gap: 0.4rem;
 }
 
 .desk-ticket-preview {
@@ -6538,11 +6546,12 @@ a.browse-view {
 
 .desk-ticket-name {
   margin: 0;
-  flex-shrink: 0;
-  max-width: 38%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 0;
+  max-width: none;
+  overflow: visible;
+  text-overflow: unset;
+  white-space: normal;
+  overflow-wrap: anywhere;
   font-weight: 800;
   font-size: 0.92rem;
 }
@@ -6558,9 +6567,9 @@ a.browse-view {
 .desk-ticket-meta {
   min-width: 0;
   flex: 1 1 auto;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow: visible;
+  text-overflow: unset;
+  white-space: normal;
 }
 
 .desk-person-row .desk-ticket-name {
@@ -8607,6 +8616,70 @@ a.inbox-name.inbox-open:focus-visible {
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem;
+}
+
+.desk-client-card {
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.9rem 1rem;
+}
+
+.desk-client-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.desk-client-kicker {
+  margin: 0 0 0.15rem;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.desk-client-head h3 {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-family: var(--font-british), var(--font-display), ui-serif, serif;
+  font-size: 1.15rem;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.desk-client-facts {
+  display: grid;
+  gap: 0.45rem 0.8rem;
+  margin: 0;
+}
+
+.desk-client-facts > div {
+  display: grid;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.desk-client-facts dt {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.desk-client-facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+@media (min-width: 720px) {
+  .desk-client-facts {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .plan-edit-stack {

@@ -67,6 +67,20 @@ function PlanFields({ plan }: { plan?: PlanCard }) {
   );
 }
 
+function sourceLabel(source: string) {
+  if (source === "grant") return "Granted by staff";
+  if (source === "request") return "Member request";
+  if (source === "welcome") return "Welcome gift";
+  return source.replace(/_/g, " ");
+}
+
+function coverLabel(status: string) {
+  if (status === "pending") return "Waiting";
+  if (status === "active") return "Live";
+  if (status === "declined") return "Declined";
+  return status.replace(/_/g, " ");
+}
+
 type Row = {
   id: string;
   user_id: string;
@@ -113,16 +127,14 @@ export default async function DeskPlansPage({
       <header className="desk-panel-head">
         <div>
           <p className="browse-kicker">Plans</p>
-          <h2>Welcome gift, then paid cover</h2>
+          <h2>Member cover</h2>
         </div>
         <p>
           {pending} waiting · {live} live
         </p>
       </header>
       <p className="browse-saved-note">
-        Welcome is automatic for two months from joining, with 20 interests or contact views. Admin can rewrite names,
-        prices, months, view caps, and add new plans. Chat needs an accepted interest.
-        Confirm a request after UPI, or grant a plan by Gmail. Do not grant onto an admin account.
+        Confirm a paid request after UPI, or grant a plan by Gmail. Do not grant to an admin account.
       </p>
       {desk.admin ? (
         <div className="plan-edit-stack">
@@ -169,21 +181,45 @@ export default async function DeskPlansPage({
           list.map((row) => {
             const person = names.get(row.user_id);
             const plan = planByCode(row.plan_code, catalog);
+            const who = person?.display_name?.trim() || "Member";
             return (
-              <li key={row.id} className={`${cardClass} card-3d desk-ticket-row`}>
-                <span className="desk-ticket-row-main">
-                  <span className="desk-ticket-row-head">
-                    <span className="desk-ticket-name">{person?.display_name || person?.email || row.user_id}</span>
-                    <span className={`desk-pill ${row.status === "active" ? "is-done" : row.status === "pending" ? "is-open" : ""}`}>
-                      {row.status}
-                    </span>
+              <li key={row.id} className={`${cardClass} desk-client-card`}>
+                <header className="desk-client-head">
+                  <div>
+                    <p className="desk-client-kicker">{coverLabel(row.status)}</p>
+                    <h3>{who}</h3>
+                  </div>
+                  <span className={`desk-pill ${row.status === "active" ? "is-done" : row.status === "pending" ? "is-open" : ""}`}>
+                    {coverLabel(row.status)}
                   </span>
-                  <span className="desk-ticket-meta">
-                    {plan?.name ?? row.plan_code} · {row.source} · {formatIstDateTime(row.created_at)}
-                    {row.ends_at ? ` · until ${formatIstDateTime(row.ends_at)}` : ""}
-                  </span>
-                  <span className="desk-ticket-preview">{person?.email}</span>
-                </span>
+                </header>
+                <dl className="desk-client-facts">
+                  <div>
+                    <dt>Gmail</dt>
+                    <dd>{person?.email || "—"}</dd>
+                  </div>
+                  <div>
+                    <dt>Plan</dt>
+                    <dd>
+                      {plan?.name ?? row.plan_code}
+                      {plan ? ` · ${plan.months} mo · ${formatInr(plan.priceInr)}` : ""}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>How</dt>
+                    <dd>{sourceLabel(row.source)}</dd>
+                  </div>
+                  <div>
+                    <dt>Asked</dt>
+                    <dd>{formatIstDateTime(row.created_at)}</dd>
+                  </div>
+                  {row.ends_at ? (
+                    <div>
+                      <dt>Until</dt>
+                      <dd>{formatIstDateTime(row.ends_at)}</dd>
+                    </div>
+                  ) : null}
+                </dl>
                 {row.status === "pending" ? (
                   <span className="plans-desk-actions">
                     <form action={confirmPlan}>
