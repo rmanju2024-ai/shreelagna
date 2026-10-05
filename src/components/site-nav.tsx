@@ -12,13 +12,11 @@ function pathMatches(pathname: string, href: string, tab: string | null) {
   if (href === "/") return pathname === "/";
   if (href === "/app/settings") return pathname === "/app/settings";
   if (href === "/app/plans") return pathname === "/app/plans" || pathname.startsWith("/app/plans/");
+  if (href === "/app/account") {
+    return pathname === "/app/account" || pathname.startsWith("/app/account/");
+  }
   if (href === "/app") {
-    return (
-      pathname === "/app" ||
-      pathname.startsWith("/app/profiles") ||
-      pathname === "/app/account" ||
-      pathname.startsWith("/app/account/")
-    );
+    return pathname === "/app" || pathname.startsWith("/app/profiles");
   }
   return pathname === href || pathname.startsWith(`${href}/`);
 }
@@ -194,9 +192,9 @@ export function HeaderNav({
         )}
         {user ? (
           <NavChip
-            item={{ href: "/app", label: "Account", icon: "profile" }}
+            item={{ href: "/app/account", label: "AccountHub", icon: "settings" }}
             overlay={overlay}
-            current={pathMatches(pathname, "/app", tab)}
+            current={pathMatches(pathname, "/app/account", tab)}
           />
         ) : null}
         {staff ? <NavChip item={desk} overlay={overlay} current={pathMatches(pathname, desk.href, tab)} /> : null}

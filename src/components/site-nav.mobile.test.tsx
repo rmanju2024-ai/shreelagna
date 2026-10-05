@@ -47,6 +47,7 @@ describe("mobile primary navigation", () => {
     for (const label of ["About", "Help", "Sign out"]) {
       expect(screen.getByText(label)).toBeTruthy();
     }
+    expect(menu.textContent).not.toContain("AccountHub");
     expect(menu.textContent).not.toContain("Account");
   });
 
@@ -66,7 +67,7 @@ describe("mobile primary navigation", () => {
   it("keeps every member destination available (Likes and Alerts live inside Inbox)", () => {
     render(<HeaderNav overlay={false} user staff />);
     const nav = screen.getByRole("navigation", { name: "Primary" });
-    for (const label of ["Home", "Discover", "Inbox", "Account", "Desk", "More"]) {
+    for (const label of ["Home", "Discover", "Inbox", "AccountHub", "Desk", "More"]) {
       expect(nav.textContent).toContain(label);
     }
   });
