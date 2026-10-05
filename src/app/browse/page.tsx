@@ -31,7 +31,8 @@ import {
 import { yearsFromDob } from "@/lib/profile/completeness";
 import { loadFaithCatalog } from "@/lib/profile/load-form-lists";
 import { formatHeightImperial, matchSelfFromProfile } from "@/lib/profile/match-compare";
-import { isPublicProfileStatus, oppositeType, type ProfileType } from "@/lib/profile/visibility";
+import { canSearchFamilies, oppositeType, type ProfileType } from "@/lib/profile/visibility";
+import { findOwnProfile } from "@/lib/profile/own-profile";
 import { displayFirstName, profileKindLabel } from "@/lib/profile/options";
 import { fetchAdminUserIds } from "@/lib/desk/admin-ids";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -121,7 +122,9 @@ export async function BrowsePage({
     notice = "Sign in and create a profile to search families.";
   } else {
     const me = await timed("ensureAppUser", ensureAppUser(supabase, user));
-    if (!me?.active_profile_id) {
+    const own = me ? await findOwnProfile(supabase, me.id) : null;
+    const mineId = me?.active_profile_id || own?.id || null;
+    if (!me || !mineId) {
       notice = "Create a profile first, then search.";
     } else {
       const db = supabase as unknown as {
@@ -161,14 +164,22 @@ export async function BrowsePage({
           };
         };
       };
-      const mineSlim = await db.from("profiles").select(BROWSE_PROFILE_SELECT).eq("id", me.active_profile_id).maybeSingle();
-      const mine =
+      const mineSlim = await db.from("profiles").select(BROWSE_PROFILE_SELECT).eq("id", mineId).maybeSingle();
+      let mine =
         mineSlim.data ??
-        (await db.from("profiles").select(BROWSE_PROFILE_SELECT_STAR).eq("id", me.active_profile_id).maybeSingle())
+        (await db.from("profiles").select(BROWSE_PROFILE_SELECT_STAR).eq("id", mineId).maybeSingle())
           .data;
-      if (!isPublicProfileStatus(mine?.status as string | undefined)) {
+      if (!mine && own?.id && own.id !== mineId) {
+        const fallback =
+          (await db.from("profiles").select(BROWSE_PROFILE_SELECT).eq("id", own.id).maybeSingle()).data ??
+          (await db.from("profiles").select(BROWSE_PROFILE_SELECT_STAR).eq("id", own.id).maybeSingle()).data;
+        mine = fallback;
+      }
+      if (!mine) {
+        notice = "Create a profile first, then search.";
+      } else if (!canSearchFamilies(mine.status as string | undefined)) {
         notice = "Hidden or inactive profiles cannot search other families.";
-      } else if (mine) {
+      } else {
         const want =
           mine.profile_type === "vadhu" || mine.profile_type === "vara"
             ? oppositeType(mine.profile_type as ProfileType)

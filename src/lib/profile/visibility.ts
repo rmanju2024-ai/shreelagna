@@ -8,6 +8,12 @@ export function isPublicProfileStatus(status: string | null | undefined): boolea
   return status === "active";
 }
 
+/** A member may open Discover with a draft or a profile awaiting house review. */
+export function canSearchFamilies(status: string | null | undefined): boolean {
+  if (!status || status === "draft" || status === "pending_review" || status === "active") return true;
+  return false;
+}
+
 export function canViewProfile(args: {
   viewerType: ProfileType | null;
   viewerStatus?: string | null;
@@ -24,7 +30,7 @@ export function canViewProfile(args: {
   if (args.isStaff) return true;
   if (!isPublicProfileStatus(args.targetStatus)) return false;
   if (args.linkedByInterest) return true;
-  if (args.viewerStatus != null && !isPublicProfileStatus(args.viewerStatus)) return false;
+  if (args.viewerStatus != null && !canSearchFamilies(args.viewerStatus)) return false;
   if (!args.viewerType) return false;
   return args.targetType === oppositeType(args.viewerType);
 }

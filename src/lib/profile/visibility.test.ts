@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canViewProfile, isPublicProfileStatus, oppositeType } from "./visibility";
+import { canSearchFamilies, canViewProfile, isPublicProfileStatus, oppositeType } from "./visibility";
 
 describe("visibility", () => {
   it("maps vadhu to vara and back", () => {
@@ -28,6 +28,16 @@ describe("visibility", () => {
         isStaff: false,
       }),
     ).toBe(false);
+  });
+
+  it("lets draft and review members search, but not hidden ones", () => {
+    expect(canSearchFamilies("draft")).toBe(true);
+    expect(canSearchFamilies("pending_review")).toBe(true);
+    expect(canSearchFamilies("active")).toBe(true);
+    expect(canSearchFamilies("on_hold")).toBe(false);
+    expect(canSearchFamilies("hidden")).toBe(false);
+    expect(canSearchFamilies("banned")).toBe(false);
+    expect(canSearchFamilies("married")).toBe(false);
   });
 
   it("blocks hidden and deleted profiles", () => {
@@ -75,6 +85,29 @@ describe("visibility", () => {
         isStaff: false,
       }),
     ).toBe(false);
+  });
+
+  it("lets a draft member open an active opposite profile", () => {
+    expect(
+      canViewProfile({
+        viewerType: "vara",
+        viewerStatus: "draft",
+        targetType: "vadhu",
+        targetStatus: "active",
+        isOwner: false,
+        isStaff: false,
+      }),
+    ).toBe(true);
+    expect(
+      canViewProfile({
+        viewerType: "vara",
+        viewerStatus: "pending_review",
+        targetType: "vadhu",
+        targetStatus: "active",
+        isOwner: false,
+        isStaff: false,
+      }),
+    ).toBe(true);
   });
 
   it("blocks hidden viewers from opening other profiles", () => {

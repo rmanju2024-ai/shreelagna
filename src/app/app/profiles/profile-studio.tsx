@@ -4,7 +4,15 @@ import { createContext, useContext, useMemo, useState, type ReactNode } from "re
 import { FieldMark } from "@/app/app/profiles/field-mark";
 import type { ProfileEditTarget } from "@/lib/profile/sections";
 
-export const STUDIO_TABS = [
+export type StudioTabId = "album" | "personal" | "life" | "faith" | "family" | "about" | "partner";
+
+export const STUDIO_TABS: readonly {
+  id: StudioTabId;
+  label: string;
+  short: string;
+  mark: string;
+  page?: number;
+}[] = [
   { id: "album", label: "Album", short: "Album", mark: "Photograph" },
   { id: "personal", label: "Personal", short: "Personal", mark: "Name", page: 1 },
   { id: "life", label: "Life", short: "Life", mark: "Occupation", page: 2 },
@@ -12,9 +20,7 @@ export const STUDIO_TABS = [
   { id: "family", label: "Family", short: "Family", mark: "Family", page: 4 },
   { id: "about", label: "About", short: "About", mark: "About" },
   { id: "partner", label: "Preference", short: "Match", mark: "Partner", page: 5 },
-] as const;
-
-export type StudioTabId = (typeof STUDIO_TABS)[number]["id"];
+];
 
 const StudioCtx = createContext<{
   tab: StudioTabId;
@@ -45,7 +51,7 @@ export function ProfileStudio({
   children: ReactNode;
 }) {
   const [tab, setTab] = useState<StudioTabId>(() => studioTabFromSection(initial));
-  const page = useMemo(() => STUDIO_TABS.find((item) => item.id === tab && "page" in item)?.page ?? 1, [tab]);
+  const page = useMemo(() => STUDIO_TABS.find((row) => row.id === tab)?.page ?? 1, [tab]);
   const formOpen = tab !== "album" && tab !== "about";
 
   function choose(id: StudioTabId) {

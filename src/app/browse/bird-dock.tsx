@@ -158,7 +158,8 @@ export function BirdDock({
   }, [profileId, thread, interestId]);
   const acted = useRef(false);
   const inbound = useRef(0);
-  const endRef = useRef<HTMLDivElement | null>(null);
+  const dockRef = useRef<HTMLDivElement | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
   const storeKey = `sl-bird-chat:${profileId}`;
   const showChat = localThread === "sent" || localThread === "received" || localThread === "accepted";
   const pool = phase === "peck" ? CHIRPS.peck : chirpPool(localThread, needPlan, needQuota, canSend, awaitingReview);
@@ -287,8 +288,31 @@ export function BirdDock({
   }, [phase, mounted]);
 
   useEffect(() => {
-    if (open) endRef.current?.scrollIntoView({ block: "end" });
-  }, [open, notes]);
+    const stage = stageRef.current;
+    if (!open || !stage) return;
+    stage.scrollTop = stage.scrollHeight;
+  }, [open, notes, wide]);
+
+  useEffect(() => {
+    if (!open) return;
+    const dock = dockRef.current;
+    const apply = () => {
+      const vv = window.visualViewport;
+      if (!vv || !dock) return;
+      const keyboard = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      dock.style.setProperty("--bird-kb", `${keyboard}px`);
+      dock.style.setProperty("--bird-vv-top", `${vv.offsetTop}px`);
+    };
+    apply();
+    window.visualViewport?.addEventListener("resize", apply);
+    window.visualViewport?.addEventListener("scroll", apply);
+    return () => {
+      window.visualViewport?.removeEventListener("resize", apply);
+      window.visualViewport?.removeEventListener("scroll", apply);
+      dock?.style.removeProperty("--bird-kb");
+      dock?.style.removeProperty("--bird-vv-top");
+    };
+  }, [open, wide]);
 
   function markActed() {
     acted.current = true;
@@ -394,7 +418,12 @@ export function BirdDock({
                     : "Finish profile";
 
   const dock = (
-    <div className={`bird-dock${open ? " is-open" : ""}${wide ? " is-wide" : ""}${inline ? " is-inline" : ""}`} data-phase={phase} data-thread={localThread}>
+    <div
+      ref={dockRef}
+      className={`bird-dock${open ? " is-open" : ""}${wide ? " is-wide" : ""}${inline ? " is-inline" : ""}`}
+      data-phase={phase}
+      data-thread={localThread}
+    >
       {wide ? <button type="button" className="bird-wa-scrim" aria-label="Restore chat" onClick={() => setWide(false)} /> : null}
       {open && showChat ? (
         <section className={`bird-wa${wide ? " is-max" : ""}`} aria-label="Chat">
@@ -413,7 +442,7 @@ export function BirdDock({
               </button>
             </div>
           </header>
-          <div className="bird-wa-stage">
+          <div className="bird-wa-stage" ref={stageRef}>
             <ul className="bird-wa-stream">
               {notes.length ? (
                 notes.map((note, index, all) => {
@@ -424,10 +453,7 @@ export function BirdDock({
                   return (
                     <li key={note.id}>
                       {showDay && stamp ? <p className="bird-wa-day">{stamp}</p> : null}
-                      <div
-                        className={`bird-wa-row ${mine ? "is-mine" : "is-theirs"}`}
-                        ref={index === all.length - 1 ? endRef : undefined}
-                      >
+                      <div className={`bird-wa-row ${mine ? "is-mine" : "is-theirs"}`}>
                         {!mine ? <ChatAvatar name={name} src={chat?.photo} size="sm" /> : null}
                         <div className="bird-wa-bubble">
                           <p>{note.body}</p>
@@ -458,6 +484,9 @@ export function BirdDock({
                 rows={1}
                 placeholder="Message"
                 value={draft}
+                enterKeyHint="send"
+                autoComplete="off"
+                autoCorrect="on"
                 onChange={(event) => setDraft(event.target.value)}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" && !event.shiftKey) {
