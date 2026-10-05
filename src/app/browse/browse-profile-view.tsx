@@ -13,6 +13,8 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { after } from "next/server";
 import { redirect } from "next/navigation";
 import { ageFromDob } from "@/lib/profile/completeness";
+import { asStringList, hopeDisplay, hopeValues } from "@/lib/profile/multi-values";
+import { maritalLabel } from "@/lib/profile/options";
 
 function nestedName(value: unknown): string | undefined {
   if (Array.isArray(value) && value[0] && typeof value[0] === "object" && "name" in value[0]) {
@@ -90,6 +92,97 @@ export async function BrowseProfileView({
     shortlisted = Boolean(shortRow);
   }
 
+  // Build complete profile data with all sections
+  const text = (key: string) => String(profile[key as keyof typeof profile] ?? "—");
+  const education = text("qualification");
+  
+  const personal = [
+    {
+      title: "Physical",
+      items: [
+        { k: "Height", v: text("height_cm") ? `${text("height_cm")} cm` : "—" },
+        { k: "Body type", v: text("body_type") },
+        { k: "Complexion", v: text("complexion") },
+      ],
+    },
+    {
+      title: "Lifestyle",
+      items: [
+        { k: "Diet", v: text("diet") },
+        { k: "Drinks", v: text("drinks") },
+        { k: "Smokes", v: text("smokes") },
+      ],
+    },
+  ];
+
+  const faith = [
+    {
+      title: "Religion & Community",
+      items: [
+        { k: "Religion", v: nestedName(profile.religions) || "—" },
+        { k: "Community", v: nestedName(profile.communities) || "—" },
+        { k: "Caste", v: text("caste") },
+      ],
+    },
+    {
+      title: "Language & Culture",
+      items: [
+        { k: "Mother tongue", v: text("mother_tongue") },
+        { k: "Languages known", v: asStringList(profile.languages_known).join(", ") || "—" },
+        { k: "Grew up in", v: text("native_state") },
+      ],
+    },
+  ];
+
+  const work = [
+    {
+      title: "Education",
+      items: [
+        { k: "Highest education", v: education },
+        { k: "College", v: text("college_name") },
+        { k: "Stream", v: text("stream") },
+      ],
+    },
+    {
+      title: "Career",
+      items: [
+        { k: "Occupation", v: text("occupation") },
+        { k: "Employer", v: text("employer_name") },
+        { k: "Employed in", v: text("employed_in") },
+        { k: "Annual income", v: text("income_band") },
+      ],
+    },
+  ];
+
+  const family = [
+    {
+      title: "Family Background",
+      items: [
+        { k: "Family type", v: text("family_type") },
+        { k: "Family status", v: text("family_status") },
+        { k: "Father", v: text("father_name") },
+        { k: "Mother", v: text("mother_name") },
+        { k: "Brothers", v: text("brothers_count") },
+        { k: "Sisters", v: text("sisters_count") },
+      ],
+    },
+  ];
+
+  const hope = [
+    {
+      title: "Partner Preferences",
+      items: [
+        { k: "Age", v: profile.pref_age_min && profile.pref_age_max ? `${profile.pref_age_min}–${profile.pref_age_max} years` : "—" },
+        { k: "Height", v: profile.pref_height_min && profile.pref_height_max ? `${profile.pref_height_min}–${profile.pref_height_max} cm` : "—" },
+        { k: "Marital status", v: hopeDisplay(hopeValues(profile, "pref_maritals"), "Any") },
+        { k: "Education", v: hopeDisplay(hopeValues(profile, "pref_educations"), "Any") },
+        { k: "Occupation", v: hopeDisplay(hopeValues(profile, "pref_occupations"), "Any") },
+        { k: "Religion", v: hopeDisplay(hopeValues(profile, "pref_religions"), "Any") },
+        { k: "Location", v: hopeDisplay(hopeValues(profile, "pref_countries"), "Any") },
+      ],
+    },
+  ];
+
   // Build profile data
   const props: ProfileData = {
     id: String(profile.id),
@@ -112,11 +205,11 @@ export async function BrowseProfileView({
     needQuota: false,
     quotaLeft: null,
     finishHref: "/app/profiles/" + (me.active_profile_id || ""),
-    personal: [],
-    faith: [],
-    work: [],
-    family: [],
-    hope: [],
+    personal,
+    faith,
+    work,
+    family,
+    hope,
   };
 
   return (
