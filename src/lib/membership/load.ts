@@ -94,14 +94,16 @@ export async function loadInterestQuota(
     paidStartsAt: paid?.starts_at,
   });
   try {
-    const interests = await asDb(db)
-      .from("interests")
-      .select("from_profile_id, to_profile_id, created_at")
-      .in("from_profile_id", profileIds);
-    const views = await asDb(db)
-      .from("contact_views")
-      .select("viewer_profile_id, viewed_profile_id, created_at")
-      .in("viewer_profile_id", profileIds);
+    const [interests, views] = await Promise.all([
+      asDb(db)
+        .from("interests")
+        .select("from_profile_id, to_profile_id, created_at")
+        .in("from_profile_id", profileIds),
+      asDb(db)
+        .from("contact_views")
+        .select("viewer_profile_id, viewed_profile_id, created_at")
+        .in("viewer_profile_id", profileIds),
+    ]);
     if (interests.error || views.error) return resolveQuota(limit, limit);
     const interestRows = (interests.data ?? []) as {
       from_profile_id?: string | null;

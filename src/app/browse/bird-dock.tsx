@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { cancelInterest, sendInterest } from "@/app/app/profiles/actions";
 import { markPeekRead, sendPeekChat } from "@/app/app/match/actions";
@@ -150,13 +150,18 @@ export function BirdDock({
   const [line, setLine] = useState(0);
   const [draft, setDraft] = useState("");
   const [extra, setExtra] = useState<PeekChatNote[]>([]);
+  const [localThread, setLocalThread] = useState(thread);
+  const [localInterestId, setLocalInterestId] = useState(interestId);
+  useEffect(() => {
+    setLocalThread(thread);
+    setLocalInterestId(interestId);
+  }, [profileId, thread, interestId]);
   const acted = useRef(false);
   const inbound = useRef(0);
   const endRef = useRef<HTMLDivElement | null>(null);
   const storeKey = `sl-bird-chat:${profileId}`;
-  const [, startTransition] = useTransition();
-  const showChat = thread === "sent" || thread === "received" || thread === "accepted";
-  const pool = phase === "peck" ? CHIRPS.peck : chirpPool(thread, needPlan, needQuota, canSend, awaitingReview);
+  const showChat = localThread === "sent" || localThread === "received" || localThread === "accepted";
+  const pool = phase === "peck" ? CHIRPS.peck : chirpPool(localThread, needPlan, needQuota, canSend, awaitingReview);
   const chirp = pool[line % pool.length];
   const name = chat?.name ?? "Match";
   const [liveNotes, setLiveNotes] = useState<PeekChatNote[]>([]);
@@ -238,7 +243,7 @@ export function BirdDock({
 
   useEffect(() => {
     setLine(0);
-  }, [thread, needPlan, needQuota, canSend, awaitingReview]);
+  }, [localThread, needPlan, needQuota, canSend, awaitingReview]);
 
   useEffect(() => {
     const id = window.setInterval(() => setLine((n) => n + 1), 6500);
@@ -305,6 +310,7 @@ export function BirdDock({
   function onSpark(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     markActed();
+    setLocalThread("sent");
     const data = new FormData(event.currentTarget);
     const rect = event.currentTarget.getBoundingClientRect();
     for (let i = 0; i < 3; i += 1) {
@@ -318,8 +324,13 @@ export function BirdDock({
       window.setTimeout(() => fly.remove(), 1800);
     }
     playThen("send", () => {
-      startTransition(() => {
-        void sendInterest(data);
+      void sendInterest(data).then((res) => {
+        if (res.ok) {
+          setLocalThread("sent");
+          if (res.interestId) setLocalInterestId(res.interestId);
+        } else {
+          setLocalThread("none");
+        }
       });
     });
   }
@@ -360,19 +371,17 @@ export function BirdDock({
     if (chat?.threadId) data.set("thread_id", chat.threadId);
     data.set("to_profile_id", profileId);
     data.set("body", text);
-    startTransition(() => {
-      void sendPeekChat(data);
-    });
+    void sendPeekChat(data);
   }
 
   const perchLabel =
     phase === "send"
       ? "Interest sent"
-      : thread === "sent"
+      : localThread === "sent"
         ? "Cancel Interest"
-        : thread === "accepted"
+        : localThread === "accepted"
           ? "Interest sent"
-          : thread === "received"
+          : localThread === "received"
             ? "Reply now"
             : needPlan
               ? "Unlock & send"
@@ -385,7 +394,7 @@ export function BirdDock({
                     : "Finish profile";
 
   const dock = (
-    <div className={`bird-dock${open ? " is-open" : ""}${wide ? " is-wide" : ""}${inline ? " is-inline" : ""}`} data-phase={phase} data-thread={thread}>
+    <div className={`bird-dock${open ? " is-open" : ""}${wide ? " is-wide" : ""}${inline ? " is-inline" : ""}`} data-phase={phase} data-thread={localThread}>
       {wide ? <button type="button" className="bird-wa-scrim" aria-label="Restore chat" onClick={() => setWide(false)} /> : null}
       {open && showChat ? (
         <section className={`bird-wa${wide ? " is-max" : ""}`} aria-label="Chat">
@@ -474,7 +483,7 @@ export function BirdDock({
           <GoldBird carry={phase === "send" ? "heart" : phase === "deliver" ? "mail" : null} />
         </span>
 
-        {thread === "none" && canSend ? (
+        {localThread === "none" && canSend ? (
           <form action={sendInterest} onSubmit={onSpark}>
             <input type="hidden" name="to_profile_id" value={profileId} />
             <button type="submit" className="bird-dock-cta">
@@ -484,31 +493,31 @@ export function BirdDock({
           </form>
         ) : null}
 
-        {thread === "none" && needPlan ? (
+        {localThread === "none" && needPlan ? (
           <Link href="/app/plans" className="bird-dock-cta">
             {perchLabel}
           </Link>
         ) : null}
 
-        {thread === "none" && needQuota ? (
+        {localThread === "none" && needQuota ? (
           <Link href="/app/plans" className="bird-dock-cta">
             {perchLabel}
           </Link>
         ) : null}
 
-        {thread === "none" && !canSend && !needPlan && !needQuota && !awaitingReview ? (
+        {localThread === "none" && !canSend && !needPlan && !needQuota && !awaitingReview ? (
           <Link href={finishHref} className="bird-dock-cta">
             {perchLabel}
           </Link>
         ) : null}
 
-        {thread === "none" && awaitingReview && !needPlan && !needQuota ? (
+        {localThread === "none" && awaitingReview && !needPlan && !needQuota ? (
           <span className="bird-dock-cta" aria-disabled>
             {perchLabel}
           </span>
         ) : null}
 
-        {thread === "closed" && canSend ? (
+        {localThread === "closed" && canSend ? (
           <form action={sendInterest} onSubmit={onSpark}>
             <input type="hidden" name="to_profile_id" value={profileId} />
             <button type="submit" className="bird-dock-cta">
@@ -517,11 +526,26 @@ export function BirdDock({
           </form>
         ) : null}
 
-        {thread === "sent" ? (
-          interestId ? (
-            <form action={cancelInterest}>
-              <input type="hidden" name="to_profile_id" value={profileId} />
-              <input type="hidden" name="interest_id" value={interestId} />
+        {localThread === "sent" ? (
+          localInterestId ? (
+            <form
+              onSubmit={(event) => {
+                event.preventDefault();
+                const prev = localInterestId;
+                markActed();
+                setLocalThread("none");
+                setLocalInterestId(null);
+                const data = new FormData();
+                data.set("to_profile_id", profileId);
+                data.set("interest_id", prev);
+                void cancelInterest(data).then((res) => {
+                  if (!res.ok) {
+                    setLocalThread("sent");
+                    setLocalInterestId(prev);
+                  }
+                });
+              }}
+            >
               <button type="submit" className="bird-dock-cta is-drop">
                 Cancel Interest
               </button>
@@ -533,13 +557,13 @@ export function BirdDock({
           )
         ) : null}
 
-        {thread === "accepted" ? (
+        {localThread === "accepted" ? (
           <button type="button" className="bird-dock-cta is-sent" onClick={openChat}>
             Interest sent
           </button>
         ) : null}
 
-        {thread === "received" ? (
+        {localThread === "received" ? (
           <Link href="/app/interests" className="bird-dock-cta">
             {perchLabel}
           </Link>

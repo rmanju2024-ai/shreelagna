@@ -31,6 +31,27 @@ export default async function ProfilePage({
   if (!me) redirect("/login?error=account");
   const house = isStaffRole(me.role);
   const db = house ? (createServiceClient() ?? supabase) : supabase;
+  const showForm = Boolean(query.error) || query.edit === "1";
+
+  if (!showForm) {
+    let peek = (await db.from("profiles").select("id, created_by").eq("id", id).maybeSingle()).data;
+    if (!peek && /^SL\d{6,}$/i.test(id)) {
+      peek = (await db.from("profiles").select("id, created_by").eq("member_code", id.toUpperCase()).maybeSingle()).data;
+    }
+    if (peek && peek.created_by === me.id) {
+      const { BrowseProfileView } = await import("@/app/browse/browse-profile-view");
+      return (
+        <PageShell full>
+          <BackToAccount />
+          <BrowseProfileView
+            params={Promise.resolve({ id: String(peek.id) })}
+            searchParams={Promise.resolve({})}
+            editHref={`/app/profiles/${peek.id}?edit=1`}
+          />
+        </PageShell>
+      );
+    }
+  }
 
   const [profileJoin, media] = await Promise.all([
     db
@@ -70,7 +91,6 @@ export default async function ProfilePage({
   const video = (mediaRows ?? []).find((m) => m.kind === "video") ?? null;
   const audio = (mediaRows ?? []).find((m) => m.kind === "audio") ?? null;
   const memberCode = typeof profile.member_code === "string" ? profile.member_code : undefined;
-  const showForm = Boolean(query.error) || query.edit === "1";
 
   if (showForm) {
     const { ProfileEditScreen } = await import("@/app/app/profiles/profile-edit-screen");
@@ -91,20 +111,6 @@ export default async function ProfilePage({
 
   const religionName = nestedName(profile.religions);
   const communityName = nestedName(profile.communities);
-
-  if (own && !showForm) {
-    const { BrowseProfileView } = await import("@/app/browse/browse-profile-view");
-    return (
-      <PageShell full>
-        <BackToAccount />
-        <BrowseProfileView
-          params={Promise.resolve({ id: String(profile.id) })}
-          searchParams={Promise.resolve({})}
-          editHref={`/app/profiles/${profile.id}?edit=1`}
-        />
-      </PageShell>
-    );
-  }
 
   return (
     <PageShell full><BackToAccount />

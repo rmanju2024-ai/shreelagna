@@ -25,7 +25,6 @@ import { hasDeleteConfirmation } from "@/lib/profile/delete-confirmation";
 import { contentFlags, MEMBER_CONTACT_WARNING } from "@/lib/moderation/content-flags";
 import { writeAudit } from "@/lib/desk/audit";
 import { notifyInterestReceived } from "@/lib/notify/dispatch";
-import { whatsappFailFlag } from "@/lib/notify/whatsapp";
 import { digitsOnly } from "@/lib/notify/phone";
 import { complimentaryPaidProfileAccess, pairPlanLive } from "@/lib/membership/access";
 import { loadInterestQuota, loadMembership } from "@/lib/membership/load";
@@ -617,12 +616,10 @@ export async function toggleShortlist(formData: FormData) {
   redirect(flag(result.on ? "shortlisted" : "unshortlisted"));
 }
 
-export async function sendInterest(formData: FormData) {
+export async function sendInterest(formData: FormData): Promise<{ ok: boolean; interestId?: string | null; error?: string }> {
   const { supabase, me } = await requireMember();
   const toId = String(formData.get("to_profile_id") ?? "");
-  if (!toId || !me.active_profile_id) {
-    redirect("/browse?error=need_profile");
-  }
+  if (!toId || !me.active_profile_id) return { ok: false, error: "need_profile" };
 
   const { data: mine } = await supabase
     .from("profiles")
@@ -630,27 +627,16 @@ export async function sendInterest(formData: FormData) {
     .eq("id", me.active_profile_id)
     .maybeSingle();
 
-  if (!mine?.is_complete || mine.status !== "active") {
-    redirect(`/browse/${toId}?error=incomplete`);
-  }
-  if (!canSendInterest(mine.id, toId)) {
-    redirect("/browse?error=self");
-  }
+  if (!mine?.is_complete || mine.status !== "active") return { ok: false, error: "incomplete" };
+  if (!canSendInterest(mine.id, toId)) return { ok: false, error: "self" };
 
   const access = await loadMembership(supabase, me);
-  if (!access.live) {
-    redirect(`/browse/${toId}?error=plan`);
-  }
-  const quota = await loadInterestQuota(supabase, me, access, [mine.id]);
-  const { data: alreadyView } = await supabase
-    .from("contact_views")
-    .select("id")
-    .eq("viewer_profile_id", mine.id)
-    .eq("viewed_profile_id", toId)
-    .maybeSingle();
-  if (!alreadyView && !quota.canSend) {
-    redirect(`/browse/${toId}?error=quota`);
-  }
+  if (!access.live) return { ok: false, error: "plan" };
+  const [quota, alreadyView] = await Promise.all([
+    loadInterestQuota(supabase, me, access, [mine.id]),
+    supabase.from("contact_views").select("id").eq("viewer_profile_id", mine.id).eq("viewed_profile_id", toId).maybeSingle(),
+  ]);
+  if (!alreadyView.data && !quota.canSend) return { ok: false, error: "quota" };
 
   let { data: target } = await supabase
     .from("profiles")
@@ -665,9 +651,7 @@ export async function sendInterest(formData: FormData) {
       .maybeSingle();
     target = retry.data as typeof target;
   }
-  if (!target || target.status !== "active") {
-    redirect("/browse?error=unavailable");
-  }
+  if (!target || target.status !== "active") return { ok: false, error: "unavailable" };
 
   const { data: existing } = await supabase
     .from("interests")
@@ -679,9 +663,7 @@ export async function sendInterest(formData: FormData) {
   const open = (existing ?? []).find((row) =>
     openInterestBlocksSend(effectiveInterestStatus(row.status, row.created_at)),
   );
-  if (open) {
-    redirect(`/browse/${toId}`);
-  }
+  if (open) return { ok: true, interestId: typeof open.id === "string" ? open.id : null };
   const closedIds = (existing ?? [])
     .filter((row) => !openInterestBlocksSend(effectiveInterestStatus(row.status, row.created_at)))
     .map((row) => row.id);
@@ -689,67 +671,68 @@ export async function sendInterest(formData: FormData) {
     await supabase.from("interests").delete().in("id", closedIds);
   }
 
-  const { error } = await supabase.from("interests").insert({
-    from_profile_id: mine.id,
-    to_profile_id: toId,
-  });
-  if (error && !error.message.toLowerCase().includes("duplicate")) {
-    redirect(`/browse/${toId}?error=could_not_send`);
+  const inserted = await supabase
+    .from("interests")
+    .insert({ from_profile_id: mine.id, to_profile_id: toId })
+    .select("id")
+    .maybeSingle();
+  if (inserted.error && !inserted.error.message.toLowerCase().includes("duplicate")) {
+    return { ok: false, error: "could_not_send" };
   }
+  const interestId = typeof inserted.data?.id === "string" ? inserted.data.id : open?.id ?? null;
   const [a, b] = mine.id < toId ? [mine.id, toId] : [toId, mine.id];
-  await supabase.from("threads").insert({ profile_a: a, profile_b: b });
-  if (!error && canAlertInterest(target)) {
+  void supabase.from("threads").insert({ profile_a: a, profile_b: b });
+
+  if (canAlertInterest(target)) {
     const senderName = displayFirstName(mine.subject_full_name ?? "A member");
     const viewerFirst = displayFirstName(target.subject_full_name ?? "there");
     const copy = interestReceivedCopy(viewerFirst, senderName);
-    await supabase.from("notices").insert({
-      user_id: target.created_by,
-      kind: copy.kind,
-      title: copy.title,
-      body: copy.body,
-      href: "/app/interests",
-      match_profile_id: mine.id,
+    const ownerId = target.created_by;
+    const mobile = typeof target.subject_mobile === "string" ? target.subject_mobile : null;
+    after(async () => {
+      await supabase.from("notices").insert({
+        user_id: ownerId,
+        kind: copy.kind,
+        title: copy.title,
+        body: copy.body,
+        href: "/app/interests",
+        match_profile_id: mine.id,
+      });
+      await notifyInterestReceived(ownerId, senderName, mobile);
+      revalidatePath("/app/alerts");
+      revalidatePath("/app/interests");
     });
-    const wa = await notifyInterestReceived(
-      target.created_by,
-      senderName,
-      typeof target.subject_mobile === "string" ? target.subject_mobile : null,
-    );
-    revalidatePath(`/browse/${toId}`);
-    revalidatePath("/app/alerts");
-    revalidatePath("/app/interests");
-    revalidatePath("/", "layout");
-    redirect(`/browse/${toId}?sent=1${wa.ok ? "" : `&wa=${whatsappFailFlag(wa.error)}`}`);
+  } else {
+    after(() => {
+      revalidatePath("/app/alerts");
+      revalidatePath("/app/interests");
+    });
   }
-  revalidatePath(`/browse/${toId}`);
-  revalidatePath("/app/alerts");
-  revalidatePath("/app/interests");
-  revalidatePath("/", "layout");
-  redirect(`/browse/${toId}?sent=1`);
+  return { ok: true, interestId };
 }
 
-export async function cancelInterest(formData: FormData) {
+export async function cancelInterest(formData: FormData): Promise<{ ok: boolean }> {
   const { supabase, me } = await requireMember();
   const toId = String(formData.get("to_profile_id") ?? "");
   const interestKey = String(formData.get("interest_id") ?? "");
-  if (!toId || !me.active_profile_id) redirect("/browse?error=need_profile");
+  if (!toId || !me.active_profile_id) return { ok: false };
   const { data: row } = await supabase
     .from("interests")
     .select("id, from_profile_id, to_profile_id, status, created_at")
     .eq("id", interestKey)
     .maybeSingle();
   if (!row || row.from_profile_id !== me.active_profile_id || row.to_profile_id !== toId) {
-    redirect(`/browse/${toId}`);
+    return { ok: false };
   }
   if (effectiveInterestStatus(row.status, row.created_at) !== "pending") {
-    redirect(`/browse/${toId}`);
+    return { ok: false };
   }
   await supabase.from("interests").delete().eq("id", row.id);
-  revalidatePath(`/browse/${toId}`);
-  revalidatePath("/app/interests");
-  revalidatePath("/app/alerts");
-  revalidatePath("/", "layout");
-  redirect(`/browse/${toId}`);
+  after(() => {
+    revalidatePath("/app/interests");
+    revalidatePath("/app/alerts");
+  });
+  return { ok: true };
 }
 
 export async function revealContact(toId: string): Promise<{

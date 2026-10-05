@@ -311,13 +311,19 @@ export async function BrowseProfileView({
   let accepted = false;
   let interestId: string | null = null;
   let kundali: ReturnType<typeof kundaliScore> | null = null;
+  let contact: ProfileData["contact"] = undefined;
+  let shortlisted = false;
   const db = createServiceClient() ?? supabase;
-  const access = await loadMembership(db, me);
+  const [access, ownerRes, myProfilesRes] = await Promise.all([
+    loadMembership(db, me),
+    db.from("app_users").select("id, role, welcome_started_at, welcome_days, email").eq("id", profile.created_by).maybeSingle(),
+    own
+      ? Promise.resolve({ data: [] as Record<string, unknown>[] })
+      : db.from("profiles").select("*, religions(name), communities(name)").eq("created_by", me.id),
+  ]);
   needPlan = !access.live;
-  const { data: myProfiles } = own
-    ? { data: [] as Record<string, unknown>[] }
-    : await db.from("profiles").select("*, religions(name), communities(name)").eq("created_by", me.id);
-  const mineList = myProfiles ?? [];
+  const owner = ownerRes.data;
+  const mineList = (myProfilesRes.data ?? []) as Record<string, unknown>[];
   const mine =
     mineList.find((row) => row.id === me.active_profile_id) ??
     mineList.find((row) => isPublicProfileStatus(typeof row.status === "string" ? row.status : null)) ??
@@ -327,21 +333,45 @@ export async function BrowseProfileView({
   let chatThreadId: string | null = null;
   let chatNotes: { id: string; sender_profile_id: string; body: string; created_at: string; read_at?: string | null }[] = [];
 
+  const targetAccessP = owner ? loadMembership(db, owner) : Promise.resolve(null);
+
   if (mine && String(mine.id) !== id) {
-    const { data: interestRows } = await db
-      .from("interests")
-      .select("id, from_profile_id, to_profile_id, status, created_at")
-      .or(`from_profile_id.eq.${id},to_profile_id.eq.${id}`);
+    const [interestRes, quota, blockRes, viewedRes, shortRes] = await Promise.all([
+      db
+        .from("interests")
+        .select("id, from_profile_id, to_profile_id, status, created_at")
+        .or(`from_profile_id.eq.${id},to_profile_id.eq.${id}`),
+      loadInterestQuota(db, me, access, [String(mine.id)]),
+      db
+        .from("member_blocks")
+        .select("blocker_profile_id")
+        .or(
+          `and(blocker_profile_id.eq.${String(mine.id)},blocked_profile_id.eq.${id}),and(blocker_profile_id.eq.${id},blocked_profile_id.eq.${String(mine.id)})`,
+        )
+        .limit(1),
+      db
+        .from("contact_views")
+        .select("id")
+        .eq("viewer_profile_id", String(mine.id))
+        .eq("viewed_profile_id", id)
+        .maybeSingle(),
+      db
+        .from("profile_shortlists")
+        .select("owner_profile_id")
+        .eq("owner_profile_id", String(mine.id))
+        .eq("shortlisted_profile_id", id)
+        .maybeSingle(),
+    ]);
+    if (blockRes.data?.length) return <UnavailableBrowse />;
     viewerType = asProfileType(mine.profile_type);
     viewerStatus = typeof mine.status === "string" ? mine.status : null;
-    const quota = await loadInterestQuota(db, me, access, [String(mine.id)]);
     quotaLeft = quota.left;
     quotaUsed = quota.used;
     quotaLimit = quota.limit;
     const complete = Boolean(mine.is_complete);
     const live = isPublicProfileStatus(typeof mine.status === "string" ? mine.status : null);
     awaitingReview = complete && !live;
-    const link = (interestRows ?? []).find(
+    const link = (interestRes.data ?? []).find(
       (row) => myIds.includes(row.from_profile_id) || myIds.includes(row.to_profile_id),
     );
     interestStatus = link ? effectiveInterestStatus(link.status, link.created_at) : null;
@@ -367,46 +397,14 @@ export async function BrowseProfileView({
         manglik: typeof profile.manglik === "string" ? profile.manglik : null,
       },
     );
-  } else if (own) {
-    viewerType = asProfileType(profile.profile_type);
-  }
 
-  if (!own && mine) {
-    const { data: blocks } = await db
-      .from("member_blocks")
-      .select("blocker_profile_id")
-      .or(
-        `and(blocker_profile_id.eq.${String(mine.id)},blocked_profile_id.eq.${id}),and(blocker_profile_id.eq.${id},blocked_profile_id.eq.${String(mine.id)})`,
-      )
-      .limit(1);
-    if (blocks?.length) return <UnavailableBrowse />;
-  }
-
-  const targetType = asProfileType(profile.profile_type);
-  const thread = interestThreadState(interestStatus, sentByMe || Boolean(sent));
-  const linkedByInterest = thread === "sent" || thread === "received" || thread === "accepted";
-
-  let contact: ProfileData["contact"] = undefined;
-  if (!own && mine && String(mine.id) !== id) {
     const mode = typeof profile.contact_release_mode === "string" ? profile.contact_release_mode : "";
-    const { data: viewed } = await db
-      .from("contact_views")
-      .select("id")
-      .eq("viewer_profile_id", String(mine.id))
-      .eq("viewed_profile_id", id)
-      .maybeSingle();
+    const viewed = viewedRes.data;
     const revealed = Boolean(viewed) || isStaff;
-    let mobile = "";
-    let email = "";
-    if (revealed) {
-      mobile = typeof profile.subject_mobile === "string" ? profile.subject_mobile.trim() : "";
-      const { data: ownerMail } = await db.from("app_users").select("email").eq("id", profile.created_by).maybeSingle();
-      email = typeof ownerMail?.email === "string" ? ownerMail.email.trim() : "";
-    }
     contact = {
       revealed,
-      mobile,
-      email,
+      mobile: revealed && typeof profile.subject_mobile === "string" ? profile.subject_mobile.trim() : "",
+      email: revealed && typeof owner?.email === "string" ? owner.email.trim() : "",
       locked: mode === "never",
       accepted,
       needPlan,
@@ -420,7 +418,9 @@ export async function BrowseProfileView({
       left: quotaLeft,
       limit: quotaLimit,
     };
+    shortlisted = Boolean(shortRes.data);
   } else if (own) {
+    viewerType = asProfileType(profile.profile_type);
     contact = {
       revealed: true,
       self: true,
@@ -436,12 +436,11 @@ export async function BrowseProfileView({
       limit: null,
     };
   }
-  const { data: owner } = await db
-    .from("app_users")
-    .select("id, role, welcome_started_at, welcome_days")
-    .eq("id", profile.created_by)
-    .maybeSingle();
-  const targetAccess = owner ? await loadMembership(db, owner) : null;
+
+  const targetAccess = await targetAccessP;
+  const targetType = asProfileType(profile.profile_type);
+  const thread = interestThreadState(interestStatus, sentByMe || Boolean(sent));
+  const linkedByInterest = thread === "sent" || thread === "received" || thread === "accepted";
   const pairLive = pairPlanLive(access.live, targetAccess?.live);
   const myChatId = mine && String(mine.id) !== id ? String(mine.id) : null;
   if (myChatId && linkedByInterest) {
@@ -552,17 +551,6 @@ export async function BrowseProfileView({
     asProfileType(profile.profile_type) ?? undefined,
   );
   const memberCode = typeof profile.member_code === "string" ? profile.member_code : undefined;
-
-  let shortlisted = false;
-  if (!own && mine) {
-    const { data: shortRow } = await db
-      .from("profile_shortlists")
-      .select("owner_profile_id")
-      .eq("owner_profile_id", String(mine.id))
-      .eq("shortlisted_profile_id", id)
-      .maybeSingle();
-    shortlisted = Boolean(shortRow);
-  }
 
   const yesNo = (value: unknown) => {
     if (value === true || value === "true") return "Yes";
