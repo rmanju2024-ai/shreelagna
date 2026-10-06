@@ -445,25 +445,18 @@ export const FAMILY_STATUSES = [
 
 export const SETTLE_ABROAD = ["Yes", "No", "Open", "Don't know"] as const;
 
-/** How a parent earns a living, or that they have passed away — used to write the family line. */
+/** Status and work tags. Families can pick more than one, e.g. Passed away + Business. */
 export const PARENT_PROFESSIONS = [
+  "Passed away",
+  "Retired",
   "Homemaker",
   "Employed",
-  "Government employee",
   "Business",
   "Farmer",
+  "Government employee",
   "Teacher",
   "Doctor",
   "Engineer",
-  "Professional",
-  "Retired",
-  "Retired from government service",
-  "Retired businessman",
-  "Retired farmer",
-  "Passed away",
-  "Passed away · was employed",
-  "Passed away · was in business",
-  "Passed away · was a farmer",
   "Don't know",
 ] as const;
 

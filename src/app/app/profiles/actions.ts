@@ -13,6 +13,7 @@ import { ABOUT_MAX, ABOUT_MIN, FAMILY_NOTE_MAX, aboutPlainText } from "@/lib/pro
 import { contactViewedCopy, interestReceivedCopy } from "@/lib/match/alert-copy";
 import { canAlertInterest } from "@/lib/match/profile-settings";
 import { canSendInterest, effectiveInterestStatus, openInterestBlocksSend } from "@/lib/match/interest-status";
+import { joinParentTags } from "@/lib/profile/parent-line";
 import { parseProfileForm } from "@/lib/validation/profile";
 import { isProfileEditSection, pickSectionRecord, SECTION_FORM_KEYS } from "@/lib/profile/sections";
 import { buildProfileSaveRow, pickSaveRow } from "@/lib/profile/save-payload";
@@ -219,9 +220,9 @@ export async function saveProfile(formData: FormData) {
     sisters_count: formData.get("sisters_count"),
     sisters_married_count: formData.get("sisters_married_count"),
     father_name: String(formData.get("father_name") ?? ""),
-    father_occupation: String(formData.get("father_occupation") ?? ""),
+    father_occupation: joinParentTags(formData.getAll("father_occupation")),
     mother_name: String(formData.get("mother_name") ?? ""),
-    mother_occupation: String(formData.get("mother_occupation") ?? ""),
+    mother_occupation: joinParentTags(formData.getAll("mother_occupation")),
     siblings_note: aboutPlainText(String(formData.get("siblings_note") ?? "")).slice(0, FAMILY_NOTE_MAX),
     family_status: String(formData.get("family_status") ?? ""),
     family_location: String(formData.get("family_location") ?? ""),

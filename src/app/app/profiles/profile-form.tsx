@@ -16,6 +16,7 @@ import {
 } from "@/lib/profile/options";
 import { citiesForState, pickListed, sortLabels, type FormLists } from "@/lib/profile/form-lists";
 import { asStringList, hopeValues, languagesKnown } from "@/lib/profile/multi-values";
+import { parseParentTags } from "@/lib/profile/parent-line";
 import { FieldHelp } from "@/app/app/profiles/field-help";
 import { FieldMark } from "@/app/app/profiles/field-mark";
 import { HopePicker } from "@/app/app/profiles/hope-picker";
@@ -41,10 +42,10 @@ const WIZARD_STEPS = [
   { id: 5, short: "Match", title: "Preferences", hint: "What you are looking for", mark: "Partner" },
 ] as const;
 
-function parentProfessionChoices(current?: string | null) {
-  const extra = current?.trim() && !(PARENT_PROFESSIONS as readonly string[]).includes(current.trim()) ? [current.trim()] : [];
-  return [...PARENT_PROFESSIONS, ...extra];
-}
+const PARENT_PROFESSION_OPTIONS = PARENT_PROFESSIONS.map((item) => ({
+  value: item,
+  label: choiceLabel(item),
+}));
 
 export function ProfileForm({
   values,
@@ -999,32 +1000,22 @@ export function ProfileForm({
               className={inputClass}
             />
           </Field>
-          <Field
+          <HopePicker
             label="Father's profession"
-            help="Pick the closest option so the profile can say this kindly — including if father has passed away."
-          >
-            <Select3d name="father_occupation" defaultValue={values?.father_occupation ?? ""} className={inputClass}>
-              <option value="">Not mentioned</option>
-              {parentProfessionChoices(values?.father_occupation).map((item) => (
-                <option key={`father-${item}`} value={item}>
-                  {choiceLabel(item)}
-                </option>
-              ))}
-            </Select3d>
-          </Field>
-          <Field
+            name="father_occupation"
+            alphabetize={false}
+            options={PARENT_PROFESSION_OPTIONS}
+            selected={parseParentTags(values?.father_occupation)}
+            help="Tick several if needed — for example Passed away and Business, or Dont Know if you are not sure."
+          />
+          <HopePicker
             label="Mother's profession"
-            help="Pick the closest option so the profile can say this kindly — including if mother has passed away."
-          >
-            <Select3d name="mother_occupation" defaultValue={values?.mother_occupation ?? ""} className={inputClass}>
-              <option value="">Not mentioned</option>
-              {parentProfessionChoices(values?.mother_occupation).map((item) => (
-                <option key={`mother-${item}`} value={item}>
-                  {choiceLabel(item)}
-                </option>
-              ))}
-            </Select3d>
-          </Field>
+            name="mother_occupation"
+            alphabetize={false}
+            options={PARENT_PROFESSION_OPTIONS}
+            selected={parseParentTags(values?.mother_occupation)}
+            help="Tick several if needed — for example Passed away and Homemaker, or Dont Know if you are not sure."
+          />
           <div className="field-3d sm:col-span-2">
             <span className="field-3d-label">
               About the family
