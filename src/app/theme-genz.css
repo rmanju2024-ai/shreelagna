@@ -946,23 +946,57 @@ table { max-width: 100%; }
     padding-inline: clamp(0.65rem, 3vw, 1rem);
   }
 
-  /* Compact header and brand; primary actions stay in the bottom navigation. */
-  .site-head-inner { min-height: 4.25rem !important; padding: 0.45rem 0.75rem !important; }
-  .site-head-brand { display: flex; min-width: 0; max-width: 100%; width: 100%; flex: 1 1 auto; align-items: center; }
-  .site-head-brand img { width: auto; max-height: 3.2rem; object-fit: contain; }
-  .site-head-brand > a { flex: none; min-width: 0; gap: 0.4rem; }
-  .site-head-brand > a > span { min-width: 0; }
-  .site-head-brand > a > span > span:first-child { font-size: 1.05rem; }
-  .site-head-brand > a > span > span:last-child { display: none; }
-  .header-profile-chip {
+  /* Compact header: crest + profile identity; primary actions stay in the bottom navigation. */
+  header.sticky, header.absolute {
+    z-index: 50;
+    background: rgb(251 245 236 / 96%) !important;
+  }
+  .site-head-inner {
+    min-height: 4.25rem !important;
+    padding: 0.45rem 0.75rem !important;
+    flex-wrap: nowrap !important;
+  }
+  .site-head-inner > .site-nav {
+    position: fixed !important;
+    inset: auto 0.35rem max(0.35rem, env(safe-area-inset-bottom)) 0.35rem !important;
+    width: auto !important;
+    max-width: none !important;
+    transform: none !important;
+    z-index: 90;
+  }
+  .site-head-brand {
     display: flex !important;
     flex: 1 1 auto !important;
-    min-width: 0;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: auto !important;
+    align-items: center;
+    gap: 0.45rem !important;
+  }
+  .site-head-brand .brand-mark { flex: none; gap: 0.4rem !important; }
+  .site-head-brand .brand-wordmark { display: none !important; }
+  .site-head-brand img { width: 2.55rem !important; height: 2.55rem !important; max-height: 2.55rem !important; }
+  .header-profile-chip {
+    display: flex !important;
+    visibility: visible !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
     max-width: none !important;
+    background: rgb(255 252 247 / 96%) !important;
+    border-color: rgb(196 154 98 / 55%) !important;
+  }
+  .header-profile-chip.is-overlay {
+    background: rgb(255 252 247 / 96%) !important;
   }
   .header-profile-chip-copy { display: grid !important; min-width: 0; }
   .header-profile-chip-copy span,
-  .header-profile-chip-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .header-profile-chip-copy strong {
+    overflow: hidden;
+    color: #7c2d12 !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .header-profile-chip-copy span { color: #9a3412 !important; }
 
   /* One readable card per row, with no accidental desktop minimum widths. */
   .sx-grid, .inbox-list.sx-grid, .alert-list, .plans-grid {

@@ -13,7 +13,8 @@ describe("shared mobile CSS contract", () => {
     expect(css).toContain("position: static");
     expect(css).toContain(".header-profile-chip");
     expect(css).toContain("flex: 1 1 auto !important");
-    expect(css).toContain("max-width: none !important");
+    expect(css).toContain(".brand-wordmark { display: none !important; }");
+    expect(css).toContain("inset: auto 0.35rem max(0.35rem, env(safe-area-inset-bottom)) 0.35rem !important");
   });
 
   it("keeps cards and forms inside narrow screens", () => {

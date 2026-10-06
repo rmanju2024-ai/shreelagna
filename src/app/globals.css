@@ -9585,7 +9585,7 @@ a.inbox-name.inbox-open:focus-visible {
 @media (max-width: 720px) {
   .site-head-inner {
     min-height: 0;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 0.35rem;
     padding-top: 0.35rem;
     padding-bottom: 0.35rem;
