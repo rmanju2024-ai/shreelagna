@@ -1749,14 +1749,17 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
   justify-items: center;
   pointer-events: none;
 }
-.bird-chat-layer {
+#shree-chat-root {
+  position: relative;
+  z-index: 9000;
+}
   position: fixed;
   inset: 0;
-  z-index: 1400;
+  z-index: 9000;
   display: grid;
   place-items: end;
   padding: 0.75rem max(0.75rem, env(safe-area-inset-right)) max(0.9rem, calc(env(safe-area-inset-bottom) + 0.75rem)) 0.75rem;
-  pointer-events: none;
+  pointer-events: auto;
 }
 .bird-chat-layer .bird-wa-scrim,
 .bird-chat-layer .bird-wa {

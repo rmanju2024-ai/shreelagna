@@ -58,4 +58,11 @@ describe("BirdDock chat chrome", () => {
     expect(screen.queryByLabelText("Chat")).toBeNull();
     expect(screen.getByRole("button", { name: /open chat/i })).toBeTruthy();
   });
+
+  it("keeps chat open if the opening tap also hits the scrim", () => {
+    render(<BirdDock {...props} />);
+    fireEvent.click(screen.getByRole("button", { name: /open chat/i }));
+    fireEvent.click(screen.getByRole("button", { name: /dismiss chat backdrop/i }));
+    expect(screen.getByLabelText("Chat")).toBeTruthy();
+  });
 });

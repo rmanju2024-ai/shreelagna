@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type SyntheticEvent } from "react";
 import { createPortal } from "react-dom";
 import { cancelInterest, sendInterest } from "@/app/app/profiles/actions";
 import { markPeekRead, sendPeekChat } from "@/app/app/match/actions";
@@ -67,6 +67,16 @@ function dayLabel(iso: string) {
   y.setDate(today.getDate() - 1);
   if (at.toDateString() === y.toDateString()) return "Yesterday";
   return at.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+}
+
+function chatRoot() {
+  let node = document.getElementById("shree-chat-root");
+  if (!node) {
+    node = document.createElement("div");
+    node.id = "shree-chat-root";
+    document.body.appendChild(node);
+  }
+  return node;
 }
 
 function Tick({ mine, pending, read }: { mine: boolean; pending?: boolean; read?: boolean }) {
@@ -160,6 +170,8 @@ export function BirdDock({
   const inbound = useRef(0);
   const dockRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
+  const openedAt = useRef(0);
+  const [host, setHost] = useState<HTMLElement | null>(null);
   const showChat = localThread === "sent" || localThread === "received" || localThread === "accepted";
   const pool = phase === "peck" ? CHIRPS.peck : chirpPool(localThread, needPlan, needQuota, canSend, awaitingReview);
   const chirp = pool[line % pool.length];
@@ -224,6 +236,7 @@ export function BirdDock({
 
   useEffect(() => {
     setMounted(true);
+    setHost(chatRoot());
   }, []);
 
   useEffect(() => {
@@ -352,8 +365,12 @@ export function BirdDock({
     });
   }
 
-  function openChat() {
+  function openChat(event?: SyntheticEvent) {
+    event?.preventDefault();
+    event?.stopPropagation();
     markActed();
+    openedAt.current = Date.now();
+    setWide(false);
     setOpen(true);
     setBadge(0);
     const data = new FormData();
@@ -362,7 +379,8 @@ export function BirdDock({
     void markPeekRead(data);
   }
 
-  function closeChat() {
+  function closeChat(force = false) {
+    if (!force && Date.now() - openedAt.current < 500) return;
     setOpen(false);
     setWide(false);
   }
@@ -418,8 +436,17 @@ export function BirdDock({
 
   const panel =
     open && showChat ? (
-      <div ref={dockRef} className={`bird-chat-layer${wide ? " is-wide" : ""}`}>
-        <button type="button" className="bird-wa-scrim" aria-label="Close chat" onClick={closeChat} />
+      <div ref={dockRef} className={`bird-chat-layer${wide ? " is-wide" : ""}`} role="presentation">
+        <button
+          type="button"
+          className="bird-wa-scrim"
+          aria-label="Dismiss chat backdrop"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            closeChat();
+          }}
+        />
         <section
           className={`bird-wa${wide ? " is-max" : ""}`}
           aria-label="Chat"
@@ -441,7 +468,7 @@ export function BirdDock({
                 onClick={(event) => {
                   event.preventDefault();
                   event.stopPropagation();
-                  closeChat();
+                  closeChat(true);
                 }}
                 aria-label="Close"
               >
@@ -609,7 +636,11 @@ export function BirdDock({
             <button
               type="button"
               className={`bird-dock-chat${badge ? " has-mail" : ""}${phase === "deliver" ? " is-drop-in" : ""}${open ? " is-on" : ""}`}
-              onClick={open ? closeChat : openChat}
+              onPointerDown={(event) => event.stopPropagation()}
+              onClick={(event) => {
+                if (open) closeChat(true);
+                else openChat(event);
+              }}
               aria-label={open ? "Close chat" : "Open chat"}
               aria-expanded={open}
             >
@@ -621,7 +652,7 @@ export function BirdDock({
           ) : null}
         </div>
       </div>
-      {mounted && panel ? createPortal(panel, document.body) : null}
+      {mounted && host && panel ? createPortal(panel, host) : null}
     </>
   );
 }

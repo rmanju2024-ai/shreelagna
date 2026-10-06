@@ -414,7 +414,7 @@ export function ProfileRedesign(props: ProfileData) {
       awaitingReview={props.awaitingReview}
       quotaLeft={props.quotaLeft}
       finishHref={props.finishHref}
-      chat={lightbox === null ? props.chat : undefined}
+      chat={props.chat}
     />
   ) : null;
 
