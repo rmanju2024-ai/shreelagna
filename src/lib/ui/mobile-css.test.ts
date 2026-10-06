@@ -72,6 +72,8 @@ describe("shared mobile CSS contract", () => {
     expect(css).toContain(".sx-hero h1 { color: var(--theme-ink)");
     expect(css).toContain(".sx-hero-sub { color: color-mix");
     expect(css).toContain("background-color: var(--theme-surface)");
+    expect(css).toContain(".plans-welcome-banner");
+    expect(css).toContain(".plans-header");
     expect(css).toContain('html[data-scene="nature"] .app-main');
     expect(css).toContain('html[data-scene="honeymoon"] .app-main');
     expect(css).toContain('html[data-scene="couple"] .app-main');

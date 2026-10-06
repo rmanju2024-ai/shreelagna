@@ -1152,7 +1152,9 @@ html[data-scene="couple"] .app-main {
   .sx-board, .sx-card, .alert-card, .plan-card, .settings-card,
   .profile-wizard, .profile-readiness, .portrait-group, .portrait-sheet,
   .desk-panel, .desk-admin-block, .desk-break-card, .wc-shell,
-  .browse-profile-missing, .card-premium
+  .browse-profile-missing, .card-premium,
+  .plans-header, .plans-welcome-banner, .plans-usage, .plans-card,
+  .account-hub-head, .account-pulse, .account-hub-card, .account-hub-rail
 ) {
   border-color: var(--gz-stroke);
   background-color: var(--gz-surface);
@@ -1245,13 +1247,42 @@ html[data-scene="couple"] .app-main {
 .sx-eyebrow::before { content: "✦"; color: var(--pop); }
 
 /* Scene photos are decorative: content always keeps a readable opaque layer. */
-.app-main :where(.sx-board, .card-premium, .alert-card, .plan-card, .desk-panel, .portrait-group) {
-  color: var(--ink);
+.app-main :where(
+  .sx-board, .card-premium, .alert-card, .plan-card, .desk-panel, .portrait-group,
+  .plans-header, .plans-welcome-banner, .plans-usage, .plans-card, .plans-msg,
+  .account-hub-head, .account-pulse, .account-hub-card, .account-hub-rail, .page-head-panel
+) {
+  color: var(--theme-ink);
   background-color: var(--theme-surface);
 }
 .app-main :where(.sx-board, .card-premium, .alert-card, .plan-card, .desk-panel, .portrait-group)
   :where(p, small, time, .sx-place, .desk-ticket-meta) {
   text-shadow: none;
+}
+.app-main .plans-header,
+.app-main .plans-welcome-banner,
+.app-main .plans-usage {
+  color: var(--theme-ink);
+}
+.app-main .plans-intro,
+.app-main .plans-welcome-banner p,
+.app-main .plans-usage p {
+  color: color-mix(in srgb, var(--theme-ink) 82%, #2b1a14);
+}
+.app-main .plans-status :where(h1, h2, h3, p, b, small) {
+  color: #fff8e7;
+}
+.app-main .plans-status .plans-label {
+  color: #3f0e0d;
+}
+.app-main .account-hub-section h2,
+.app-main .account-hub-section-kicker {
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.28rem 0.7rem;
+  border-radius: 999px;
+  background-color: var(--theme-surface);
+  color: var(--theme-ink);
 }
 
 /* Familiar, tactile controls on forms and dense utility pages. */

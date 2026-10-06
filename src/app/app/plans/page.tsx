@@ -46,9 +46,7 @@ export default async function PlansPage({
         <div className="plans-header">
           <p className="browse-kicker">Membership</p>
           <h1>Plans</h1>
-          <p className="plans-intro">
-            Welcome gift on joining. Paid cover thereafter. Chat opens as soon as you send a request — no need to wait for accept.
-          </p>
+          <p className="plans-intro">Welcome gift on joining, then paid cover. Chat is available when you send interest.</p>
         </div>
 
         <div className={`plans-status is-${access.kind}`}>
@@ -83,8 +81,7 @@ export default async function PlansPage({
           <details className="plans-usage">
             <summary>How this count works · click for more details</summary>
             <p>
-              Send a request or open contact on one family counts as 1. Chat starts the moment you send interest. A later
-              message or contact view on that same family does not take another.
+              Interest sent or contact viewed on the same family is one count. A later action on that family is not counted again.
             </p>
             <p>
               This period: {quota.used} used · {quota.left ?? 0} left of {quota.limit}.
@@ -119,8 +116,7 @@ export default async function PlansPage({
           <div>
             <h3>🎁 Welcome offer</h3>
             <p>
-              {WELCOME_INTEREST_LIMIT} free profile uses in your first 2 months. Interest or contact on one family counts as 1.
-              Chat opens as soon as you send a request — they do not need to accept first.
+              {WELCOME_INTEREST_LIMIT} families in the first 2 months. Interest sent or contact viewed on the same family is one count.
             </p>
           </div>
         </div>

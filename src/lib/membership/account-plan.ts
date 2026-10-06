@@ -34,7 +34,7 @@ export function planHeaderMarks(input: {
       tone: "soft",
     });
     if (access.until) {
-      marks.push({ id: "end", text: formatIstDate(access.until, false), hint: "Last day", tone: "soft" });
+      marks.push({ id: "end", text: formatIstDate(access.until, false), hint: "Plan expiry", tone: "soft" });
     }
   }
   marks.push({

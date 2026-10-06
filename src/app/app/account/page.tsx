@@ -29,10 +29,11 @@ const groups = [
     title: "Inbox",
     kicker: "Messages",
     mark: "Inbox",
+    columns: 3,
     items: [
-      { href: "/app/alerts", title: "Alerts", mark: "Hope", text: "Notices when families view, request or reply." },
-      { href: "/app/chat", title: "Chat", mark: "Contact", text: "Write after a family accepts." },
+      { href: "/app/chat", title: "Chat", mark: "Inbox", text: "Write when you send a request." },
       { href: "/app/interests", title: "Interests", mark: "Partner", text: "Requests you sent, received and accepted." },
+      { href: "/app/alerts", title: "Alerts", mark: "Hope", text: "Notices when families view, request or reply." },
     ],
   },
   {
@@ -208,7 +209,7 @@ export default async function AccountHubPage() {
                   <FieldMark label={group.mark} />
                   {group.title}
                 </h2>
-                <div className="account-hub-grid">
+                <div className={`account-hub-grid${group.columns === 3 ? " is-trio" : ""}`}>
                   {group.items.map((item) => (
                     <Link key={item.href} href={item.href} className={`${cardClass} account-hub-card`}>
                       <em className="account-hub-ico" aria-hidden>
