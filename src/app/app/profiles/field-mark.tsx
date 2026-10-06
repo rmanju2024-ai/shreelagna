@@ -6,6 +6,8 @@ function pathFor(label: string) {
   if (t.includes("height") || t.includes("age") || t.includes("year")) return "M6 4v16M18 4v16M6 8h12M6 16h12";
   if (t.includes("country") || t.includes("city") || t.includes("state") || t.includes("place") || t.includes("location") || t.includes("grew"))
     return "M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11zm0-8.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z";
+  if (t.includes("inbox") || t.includes("chat") || t.includes("message"))
+    return "M4 6h16v10H8l-4 4V6z";
   if (t.includes("mobile") || t.includes("email") || t.includes("contact"))
     return "M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm3 16h4";
   if (t.includes("blood") || t.includes("health") || t.includes("habit") || t.includes("diet"))

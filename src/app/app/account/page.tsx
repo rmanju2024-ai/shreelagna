@@ -18,7 +18,7 @@ const groups = [
       { href: "/app", title: "My profile", mark: "Name", text: "Your story, media and completeness." },
       { href: "/app/shortlist", title: "Shortlist", mark: "Partner", text: "Private profiles you wish to revisit." },
       { href: "/app/blocked", title: "Blocked profiles", mark: "Safety", text: "Members you blocked. Unblock any time." },
-      { href: "/app/interests", title: "Interests", mark: "Hope", text: "Requests, replies and match history." },
+      { href: "/app/chat", title: "Inbox", mark: "Inbox", text: "Chat, interests and alerts — all in one place." },
     ],
   },
   {
