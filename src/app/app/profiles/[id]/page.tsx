@@ -42,7 +42,7 @@ export default async function ProfilePage({
       const { BrowseProfileView } = await import("@/app/browse/browse-profile-view");
       return (
         <PageShell full>
-          <BackToAccount />
+          <BackToAccount align="profile" />
           <BrowseProfileView
             params={Promise.resolve({ id: String(peek.id) })}
             searchParams={Promise.resolve({})}
@@ -113,7 +113,7 @@ export default async function ProfilePage({
   const communityName = nestedName(profile.communities);
 
   return (
-    <PageShell full><BackToAccount />
+    <PageShell full><BackToAccount align="profile" />
       <ProfilePortrait
         profile={profile}
         memberCode={memberCode}

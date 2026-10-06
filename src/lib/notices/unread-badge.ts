@@ -1,6 +1,6 @@
 import { loadBlockedProfileIds } from "@/lib/safety/blocked";
 import { collapseNotices, noticesForActiveProfiles } from "@/lib/match/collapse-notices";
-import { pairCanChat } from "@/lib/match/interest-status";
+import { effectiveInterestStatus, pairCanChat } from "@/lib/match/interest-status";
 import { createServiceClient } from "@/lib/supabase/server";
 
 type Thread = { id: string; profile_a: string; profile_b: string };
@@ -9,7 +9,7 @@ type Pair = { from_profile_id: string; to_profile_id: string; status: string; cr
 /** Header badge counts. Queries run in three parallel stages instead of six sequential ones. */
 export async function unreadNoticeBadge(userId: string) {
   const db = createServiceClient();
-  if (!db) return { chatUnread: 0, alertUnread: 0 };
+  if (!db) return { chatUnread: 0, alertUnread: 0, likesPending: 0 };
 
   // Stage 1: unread notices and the member's own profiles, together.
   const [noticeResult, ownResult] = await Promise.all([
@@ -69,8 +69,15 @@ export async function unreadNoticeBadge(userId: string) {
       })
       .map((thread) => `/app/chat/${thread.id}`),
   );
+  const ownSet = new Set(ownIds);
+  const likesPending = ((pairResult.data ?? []) as Pair[]).filter((row) => {
+    if (!ownSet.has(row.to_profile_id) || ownSet.has(row.from_profile_id)) return false;
+    if (blocked.has(row.from_profile_id)) return false;
+    return effectiveInterestStatus(row.status, row.created_at) === "pending";
+  }).length;
   return {
     chatUnread: open.filter((row) => row.kind === "chat" && visibleChatHrefs.has(row.href ?? "")).length,
     alertUnread: open.filter((row) => row.kind !== "chat").length,
+    likesPending,
   };
 }

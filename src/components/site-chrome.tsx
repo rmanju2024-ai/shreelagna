@@ -55,6 +55,7 @@ export async function SiteHeader({ overlay = false, glass = false }: { overlay?:
           return {
             chatUnread: open.filter((row) => row.kind === "chat").length,
             alertUnread: open.filter((row) => row.kind !== "chat").length,
+            likesPending: 0,
           };
         }),
         me.active_profile_id

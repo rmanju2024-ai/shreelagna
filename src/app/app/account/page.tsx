@@ -8,6 +8,8 @@ import { planHeaderMarks, type PlanMark } from "@/lib/membership/account-plan";
 import { fetchPendingPlanCode, fetchPlans, loadInterestQuota, loadMembership } from "@/lib/membership/load";
 import { findOwnProfile } from "@/lib/profile/own-profile";
 import { monthAgoIso, pulseNote, tallyMonthPulse } from "@/lib/profile/month-pulse";
+import { unreadLabel } from "@/lib/match/chat-ui";
+import { unreadNoticeBadge } from "@/lib/notices/unread-badge";
 import { createServiceClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { cardClass } from "@/lib/ui/classes";
@@ -144,11 +146,12 @@ export default async function AccountHubPage() {
   const own = await findOwnProfile(supabase, me.id);
   const profileId = me.active_profile_id || own?.id || null;
   const since = monthAgoIso();
-  const [access, mineRows, pendingCode, plans] = await Promise.all([
+  const [access, mineRows, pendingCode, plans, inbox] = await Promise.all([
     loadMembership(db, me),
     db.from("profiles").select("id").eq("created_by", me.id),
     fetchPendingPlanCode(db, me.id),
     fetchPlans(db),
+    unreadNoticeBadge(me.id).catch(() => ({ chatUnread: 0, alertUnread: 0, likesPending: 0 })),
   ]);
   const quota = await loadInterestQuota(
     db,
@@ -156,6 +159,11 @@ export default async function AccountHubPage() {
     access,
     (mineRows.data ?? []).map((row) => String(row.id)),
   );
+  const inboxCounts: Record<string, number> = {
+    "/app/chat": inbox.chatUnread,
+    "/app/interests": inbox.likesPending,
+    "/app/alerts": inbox.alertUnread,
+  };
   const pending = planByCode(pendingCode, plans.filter((plan) => plan.forSale));
   const planMarks = planHeaderMarks({
     access,
@@ -210,8 +218,12 @@ export default async function AccountHubPage() {
                   {group.title}
                 </h2>
                 <div className={`account-hub-grid${group.columns === 3 ? " is-trio" : ""}`}>
-                  {group.items.map((item) => (
+                  {group.items.map((item) => {
+                    const count = inboxCounts[item.href] ?? 0;
+                    const mark = unreadLabel(count);
+                    return (
                     <Link key={item.href} href={item.href} className={`${cardClass} account-hub-card`}>
+                      {mark ? <b className="account-hub-badge">{mark}</b> : null}
                       <em className="account-hub-ico" aria-hidden>
                         <FieldMark label={item.mark} />
                       </em>
@@ -219,7 +231,8 @@ export default async function AccountHubPage() {
                       <p>{item.text}</p>
                       <span>Open</span>
                     </Link>
-                  ))}
+                    );
+                  })}
                 </div>
               </section>
             ))}

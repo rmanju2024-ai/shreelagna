@@ -144,7 +144,7 @@ export function BirdDock({
 }) {
   const [mounted, setMounted] = useState(false);
   const [phase, setPhase] = useState<Phase>("enter");
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(inline);
   const [wide, setWide] = useState(false);
   const [badge, setBadge] = useState(0);
   const [line, setLine] = useState(0);
@@ -162,6 +162,7 @@ export function BirdDock({
   const stageRef = useRef<HTMLDivElement | null>(null);
   const storeKey = `sl-bird-chat:${profileId}`;
   const showChat = localThread === "sent" || localThread === "received" || localThread === "accepted";
+  const pinChat = inline && showChat;
   const pool = phase === "peck" ? CHIRPS.peck : chirpPool(localThread, needPlan, needQuota, canSend, awaitingReview);
   const chirp = pool[line % pool.length];
   const name = chat?.name ?? "Match";
@@ -229,18 +230,18 @@ export function BirdDock({
       const saved = sessionStorage.getItem(storeKey);
       if (saved) {
         const parsed = JSON.parse(saved) as { open?: boolean; wide?: boolean };
-        if (parsed.open) setOpen(true);
-        if (parsed.wide) setWide(true);
+        if (parsed.open || inline) setOpen(true);
+        if (parsed.wide && parsed.open) setWide(true);
       }
     } catch {
       /* ignore */
     }
-  }, [storeKey]);
+  }, [storeKey, inline]);
 
   useEffect(() => {
     if (!mounted) return;
-    sessionStorage.setItem(storeKey, JSON.stringify({ open, wide }));
-  }, [open, wide, mounted, storeKey]);
+    sessionStorage.setItem(storeKey, JSON.stringify({ open: open || pinChat, wide: wide && (open || pinChat) }));
+  }, [open, wide, mounted, storeKey, pinChat]);
 
   useEffect(() => {
     setLine(0);
@@ -379,8 +380,8 @@ export function BirdDock({
   }
 
   function closeChat() {
-    setOpen(false);
     setWide(false);
+    if (!inline) setOpen(false);
   }
 
   function onSend(event: React.FormEvent<HTMLFormElement>) {
@@ -429,12 +430,12 @@ export function BirdDock({
   const dock = (
     <div
       ref={dockRef}
-      className={`bird-dock${open ? " is-open" : ""}${wide ? " is-wide" : ""}${inline ? " is-inline" : ""}`}
+      className={`bird-dock${open || pinChat ? " is-open" : ""}${wide ? " is-wide" : ""}${inline ? " is-inline" : ""}`}
       data-phase={phase}
       data-thread={localThread}
     >
       {wide ? <button type="button" className="bird-wa-scrim" aria-label="Restore chat" onClick={() => setWide(false)} /> : null}
-      {open && showChat ? (
+      {(open || pinChat) && showChat ? (
         <section className={`bird-wa${wide ? " is-max" : ""}`} aria-label="Chat">
           <header className="bird-wa-head">
             <ChatAvatar name={name} src={chat?.photo} size={wide ? "md" : "sm"} />
@@ -446,9 +447,11 @@ export function BirdDock({
               <button type="button" className="bird-wa-icon" onClick={() => setWide((on) => !on)} aria-label={wide ? "Restore" : "Maximize"}>
                 {wide ? "↙" : "↗"}
               </button>
-              <button type="button" className="bird-wa-icon" onClick={closeChat} aria-label="Close">
-                ✕
-              </button>
+              {wide || !inline ? (
+                <button type="button" className="bird-wa-icon" onClick={closeChat} aria-label="Close">
+                  ✕
+                </button>
+              ) : null}
             </div>
           </header>
           <div className="bird-wa-stage" ref={stageRef}>
@@ -607,7 +610,7 @@ export function BirdDock({
           </Link>
         ) : null}
 
-        {showChat ? (
+        {showChat && !pinChat ? (
           <button
             type="button"
             className={`bird-dock-chat${badge ? " has-mail" : ""}${phase === "deliver" ? " is-drop-in" : ""}`}
