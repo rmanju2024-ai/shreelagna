@@ -885,6 +885,18 @@ table { max-width: 100%; }
   contain-intrinsic-size: auto 18rem;
 }
 
+body > .nav-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.45rem;
+  overflow-y: auto;
+  background: #fffaf3;
+  border: 1px solid rgb(63 14 13 / 10%);
+  border-radius: 1.1rem;
+  box-shadow: 0 18px 40px -10px rgb(63 14 13 / 35%);
+}
+
 @media (max-width: 820px) {
   /* Portaled mobile menu: independent of page headers and stacking contexts. */
   body > .nav-menu.is-mobile-sheet {

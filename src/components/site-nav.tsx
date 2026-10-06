@@ -166,7 +166,7 @@ function NavGroup({
         </span>
         {mark ? <b className="nav-badge">{mark}</b> : null}
       </button>
-      {mobile && menu ? createPortal(menu, document.body) : menu}
+      {menu ? createPortal(menu, document.body) : null}
     </div>
   );
 }

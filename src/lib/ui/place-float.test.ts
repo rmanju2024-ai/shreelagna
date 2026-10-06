@@ -18,7 +18,7 @@ describe("placeMoreMenu", () => {
     );
     expect(style.position).toBe("fixed");
     expect(style.top).toBe(72);
-    expect(style.bottom).toBeUndefined();
+    expect(style.bottom).toBe("auto");
     expect(Number(style.left) + Number(style.width)).toBeLessThanOrEqual(390 - 8);
   });
 
@@ -29,7 +29,7 @@ describe("placeMoreMenu", () => {
     const style = placeMoreMenu(
       trigger({ top: 730, right: 380, bottom: 788, left: 300, width: 80, height: 58 }),
     );
-    expect(style.top).toBeUndefined();
+    expect(style.top).toBe("auto");
     expect(style.bottom).toBe(800 - 730 + 8);
     void vh;
   });

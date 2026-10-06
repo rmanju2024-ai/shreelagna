@@ -22,6 +22,7 @@ describe("shared mobile CSS contract", () => {
   it("provides touch-size controls and a scrollable More sheet", () => {
     expect(css).toContain("min-height: 44px");
     expect(css).toContain("body > .nav-menu.is-mobile-sheet");
+    expect(css).toContain("body > .nav-menu {");
     expect(css).toContain("overflow-y: auto !important");
   });
 

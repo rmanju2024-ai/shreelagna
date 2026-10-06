@@ -81,3 +81,38 @@ describe("mobile primary navigation", () => {
     expect(nav.textContent).not.toContain("Inbox");
   });
 });
+
+describe("desktop More menu", () => {
+  beforeEach(() => {
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true,
+      value: vi.fn().mockImplementation((query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    });
+  });
+
+  it("portals More under the chip, not as a mobile sheet", () => {
+    render(
+      <InstallAppRoot>
+        <HeaderNav overlay={false} user staff />
+      </InstallAppRoot>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /more/i }));
+    const menu = screen.getByRole("menu");
+    expect(menu.parentElement).toBe(document.body);
+    expect(menu.className).not.toContain("is-mobile-sheet");
+    expect(menu.style.position).toBe("fixed");
+    expect(menu.style.bottom).toBe("auto");
+    expect(screen.getByText("About")).toBeTruthy();
+    expect(screen.getByText("Help")).toBeTruthy();
+  });
+});

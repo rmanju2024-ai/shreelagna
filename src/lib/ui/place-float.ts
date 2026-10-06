@@ -43,13 +43,24 @@ export function placeMoreMenu(trigger: HTMLElement): CSSProperties {
   const left = Math.min(Math.max(8, box.right - width), vw - width - 8);
   const openDown = box.top < vh * 0.55;
   const room = openDown ? vh - box.bottom - 12 : box.top - 12;
+  if (openDown) {
+    return {
+      position: "fixed",
+      zIndex: 1100,
+      left,
+      width,
+      maxHeight: Math.min(14.5 * 16, Math.max(8 * 16, room)),
+      top: box.bottom + 8,
+      bottom: "auto",
+    };
+  }
   return {
     position: "fixed",
     zIndex: 1100,
     left,
     width,
     maxHeight: Math.min(14.5 * 16, Math.max(8 * 16, room)),
-    top: openDown ? box.bottom + 8 : undefined,
-    bottom: openDown ? undefined : vh - box.top + 8,
+    top: "auto",
+    bottom: vh - box.top + 8,
   };
 }
