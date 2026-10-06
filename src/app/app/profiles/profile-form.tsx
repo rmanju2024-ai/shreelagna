@@ -10,6 +10,8 @@ import {
   LIVING_ARRANGEMENTS,
   PROFILE_FORM_DEFAULTS,
   SETTLE_ABROAD,
+  DONT_KNOW,
+  choiceLabel,
 } from "@/lib/profile/options";
 import { citiesForState, pickListed, sortLabels, type FormLists } from "@/lib/profile/form-lists";
 import { asStringList, hopeValues, languagesKnown } from "@/lib/profile/multi-values";
@@ -348,7 +350,9 @@ export function ProfileForm({
             <Select3d name="blood_group" defaultValue={values?.blood_group ?? ""} className={inputClass}>
               <option value="">Not mentioned</option>
               {lists.bloodGroups.map((item) => (
-                <option key={item}>{item}</option>
+                <option key={item} value={item}>
+                  {choiceLabel(item)}
+                </option>
               ))}
             </Select3d>
           </Field>
@@ -625,7 +629,9 @@ export function ProfileForm({
             <Select3d name="settle_abroad" defaultValue={values?.settle_abroad ?? ""} className={inputClass}>
               <option value="">Not mentioned</option>
               {SETTLE_ABROAD.map((item) => (
-                <option key={item}>{item}</option>
+                <option key={item} value={item}>
+                  {choiceLabel(item)}
+                </option>
               ))}
             </Select3d>
           </Field>
@@ -676,7 +682,9 @@ export function ProfileForm({
             >
               <option value="">Not mentioned</option>
               {lists.physicalStatuses.map((item) => (
-                <option key={item}>{item}</option>
+                <option key={item} value={item}>
+                  {choiceLabel(item)}
+                </option>
               ))}
             </Select3d>
           </Field>
@@ -790,7 +798,9 @@ export function ProfileForm({
             <Select3d name="gotra" defaultValue={values?.gotra ?? ""} className={inputClass}>
               <option value="">Select</option>
               {lists.gotras.map((item) => (
-                <option key={item}>{item}</option>
+                <option key={item} value={item}>
+                  {choiceLabel(item)}
+                </option>
               ))}
             </Select3d>
           </Field>
@@ -798,7 +808,9 @@ export function ProfileForm({
             <Select3d name="rashi" defaultValue={values?.rashi ?? ""} className={inputClass}>
               <option value="">Not mentioned</option>
               {lists.rashis.map((item) => (
-                <option key={item}>{item}</option>
+                <option key={item} value={item}>
+                  {choiceLabel(item)}
+                </option>
               ))}
             </Select3d>
           </Field>
@@ -806,7 +818,9 @@ export function ProfileForm({
             <Select3d name="lagna" defaultValue={values?.lagna ?? ""} className={inputClass}>
               <option value="">Not mentioned</option>
               {lists.rashis.map((item) => (
-                <option key={`lagna-${item}`}>{item}</option>
+                <option key={`lagna-${item}`} value={item}>
+                  {choiceLabel(item)}
+                </option>
               ))}
             </Select3d>
           </Field>
@@ -814,7 +828,9 @@ export function ProfileForm({
             <Select3d name="nakshatra" defaultValue={values?.nakshatra ?? ""} className={inputClass}>
               <option value="">Not mentioned</option>
               {lists.nakshatras.map((item) => (
-                <option key={item}>{item}</option>
+                <option key={item} value={item}>
+                  {choiceLabel(item)}
+                </option>
               ))}
             </Select3d>
           </Field>
@@ -823,7 +839,7 @@ export function ProfileForm({
               <option value="">Not mentioned</option>
               {lists.nakshatraPadas.map((item) => (
                 <option key={item} value={item}>
-                  Pada {item}
+                  {item === DONT_KNOW ? "I don't know" : `Pada ${item}`}
                 </option>
               ))}
             </Select3d>
@@ -832,7 +848,9 @@ export function ProfileForm({
             <Select3d name="gana" defaultValue={values?.gana ?? ""} className={inputClass}>
               <option value="">Not mentioned</option>
               {lists.ganas.map((item) => (
-                <option key={item}>{item}</option>
+                <option key={item} value={item}>
+                  {choiceLabel(item)}
+                </option>
               ))}
             </Select3d>
           </Field>
@@ -840,7 +858,9 @@ export function ProfileForm({
             <Select3d name="yoni_animal" defaultValue={values?.yoni_animal ?? ""} className={inputClass}>
               <option value="">Not mentioned</option>
               {lists.yoniAnimals.map((item) => (
-                <option key={item}>{item}</option>
+                <option key={item} value={item}>
+                  {choiceLabel(item)}
+                </option>
               ))}
             </Select3d>
           </Field>
@@ -848,7 +868,9 @@ export function ProfileForm({
             <Select3d name="manglik" defaultValue={values?.manglik ?? ""} className={inputClass}>
               <option value="">Not mentioned</option>
               {lists.manglik.map((item) => (
-                <option key={item}>{item}</option>
+                <option key={item} value={item}>
+                  {choiceLabel(item)}
+                </option>
               ))}
             </Select3d>
           </Field>

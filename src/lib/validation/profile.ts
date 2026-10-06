@@ -90,7 +90,7 @@ export const profileFormSchema = z.object({
   rashi: z.string().trim().max(40).optional().or(z.literal("")),
   lagna: z.string().trim().max(40).optional().or(z.literal("")),
   nakshatra: z.string().trim().max(40).optional().or(z.literal("")),
-  nakshatra_pada: z.string().trim().max(8).optional().or(z.literal("")),
+  nakshatra_pada: z.string().trim().max(20).optional().or(z.literal("")),
   gana: z.string().trim().max(40).optional().or(z.literal("")),
   yoni_animal: z.string().trim().max(40).optional().or(z.literal("")),
   manglik: z.string().trim().max(40).optional().or(z.literal("")),

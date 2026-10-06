@@ -21,6 +21,7 @@ import {
   RASHIS,
   RESIDENCY_STATUSES,
   YONI_ANIMALS,
+  withDontKnow,
 } from "@/lib/profile/options";
 import { compareLabel, emptyFormLists, sortLabels, type FormLists } from "@/lib/profile/form-lists";
 
@@ -88,21 +89,21 @@ export function enrichFormLists(loaded: FormLists): FormLists {
     employedIn: take(loaded.employedIn, seed.employedIn),
     families: take(loaded.families, seed.families),
     familyStatuses: take(loaded.familyStatuses, seed.familyStatuses),
-    physicalStatuses: take(loaded.physicalStatuses, seed.physicalStatuses),
-    bloodGroups: take(loaded.bloodGroups, seed.bloodGroups),
+    physicalStatuses: withDontKnow(take(loaded.physicalStatuses, seed.physicalStatuses)),
+    bloodGroups: withDontKnow(take(loaded.bloodGroups, seed.bloodGroups)),
     hobbies: take(loaded.hobbies, seed.hobbies, "alpha"),
     countries: take(loaded.countries, seed.countries),
     hopeCountries: take(loaded.hopeCountries, seed.hopeCountries),
     residency: take(loaded.residency, seed.residency),
-    gotras: take(loaded.gotras, seed.gotras),
+    gotras: withDontKnow(take(loaded.gotras, seed.gotras)),
     prefManaged: take(loaded.prefManaged, seed.prefManaged),
     horoscopePref: take(loaded.horoscopePref, seed.horoscopePref),
     creatorRoles: loaded.creatorRoles.length ? loaded.creatorRoles : seed.creatorRoles,
-    rashis: take(loaded.rashis, seed.rashis),
-    nakshatras: take(loaded.nakshatras, seed.nakshatras),
-    nakshatraPadas: take(loaded.nakshatraPadas, seed.nakshatraPadas),
-    ganas: take(loaded.ganas, seed.ganas),
-    yoniAnimals: take(loaded.yoniAnimals, seed.yoniAnimals),
-    manglik: take(loaded.manglik, seed.manglik),
+    rashis: withDontKnow(take(loaded.rashis, seed.rashis)),
+    nakshatras: withDontKnow(take(loaded.nakshatras, seed.nakshatras)),
+    nakshatraPadas: withDontKnow(take(loaded.nakshatraPadas, seed.nakshatraPadas)),
+    ganas: withDontKnow(take(loaded.ganas, seed.ganas)),
+    yoniAnimals: withDontKnow(take(loaded.yoniAnimals, seed.yoniAnimals)),
+    manglik: withDontKnow(take(loaded.manglik, seed.manglik)),
   };
 }

@@ -117,6 +117,17 @@ export const DIETS = [
   "Vegetarian",
 ] as const;
 
+export const DONT_KNOW = "Don't know";
+
+/** Keep one unknown choice at the top of lists people may not be sure about. */
+export function withDontKnow(list: readonly string[]): string[] {
+  return [DONT_KNOW, ...list.filter((item) => item !== DONT_KNOW)];
+}
+
+export function choiceLabel(value: string) {
+  return value === DONT_KNOW ? "I don't know" : value;
+}
+
 export const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Don't know"] as const;
 
 export const RESIDENCY_STATUSES = [
@@ -432,7 +443,7 @@ export const FAMILY_STATUSES = [
   "Prefer not to say",
 ] as const;
 
-export const SETTLE_ABROAD = ["Yes", "No", "Open"] as const;
+export const SETTLE_ABROAD = ["Yes", "No", "Open", "Don't know"] as const;
 
 export const LIVING_ARRANGEMENTS = ["Own house", "Parents' house", "Rented", "Leased"] as const;
 
@@ -440,6 +451,7 @@ export const PHYSICAL_STATUSES = [
   "No disability",
   "Has a disability",
   "Prefer not to say",
+  "Don't know",
 ] as const;
 
 export function maritalLabel(value: string | null | undefined): string {

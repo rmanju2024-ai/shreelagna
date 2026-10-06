@@ -11,15 +11,20 @@ describe("form lists", () => {
   });
 
   it("keeps seed catalogs for every registration list", () => {
-    const lists = listsFromSeed();
-    expect(lists.countries).toContain("India");
-    expect(lists.gotras[0]).toBe("Don't know");
-    expect(lists.yoniAnimals).toHaveLength(14);
-    expect(lists.hopeIncomes.length).toBeGreaterThan(5);
-    expect(lists.bloodGroups).toContain("O+");
-    expect(lists.occupations).toContain("Accountant");
-    expect(lists.occupations).toContain("Other profession");
-    expect(lists.employedIn).toContain("Family business");
+    const seed = listsFromSeed();
+    expect(seed.countries).toContain("India");
+    expect(seed.gotras[0]).toBe("Don't know");
+    expect(seed.yoniAnimals).toHaveLength(14);
+    expect(seed.hopeIncomes.length).toBeGreaterThan(5);
+    expect(seed.bloodGroups).toContain("O+");
+    expect(seed.occupations).toContain("Accountant");
+    expect(seed.occupations).toContain("Other profession");
+    expect(seed.employedIn).toContain("Family business");
+    const lists = enrichFormLists(seed);
+    expect(lists.nakshatraPadas[0]).toBe("Don't know");
+    expect(lists.rashis[0]).toBe("Don't know");
+    expect(lists.ganas[0]).toBe("Don't know");
+    expect(lists.yoniAnimals[0]).toBe("Don't know");
   });
 
   it("uses loaded catalogs instead of seed when present", () => {
