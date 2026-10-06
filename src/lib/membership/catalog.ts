@@ -5,8 +5,8 @@ export function planBenefitLines(interestLimit: number): string[] {
   return [
     `${interestLimit} interests or views`,
     "Chat as soon as you send interest",
-    "Search and shortlist families",
-    "Open contact on a counted view",
+    "Premium highlight on Discover",
+    "Dedicated customer service",
   ];
 }
 

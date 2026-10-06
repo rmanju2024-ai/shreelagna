@@ -30,6 +30,8 @@ describe("plan catalog", () => {
     const lines = planBenefitLines(20);
     expect(lines).toHaveLength(4);
     expect(lines[1]).toMatch(/chat as soon as you send interest/i);
+    expect(lines[2]).toMatch(/premium highlight/i);
+    expect(lines[3]).toMatch(/customer service/i);
     expect(lines[0]).toContain("20");
   });
 });
