@@ -55,7 +55,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${sourceSerif.variable} ${playfair.variable} h-full antialiased`}
     >
-      <body className="min-h-dvh w-full overflow-x-hidden">
+      <body className="min-h-dvh w-full overflow-x-clip">
         <ChromeLayout>{children}</ChromeLayout>
         <Butterflies />
         <WebVitals />

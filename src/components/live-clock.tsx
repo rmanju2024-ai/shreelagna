@@ -52,7 +52,7 @@ export function LiveClock({
 
   return (
     <div
-      className={`hidden min-w-[220px] select-none lg:block ${light ? "text-[#fff7ea]" : "text-[var(--ink)]"}`}
+      className={`live-clock select-none ${light ? "text-[#fff7ea]" : "text-[var(--ink)]"}`}
       suppressHydrationWarning
     >
       <p className={`text-sm font-medium ${light ? "text-[var(--gold-soft)]" : "text-[var(--muted)]"}`}>

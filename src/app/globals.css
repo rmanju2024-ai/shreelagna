@@ -8520,8 +8520,8 @@ a.inbox-name.inbox-open:focus-visible {
   display: inline-flex;
   flex: 0 1 auto;
   width: max-content;
+  max-width: min(28rem, calc(100% - 0.5rem));
   min-width: 0;
-  max-width: 12.5rem;
   align-items: center;
   gap: 0.4rem;
   padding: 0.12rem 0.7rem 0.12rem 0.12rem;
@@ -8549,15 +8549,14 @@ a.inbox-name.inbox-open:focus-visible {
   text-transform: uppercase;
 }
 .header-profile-chip-copy strong {
-  overflow: hidden;
+  overflow: visible;
   color: #7c2d12;
   font-family: var(--font-british), var(--font-display), Palatino, serif;
   font-size: clamp(0.88rem, 1.6vw, 1.05rem);
   font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.2;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
 }
 .header-profile-chip.is-pending .header-profile-chip-copy strong { color: #9a3412; font-weight: 700; }
 .header-profile-chip.is-overlay {
@@ -8565,11 +8564,18 @@ a.inbox-name.inbox-open:focus-visible {
   background: rgb(255 248 236 / 18%);
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 22%);
 }
+.live-clock {
+  display: block;
+  min-width: 7.5rem;
+}
+@media (min-width: 1024px) {
+  .live-clock { min-width: 13.75rem; }
+}
 @media (max-width: 720px) {
   .header-profile-chip {
-    flex: 0 1 auto;
-    width: max-content;
-    max-width: min(11.5rem, calc(100vw - 5.5rem));
+    flex: 1 1 100%;
+    width: auto;
+    max-width: 100%;
     padding: 0.1rem 0.55rem 0.1rem 0.1rem;
     gap: 0.3rem;
   }
@@ -8579,9 +8585,9 @@ a.inbox-name.inbox-open:focus-visible {
   }
   .header-profile-chip-copy span,
   .header-profile-chip-copy strong {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow: visible;
+    text-overflow: unset;
+    white-space: normal;
   }
 }
 
@@ -9625,15 +9631,10 @@ a.inbox-name.inbox-open:focus-visible {
 @media (max-width: 720px) {
   .site-head-inner {
     min-height: 0;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     gap: 0.35rem;
     padding-top: 0.35rem;
     padding-bottom: 0.35rem;
-  }
-
-  .site-head-brand .live-clock,
-  .role-flag {
-    display: none;
   }
 
   .house-role-seal {
@@ -9910,15 +9911,17 @@ a.inbox-name.inbox-open:focus-visible {
   to { stroke-dasharray: var(--match-dash) 100; }
 }
 
-.site-nav {
-  bottom: max(0.75rem, env(safe-area-inset-bottom));
-  left: 50%;
-  position: fixed;
-  right: auto;
-  top: auto;
-  transform: translateX(-50%);
-  width: min(calc(100% - 1.5rem), 48rem);
-  z-index: 80;
+@media (min-width: 821px) {
+  body > .site-nav {
+    bottom: max(0.75rem, env(safe-area-inset-bottom));
+    left: 50%;
+    position: fixed;
+    right: auto;
+    top: auto;
+    transform: translateX(-50%);
+    width: min(calc(100% - 1.5rem), 48rem);
+    z-index: 80;
+  }
 }
 
 .site-nav-row {
@@ -10012,7 +10015,6 @@ a.inbox-name.inbox-open:focus-visible {
   }
 
   .site-nav {
-    bottom: max(0.45rem, env(safe-area-inset-bottom));
     width: calc(100% - 0.9rem);
   }
 

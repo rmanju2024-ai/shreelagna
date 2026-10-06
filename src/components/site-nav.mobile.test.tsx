@@ -75,6 +75,8 @@ describe("mobile primary navigation", () => {
     const nav = screen.getByRole("navigation", { name: "Primary" });
     expect(nav.parentElement).toBe(document.body);
     expect(nav.className).toContain("is-mobile-dock");
+    expect(nav.style.position).toBe("fixed");
+    expect(nav.style.bottom).toBe("var(--mobile-dock-shift, 0px)");
     for (const label of ["Home", "Discover", "Account", "Desk", "More"]) {
       expect(nav.textContent).toContain(label);
     }

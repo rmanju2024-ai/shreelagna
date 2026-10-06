@@ -189,6 +189,37 @@ export function HeaderNav({
   const pathname = usePathname();
   const tab = useSearchParams().get("tab");
   const [dock, setDock] = useState(false);
+
+  useLayoutEffect(() => {
+    const mq = window.matchMedia("(max-width: 820px)");
+    const root = document.documentElement;
+    const syncDock = () => setDock(mq.matches);
+    const pinToVisualViewport = () => {
+      const vv = window.visualViewport;
+      if (!vv) {
+        root.style.setProperty("--mobile-dock-shift", "0px");
+        return;
+      }
+      const obscured = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      root.style.setProperty("--mobile-dock-shift", `${obscured}px`);
+    };
+    const vv = window.visualViewport;
+    syncDock();
+    pinToVisualViewport();
+    mq.addEventListener("change", syncDock);
+    window.addEventListener("resize", pinToVisualViewport);
+    window.addEventListener("scroll", pinToVisualViewport, true);
+    vv?.addEventListener("resize", pinToVisualViewport);
+    vv?.addEventListener("scroll", pinToVisualViewport);
+    return () => {
+      mq.removeEventListener("change", syncDock);
+      window.removeEventListener("resize", pinToVisualViewport);
+      window.removeEventListener("scroll", pinToVisualViewport, true);
+      vv?.removeEventListener("resize", pinToVisualViewport);
+      vv?.removeEventListener("scroll", pinToVisualViewport);
+      root.style.removeProperty("--mobile-dock-shift");
+    };
+  }, []);
   const more: NavItem[] = [
     { href: "/about", label: "About", icon: "about" },
     { href: "/contact", label: "Help", icon: "help" },
@@ -197,16 +228,26 @@ export function HeaderNav({
   const registerHere = pathMatches(pathname, "/login", tab);
   const moreOn = more.some((item) => pathMatches(pathname, item.href, tab));
 
-  useLayoutEffect(() => {
-    const mq = window.matchMedia("(max-width: 820px)");
-    const sync = () => setDock(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
-
   const nav = (
-    <nav aria-label="Primary" className={`site-nav${overlay ? " is-overlay" : ""}${dock ? " is-mobile-dock" : ""}`}>
+    <nav
+      aria-label="Primary"
+      className={`site-nav${overlay ? " is-overlay" : ""}${dock ? " is-mobile-dock" : ""}`}
+      style={
+        dock
+          ? {
+              position: "fixed",
+              left: 0,
+              right: 0,
+              top: "auto",
+              bottom: "var(--mobile-dock-shift, 0px)",
+              width: "100%",
+              maxWidth: "none",
+              transform: "none",
+              zIndex: 9990,
+            }
+          : undefined
+      }
+    >
       <div className="site-nav-row">
         <NavChip item={{ href: "/", label: "Home", icon: "home" }} overlay={overlay} current={pathMatches(pathname, "/", tab)} />
         <NavChip item={{ href: "/browse", label: "Discover", icon: "browse" }} overlay={overlay} current={pathMatches(pathname, "/browse", tab)} />

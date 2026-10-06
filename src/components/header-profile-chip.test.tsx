@@ -11,6 +11,14 @@ describe("HeaderProfileChip", () => {
     expect(link.getAttribute("href")).toBe("/app");
     expect(link.className).toContain("is-member");
     expect(link.querySelector(".house-star")).toBeTruthy();
+    expect(link.textContent).toContain("Ananya Rao");
+  });
+
+  it("keeps a long profile name in full", () => {
+    render(<HeaderProfileChip name="Manjunatha Ramamurthy" pending={false} mark="staff" />);
+    expect(screen.getByRole("link", { name: /Staff, Manjunatha Ramamurthy/ }).textContent).toContain(
+      "Manjunatha Ramamurthy",
+    );
   });
 
   it("keeps admin mark when a profile is missing", () => {

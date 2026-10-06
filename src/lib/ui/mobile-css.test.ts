@@ -9,10 +9,12 @@ describe("shared mobile CSS contract", () => {
     expect(css).toContain("@media (max-width: 820px)");
     expect(css).toContain("env(safe-area-inset-bottom)");
     expect(css).toContain("bottom: 0 !important");
-    expect(css).toContain(".site-nav.is-mobile-dock");
+    expect(css).toContain("body > .site-nav.is-mobile-dock");
     expect(css).toContain(".header-profile-chip {");
-    expect(css).toContain("width: max-content !important");
-    expect(css).toContain("max-width: min(11.5rem, calc(100vw - 5.5rem)) !important");
+    expect(css).toContain(".site-head-brand .brand-wordmark {");
+    expect(css).toContain("display: flex !important");
+    expect(css).toContain(".site-head-brand .live-clock {");
+    expect(css).toContain("white-space: normal !important");
   });
 
   it("keeps cards and forms inside narrow screens", () => {
