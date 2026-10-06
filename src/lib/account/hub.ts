@@ -52,3 +52,14 @@ export function accountInboxCounts(inbox: { chatUnread: number; alertUnread: num
     "/app/alerts": inbox.alertUnread,
   } as Record<string, number>;
 }
+
+export function accountOwnerName(
+  rows: { id?: string | null; subject_full_name?: string | null }[],
+  activeId?: string | null,
+  fallback?: string | null,
+): string {
+  const match = rows.find((row) => row.id && row.id === activeId) ?? rows[0];
+  const fromProfile = typeof match?.subject_full_name === "string" ? match.subject_full_name.trim() : "";
+  const fromAccount = typeof fallback === "string" ? fallback.trim() : "";
+  return fromProfile || fromAccount;
+}

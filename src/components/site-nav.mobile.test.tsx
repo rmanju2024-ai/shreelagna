@@ -49,6 +49,7 @@ describe("mobile primary navigation", () => {
     const menu = screen.getByRole("menu");
     expect(menu.parentElement).toBe(document.body);
     expect(menu.className).toContain("is-mobile-sheet");
+    expect(menu.style.position).toBe("fixed");
     for (const label of ["About", "Help", "Install app", "Sign out"]) {
       expect(screen.getByText(label)).toBeTruthy();
     }

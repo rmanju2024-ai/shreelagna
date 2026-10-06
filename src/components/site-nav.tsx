@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { createPortal } from "react-dom";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { NavGlyph } from "@/components/nav-icons";
 import { SignOutButton } from "@/components/sign-out-button";
 import { InstallAppMenuItem } from "@/components/install-app";
 import { unreadLabel } from "@/lib/match/chat-ui";
+import { placeMoreMenu } from "@/lib/ui/place-float";
 
 function pathMatches(pathname: string, href: string, tab: string | null) {
   if (href === "/") return pathname === "/";
@@ -80,9 +81,10 @@ function NavGroup({
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
-  const [down, setDown] = useState(false);
   const [mobile, setMobile] = useState(false);
+  const [menuStyle, setMenuStyle] = useState<CSSProperties>();
   const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const mark = unreadLabel(badge ?? 0);
 
@@ -102,11 +104,31 @@ function NavGroup({
     };
   }, []);
 
+  useLayoutEffect(() => {
+    if (!open) {
+      setMenuStyle(undefined);
+      return;
+    }
+    function place() {
+      const el = triggerRef.current;
+      if (!el) return;
+      setMenuStyle(placeMoreMenu(el));
+    }
+    place();
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
+    return () => {
+      window.removeEventListener("resize", place);
+      window.removeEventListener("scroll", place, true);
+    };
+  }, [open]);
+
   const menu = open ? (
     <div
       ref={menuRef}
-      className={`nav-menu${down ? " is-down" : ""}${mobile ? " is-mobile-sheet" : ""}`}
+      className={`nav-menu${mobile ? " is-mobile-sheet" : ""}`}
       role="menu"
+      style={menuStyle}
       onClick={() => setOpen(false)}
     >
       {children}
@@ -116,13 +138,12 @@ function NavGroup({
   return (
     <div className="nav-group" ref={ref}>
       <button
+        ref={triggerRef}
         type="button"
         className={`nav-3d${overlay ? " is-overlay" : ""}${current || open ? " is-on" : ""}`}
         aria-expanded={open}
         aria-haspopup="menu"
-        onClick={(event) => {
-          const r = event.currentTarget.getBoundingClientRect();
-          setDown(r.top < 360);
+        onClick={() => {
           setMobile(window.matchMedia("(max-width: 820px)").matches);
           setOpen((value) => !value);
         }}

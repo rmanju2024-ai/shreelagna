@@ -2,7 +2,7 @@ import Link from "next/link";
 import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { HouseCrest } from "@/components/house-crest";
 import { FieldMark } from "@/app/app/profiles/field-mark";
-import { ACCOUNT_GROUPS, accountInboxCounts } from "@/lib/account/hub";
+import { ACCOUNT_GROUPS, accountInboxCounts, accountOwnerName } from "@/lib/account/hub";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { planByCode } from "@/lib/membership/catalog";
 import { planHeaderMarks, type PlanMark } from "@/lib/membership/account-plan";
@@ -126,13 +126,14 @@ export default async function AccountHubPage() {
   const since = monthAgoIso();
   const [access, mineRows, pendingCode, plans, inbox] = await Promise.all([
     loadMembership(db, me),
-    db.from("profiles").select("id").eq("created_by", me.id),
+    db.from("profiles").select("id, subject_full_name").eq("created_by", me.id),
     fetchPendingPlanCode(db, me.id),
     fetchPlans(db),
     unreadNoticeBadge(me.id).catch(() => ({ chatUnread: 0, alertUnread: 0, likesPending: 0 })),
   ]);
   const mineIds = (mineRows.data ?? []).map((row) => String(row.id));
   const profileId = me.active_profile_id || mineIds[0] || null;
+  const ownerName = accountOwnerName(mineRows.data ?? [], me.active_profile_id, me.display_name);
   const [quota, pulse] = await Promise.all([
     loadInterestQuota(db, me, access, mineIds),
     profileId ? loadAccountPulse(db, profileId, since) : Promise.resolve(null),
@@ -152,10 +153,16 @@ export default async function AccountHubPage() {
           <span className="account-hub-crest" aria-hidden>
             <HouseCrest />
           </span>
-          <div>
+          <div className="account-hub-copy">
             <p className="browse-kicker">Your house</p>
             <h1>Account hub</h1>
           </div>
+          {ownerName ? (
+            <p className="account-hub-owner">
+              <span>Profile</span>
+              <strong>{ownerName}</strong>
+            </p>
+          ) : null}
         </header>
         <MonthPulseCard pulse={pulse} planMarks={planMarks} />
         <div className="account-hub-layout">

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ACCOUNT_GROUPS, accountInboxCounts } from "./hub";
+import { ACCOUNT_GROUPS, accountInboxCounts, accountOwnerName } from "./hub";
 
 describe("account hub", () => {
   it("keeps every section reachable from the rail", () => {
@@ -14,5 +14,19 @@ describe("account hub", () => {
   it("maps unread counts onto inbox cards", () => {
     expect(accountInboxCounts({ chatUnread: 2, alertUnread: 4, likesPending: 1 })["/app/alerts"]).toBe(4);
     expect(accountInboxCounts({ chatUnread: 2, alertUnread: 4, likesPending: 1 })["/app/interests"]).toBe(1);
+  });
+
+  it("names the account from the active profile", () => {
+    expect(
+      accountOwnerName(
+        [
+          { id: "a", subject_full_name: "Older Draft" },
+          { id: "b", subject_full_name: "Ananya Rao" },
+        ],
+        "b",
+        "Gmail Name",
+      ),
+    ).toBe("Ananya Rao");
+    expect(accountOwnerName([], null, "Priya")).toBe("Priya");
   });
 });
