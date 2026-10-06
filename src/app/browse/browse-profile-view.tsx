@@ -286,20 +286,22 @@ export async function BrowseProfileView({
   if (!supabase || !user) redirect(`/login?next=/browse/${id}`);
   const me = await ensureAppUser(supabase, user);
   if (!me) redirect("/login?error=account");
+  const isStaff = me.role === "service" || me.role === "admin";
+  const db = createServiceClient() ?? supabase;
+  const reader = isStaff ? db : supabase;
 
   const [profileJoin, media] = await Promise.all([
-    supabase.from("profiles").select("*, religions(name), communities(name)").eq("id", id).maybeSingle(),
-    supabase.from("media").select("id, kind, storage_path, status, is_primary").eq("profile_id", id).order("created_at"),
+    reader.from("profiles").select("*, religions(name), communities(name)").eq("id", id).maybeSingle(),
+    reader.from("media").select("id, kind, storage_path, status, is_primary").eq("profile_id", id).order("created_at"),
   ]);
   let profile = profileJoin.data;
   if (!profile) {
-    const plain = await supabase.from("profiles").select("*").eq("id", id).maybeSingle();
+    const plain = await reader.from("profiles").select("*").eq("id", id).maybeSingle();
     profile = plain.data;
   }
   if (!profile) return <UnavailableBrowse />;
 
   const own = me.id === profile.created_by;
-  const isStaff = me.role === "service" || me.role === "admin";
   let viewerType: ProfileType | null = null;
   let viewerStatus: string | null = null;
   let canSend = false;
@@ -319,7 +321,6 @@ export async function BrowseProfileView({
   let kundali: ReturnType<typeof kundaliScore> | null = null;
   let contact: ProfileData["contact"] = undefined;
   let shortlisted = false;
-  const db = createServiceClient() ?? supabase;
   const [access, ownerRes, myProfilesRes, verifyCasesRes] = await Promise.all([
     loadMembership(db, me),
     db.from("app_users").select("id, role, welcome_started_at, welcome_days, email, email_otp_verified_at").eq("id", profile.created_by).maybeSingle(),
@@ -370,7 +371,7 @@ export async function BrowseProfileView({
         .maybeSingle(),
       db.from("media").select("kind, status").eq("profile_id", String(mine.id)),
     ]);
-    if (blockRes.data?.length) return <UnavailableBrowse />;
+    if (blockRes.data?.length && !isStaff) return <UnavailableBrowse />;
     viewerType = asProfileType(mine.profile_type);
     viewerStatus = typeof mine.status === "string" ? mine.status : null;
     quotaLeft = quota.left;
@@ -484,6 +485,7 @@ export async function BrowseProfileView({
   });
   const allowed =
     own ||
+    (isStaff && (me.role === "admin" || owner?.role !== "admin")) ||
     Boolean(
       targetType &&
         canViewProfile({
@@ -492,7 +494,7 @@ export async function BrowseProfileView({
           targetType,
           targetStatus: typeof profile.status === "string" ? profile.status : "hidden",
           isOwner: own,
-          isStaff,
+          isStaff: false,
           linkedByInterest,
           targetOwnerIsAdmin: owner?.role === "admin",
           viewerIsAdmin: me.role === "admin",
