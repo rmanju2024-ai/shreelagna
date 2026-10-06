@@ -1753,6 +1753,7 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
   position: relative;
   z-index: 9000;
 }
+.bird-chat-layer {
   position: fixed;
   inset: 0;
   z-index: 9000;
