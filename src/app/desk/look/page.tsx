@@ -75,13 +75,15 @@ export default async function DeskLookPage() {
   if (!desk.allowed) return null;
   const db = createServiceClient() ?? desk.supabase;
   const faithPromise = loadFaithCatalog();
-  const listQuery = async (cols: string) =>
-    db
+  const listQuery = async (cols: string) => {
+    const result = await db
       .from("profiles")
       .select(cols)
       .in("status", LOOK_STATUSES)
       .order("updated_at", { ascending: false })
       .limit(LOOK_LIST_LIMIT);
+    return result as { data: Record<string, unknown>[] | null; error: { message?: string } | null };
+  };
 
   const [listData, adminIds, faith] = await Promise.all([
     listQuery(BROWSE_PROFILE_SELECT).then((result) => (result.error ? listQuery(BROWSE_PROFILE_SELECT_STAR) : result)),
@@ -89,7 +91,7 @@ export default async function DeskLookPage() {
     faithPromise,
   ]);
 
-  const rows = ((listData.data ?? []) as Record<string, unknown>[]).filter(
+  const rows = (listData.data ?? []).filter(
     (row) => desk.admin || !ownerIsAdmin(row.created_by, adminIds),
   );
   const photoMap = await loadBrowsePhotoMap(
