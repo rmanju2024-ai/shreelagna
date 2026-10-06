@@ -4,12 +4,11 @@ import { HouseCrest } from "@/components/house-crest";
 import { FieldMark } from "@/app/app/profiles/field-mark";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { planByCode } from "@/lib/membership/catalog";
-import { planDaysLine, planQuotaLine, planWaitingLine } from "@/lib/membership/account-plan";
+import { planHeaderMarks } from "@/lib/membership/account-plan";
 import { fetchPendingPlanCode, fetchPlans, loadInterestQuota, loadMembership } from "@/lib/membership/load";
 import { findOwnProfile } from "@/lib/profile/own-profile";
 import { monthAgoIso, pulseNote, tallyMonthPulse } from "@/lib/profile/month-pulse";
 import { createServiceClient } from "@/lib/supabase/server";
-import { formatIstDate } from "@/lib/time/ist";
 import { redirect } from "next/navigation";
 import { cardClass } from "@/lib/ui/classes";
 
@@ -111,46 +110,6 @@ function MonthPulseCard({
   );
 }
 
-function PlanSnapshot({
-  label,
-  waiting,
-  days,
-  lastDay,
-  quota,
-}: {
-  label: string;
-  waiting: string;
-  days: string;
-  lastDay: string | null;
-  quota: string;
-}) {
-  return (
-    <section className="account-plan" aria-label="Current membership">
-      <p className="browse-kicker">Current plan</p>
-      <h2>{label}</h2>
-      <ul>
-        <li>
-          <span>Waiting</span>
-          <strong>{waiting}</strong>
-        </li>
-        <li>
-          <span>Days left</span>
-          <strong>{days}</strong>
-        </li>
-        <li>
-          <span>Last day</span>
-          <strong>{lastDay ?? "No end date"}</strong>
-        </li>
-        <li>
-          <span>Usage</span>
-          <strong>{quota}</strong>
-        </li>
-      </ul>
-      <Link href="/app/plans">See plans</Link>
-    </section>
-  );
-}
-
 export default async function AccountHubPage() {
   const { supabase, user } = await getAuth();
   if (!supabase || !user) redirect("/login?next=/app/account");
@@ -173,6 +132,12 @@ export default async function AccountHubPage() {
     (mineRows.data ?? []).map((row) => String(row.id)),
   );
   const pending = planByCode(pendingCode, plans.filter((plan) => plan.forSale));
+  const planMarks = planHeaderMarks({
+    access,
+    pendingName: pending?.name ?? null,
+    used: quota.used,
+    limit: quota.limit,
+  });
   let pulse = profileId
     ? tallyMonthPulse({ views: 0, received: [], sent: [], since })
     : null;
@@ -200,15 +165,16 @@ export default async function AccountHubPage() {
             <p className="browse-kicker">Your house</p>
             <h1>Account hub</h1>
           </div>
+          <Link href="/app/plans" className="account-hub-marks" aria-label={access.label}>
+            {planMarks.map((mark) => (
+              <b key={mark.id} className={`is-${mark.tone}`}>
+                <i aria-hidden>{mark.icon}</i>
+                {mark.text}
+              </b>
+            ))}
+          </Link>
         </header>
         {pulse ? <MonthPulseCard pulse={pulse} /> : null}
-        <PlanSnapshot
-          label={access.label}
-          waiting={planWaitingLine({ live: access.live, pendingName: pending?.name ?? null })}
-          days={planDaysLine(access)}
-          lastDay={access.until ? formatIstDate(access.until) : null}
-          quota={planQuotaLine(quota)}
-        />
         <div className="account-hub-layout">
           <aside className="account-hub-rail" aria-label="Account sections">
             {groups.map((group) => (
