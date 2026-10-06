@@ -21,7 +21,7 @@ export default async function DeskSafetyPage() {
     .order("created_at", { ascending: false })
     .limit(100);
   const people = await loadSafetyParties(
-    db,
+    db as never,
     (cases ?? []).flatMap((item) => [item.reporter_profile_id, item.reported_profile_id]),
   );
 

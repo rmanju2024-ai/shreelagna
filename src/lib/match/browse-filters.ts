@@ -3,6 +3,7 @@ import { yearsFromDob } from "@/lib/profile/completeness";
 export type BrowseFilters = {
   ageMin: number | null;
   ageMax: number | null;
+  kind: string[];
   country: string[];
   state: string[];
   city: string[];
@@ -16,6 +17,7 @@ export type BrowseFilters = {
 export const EMPTY_BROWSE_FILTERS: BrowseFilters = {
   ageMin: null,
   ageMax: null,
+  kind: [],
   country: [],
   state: [],
   city: [],
@@ -41,6 +43,7 @@ export function parseBrowseFilters(params: Record<string, string | string[] | un
   return {
     ageMin: asInt(params.age_min),
     ageMax: asInt(params.age_max),
+    kind: asList(params.kind),
     country: asList(params.country),
     state: asList(params.state),
     city: asList(params.city),
@@ -58,6 +61,7 @@ export function browseFiltersActive(filters: BrowseFilters): boolean {
   return Boolean(
     filters.ageMin != null ||
       filters.ageMax != null ||
+      filters.kind.length ||
       filters.country.length ||
       filters.state.length ||
       filters.city.length ||
@@ -79,6 +83,7 @@ export function browseFilterQuery(filters: BrowseFilters): Record<string, string
   const query: Record<string, string> = {};
   if (filters.ageMin != null) query.age_min = String(filters.ageMin);
   if (filters.ageMax != null) query.age_max = String(filters.ageMax);
+  if (filters.kind.length) query.kind = filters.kind.join("|");
   if (filters.country.length) query.country = filters.country.join("|");
   if (filters.state.length) query.state = filters.state.join("|");
   if (filters.city.length) query.city = filters.city.join("|");
@@ -108,6 +113,7 @@ export function readSavedBrowseFilters(raw: string | null | undefined): SavedBro
           ...parseBrowseFilters({
             age_min: item.ageMin != null ? String(item.ageMin) : undefined,
             age_max: item.ageMax != null ? String(item.ageMax) : undefined,
+            kind: item.kind as string | string[] | undefined,
             country: item.country as string | string[] | undefined,
             state: item.state as string | string[] | undefined,
             city: item.city as string | string[] | undefined,
@@ -134,6 +140,7 @@ function inList(value: string | null | undefined, expected: string[]): boolean {
 export function profileFitsBrowse(
   profile: {
     date_of_birth?: string | null;
+    profile_type?: string | null;
     current_country?: string | null;
     current_state?: string | null;
     current_city?: string | null;
@@ -148,6 +155,7 @@ export function profileFitsBrowse(
   const age = profile.date_of_birth ? yearsFromDob(profile.date_of_birth) : null;
   if (filters.ageMin != null && (age == null || age < filters.ageMin)) return false;
   if (filters.ageMax != null && (age == null || age > filters.ageMax)) return false;
+  if (!inList(profile.profile_type, filters.kind)) return false;
   if (!inList(profile.current_country, filters.country)) return false;
   if (!inList(profile.current_state, filters.state)) return false;
   if (!inList(profile.current_city, filters.city)) return false;

@@ -21,10 +21,13 @@ export type BrowseCardNote = {
   current_country?: string | null;
   diet?: string | null;
   income_band?: string | null;
+  profile_type?: string | null;
 };
 
 function chips(note: BrowseCardNote): string[] {
+  const kind = note.profile_type === "vara" ? "Groom" : note.profile_type === "vadhu" ? "Bride" : "";
   return [
+    kind,
     [note.religion, note.community].filter(Boolean).join(" · "),
     note.education ?? "",
     note.occupation ?? "",

@@ -24,6 +24,7 @@ describe("browse filters", () => {
     expect(parseBrowseFilters({ age_min: "25", city: " Bengaluru ", country: "India" })).toEqual({
       ageMin: 25,
       ageMax: null,
+      kind: [],
       country: ["India"],
       state: [],
       city: ["Bengaluru"],
@@ -48,6 +49,9 @@ describe("browse filters", () => {
     expect(profileFitsBrowse(row, parseBrowseFilters({ city: "Mysuru" }))).toBe(false);
     expect(profileFitsBrowse(row, parseBrowseFilters({ city: "Mysuru|Bengaluru" }))).toBe(true);
     expect(profileFitsBrowse(row, parseBrowseFilters({ education: "MBA" }))).toBe(false);
+    expect(profileFitsBrowse({ ...row, profile_type: "vadhu" }, parseBrowseFilters({ kind: "vara" }))).toBe(false);
+    expect(profileFitsBrowse({ ...row, profile_type: "vadhu" }, parseBrowseFilters({ kind: "vadhu" }))).toBe(true);
+    expect(profileFitsBrowse({ ...row, profile_type: "vara" }, parseBrowseFilters({}))).toBe(true);
     expect(
       profileFitsBrowse(
         row,

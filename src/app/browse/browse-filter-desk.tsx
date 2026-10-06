@@ -16,12 +16,14 @@ export function BrowseFilterDesk({
   filters,
   religions,
   communities,
+  includeKind = false,
   onApply,
   onClear,
 }: {
   filters: BrowseFilters;
   religions: string[];
   communities: string[];
+  includeKind?: boolean;
   onApply?: (next: BrowseFilters) => void;
   onClear?: () => void;
 }) {
@@ -61,7 +63,11 @@ export function BrowseFilterDesk({
     >
       <div className="sx-filter-head">
         <div>
-          <p>Pick what you want, then Apply. Age can be 18 to 80.</p>
+          <p>
+            {includeKind
+              ? "Apply to list profiles. Leave every field as Any to see both Brides and Grooms."
+              : "Pick what you want, then Apply. Age can be 18 to 80."}
+          </p>
         </div>
         <div className="sx-filter-actions">
           <button type="submit" className={btnPrimary}>
@@ -116,6 +122,22 @@ export function BrowseFilterDesk({
             }
           />
         </label>
+        {includeKind ? (
+          <label>
+            <span>Bride or Groom</span>
+            <Select3d
+              multiple
+              name="kind"
+              values={draft.kind}
+              anyLabel="Any (Bride and Groom)"
+              className={inputClass}
+              onValuesChange={(kind) => setDraft((prev) => ({ ...prev, kind }))}
+            >
+              <option value="vadhu">Bride</option>
+              <option value="vara">Groom</option>
+            </Select3d>
+          </label>
+        ) : null}
         <label>
           <span>Residence country</span>
           <Select3d

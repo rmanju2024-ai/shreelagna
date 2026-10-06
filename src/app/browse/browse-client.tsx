@@ -39,6 +39,7 @@ function fitsCustom(note: BrowseCardNote, filters: BrowseFilters): boolean {
   return profileFitsBrowse(
     {
       date_of_birth: note.date_of_birth,
+      profile_type: note.profile_type,
       current_country: note.current_country,
       current_state: note.state,
       current_city: note.city,
@@ -67,7 +68,7 @@ export function discoverResultsHref(view: BrowseView, filters: BrowseFilters = E
   if (view === "custom") {
     if (filters.ageMin) params.set("age_min", String(filters.ageMin));
     if (filters.ageMax) params.set("age_max", String(filters.ageMax));
-    (["country", "state", "city", "religion", "community", "lifestyle", "education", "income"] as const).forEach((key) => {
+    (["kind", "country", "state", "city", "religion", "community", "lifestyle", "education", "income"] as const).forEach((key) => {
       if (filters[key].length) params.set(key, filters[key].join(","));
     });
   }

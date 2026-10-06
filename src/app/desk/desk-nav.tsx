@@ -9,6 +9,7 @@ const ITEMS = [
   { href: "/desk/analytics", id: "analytics", label: "Analytics", hint: "Pulse, place, people" },
   { href: "/desk/audit", id: "audit", label: "Audit", hint: "Staff and admin log" },
   { href: "/desk/profiles", id: "profiles", label: "Profiles", hint: "Review or find by ID" },
+  { href: "/desk/look", id: "look", label: "Look", hint: "Filter bride and groom" },
   { href: "/desk/verification", id: "verification", label: "Verification", hint: "Restricted evidence review" },
   { href: "/desk/staff", id: "staff", label: "Staff", hint: "Appoint and remove" },
   { href: "/desk/plans", id: "plans", label: "Plans", hint: "Confirm membership" },
