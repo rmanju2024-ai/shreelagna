@@ -18,7 +18,7 @@ describe("account hub plan marks", () => {
       "Name:Welcome gift",
       "Days left:59d",
       "Expiry date:3 Dec",
-      "Chat counter:2/20",
+      "Profile counter:2/20",
     ]);
   });
 

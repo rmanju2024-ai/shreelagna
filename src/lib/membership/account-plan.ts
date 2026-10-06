@@ -41,7 +41,7 @@ export function planHeaderMarks(input: {
   marks.push({
     id: "use",
     text: input.limit == null ? "Open" : `${input.used}/${input.limit}`,
-    hint: "Chat counter",
+    hint: "Profile counter",
     tone: "soft",
   });
   return marks;

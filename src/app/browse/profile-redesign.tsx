@@ -529,7 +529,7 @@ export function ProfileRedesign(props: ProfileData) {
                 </li>
               ))}
             </ul>
-            <p className="pv-verify-note">{EVIDENCE_RETENTION_NOTICE}</p>
+            {props.own ? <p className="pv-verify-note">{EVIDENCE_RETENTION_NOTICE}</p> : null}
             </div>
           ) : null}
         </div>
