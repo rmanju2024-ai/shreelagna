@@ -6,10 +6,13 @@ import { BrowseFilterDesk } from "@/app/browse/browse-filter-desk";
 import { DISCOVER_RESULTS_PAGE_SIZE } from "@/app/browse/browse-client";
 import { EMPTY_BROWSE_FILTERS, profileFitsBrowse, type BrowseFilters } from "@/lib/match/browse-filters";
 import { pageCount, pageItems } from "@/lib/match/inbox-card";
+import { ACTIVE_DAYS, activityTier } from "@/lib/match/browse-priority";
 import { yearsFromDob } from "@/lib/profile/completeness";
 import { btnGhost } from "@/lib/ui/classes";
 
-export type LookSort = "newest" | "oldest" | "age_asc" | "age_desc" | "place" | "name";
+export type LookSort = "newest" | "oldest" | "active" | "inactive" | "age_asc" | "age_desc" | "place" | "name";
+export type LookAudience = "any" | "subscribed" | "unsubscribed";
+export type LookLogin = "any" | "active" | "inactive";
 
 function fits(note: BrowseCardNote, filters: BrowseFilters): boolean {
   return profileFitsBrowse(
@@ -29,8 +32,26 @@ function fits(note: BrowseCardNote, filters: BrowseFilters): boolean {
   );
 }
 
+function lastSeenMs(note: BrowseCardNote): number {
+  return Date.parse(note.last_seen_at ?? "") || 0;
+}
+
 function placeKey(note: BrowseCardNote) {
   return [note.state, note.city].filter(Boolean).join(" ").toLowerCase();
+}
+
+export function noteFitsLook(
+  note: BrowseCardNote,
+  filters: BrowseFilters,
+  extras: { audience: LookAudience; login: LookLogin },
+  now = Date.now(),
+): boolean {
+  if (!fits(note, filters)) return false;
+  if (extras.audience === "subscribed" && !note.subscribed) return false;
+  if (extras.audience === "unsubscribed" && note.subscribed) return false;
+  if (extras.login === "any") return true;
+  const active = activityTier(note.last_seen_at, false, now) > 0;
+  return extras.login === "active" ? active : !active;
 }
 
 export function sortLookNotes(notes: BrowseCardNote[], sort: LookSort): BrowseCardNote[] {
@@ -44,6 +65,11 @@ export function sortLookNotes(notes: BrowseCardNote[], sort: LookSort): BrowseCa
       const left = ageA ?? (sort === "age_asc" ? 999 : -1);
       const right = ageB ?? (sort === "age_asc" ? 999 : -1);
       return sort === "age_asc" ? left - right : right - left;
+    }
+    if (sort === "active" || sort === "inactive") {
+      const timeA = lastSeenMs(a);
+      const timeB = lastSeenMs(b);
+      return sort === "active" ? timeB - timeA : timeA - timeB;
     }
     const timeA = Date.parse(a.created_at ?? "") || 0;
     const timeB = Date.parse(b.created_at ?? "") || 0;
@@ -63,16 +89,18 @@ export function DeskLookBoard({
 }) {
   const [filters, setFilters] = useState<BrowseFilters>(EMPTY_BROWSE_FILTERS);
   const [sort, setSort] = useState<LookSort>("newest");
+  const [audience, setAudience] = useState<LookAudience>("any");
+  const [login, setLogin] = useState<LookLogin>("any");
   const [applied, setApplied] = useState(false);
   const [page, setPage] = useState(1);
 
   const ranked = useMemo(() => {
     if (!applied) return [];
     return sortLookNotes(
-      notes.filter((note) => fits(note, filters)),
+      notes.filter((note) => noteFitsLook(note, filters, { audience, login })),
       sort,
     );
-  }, [applied, filters, notes, sort]);
+  }, [applied, audience, filters, login, notes, sort]);
   const pages = pageCount(ranked.length, DISCOVER_RESULTS_PAGE_SIZE);
   const currentPage = Math.min(page, pages);
   const shown = pageItems(ranked, currentPage, DISCOVER_RESULTS_PAGE_SIZE);
@@ -83,7 +111,10 @@ export function DeskLookBoard({
         <div>
           <p className="browse-kicker">Look</p>
           <h2>Browse with advanced filter</h2>
-          <p>Same Discover filters, for both Bride and Groom. Nothing lists until you Apply.</p>
+          <p>
+            Same Discover filters, plus membership and last login. Active is a login within {ACTIVE_DAYS} days.
+            Nothing lists until you Apply.
+          </p>
         </div>
       </header>
       <BrowseFilterDesk
@@ -91,6 +122,16 @@ export function DeskLookBoard({
         sort={sort}
         onSortChange={(next) => {
           setSort(next as LookSort);
+          setPage(1);
+        }}
+        audience={audience}
+        onAudienceChange={(next) => {
+          setAudience(next as LookAudience);
+          setPage(1);
+        }}
+        login={login}
+        onLoginChange={(next) => {
+          setLogin(next as LookLogin);
           setPage(1);
         }}
         filters={filters}
@@ -104,6 +145,8 @@ export function DeskLookBoard({
         onClear={() => {
           setFilters(EMPTY_BROWSE_FILTERS);
           setSort("newest");
+          setAudience("any");
+          setLogin("any");
           setPage(1);
           setApplied(false);
         }}

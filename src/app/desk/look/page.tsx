@@ -67,6 +67,8 @@ function cardFromRow(row: Record<string, unknown>, photoMap: Map<string, string>
     income_band: asText(row.income_band),
     profile_type: asText(row.profile_type),
     created_at: asText(row.created_at),
+    last_seen_at: asText(row.last_seen_at),
+    subscribed: Boolean(row.subscribed),
     score: null,
   };
 }
@@ -95,12 +97,33 @@ export default async function DeskLookPage() {
   const rows = (listData.data ?? []).filter(
     (row) => desk.admin || !ownerIsAdmin(row.created_by, adminIds),
   );
+  const ownerIds = [...new Set(rows.map((row) => String(row.created_by ?? "")).filter(Boolean))];
+  const paidResult =
+    ownerIds.length === 0
+      ? { data: [] as { user_id?: string | null; ends_at?: string | null }[] }
+      : ((await db
+          .from("memberships")
+          .select("user_id, status, ends_at")
+          .eq("status", "active")
+          .in("user_id", ownerIds)) as unknown as {
+          data: { user_id?: string | null; ends_at?: string | null }[] | null;
+        });
+  const paid = paidResult.data ?? [];
+  const nowMs = Date.now();
+  const subscribedOwners = new Set(
+    paid
+      .filter((row) => !row.ends_at || Date.parse(String(row.ends_at)) > nowMs)
+      .map((row) => String(row.user_id ?? ""))
+      .filter(Boolean),
+  );
   const photoMap = await loadBrowsePhotoMap(
     db,
     rows.map((row) => String(row.id)),
   );
   const now = Date.now();
-  const notes = rows.map((row) => cardFromRow(row, photoMap, now));
+  const notes = rows.map((row) =>
+    cardFromRow({ ...row, subscribed: subscribedOwners.has(String(row.created_by ?? "")) }, photoMap, now),
+  );
 
   return (
     <DeskLookBoard

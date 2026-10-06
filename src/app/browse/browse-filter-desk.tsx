@@ -19,6 +19,10 @@ export function BrowseFilterDesk({
   includeKind = false,
   sort,
   onSortChange,
+  audience,
+  onAudienceChange,
+  login,
+  onLoginChange,
   onApply,
   onClear,
 }: {
@@ -28,6 +32,10 @@ export function BrowseFilterDesk({
   includeKind?: boolean;
   sort?: string;
   onSortChange?: (next: string) => void;
+  audience?: string;
+  onAudienceChange?: (next: string) => void;
+  login?: string;
+  onLoginChange?: (next: string) => void;
   onApply?: (next: BrowseFilters) => void;
   onClear?: () => void;
 }) {
@@ -69,7 +77,7 @@ export function BrowseFilterDesk({
         <div>
           <p>
             {includeKind
-              ? "Apply to list profiles. Leave every field as Any to see both Brides and Grooms. Sort after you list."
+              ? "Apply to list. Any lists both Brides and Grooms. Active means a recent login; inactive means last login was long ago."
               : "Pick what you want, then Apply. Age can be 18 to 80."}
           </p>
         </div>
@@ -257,10 +265,42 @@ export function BrowseFilterDesk({
             >
               <option value="newest">Recently created</option>
               <option value="oldest">Oldest first</option>
+              <option value="active">Recently active</option>
+              <option value="inactive">Most inactive</option>
               <option value="age_asc">Age, youngest</option>
               <option value="age_desc">Age, oldest</option>
               <option value="place">Place</option>
               <option value="name">Name</option>
+            </Select3d>
+          </label>
+        ) : null}
+        {audience != null ? (
+          <label>
+            <span>Membership</span>
+            <Select3d
+              name="audience"
+              value={audience}
+              className={inputClass}
+              onChange={(event) => onAudienceChange?.(event.target.value)}
+            >
+              <option value="any">Any membership</option>
+              <option value="subscribed">Subscribed</option>
+              <option value="unsubscribed">Unsubscribed</option>
+            </Select3d>
+          </label>
+        ) : null}
+        {login != null ? (
+          <label>
+            <span>Last login</span>
+            <Select3d
+              name="login"
+              value={login}
+              className={inputClass}
+              onChange={(event) => onLoginChange?.(event.target.value)}
+            >
+              <option value="any">Any login</option>
+              <option value="active">Active (logged in recently)</option>
+              <option value="inactive">Inactive (long since last login)</option>
             </Select3d>
           </label>
         ) : null}

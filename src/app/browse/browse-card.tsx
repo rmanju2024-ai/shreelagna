@@ -23,6 +23,8 @@ export type BrowseCardNote = {
   income_band?: string | null;
   profile_type?: string | null;
   created_at?: string | null;
+  last_seen_at?: string | null;
+  subscribed?: boolean;
 };
 
 function chips(note: BrowseCardNote): string[] {

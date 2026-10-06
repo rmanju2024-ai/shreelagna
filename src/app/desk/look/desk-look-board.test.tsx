@@ -3,8 +3,9 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import type { BrowseCardNote } from "@/app/browse/browse-card";
-import { DeskLookBoard, sortLookNotes } from "./desk-look-board";
+import { DeskLookBoard, noteFitsLook, sortLookNotes } from "./desk-look-board";
 import { DISCOVER_RESULTS_PAGE_SIZE } from "@/app/browse/browse-client";
+import { EMPTY_BROWSE_FILTERS } from "@/lib/match/browse-filters";
 
 afterEach(cleanup);
 
@@ -57,5 +58,35 @@ describe("Desk look board", () => {
     expect(sortLookNotes(notes, "place").map((row) => row.name)).toEqual(["Ananya", "Zara"]);
     expect(sortLookNotes(notes, "newest").map((row) => row.name)).toEqual(["Ananya", "Zara"]);
     expect(sortLookNotes(notes, "oldest").map((row) => row.name)).toEqual(["Zara", "Ananya"]);
+  });
+
+  it("sorts by last login and filters membership and inactivity", () => {
+    const notes = [
+      note({
+        id: "quiet",
+        name: "Quiet",
+        last_seen_at: "2025-01-01T00:00:00Z",
+        subscribed: false,
+      }),
+      note({
+        id: "fresh",
+        name: "Fresh",
+        last_seen_at: "2026-10-05T00:00:00Z",
+        subscribed: true,
+      }),
+    ];
+    expect(sortLookNotes(notes, "inactive").map((row) => row.name)).toEqual(["Quiet", "Fresh"]);
+    expect(sortLookNotes(notes, "active").map((row) => row.name)).toEqual(["Fresh", "Quiet"]);
+    const now = Date.parse("2026-10-06T00:00:00Z");
+    expect(
+      notes
+        .filter((row) => noteFitsLook(row, EMPTY_BROWSE_FILTERS, { audience: "subscribed", login: "any" }, now))
+        .map((row) => row.name),
+    ).toEqual(["Fresh"]);
+    expect(
+      notes
+        .filter((row) => noteFitsLook(row, EMPTY_BROWSE_FILTERS, { audience: "unsubscribed", login: "inactive" }, now))
+        .map((row) => row.name),
+    ).toEqual(["Quiet"]);
   });
 });
