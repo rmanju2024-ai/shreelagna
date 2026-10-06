@@ -97,7 +97,7 @@ function MonthPulseCard({
       ) : (
         <div className="account-pulse-copy">
           <p className="browse-kicker">Last 30 days</p>
-          <h2>Your house is ready.</h2>
+          <h2>Ready when you are.</h2>
         </div>
       )}
       {planMarks.length ? (
@@ -154,7 +154,6 @@ export default async function AccountHubPage() {
             <HouseCrest />
           </span>
           <div className="account-hub-copy">
-            <p className="browse-kicker">Your house</p>
             <h1>Account hub</h1>
           </div>
           {ownerName ? (

@@ -1,4 +1,5 @@
 import type { Membership } from "@/lib/membership/access";
+import { WELCOME_PLAN_NAME } from "@/lib/membership/catalog";
 import { formatIstDate } from "@/lib/time/ist";
 
 export type PlanMark = {
@@ -17,7 +18,7 @@ export function planHeaderMarks(input: {
   const { access } = input;
   const name =
     access.kind === "welcome"
-      ? "Gift"
+      ? WELCOME_PLAN_NAME
       : access.kind === "none"
         ? "No plan"
         : access.kind === "house"

@@ -11,6 +11,9 @@ describe("shared mobile CSS contract", () => {
     expect(css).toContain("bottom: 0 !important");
     expect(css).toContain(".site-head-inner > .site-nav");
     expect(css).toContain("position: static");
+    expect(css).toContain(".header-profile-chip");
+    expect(css).toContain("flex: 1 1 auto !important");
+    expect(css).toContain("max-width: none !important");
   });
 
   it("keeps cards and forms inside narrow screens", () => {

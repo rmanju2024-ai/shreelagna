@@ -1,4 +1,4 @@
-import { WELCOME_DAYS, planByCode } from "@/lib/membership/catalog";
+import { WELCOME_DAYS, WELCOME_PLAN_NAME, planByCode } from "@/lib/membership/catalog";
 import { parseInstant } from "@/lib/time/ist";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -73,7 +73,7 @@ export function resolveMembership(input: {
     return {
       kind: "welcome",
       live: true,
-      label: "Welcome gift",
+      label: WELCOME_PLAN_NAME,
       until: giftUntil,
       daysLeft: daysLeft(giftUntil, now),
       planCode: "welcome",

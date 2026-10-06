@@ -1,5 +1,6 @@
 import { isProfileComplete, yearsFromDob } from "@/lib/profile/completeness";
 import { CREATOR_ROLES, MARITAL_STATUSES } from "@/lib/profile/options";
+import { WELCOME_PLAN_NAME } from "@/lib/membership/catalog";
 import { formatIstDate, formatIstMonth, istDayKey, istMonthKey, parseInstant } from "@/lib/time/ist";
 
 export type CountRow = { label: string; count: number };
@@ -364,6 +365,6 @@ export function planUsage(input: {
     paidMembers: paidUsers.size,
     welcome,
     noPlan,
-    rows: [...paidRows, { label: "Welcome gift", count: welcome }, { label: "No plan", count: noPlan }],
+    rows: [...paidRows, { label: WELCOME_PLAN_NAME, count: welcome }, { label: "No plan", count: noPlan }],
   };
 }

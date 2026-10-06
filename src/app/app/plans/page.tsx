@@ -2,7 +2,7 @@ import { BackToAccount } from "@/components/back-to-account";
 import { requestPlan } from "@/app/app/plans/actions";
 import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
-import { WELCOME_INTEREST_LIMIT, formatInr, planBenefitLines, planByCode } from "@/lib/membership/catalog";
+import { WELCOME_INTEREST_LIMIT, WELCOME_PLAN_NAME, formatInr, planBenefitLines, planByCode } from "@/lib/membership/catalog";
 import { fetchPendingPlanCode, fetchPlans, loadInterestQuota, loadMembership } from "@/lib/membership/load";
 import { formatIstDate } from "@/lib/time/ist";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -114,7 +114,7 @@ export default async function PlansPage({
 
         <div className="plans-welcome-banner">
           <div>
-            <h3>🎁 Welcome offer</h3>
+            <h3>🎁 {WELCOME_PLAN_NAME}</h3>
             <p>
               {WELCOME_INTEREST_LIMIT} families in the first 2 months. Interest sent or contact viewed on the same family is one count.
             </p>
@@ -125,7 +125,7 @@ export default async function PlansPage({
           <li className="plans-card is-welcome">
             <span className="plans-mark">{access.kind === "welcome" ? "Active" : "Automatic"}</span>
             <p className="plans-months">2 months</p>
-            <h2>Welcome</h2>
+            <h2>{WELCOME_PLAN_NAME}</h2>
             <p className="plans-price">Free <small>from joining</small></p>
             <p className="plans-desc">Applied automatically.</p>
             <ul className="plans-benefits">

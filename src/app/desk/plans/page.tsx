@@ -2,7 +2,7 @@ import { addPlan, confirmPlan, declinePlan, grantPlan, savePlan } from "@/app/de
 import { DeskPager } from "@/app/desk/desk-pager";
 import { requireDesk } from "@/lib/desk/access";
 import { deskPage, deskRange } from "@/lib/desk/pager";
-import { formatInr, perkText, planByCode, type PlanCard } from "@/lib/membership/catalog";
+import { formatInr, perkText, planByCode, WELCOME_PLAN_NAME, type PlanCard } from "@/lib/membership/catalog";
 import { fetchPlans } from "@/lib/membership/load";
 import { createServiceClient } from "@/lib/supabase/server";
 import { formatIstDateTime } from "@/lib/time/ist";
@@ -70,7 +70,7 @@ function PlanFields({ plan }: { plan?: PlanCard }) {
 function sourceLabel(source: string) {
   if (source === "grant") return "Granted by staff";
   if (source === "request") return "Member request";
-  if (source === "welcome") return "Welcome gift";
+  if (source === "welcome") return WELCOME_PLAN_NAME;
   return source.replace(/_/g, " ");
 }
 

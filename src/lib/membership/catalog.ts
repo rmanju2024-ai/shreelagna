@@ -1,5 +1,6 @@
 export const WELCOME_DAYS = 61;
 export const WELCOME_INTEREST_LIMIT = 20;
+export const WELCOME_PLAN_NAME = "Welcome gift";
 
 export function planBenefitLines(interestLimit: number): string[] {
   return [

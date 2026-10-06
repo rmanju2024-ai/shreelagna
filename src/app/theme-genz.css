@@ -948,8 +948,21 @@ table { max-width: 100%; }
 
   /* Compact header and brand; primary actions stay in the bottom navigation. */
   .site-head-inner { min-height: 4.25rem !important; padding: 0.45rem 0.75rem !important; }
-  .site-head-brand { min-width: 0; max-width: calc(100% - 0.5rem); }
+  .site-head-brand { display: flex; min-width: 0; max-width: 100%; width: 100%; flex: 1 1 auto; align-items: center; }
   .site-head-brand img { width: auto; max-height: 3.2rem; object-fit: contain; }
+  .site-head-brand > a { flex: none; min-width: 0; gap: 0.4rem; }
+  .site-head-brand > a > span { min-width: 0; }
+  .site-head-brand > a > span > span:first-child { font-size: 1.05rem; }
+  .site-head-brand > a > span > span:last-child { display: none; }
+  .header-profile-chip {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    min-width: 0;
+    max-width: none !important;
+  }
+  .header-profile-chip-copy { display: grid !important; min-width: 0; }
+  .header-profile-chip-copy span,
+  .header-profile-chip-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   /* One readable card per row, with no accidental desktop minimum widths. */
   .sx-grid, .inbox-list.sx-grid, .alert-list, .plans-grid {

@@ -15,7 +15,7 @@ describe("account hub plan marks", () => {
       limit: 20,
     });
     expect(marks.map((item) => `${item.hint}:${item.text}`)).toEqual([
-      "Plan:Gift",
+      "Plan:Welcome gift",
       "Days left:59d",
       "Plan expiry:3 Dec",
       "Chats used:2/20",
