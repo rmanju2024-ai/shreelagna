@@ -7495,6 +7495,10 @@ a.browse-view {
   display: grid;
   justify-items: start;
   gap: 0.45rem;
+  width: 100%;
+  max-width: 86rem;
+  margin: 0 auto;
+  padding: 0.7rem 0 0;
 }
 .inbox-switcher-wrap .back-to-account {
   max-width: none;
