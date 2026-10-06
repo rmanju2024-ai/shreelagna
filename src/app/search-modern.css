@@ -1749,6 +1749,31 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
   justify-items: center;
   pointer-events: none;
 }
+.bird-chat-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  display: grid;
+  place-items: end;
+  padding: 0.75rem max(0.75rem, env(safe-area-inset-right)) max(0.9rem, calc(env(safe-area-inset-bottom) + 0.75rem)) 0.75rem;
+  pointer-events: none;
+}
+.bird-chat-layer .bird-wa-scrim,
+.bird-chat-layer .bird-wa {
+  pointer-events: auto;
+}
+.bird-chat-layer.is-wide {
+  place-items: center;
+  padding: 1.25rem;
+}
+.bird-chat-layer .bird-wa {
+  z-index: 2;
+}
+.bird-wa-icon {
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 3;
+}
 .bird-dock.is-inline.is-wide .bird-wa.is-max {
   width: min(44rem, calc(100vw - 2.5rem));
   height: min(86dvh, 54rem);

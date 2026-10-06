@@ -160,7 +160,6 @@ export function BirdDock({
   const inbound = useRef(0);
   const dockRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
-  const storeKey = `sl-bird-chat:${profileId}`;
   const showChat = localThread === "sent" || localThread === "received" || localThread === "accepted";
   const pool = phase === "peck" ? CHIRPS.peck : chirpPool(localThread, needPlan, needQuota, canSend, awaitingReview);
   const chirp = pool[line % pool.length];
@@ -225,22 +224,7 @@ export function BirdDock({
 
   useEffect(() => {
     setMounted(true);
-    try {
-      const saved = sessionStorage.getItem(storeKey);
-      if (saved) {
-        const parsed = JSON.parse(saved) as { open?: boolean; wide?: boolean };
-        if (parsed.open) setOpen(true);
-        if (parsed.wide && parsed.open) setWide(true);
-      }
-    } catch {
-      /* ignore */
-    }
-  }, [storeKey, inline]);
-
-  useEffect(() => {
-    if (!mounted) return;
-    sessionStorage.setItem(storeKey, JSON.stringify({ open, wide: wide && open }));
-  }, [open, wide, mounted, storeKey]);
+  }, []);
 
   useEffect(() => {
     setLine(0);
@@ -383,6 +367,12 @@ export function BirdDock({
     setWide(false);
   }
 
+  function toggleWide(event: React.MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    setWide((on) => !on);
+  }
+
   function onSend(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const text = draft.trim();
@@ -426,16 +416,15 @@ export function BirdDock({
                     ? "Awaiting review"
                     : "Finish profile";
 
-  const dock = (
-    <div
-      ref={dockRef}
-      className={`bird-dock${open ? " is-open" : ""}${wide ? " is-wide" : ""}${inline ? " is-inline" : ""}`}
-      data-phase={phase}
-      data-thread={localThread}
-    >
-      {wide ? <button type="button" className="bird-wa-scrim" aria-label="Restore chat" onClick={() => setWide(false)} /> : null}
-      {open && showChat ? (
-        <section className={`bird-wa${wide ? " is-max" : ""}`} aria-label="Chat">
+  const panel =
+    open && showChat ? (
+      <div ref={dockRef} className={`bird-chat-layer${wide ? " is-wide" : ""}`}>
+        <button type="button" className="bird-wa-scrim" aria-label="Close chat" onClick={closeChat} />
+        <section
+          className={`bird-wa${wide ? " is-max" : ""}`}
+          aria-label="Chat"
+          onClick={(event) => event.stopPropagation()}
+        >
           <header className="bird-wa-head">
             <ChatAvatar name={name} src={chat?.photo} size={wide ? "md" : "sm"} />
             <div className="bird-wa-who">
@@ -443,10 +432,19 @@ export function BirdDock({
               <p>{chat?.seen ?? "tap to chat"}</p>
             </div>
             <div className="bird-wa-tools">
-              <button type="button" className="bird-wa-icon" onClick={() => setWide((on) => !on)} aria-label={wide ? "Restore" : "Maximize"}>
+              <button type="button" className="bird-wa-icon" onClick={toggleWide} aria-label={wide ? "Restore" : "Maximize"}>
                 {wide ? "↙" : "↗"}
               </button>
-              <button type="button" className="bird-wa-icon" onClick={closeChat} aria-label="Close">
+              <button
+                type="button"
+                className="bird-wa-icon"
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  closeChat();
+                }}
+                aria-label="Close"
+              >
                 ✕
               </button>
             </div>
@@ -510,115 +508,120 @@ export function BirdDock({
             </form>
           )}
         </section>
-      ) : null}
+      </div>
+    ) : null;
 
-      {showChat ? null : (
-      <p className="bird-chirp" aria-live="polite">
-        {chirp}
-      </p>
-      )}
+  return (
+    <>
+      <div className={`bird-dock${inline ? " is-inline" : ""}`} data-phase={phase} data-thread={localThread}>
+        {showChat ? null : (
+          <p className="bird-chirp" aria-live="polite">
+            {chirp}
+          </p>
+        )}
 
-      <div className="bird-dock-stage">
-        <span className="bird-dock-actor" aria-hidden>
-          <GoldBird carry={phase === "send" ? "heart" : phase === "deliver" ? "mail" : null} />
-        </span>
-
-        {localThread === "none" && canSend ? (
-          <form onSubmit={onSpark}>
-            <input type="hidden" name="to_profile_id" value={profileId} />
-            <button type="submit" className="bird-dock-cta">
-              {perchLabel}
-              {quotaLeft !== null && phase !== "send" ? ` · ${quotaLeft}` : ""}
-            </button>
-          </form>
-        ) : null}
-
-        {localThread === "none" && needPlan ? (
-          <Link href="/app/plans" className="bird-dock-cta">
-            {perchLabel}
-          </Link>
-        ) : null}
-
-        {localThread === "none" && needQuota ? (
-          <Link href="/app/plans" className="bird-dock-cta">
-            {perchLabel}
-          </Link>
-        ) : null}
-
-        {localThread === "none" && !canSend && !needPlan && !needQuota && !awaitingReview ? (
-          <Link href={finishHref} className="bird-dock-cta">
-            {perchLabel}
-          </Link>
-        ) : null}
-
-        {localThread === "none" && awaitingReview && !needPlan && !needQuota ? (
-          <span className="bird-dock-cta" aria-disabled>
-            {perchLabel}
+        <div className="bird-dock-stage">
+          <span className="bird-dock-actor" aria-hidden>
+            <GoldBird carry={phase === "send" ? "heart" : phase === "deliver" ? "mail" : null} />
           </span>
-        ) : null}
 
-        {localThread === "closed" && canSend ? (
-          <form onSubmit={onSpark}>
-            <input type="hidden" name="to_profile_id" value={profileId} />
-            <button type="submit" className="bird-dock-cta">
-              {perchLabel}
-            </button>
-          </form>
-        ) : null}
-
-        {localThread === "sent" ? (
-          localInterestId ? (
-            <form
-              onSubmit={(event) => {
-                event.preventDefault();
-                const prev = localInterestId;
-                markActed();
-                setLocalThread("none");
-                setLocalInterestId(null);
-                const data = new FormData();
-                data.set("to_profile_id", profileId);
-                data.set("interest_id", prev);
-                void cancelInterest(data).then((res) => {
-                  if (!res.ok) {
-                    setLocalThread("sent");
-                    setLocalInterestId(prev);
-                  }
-                });
-              }}
-            >
-              <button type="submit" className="bird-dock-cta is-drop">
-                Cancel Interest
+          {localThread === "none" && canSend ? (
+            <form onSubmit={onSpark}>
+              <input type="hidden" name="to_profile_id" value={profileId} />
+              <button type="submit" className="bird-dock-cta">
+                {perchLabel}
+                {quotaLeft !== null && phase !== "send" ? ` · ${quotaLeft}` : ""}
               </button>
             </form>
-          ) : (
-            <button type="button" className="bird-dock-cta is-sent">
-              Interest sent
-            </button>
-          )
-        ) : null}
+          ) : null}
 
-        {localThread === "received" ? (
-          <Link href="/app/interests" className="bird-dock-cta">
-            {perchLabel}
-          </Link>
-        ) : null}
+          {localThread === "none" && needPlan ? (
+            <Link href="/app/plans" className="bird-dock-cta">
+              {perchLabel}
+            </Link>
+          ) : null}
 
-        {showChat && !open ? (
-          <button
-            type="button"
-            className={`bird-dock-chat${badge ? " has-mail" : ""}${phase === "deliver" ? " is-drop-in" : ""}`}
-            onClick={openChat}
-            aria-label="Open chat"
-          >
-            <span className="bird-dock-chat-face" aria-hidden>
-              💬
+          {localThread === "none" && needQuota ? (
+            <Link href="/app/plans" className="bird-dock-cta">
+              {perchLabel}
+            </Link>
+          ) : null}
+
+          {localThread === "none" && !canSend && !needPlan && !needQuota && !awaitingReview ? (
+            <Link href={finishHref} className="bird-dock-cta">
+              {perchLabel}
+            </Link>
+          ) : null}
+
+          {localThread === "none" && awaitingReview && !needPlan && !needQuota ? (
+            <span className="bird-dock-cta" aria-disabled>
+              {perchLabel}
             </span>
-            {badge > 0 ? <i>{badge > 9 ? "9+" : badge}</i> : null}
-          </button>
-        ) : null}
-      </div>
-    </div>
-  );
+          ) : null}
 
-  return !mounted || (inline && !wide) ? dock : createPortal(dock, document.body);
+          {localThread === "closed" && canSend ? (
+            <form onSubmit={onSpark}>
+              <input type="hidden" name="to_profile_id" value={profileId} />
+              <button type="submit" className="bird-dock-cta">
+                {perchLabel}
+              </button>
+            </form>
+          ) : null}
+
+          {localThread === "sent" ? (
+            localInterestId ? (
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  const prev = localInterestId;
+                  markActed();
+                  setLocalThread("none");
+                  setLocalInterestId(null);
+                  const data = new FormData();
+                  data.set("to_profile_id", profileId);
+                  data.set("interest_id", prev);
+                  void cancelInterest(data).then((res) => {
+                    if (!res.ok) {
+                      setLocalThread("sent");
+                      setLocalInterestId(prev);
+                    }
+                  });
+                }}
+              >
+                <button type="submit" className="bird-dock-cta is-drop">
+                  Cancel Interest
+                </button>
+              </form>
+            ) : (
+              <button type="button" className="bird-dock-cta is-sent">
+                Interest sent
+              </button>
+            )
+          ) : null}
+
+          {localThread === "received" ? (
+            <Link href="/app/interests" className="bird-dock-cta">
+              {perchLabel}
+            </Link>
+          ) : null}
+
+          {showChat ? (
+            <button
+              type="button"
+              className={`bird-dock-chat${badge ? " has-mail" : ""}${phase === "deliver" ? " is-drop-in" : ""}${open ? " is-on" : ""}`}
+              onClick={open ? closeChat : openChat}
+              aria-label={open ? "Close chat" : "Open chat"}
+              aria-expanded={open}
+            >
+              <span className="bird-dock-chat-face" aria-hidden>
+                💬
+              </span>
+              {badge > 0 && !open ? <i>{badge > 9 ? "9+" : badge}</i> : null}
+            </button>
+          ) : null}
+        </div>
+      </div>
+      {mounted && panel ? createPortal(panel, document.body) : null}
+    </>
+  );
 }
