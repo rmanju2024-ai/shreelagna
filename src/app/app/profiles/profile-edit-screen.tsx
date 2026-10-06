@@ -8,6 +8,7 @@ import { aboutPlainText } from "@/lib/profile/about-html";
 import { isProfileEditSection, portraitTabForSection, type ProfileEditTarget } from "@/lib/profile/sections";
 import { btnHero, btnHeroGhost } from "@/lib/ui/classes";
 import { watermarkLine } from "@/lib/brand";
+import { displayFirstName } from "@/lib/profile/options";
 import { FieldMark } from "@/app/app/profiles/field-mark";
 
 const EDIT_TABS = [
