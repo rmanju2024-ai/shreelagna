@@ -12,5 +12,6 @@ describe("HouseRoleSeal", () => {
     expect(container.firstElementChild?.className).toContain("is-staff");
     rerender(<HouseRoleSeal mark="member" />);
     expect(container.firstElementChild?.className).toContain("is-member");
+    expect(container.querySelector(".house-star")).toBeTruthy();
   });
 });

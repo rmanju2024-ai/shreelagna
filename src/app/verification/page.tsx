@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal-page";
+import { EVIDENCE_RETENTION_NOTICE } from "@/lib/verification/copy";
 
 export const metadata: Metadata = { title: "Verification Standard", description: "How Shree Lagna handles profile verification requests." };
 
@@ -11,7 +12,7 @@ export default function VerificationPage() {
     sections={[
       { title: "What we may review", body: ["Identity: government-issued photo identification used only to compare name and age. Education: a degree, marksheet, or institution record. Employment: a current employer letter, work ID, or official work email confirmation.", "We do not ask for Aadhaar, PAN, bank statements, passwords, OTPs, or any document that exposes financial or authentication information."] },
       { title: "Who can review", body: ["Only authorised Shree Lagna administrators may approve or reject a document-based verification case. General support staff can assist with a request but cannot issue an identity, education, or employment approval.", "Review decisions, reviewer identity, timestamps, and reason notes are recorded in the internal audit trail."] },
-      { title: "Retention and re-checks", body: ["After our review, we retain your document in private storage for 30 days and then permanently delete it. We do not keep copies on your profile; only the verification result remains.", "Identity, education, and employment checks are re-checked every 24 months, or earlier if a member updates the relevant profile detail or a safety concern is raised."] },
+      { title: "Retention and re-checks", body: [EVIDENCE_RETENTION_NOTICE, "Identity, education, and employment checks are re-checked every 24 months, or earlier if a member updates the relevant profile detail or a safety concern is raised."] },
       { title: "If a request is rejected", body: ["We provide a reason where it is safe and appropriate. A member can submit one appeal with corrected information or replacement evidence. An administrator who did not make the original decision should review the appeal where practical.", "A verification outcome is not a background check, guarantee, endorsement, or promise about a person’s conduct or compatibility."] },
     ]}
   />;

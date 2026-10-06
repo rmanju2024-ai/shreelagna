@@ -4,7 +4,7 @@ import { requireDesk } from "@/lib/desk/access";
 import { writeAudit } from "@/lib/desk/audit";
 import { createServiceClient } from "@/lib/supabase/server";
 import { refreshDesk } from "@/lib/desk/refresh";
-import { evidenceDeleteAfter, evidenceStore, purgeExpiredEvidence } from "@/lib/verification/evidence";
+import { deleteCaseEvidence, evidenceDeleteAfter, evidenceStore, purgeExpiredEvidence } from "@/lib/verification/evidence";
 
 const STATES = ["in_review", "approved", "rejected", "expired"] as const;
 
@@ -57,5 +57,6 @@ export async function reviewVerificationCase(formData: FormData) {
   });
   refreshDesk(["/desk/verification", "/desk/profiles"]);
   const store = await evidenceStore();
-  if (store) await purgeExpiredEvidence(store);
+  if (store && closed) await deleteCaseEvidence(store, item.profile_id, id);
+  else if (store) await purgeExpiredEvidence(store);
 }

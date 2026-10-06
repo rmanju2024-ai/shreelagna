@@ -981,7 +981,7 @@ body > .nav-menu {
   }
   .site-head-brand {
     display: flex !important;
-    flex: 1 1 auto !important;
+    flex: 0 1 auto !important;
     min-width: 0 !important;
     max-width: 100% !important;
     width: auto !important;
@@ -992,11 +992,12 @@ body > .nav-menu {
   .site-head-brand .brand-wordmark { display: none !important; }
   .site-head-brand img { width: 2.55rem !important; height: 2.55rem !important; max-height: 2.55rem !important; }
   .header-profile-chip {
-    display: flex !important;
+    display: inline-flex !important;
     visibility: visible !important;
-    flex: 1 1 auto !important;
+    flex: 0 1 auto !important;
+    width: max-content !important;
     min-width: 0 !important;
-    max-width: none !important;
+    max-width: min(11.5rem, calc(100vw - 5.5rem)) !important;
     background: rgb(255 252 247 / 96%) !important;
     border-color: rgb(196 154 98 / 55%) !important;
   }

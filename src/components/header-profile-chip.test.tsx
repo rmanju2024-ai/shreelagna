@@ -10,6 +10,7 @@ describe("HeaderProfileChip", () => {
     const link = screen.getByRole("link", { name: /Member, Ananya Rao/ });
     expect(link.getAttribute("href")).toBe("/app");
     expect(link.className).toContain("is-member");
+    expect(link.querySelector(".house-star")).toBeTruthy();
   });
 
   it("keeps admin mark when a profile is missing", () => {

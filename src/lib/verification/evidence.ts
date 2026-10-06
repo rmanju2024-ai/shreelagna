@@ -1,5 +1,4 @@
 import { createServiceClient } from "@/lib/supabase/server";
-import { EVIDENCE_RETENTION_DAYS } from "@/lib/verification/copy";
 
 export const EVIDENCE_BUCKET = "verification-evidence";
 export const EVIDENCE_MAX_BYTES = 5 * 1024 * 1024;
@@ -12,7 +11,29 @@ export const EVIDENCE_TYPES: Record<string, string> = {
 };
 
 export function evidenceDeleteAfter(from = new Date()) {
-  return new Date(from.getTime() + EVIDENCE_RETENTION_DAYS * 24 * 60 * 60 * 1000).toISOString();
+  return from.toISOString();
+}
+
+async function removeFolder(
+  store: NonNullable<Awaited<ReturnType<typeof evidenceStore>>>,
+  profileId: string,
+  caseId: string,
+) {
+  const folder = evidenceFolder(profileId, caseId);
+  const listed = await store.storage.from(EVIDENCE_BUCKET).list(folder);
+  const paths = (listed.data ?? [])
+    .map((file) => file.name)
+    .filter((name) => name && name !== ".emptyFolderPlaceholder")
+    .map((name) => `${folder}/${name}`);
+  if (paths.length) await store.storage.from(EVIDENCE_BUCKET).remove(paths);
+}
+
+export async function deleteCaseEvidence(
+  store: NonNullable<Awaited<ReturnType<typeof evidenceStore>>>,
+  profileId: string,
+  caseId: string,
+) {
+  await removeFolder(store, profileId, caseId);
 }
 
 /** Private bucket: nothing here is ever public; the desk reads files through short-lived signed links. */
@@ -37,12 +58,6 @@ export async function purgeExpiredEvidence(store: NonNullable<Awaited<ReturnType
     .lte("evidence_delete_after", now)
     .limit(40);
   for (const item of due ?? []) {
-    const folder = evidenceFolder(item.profile_id, item.id);
-    const listed = await store.storage.from(EVIDENCE_BUCKET).list(folder);
-    const paths = (listed.data ?? [])
-      .map((file) => file.name)
-      .filter((name) => name && name !== ".emptyFolderPlaceholder")
-      .map((name) => `${folder}/${name}`);
-    if (paths.length) await store.storage.from(EVIDENCE_BUCKET).remove(paths);
+    await removeFolder(store, item.profile_id, item.id);
   }
 }

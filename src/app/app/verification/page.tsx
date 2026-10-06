@@ -91,7 +91,7 @@ export default async function MemberVerificationPage({ searchParams }: { searchP
                       ))}
                     </ol>
                     {item.status === "rejected" && item.rejection_reason ? <p className="verify-note">Reason: {item.rejection_reason}</p> : null}
-                    {item.status === "approved" ? <p className="verify-note is-ok">Verified. The document is not kept on your profile and will be deleted from our storage after 30 days. Re-check due {item.recheck_due_at ? new Date(item.recheck_due_at).toLocaleDateString("en-IN") : "in 2 years"}.</p> : null}
+                    {item.status === "approved" ? <p className="verify-note is-ok">Verified. {EVIDENCE_RETENTION_NOTICE} Re-check due {item.recheck_due_at ? new Date(item.recheck_due_at).toLocaleDateString("en-IN") : "in 2 years"}.</p> : null}
                     {open ? (
                       <form action={uploadVerificationEvidence} className="verify-upload">
                         <input type="hidden" name="case_id" value={item.id} />

@@ -39,12 +39,12 @@ export default async function DeskVerificationPage() {
   return (
     <section className="desk-panel">
       <header className="desk-panel-head"><div><p className="browse-kicker">Restricted review</p><h2>Verification cases</h2></div><p>{cases?.length ?? 0} waiting</p></header>
-      <p className="desk-profile-queue-note">Only administrators can approve document-based checks. After review, files stay private for 30 days and are then deleted; the profile keeps only the verification result.</p>
+      <p className="desk-profile-queue-note">Only administrators can approve document-based checks. Documents are deleted as soon as review is complete; the profile keeps only the result.</p>
       {cases?.length ? <ul className="desk-ticket-list">{cases.map((item) => (
         <li key={item.id} className={`${cardClass} card-3d desk-ticket-row desk-profile-row`}>
           <div className="desk-profile-summary">
             <div className="desk-ticket-row-head"><b>{item.document_type} check</b><span className="desk-profile-chip">{item.status.replace(/_/g, " ")}</span></div>
-            <span className="desk-ticket-meta">Profile {item.profile_id} · Requested {new Date(item.created_at).toLocaleDateString("en-IN")} · Evidence deletion due {new Date(item.evidence_delete_after).toLocaleDateString("en-IN")}</span>
+            <span className="desk-ticket-meta">Profile {item.profile_id} · Requested {new Date(item.created_at).toLocaleDateString("en-IN")}</span>
             {(links.get(item.id) ?? []).length ? <span className="desk-ticket-meta">Evidence: {(links.get(item.id) ?? []).map((f, i) => <a key={f.name} href={f.url} target="_blank" rel="noreferrer">File {i + 1}</a>).reduce<React.ReactNode[]>((acc, el, i) => (i ? [...acc, " · ", el] : [el]), [])}</span> : <span className="desk-ticket-meta">No document uploaded yet</span>}
           </div>
           {desk.admin ? <form action={reviewVerificationCase} className="desk-profile-actions">

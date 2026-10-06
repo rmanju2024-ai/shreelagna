@@ -10,7 +10,9 @@ describe("shared mobile CSS contract", () => {
     expect(css).toContain("env(safe-area-inset-bottom)");
     expect(css).toContain("bottom: 0 !important");
     expect(css).toContain(".site-nav.is-mobile-dock");
-    expect(css).toContain(".brand-wordmark { display: none !important; }");
+    expect(css).toContain(".header-profile-chip {");
+    expect(css).toContain("width: max-content !important");
+    expect(css).toContain("max-width: min(11.5rem, calc(100vw - 5.5rem)) !important");
   });
 
   it("keeps cards and forms inside narrow screens", () => {
