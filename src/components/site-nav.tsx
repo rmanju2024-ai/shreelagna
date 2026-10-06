@@ -182,7 +182,6 @@ export function HeaderNav({
   overlay: boolean;
   user: boolean;
   staff: boolean;
-  houseStar?: "admin" | "staff";
   chatUnread?: number;
   alertUnread?: number;
   likesPending?: number;

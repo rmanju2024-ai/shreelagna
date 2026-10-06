@@ -63,3 +63,9 @@ export function accountOwnerName(
   const fromAccount = typeof fallback === "string" ? fallback.trim() : "";
   return fromProfile || fromAccount;
 }
+
+export function bannerProfileChip(profileName?: string | null): { label: string; pending: boolean } {
+  const name = typeof profileName === "string" ? profileName.trim() : "";
+  if (name) return { label: name, pending: false };
+  return { label: "Not created yet", pending: true };
+}

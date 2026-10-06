@@ -8425,6 +8425,117 @@ a.inbox-name.inbox-open:focus-visible {
   background: linear-gradient(180deg, #fffdf8, #f3e6d2);
 }
 
+.house-role-seal {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 3.05rem;
+  height: 3.05rem;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 1;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 35%), 0 6px 14px rgb(63 14 13 / 16%);
+}
+.house-role-seal b {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.house-role-seal.is-admin {
+  color: #fff8ee;
+  background:
+    radial-gradient(circle at 32% 28%, #c45c6a, transparent 52%),
+    linear-gradient(165deg, #a24a3c, #5c1816);
+  border: 2px solid #3f0e0d;
+}
+.house-role-seal.is-staff {
+  color: #5c1816;
+  background:
+    radial-gradient(circle at 32% 28%, #fff6e4, transparent 55%),
+    linear-gradient(165deg, #f3e2c8, #c9a24a);
+  border: 2px solid #9a6b1f;
+}
+.house-role-seal.is-overlay.is-admin {
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 28%), 0 0 0 2px rgb(255 255 255 / 18%);
+}
+.house-role-seal.is-overlay.is-staff {
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 2px rgb(255 255 255 / 18%);
+}
+.house-role-seal.is-member {
+  color: #7c2d12;
+  background:
+    radial-gradient(circle at 32% 28%, #fffdf8, transparent 55%),
+    linear-gradient(165deg, #fff8ee, #e8d2b0);
+  border: 2px solid #c4a66a;
+}
+.house-role-seal.is-overlay.is-member {
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 2px rgb(255 255 255 / 18%);
+}
+
+.header-profile-chip {
+  display: flex;
+  min-width: 0;
+  max-width: 22rem;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.18rem 0.85rem 0.18rem 0.18rem;
+  border-radius: 999px;
+  text-decoration: none;
+  border: 1px solid rgb(196 154 98 / 40%);
+  background: rgb(255 252 247 / 86%);
+  box-shadow: inset 0 1px 0 #fff, 0 6px 12px rgb(63 14 13 / 8%);
+}
+.header-profile-chip .house-role-seal {
+  width: 2.55rem;
+  height: 2.55rem;
+}
+.header-profile-chip .house-role-seal b {
+  font-size: 0.52rem;
+  letter-spacing: 0.04em;
+}
+.header-profile-chip-copy {
+  display: grid;
+  min-width: 0;
+  gap: 0.04rem;
+  padding-right: 0.2rem;
+}
+.header-profile-chip-copy span {
+  color: #9a3412;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.header-profile-chip-copy strong {
+  overflow: hidden;
+  color: #7c2d12;
+  font-family: var(--font-british), var(--font-display), Palatino, serif;
+  font-size: clamp(0.88rem, 1.6vw, 1.05rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.header-profile-chip.is-pending .header-profile-chip-copy strong { color: #9a3412; font-weight: 700; }
+.header-profile-chip.is-overlay {
+  border-color: rgb(255 255 255 / 28%);
+  background: rgb(255 248 236 / 18%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 22%);
+}
+@media (max-width: 720px) {
+  .header-profile-chip {
+    max-width: 11.5rem;
+    padding: 0.12rem 0.5rem 0.12rem 0.12rem;
+    gap: 0.35rem;
+  }
+  .header-profile-chip .house-role-seal {
+    width: 2.15rem;
+    height: 2.15rem;
+  }
+}
+
 .role-flag.is-overlay {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 3px 0 rgba(0, 0, 0, 0.35);
 }
@@ -9475,6 +9586,12 @@ a.inbox-name.inbox-open:focus-visible {
   .role-flag {
     display: none;
   }
+
+  .house-role-seal {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  .house-role-seal b { font-size: 0.52rem; }
 
   .nav-3d-label,
   .nav-3d-caret {

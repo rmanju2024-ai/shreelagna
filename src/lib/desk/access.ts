@@ -11,6 +11,14 @@ export function isAdminRole(role?: string | null): boolean {
   return role === "admin";
 }
 
+/** Header identity: admin, staff, or signed-in member. */
+export function houseRoleMark(role?: string | null): "admin" | "staff" | "member" | null {
+  if (role === "admin") return "admin";
+  if (role === "service") return "staff";
+  if (role) return "member";
+  return null;
+}
+
 export function canEditMemberProfile(
   actor: { id: string; role?: string | null },
   owner: { id?: string | null; role?: string | null } | null,

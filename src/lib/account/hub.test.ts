@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ACCOUNT_GROUPS, accountInboxCounts, accountOwnerName } from "./hub";
+import { ACCOUNT_GROUPS, accountInboxCounts, accountOwnerName, bannerProfileChip } from "./hub";
 
 describe("account hub", () => {
   it("keeps every section reachable from the rail", () => {
@@ -28,5 +28,11 @@ describe("account hub", () => {
       ),
     ).toBe("Ananya Rao");
     expect(accountOwnerName([], null, "Priya")).toBe("Priya");
+  });
+
+  it("labels the header chip when a profile is missing", () => {
+    expect(bannerProfileChip("Ananya Rao")).toEqual({ label: "Ananya Rao", pending: false });
+    expect(bannerProfileChip("  ")).toEqual({ label: "Not created yet", pending: true });
+    expect(bannerProfileChip(null)).toEqual({ label: "Not created yet", pending: true });
   });
 });
