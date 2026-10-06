@@ -11,6 +11,14 @@ describe("collapse notices", () => {
     expect(rows.map((row) => row.id)).toEqual(["2", "3"]);
   });
 
+  it("keeps one shortlist alert per person", () => {
+    const rows = collapseNotices([
+      { id: "n2", kind: "shortlist", match_profile_id: "manju", created_at: "2026-09-25T11:00:00Z" },
+      { id: "n1", kind: "shortlist", match_profile_id: "manju", created_at: "2026-09-25T10:00:00Z" },
+    ]);
+    expect(rows.map((row) => row.id)).toEqual(["n2"]);
+  });
+
   it("keeps one contact-view alert per person", () => {
     const rows = collapseNotices([
       { id: "b", kind: "contact_view", match_profile_id: "manju", created_at: "2026-09-25T10:00:00Z" },

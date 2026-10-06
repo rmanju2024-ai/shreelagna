@@ -11,7 +11,9 @@ import { formList } from "@/lib/profile/multi-values";
 import { loadFormLists } from "@/lib/profile/load-form-lists";
 import { ABOUT_MAX, ABOUT_MIN, FAMILY_NOTE_MAX, aboutPlainText } from "@/lib/profile/about-html";
 import { contactViewedCopy, interestReceivedCopy } from "@/lib/match/alert-copy";
+import { upsertShortlistNotice } from "@/lib/match/shortlist-notice";
 import { canAlertInterest } from "@/lib/match/profile-settings";
+import { loadBlockedProfileIds } from "@/lib/safety/blocked";
 import { canSendInterest, effectiveInterestStatus, openInterestBlocksSend } from "@/lib/match/interest-status";
 import { joinParentTags } from "@/lib/profile/parent-line";
 import { parseProfileForm } from "@/lib/validation/profile";
@@ -500,6 +502,27 @@ export async function saveShortlist(profileId: string, want: boolean): Promise<{
     : await db.from("profile_shortlists").delete().eq("owner_profile_id", me.active_profile_id).eq("shortlisted_profile_id", profileId);
   if (result.error) return { ok: false, on };
   revalidatePath("/app/shortlist");
+  if (want) {
+    const viewerId = me.active_profile_id;
+    after(async () => {
+      const [{ data: target }, { data: mine }, blocked] = await Promise.all([
+        db.from("profiles").select("id, status, created_by").eq("id", profileId).maybeSingle(),
+        db.from("profiles").select("subject_full_name").eq("id", viewerId).maybeSingle(),
+        loadBlockedProfileIds(db, [viewerId, profileId]),
+      ]);
+      const ownerId = typeof target?.created_by === "string" ? target.created_by : null;
+      if (!ownerId || target?.status !== "active" || blocked.has(profileId) || blocked.has(viewerId)) return;
+      const viewerName = displayFirstName(
+        typeof mine?.subject_full_name === "string" ? mine.subject_full_name : "A member",
+      );
+      await upsertShortlistNotice(db, {
+        ownerUserId: ownerId,
+        viewerProfileId: viewerId,
+        viewerName,
+      });
+      revalidatePath("/app/alerts");
+    });
+  }
   return { ok: true, on: want };
 }
 

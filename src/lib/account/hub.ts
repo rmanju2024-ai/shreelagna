@@ -6,7 +6,7 @@ export const ACCOUNT_GROUPS = [
     mark: "About",
     items: [
       { href: "/app", title: "My profile", mark: "Name", text: "Your story, media and completeness." },
-      { href: "/app/shortlist", title: "Shortlist", mark: "Partner", text: "Private profiles you wish to revisit." },
+      { href: "/app/shortlist", title: "Shortlist", mark: "Partner", text: "Profiles you wish to revisit. They are alerted when you shortlist them." },
       { href: "/app/blocked", title: "Blocked profiles", mark: "Safety", text: "Members you blocked. Unblock any time." },
     ],
   },

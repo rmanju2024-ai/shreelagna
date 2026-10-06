@@ -55,6 +55,14 @@ export function profileViewedCopy(otherName: string) {
   };
 }
 
+export function profileShortlistedCopy(otherName: string) {
+  return {
+    kind: "shortlist",
+    title: otherName,
+    body: `${otherName} shortlisted your profile.`,
+  };
+}
+
 export function contactViewedCopy(otherName: string) {
   return {
     kind: "contact_view",
@@ -71,7 +79,7 @@ export function alertActionLabel(kind: string, href: string | null | undefined):
   if (kind === "chat" || href?.startsWith("/app/chat")) return "Open chat";
   if (kind === "interest_received" || kind === "interest_declined" || href === "/app/interests") return "Open inbox";
   if (kind === "interest_accepted") return "Open chat";
-  if (kind === "profile_view" || kind === "contact_view") return "Open profile";
+  if (kind === "profile_view" || kind === "contact_view" || kind === "shortlist") return "Open profile";
   return "Open profile";
 }
 
@@ -84,6 +92,7 @@ export function alertHeadline(kind: string, title: string, body: string): { name
     return { name, detail: reason ? `declined your interest — ${reason}` : "declined your interest" };
   }
   if (kind === "profile_view") return { name, detail: "viewed your profile" };
+  if (kind === "shortlist") return { name, detail: "shortlisted your profile" };
   if (kind === "contact_view") return { name, detail: "viewed your mobile and email" };
   if (kind === "match" || title === "New match") return { name: "New match", detail: "fits your preference" };
   if (kind === "chat" || title === "New message") {
@@ -125,6 +134,7 @@ export function alertLine(kind: string, title: string, body: string): string {
     return snippet ? `${name} sent a message: ${snippet}` : `${name} sent you a message.`;
   }
   if (kind === "profile_view") return `${name || "Someone"} viewed your profile.`;
+  if (kind === "shortlist") return `${name || "Someone"} shortlisted your profile.`;
   if (kind === "contact_view") return `${name || "Someone"} viewed your mobile and email.`;
   if (kind === "match" || title === "New match") return "A new match fits your preference.";
   const compact = body.replace(/^Namaste[^.]+\.\s*/i, "").trim();

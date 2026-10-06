@@ -3,7 +3,13 @@ export function noticeCollapseKey(note: {
   kind: string;
   match_profile_id?: string | null;
 }): string {
-  if ((note.kind === "profile_view" || note.kind === "contact_view" || note.kind === "match") && note.match_profile_id) {
+  if (
+    (note.kind === "profile_view" ||
+      note.kind === "contact_view" ||
+      note.kind === "shortlist" ||
+      note.kind === "match") &&
+    note.match_profile_id
+  ) {
     return `${note.kind}:${note.match_profile_id}`;
   }
   return note.id;

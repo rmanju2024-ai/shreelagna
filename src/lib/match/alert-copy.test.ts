@@ -9,6 +9,7 @@ import {
   interestDeclinedCopy,
   interestReceivedCopy,
   contactViewedCopy,
+  profileShortlistedCopy,
   profileViewedCopy,
 } from "./alert-copy";
 
@@ -49,10 +50,15 @@ describe("alert copy", () => {
     expect(alertActionLabel("chat", "/app/chat/1")).toBe("Open chat");
     expect(alertActionLabel("interest_received", "/app/interests")).toBe("Open inbox");
     expect(profileViewedCopy("Rohan").body).toBe("Rohan viewed your profile.");
+    expect(profileShortlistedCopy("Rohan").body).toBe("Rohan shortlisted your profile.");
     expect(contactViewedCopy("Rohan").body).toBe("Rohan viewed your mobile and email.");
     expect(alertHeadline("profile_view", "Rohan", "Rohan viewed your profile.")).toEqual({
       name: "Rohan",
       detail: "viewed your profile",
+    });
+    expect(alertHeadline("shortlist", "Rohan", "Rohan shortlisted your profile.")).toEqual({
+      name: "Rohan",
+      detail: "shortlisted your profile",
     });
     expect(alertHeadline("contact_view", "Rohan", "Rohan viewed your mobile and email.")).toEqual({
       name: "Rohan",

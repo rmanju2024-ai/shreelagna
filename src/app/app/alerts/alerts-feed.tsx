@@ -13,6 +13,7 @@ const alertStyle = (kind: string) => {
   if (kind === "interest_received") return { icon: "💌", tone: "interest" };
   if (kind === "interest_accepted") return { icon: "✨", tone: "accepted" };
   if (kind === "profile_view") return { icon: "👀", tone: "view" };
+  if (kind === "shortlist") return { icon: "♥", tone: "shortlist" };
   if (kind === "contact_view") return { icon: "📇", tone: "contact" };
   if (kind === "match") return { icon: "💫", tone: "match" };
   return { icon: "🔔", tone: "general" };

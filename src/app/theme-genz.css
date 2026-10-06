@@ -1501,6 +1501,7 @@ html[data-scene="couple"] .app-main {
 .alerts-genz-icon.is-interest { background: rgb(255 225 234); }
 .alerts-genz-icon.is-accepted { background: rgb(234 226 255); }
 .alerts-genz-icon.is-view { background: rgb(222 241 255); }
+.alerts-genz-icon.is-shortlist { background: rgb(255 228 236); }
 .alerts-genz-icon.is-contact { background: rgb(226 246 234); }
 .alerts-genz-icon.is-match { background: rgb(255 239 200); }
 .alerts-genz-list .wa-avatar { width: 2.4rem; height: 2.4rem; }

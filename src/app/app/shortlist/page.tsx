@@ -46,7 +46,7 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
         <header className="page-head-panel">
           <p className="browse-kicker">Your picks</p>
           <h1>Shortlisted profiles</h1>
-          <p className="set-lead">Keep thoughtful possibilities together. A shortlist is private to you.</p>
+          <p className="set-lead">Keep thoughtful possibilities together. Your list stays private; they get an alert that you shortlisted them.</p>
         </header>
         <SafetyFlash code={safety} />
         {rows.length ? (
