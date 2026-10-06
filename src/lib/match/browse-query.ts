@@ -4,6 +4,7 @@ import { pickPrimaryPhotoMap } from "@/lib/match/inbox-card";
 export const BROWSE_PROFILE_COLUMNS = [
   "id",
   "created_by",
+  "created_at",
   "profile_type",
   "status",
   "subject_full_name",

@@ -31,13 +31,9 @@ export default async function DeskLayout({ children }: { children: React.ReactNo
         <PageHero
           kicker={desk.admin ? "Admin" : "Staff"}
           title="House desk"
-          sub={
-            desk.admin
-              ? "Tickets, analytics, audit, plans, member edit, and staff appoint."
-              : "Work tickets, confirm plans, review the audit log, and edit member profiles."
-          }
+          sub="Open one desk at a time."
         />
-        <div className="browse-board desk-board">
+        <div className="browse-board desk-board is-menu">
           <DeskNav admin={desk.admin} />
           <div className="desk-main">
             <Suspense fallback={<DeskPaneFallback />}>{children}</Suspense>

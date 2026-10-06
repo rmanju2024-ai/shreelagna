@@ -66,6 +66,7 @@ function cardFromRow(row: Record<string, unknown>, photoMap: Map<string, string>
     diet: asText(row.diet),
     income_band: asText(row.income_band),
     profile_type: asText(row.profile_type),
+    created_at: asText(row.created_at),
     score: null,
   };
 }

@@ -119,6 +119,50 @@ export function NavGlyph({ name }: { name: string }) {
           <path d="M12 7.2v7.2M9.4 12.2 12 14.8l2.6-2.6" />
         </svg>
       );
+    case "tickets":
+      return (
+        <svg {...common}>
+          <path {...duo} d="M4.5 8.2h15v3.2c-1.2.2-2 1.1-2 2.3s.8 2.1 2 2.3v3.2h-15v-3.2c1.2-.2 2-1.1 2-2.3s-.8-2.1-2-2.3V8.2Z" />
+          <path d="M9 9.2v9.2" />
+        </svg>
+      );
+    case "safety":
+      return (
+        <svg {...common}>
+          <path {...duo} d="M12 3.5 19 6.5v5.3c0 4.3-2.9 7.1-7 8.7-4.1-1.6-7-4.4-7-8.7V6.5l7-3Z" />
+          <path d="M12 10.2v3.2M12 16.2h.01" />
+        </svg>
+      );
+    case "analytics":
+      return (
+        <svg {...common}>
+          <path {...duo} d="M4.5 18.5h15" />
+          <path {...duo} d="M6.5 18.5v-6.2h3.2V18.5H6.5Z" />
+          <path {...duo} d="M10.4 18.5V7.8h3.2v10.7h-3.2Z" />
+          <path {...duo} d="M14.3 18.5v-9.4h3.2v9.4h-3.2Z" />
+        </svg>
+      );
+    case "audit":
+      return (
+        <svg {...common}>
+          <path {...duo} d="M7.2 4.2h7.2L18.8 8.6v11.2H7.2V4.2Z" />
+          <path d="M14.2 4.4v4.4h4.4M9.2 12.2h6.4M9.2 15.2h4.6" />
+        </svg>
+      );
+    case "look":
+      return (
+        <svg {...common}>
+          <circle {...duo} cx="10.5" cy="10.5" r="5.4" />
+          <path d="m14.4 14.4 5 5" />
+        </svg>
+      );
+    case "verify":
+      return (
+        <svg {...common}>
+          <circle {...duo} cx="12" cy="12" r="8.5" />
+          <path d="m8.6 12.2 2.2 2.2 4.6-4.8" />
+        </svg>
+      );
     default:
       return (
         <svg {...common}>

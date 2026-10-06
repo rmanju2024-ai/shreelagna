@@ -3,7 +3,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import type { BrowseCardNote } from "@/app/browse/browse-card";
-import { DeskLookBoard } from "./desk-look-board";
+import { DeskLookBoard, sortLookNotes } from "./desk-look-board";
 import { DISCOVER_RESULTS_PAGE_SIZE } from "@/app/browse/browse-client";
 
 afterEach(cleanup);
@@ -47,5 +47,15 @@ describe("Desk look board", () => {
     expect(screen.queryByText("Name 10")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
     expect(screen.getByText("Name 10")).toBeTruthy();
+  });
+
+  it("sorts listed profiles by place", () => {
+    const notes = [
+      note({ id: "a", name: "Zara", city: "Mysuru", state: "Karnataka", created_at: "2026-01-01" }),
+      note({ id: "b", name: "Ananya", city: "Bengaluru", state: "Karnataka", created_at: "2026-02-01" }),
+    ];
+    expect(sortLookNotes(notes, "place").map((row) => row.name)).toEqual(["Ananya", "Zara"]);
+    expect(sortLookNotes(notes, "newest").map((row) => row.name)).toEqual(["Ananya", "Zara"]);
+    expect(sortLookNotes(notes, "oldest").map((row) => row.name)).toEqual(["Zara", "Ananya"]);
   });
 });

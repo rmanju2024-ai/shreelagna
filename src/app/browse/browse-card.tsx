@@ -22,6 +22,7 @@ export type BrowseCardNote = {
   diet?: string | null;
   income_band?: string | null;
   profile_type?: string | null;
+  created_at?: string | null;
 };
 
 function chips(note: BrowseCardNote): string[] {

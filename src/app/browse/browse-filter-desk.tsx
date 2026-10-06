@@ -17,6 +17,8 @@ export function BrowseFilterDesk({
   religions,
   communities,
   includeKind = false,
+  sort,
+  onSortChange,
   onApply,
   onClear,
 }: {
@@ -24,6 +26,8 @@ export function BrowseFilterDesk({
   religions: string[];
   communities: string[];
   includeKind?: boolean;
+  sort?: string;
+  onSortChange?: (next: string) => void;
   onApply?: (next: BrowseFilters) => void;
   onClear?: () => void;
 }) {
@@ -65,7 +69,7 @@ export function BrowseFilterDesk({
         <div>
           <p>
             {includeKind
-              ? "Apply to list profiles. Leave every field as Any to see both Brides and Grooms."
+              ? "Apply to list profiles. Leave every field as Any to see both Brides and Grooms. Sort after you list."
               : "Pick what you want, then Apply. Age can be 18 to 80."}
           </p>
         </div>
@@ -242,6 +246,24 @@ export function BrowseFilterDesk({
             onValuesChange={(income) => setDraft((prev) => ({ ...prev, income }))}
           />
         </label>
+        {sort != null ? (
+          <label>
+            <span>Sort by</span>
+            <Select3d
+              name="sort"
+              value={sort}
+              className={inputClass}
+              onChange={(event) => onSortChange?.(event.target.value)}
+            >
+              <option value="newest">Recently created</option>
+              <option value="oldest">Oldest first</option>
+              <option value="age_asc">Age, youngest</option>
+              <option value="age_desc">Age, oldest</option>
+              <option value="place">Place</option>
+              <option value="name">Name</option>
+            </Select3d>
+          </label>
+        ) : null}
       </div>
     </form>
   );
