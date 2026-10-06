@@ -597,7 +597,7 @@ export function ProfileRedesign(props: ProfileData) {
               <section className="pv-panel">
                 <div className="pv-panel-head">
                   <span className="pv-ico">▣</span>
-                  <span>More about this family</span>
+                  <span>Job, family, and my more</span>
                 </div>
                 <DetailTiles groups={closedDetails} />
               </section>
