@@ -678,7 +678,7 @@ export async function BrowseProfileView({
       ),
       items: factsOf(
         fact("Income", profile.income_band),
-        fact("Settle abroad", profile.settle_abroad),
+        fact("Wish to settle in abroad", profile.settle_abroad),
         fact("Ambition", profile.future_ambition),
       ),
     },

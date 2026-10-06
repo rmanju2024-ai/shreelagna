@@ -253,7 +253,7 @@ export function ProfilePortrait({
         { k: "Working as", v: profile.occupation ?? "—", required: true },
         { k: "Employed in", v: typeof profile.employed_in === "string" ? profile.employed_in : "—" },
         { k: "Employer name", v: typeof profile.employer_name === "string" && profile.employer_name.trim() ? profile.employer_name : "—" },
-        { k: "Settle abroad", v: text("settle_abroad") },
+        { k: "Wish to settle in abroad", v: text("settle_abroad") },
         { k: "Future ambition", v: text("future_ambition") },
       ],
     },

@@ -619,8 +619,8 @@ export function ProfileForm({
             </Select3d>
           </Field>
           <Field
-            label="Want to settle abroad?"
-            help="Whether they hope to live overseas, stay in India, or remain open."
+            label="Wish to settle in abroad?"
+            help="Yes if they hope to live overseas, No to stay in India, Open if either is fine."
           >
             <Select3d name="settle_abroad" defaultValue={values?.settle_abroad ?? ""} className={inputClass}>
               <option value="">Not mentioned</option>

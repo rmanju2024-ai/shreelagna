@@ -40,7 +40,7 @@ const FACT_ICON: Record<string, string> = {
   "Pin code": "📍",
   "Employed in": "🏢",
   Income: "₹",
-  "Settle abroad": "✈",
+  "Wish to settle in abroad": "✈",
   Ambition: "★",
   "Living standard": "⌂",
   Rashi: "☽",
