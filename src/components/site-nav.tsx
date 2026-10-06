@@ -188,6 +188,7 @@ export function HeaderNav({
 }) {
   const pathname = usePathname();
   const tab = useSearchParams().get("tab");
+  const [dock, setDock] = useState(false);
   const more: NavItem[] = [
     { href: "/about", label: "About", icon: "about" },
     { href: "/contact", label: "Help", icon: "help" },
@@ -196,8 +197,16 @@ export function HeaderNav({
   const registerHere = pathMatches(pathname, "/login", tab);
   const moreOn = more.some((item) => pathMatches(pathname, item.href, tab));
 
-  return (
-    <nav aria-label="Primary" className={`site-nav${overlay ? " is-overlay" : ""}`}>
+  useLayoutEffect(() => {
+    const mq = window.matchMedia("(max-width: 820px)");
+    const sync = () => setDock(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  const nav = (
+    <nav aria-label="Primary" className={`site-nav${overlay ? " is-overlay" : ""}${dock ? " is-mobile-dock" : ""}`}>
       <div className="site-nav-row">
         <NavChip item={{ href: "/", label: "Home", icon: "home" }} overlay={overlay} current={pathMatches(pathname, "/", tab)} />
         <NavChip item={{ href: "/browse", label: "Discover", icon: "browse" }} overlay={overlay} current={pathMatches(pathname, "/browse", tab)} />
@@ -229,4 +238,7 @@ export function HeaderNav({
       </div>
     </nav>
   );
+
+  if (dock) return createPortal(nav, document.body);
+  return nav;
 }

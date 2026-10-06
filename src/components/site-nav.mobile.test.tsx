@@ -73,6 +73,8 @@ describe("mobile primary navigation", () => {
   it("keeps every member destination available (Inbox lives on Account hub)", () => {
     render(<HeaderNav overlay={false} user staff />);
     const nav = screen.getByRole("navigation", { name: "Primary" });
+    expect(nav.parentElement).toBe(document.body);
+    expect(nav.className).toContain("is-mobile-dock");
     for (const label of ["Home", "Discover", "Account", "Desk", "More"]) {
       expect(nav.textContent).toContain(label);
     }
