@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { planHeaderMarks } from "./account-plan";
 
 describe("account hub plan marks", () => {
-  it("packs welcome cover into short chips", () => {
+  it("packs welcome cover with short labels", () => {
     const marks = planHeaderMarks({
       access: {
         kind: "welcome",
@@ -14,7 +14,12 @@ describe("account hub plan marks", () => {
       used: 2,
       limit: 20,
     });
-    expect(marks.map((item) => `${item.icon}${item.text}`)).toEqual(["✦Gift", "☽59d", "▣3 Dec", "✉2/20"]);
+    expect(marks.map((item) => `${item.hint}:${item.text}`)).toEqual([
+      "Plan:Gift",
+      "Days left:59d",
+      "Last day:3 Dec",
+      "Chats used:2/20",
+    ]);
   });
 
   it("shows wait instead of unused waiting copy", () => {
@@ -25,7 +30,11 @@ describe("account hub plan marks", () => {
       limit: 0,
     });
     expect(marks.find((item) => item.id === "plan")?.text).toBe("No plan");
-    expect(marks.find((item) => item.id === "wait")?.text).toBe("Gold");
-    expect(marks.find((item) => item.id === "use")?.text).toBe("0/0");
+    expect(marks.find((item) => item.id === "wait")).toEqual({
+      id: "wait",
+      text: "Gold",
+      hint: "Waiting",
+      tone: "wait",
+    });
   });
 });

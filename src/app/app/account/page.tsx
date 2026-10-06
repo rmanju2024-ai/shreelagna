@@ -4,7 +4,7 @@ import { HouseCrest } from "@/components/house-crest";
 import { FieldMark } from "@/app/app/profiles/field-mark";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { planByCode } from "@/lib/membership/catalog";
-import { planHeaderMarks } from "@/lib/membership/account-plan";
+import { planHeaderMarks, type PlanMark } from "@/lib/membership/account-plan";
 import { fetchPendingPlanCode, fetchPlans, loadInterestQuota, loadMembership } from "@/lib/membership/load";
 import { findOwnProfile } from "@/lib/profile/own-profile";
 import { monthAgoIso, pulseNote, tallyMonthPulse } from "@/lib/profile/month-pulse";
@@ -60,52 +60,76 @@ const groups = [
 
 function MonthPulseCard({
   pulse,
+  planMarks,
 }: {
-  pulse: { views: number; received: number; sent: number; accepted: number; warmth: number };
+  pulse: { views: number; received: number; sent: number; accepted: number; warmth: number } | null;
+  planMarks: PlanMark[];
 }) {
   const ring = 2 * Math.PI * 26;
-  const drawn = (pulse.warmth / 100) * ring;
+  const drawn = pulse ? (pulse.warmth / 100) * ring : 0;
   return (
-    <section className="account-pulse" aria-label="How your profile did in the last 30 days">
-      <div className="account-pulse-moon">
-        <svg viewBox="0 0 64 64" aria-hidden>
-          <circle className="account-pulse-track" cx="32" cy="32" r="26" />
-          <circle
-            className="account-pulse-glow"
-            cx="32"
-            cy="32"
-            r="26"
-            strokeDasharray={`${drawn} ${ring}`}
-            transform="rotate(-90 32 32)"
-          />
-        </svg>
-        <p>
-          <b>{pulse.warmth}</b>
-          <span>warmth</span>
-        </p>
-      </div>
-      <div className="account-pulse-copy">
-        <p className="browse-kicker">Last 30 days</p>
-        <h2>{pulseNote(pulse.warmth)}</h2>
-        <ul>
-          <li>
-            <strong>{pulse.views}</strong>
-            seen
-          </li>
-          <li>
-            <strong>{pulse.received}</strong>
-            received
-          </li>
-          <li>
-            <strong>{pulse.sent}</strong>
-            sent
-          </li>
-          <li>
-            <strong>{pulse.accepted}</strong>
-            accepted
-          </li>
-        </ul>
-      </div>
+    <section className="account-pulse" aria-label="Activity and current plan">
+      {pulse ? (
+        <div className="account-pulse-moon">
+          <svg viewBox="0 0 64 64" aria-hidden>
+            <circle className="account-pulse-track" cx="32" cy="32" r="26" />
+            <circle
+              className="account-pulse-glow"
+              cx="32"
+              cy="32"
+              r="26"
+              strokeDasharray={`${drawn} ${ring}`}
+              transform="rotate(-90 32 32)"
+            />
+          </svg>
+          <p>
+            <b>{pulse.warmth}</b>
+            <span>warmth</span>
+          </p>
+        </div>
+      ) : null}
+      {pulse ? (
+        <div className="account-pulse-copy">
+          <p className="browse-kicker">Last 30 days</p>
+          <h2>{pulseNote(pulse.warmth)}</h2>
+          <ul>
+            <li>
+              <strong>{pulse.views}</strong>
+              seen
+            </li>
+            <li>
+              <strong>{pulse.received}</strong>
+              received
+            </li>
+            <li>
+              <strong>{pulse.sent}</strong>
+              sent
+            </li>
+            <li>
+              <strong>{pulse.accepted}</strong>
+              accepted
+            </li>
+          </ul>
+        </div>
+      ) : (
+        <div className="account-pulse-copy">
+          <p className="browse-kicker">Last 30 days</p>
+          <h2>Your house is ready.</h2>
+        </div>
+      )}
+      {planMarks.length ? (
+        <Link href="/app/plans" className="account-pulse-plan">
+          <p className="browse-kicker">Current plan</p>
+          <ul>
+            {planMarks.map((mark) => (
+              <li key={mark.id} className={`is-${mark.tone}`}>
+                <span>{mark.hint}</span>
+                <strong>{mark.text}</strong>
+              </li>
+            ))}
+          </ul>
+        </Link>
+      ) : null}
     </section>
   );
 }
@@ -165,16 +189,8 @@ export default async function AccountHubPage() {
             <p className="browse-kicker">Your house</p>
             <h1>Account hub</h1>
           </div>
-          <Link href="/app/plans" className="account-hub-marks" aria-label={access.label}>
-            {planMarks.map((mark) => (
-              <b key={mark.id} className={`is-${mark.tone}`}>
-                <i aria-hidden>{mark.icon}</i>
-                {mark.text}
-              </b>
-            ))}
-          </Link>
         </header>
-        {pulse ? <MonthPulseCard pulse={pulse} /> : null}
+        <MonthPulseCard pulse={pulse} planMarks={planMarks} />
         <div className="account-hub-layout">
           <aside className="account-hub-rail" aria-label="Account sections">
             {groups.map((group) => (
