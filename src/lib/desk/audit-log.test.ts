@@ -2,12 +2,28 @@ import { describe, expect, it } from "vitest";
 import { auditDetails, formatAuditCsvRow, toCsv } from "./audit-log";
 
 describe("desk audit log", () => {
-  it("flattens useful metadata for the details column", () => {
-    expect(auditDetails({ status: "active", field: "about", junk: true })).toBe("Status active · Field about");
-    expect(auditDetails({ status: "approved" }, { title: "Kavya · SL-1", email: "k@test", place: "Mysuru", plan: "Gold" })).toBe(
-      "Profile Kavya · SL-1 · Gmail k@test · Place Mysuru · Plan Gold · Status approved",
-    );
+  it("puts the action and member in details without repeating other columns", () => {
+    expect(auditDetails({ status: "active", field: "about", junk: true })).toBe("active · field about");
+    expect(
+      auditDetails(
+        { action: "verification.case.review", entity_type: "verification_case", metadata: { status: "approved", documentType: "identity" } },
+        { title: "Kavya · SL-1 · Bride", email: "k@test", place: "Mysuru" },
+      ),
+    ).toBe("approved · identity document · on Kavya · SL-1 · Bride · Mysuru");
     expect(auditDetails(null)).toBe("");
+  });
+
+  it("names who accepted interest on which profile", () => {
+    expect(
+      auditDetails(
+        {
+          action: "interest.accepted",
+          entity_type: "interest",
+          metadata: { from: "a", to: "b" },
+        },
+        { fromTitle: "Jayesh · SL010003 · Groom", toTitle: "Manjunatha R · SL010002 · Groom" },
+      ),
+    ).toBe("Manjunatha R · SL010002 · Groom accepted interest from Jayesh · SL010003 · Groom");
   });
 
   it("builds a CSV row with actor, action, and entity", () => {
@@ -23,6 +39,7 @@ describe("desk audit log", () => {
         metadata: { status: "on_hold" },
       },
       { id: "u1", display_name: "Kavya", email: "kavya@house.test" },
+      { title: "Kavya · SL-1 · Bride" },
     );
     expect(row).toEqual([
       "12",
@@ -34,8 +51,8 @@ describe("desk audit log", () => {
       "profile.status",
       "Profile status",
       "profile",
-      "p-123",
-      "Status on_hold",
+      "Kavya · SL-1 · Bride",
+      "on hold · on Kavya · SL-1 · Bride",
     ]);
   });
 

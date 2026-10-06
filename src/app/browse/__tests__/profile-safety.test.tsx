@@ -12,6 +12,7 @@ import { BackLink } from "@/components/back-link";
 import { PromoBubble } from "@/app/browse/promo-bubble";
 import { SafetyFlash } from "@/app/browse/safety-flash";
 import { SafetyProfileControl } from "@/app/app/safety/safety-profile-control";
+import { blockProfile } from "@/app/app/safety/actions";
 
 function setReferrer(value: string, length = 3) {
   Object.defineProperty(document, "referrer", { value, configurable: true });
@@ -56,6 +57,26 @@ describe("profile safety and close behaviour", () => {
   it("report opens its own page", () => {
     render(<SafetyProfileControl profileId="p1" returnTo="/browse/p1" />);
     expect(screen.getByText(/Report/).getAttribute("href")).toBe("/browse/p1/report");
+  });
+
+  it("closes the confirm popup, shows a blocked message, then refreshes", async () => {
+    vi.mocked(blockProfile).mockResolvedValue({ ok: true });
+    const reload = vi.fn();
+    vi.stubGlobal("location", { reload });
+    vi.useFakeTimers();
+    render(<SafetyProfileControl profileId="p1" returnTo="/browse/p1" name="Asha" />);
+    fireEvent.click(screen.getByText(/Block/));
+    await act(async () => {
+      fireEvent.submit(screen.getByText("Yes, block").closest("form")!);
+    });
+    expect(screen.queryByText(/Block Asha\?/)).toBeNull();
+    expect(screen.getByRole("status").textContent).toMatch(/blocked/i);
+    act(() => {
+      vi.advanceTimersByTime(3500);
+    });
+    expect(reload).toHaveBeenCalled();
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
   });
 
   it("shows feedback after blocking or reporting", () => {

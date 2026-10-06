@@ -19,17 +19,17 @@ async function member() {
 export async function blockProfile(formData: FormData) {
   const { db, me } = await member();
   const targetId = String(formData.get("profile_id") ?? "");
-  const returnTo = String(formData.get("return_to") ?? "/browse");
   if (!targetId || targetId === me.active_profile_id) redirect("/browse");
   const { error } = await db.from("member_blocks").upsert(
     { blocker_profile_id: me.active_profile_id, blocked_profile_id: targetId },
     { onConflict: "blocker_profile_id,blocked_profile_id", ignoreDuplicates: true },
   );
-  if (error) redirect(`${returnTo}?safety=block_error`);
+  if (error) return { ok: false as const, error: "Could not block this profile just now. Please try again." };
   revalidatePath("/browse");
   revalidatePath("/app/interests");
   revalidatePath("/app/chat");
-  redirect("/browse?safety=blocked");
+  revalidatePath(`/browse/${targetId}`);
+  return { ok: true as const };
 }
 
 export async function reportProfile(formData: FormData) {

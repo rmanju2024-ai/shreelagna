@@ -2,7 +2,7 @@ import { DeskPager } from "@/app/desk/desk-pager";
 import { requireDesk } from "@/lib/desk/access";
 import { cachedAuditPage } from "@/lib/desk/cached";
 import { auditActionLabel, houseRoleLabel } from "@/lib/desk/breakdown";
-import { auditDetails, auditRecordLabel, type AuditActor, type AuditEventRow } from "@/lib/desk/audit-log";
+import { auditDetails, type AuditActor, type AuditEventRow } from "@/lib/desk/audit-log";
 import { loadAuditSubjects, subjectKey } from "@/lib/desk/audit-subjects";
 import { deskPage, deskRange } from "@/lib/desk/pager";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -57,7 +57,7 @@ export default async function DeskAuditPage({
     <div className="desk-audit">
       <div className="desk-audit-toolbar">
         <p className="browse-saved-note">
-          Staff and Admin activity — who acted, which member profile, which plan, and where. 20 per page, newest first.
+          Staff and Admin activity — who acted, what they did, and on which member. 20 per page, newest first.
         </p>
         <a href="/desk/audit/export" className={btnGhost}>
           Export CSV
@@ -72,7 +72,6 @@ export default async function DeskAuditPage({
                 <th>Actor</th>
                 <th>Role</th>
                 <th>Action</th>
-                <th>Profile</th>
                 <th>Details</th>
               </tr>
             </thead>
@@ -81,8 +80,7 @@ export default async function DeskAuditPage({
                 const actor = row.actor_user_id ? actorById.get(row.actor_user_id) : null;
                 const name = actor?.display_name || actor?.email || houseRoleLabel(row.actor_role);
                 const subject = subjects.get(subjectKey(row.entity_type, row.entity_id));
-                const details = auditDetails(row.metadata, subject);
-                const record = auditRecordLabel(row, subject);
+                const details = auditDetails(row, subject);
                 return (
                   <tr key={row.id}>
                     <td>
@@ -95,15 +93,6 @@ export default async function DeskAuditPage({
                     <td>{houseRoleLabel(row.actor_role)}</td>
                     <td>
                       <strong>{auditActionLabel(row.action)}</strong>
-                      <small>{row.action}</small>
-                    </td>
-                    <td title={row.entity_id ?? undefined}>
-                      {subject?.href ? (
-                        <a href={subject.href}>{record}</a>
-                      ) : (
-                        record
-                      )}
-                      {subject?.email ? <small>{subject.email}</small> : null}
                     </td>
                     <td>{details || "—"}</td>
                   </tr>

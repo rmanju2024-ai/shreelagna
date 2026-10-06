@@ -6332,6 +6332,79 @@ a.browse-view {
   overflow: visible;
 }
 
+.desk-safety-row {
+  align-items: start;
+  cursor: default;
+}
+
+.desk-safety-row .desk-ticket-row-main {
+  display: grid;
+  gap: 0.45rem;
+  align-items: start;
+}
+
+.desk-safety-parties {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0.15rem 0 0;
+}
+
+.desk-safety-parties div {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.desk-safety-parties dt {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9a3412;
+}
+
+.desk-safety-parties dd {
+  margin: 0;
+  display: grid;
+  gap: 0.15rem;
+  font-weight: 700;
+  color: #3f0e0d;
+}
+
+.desk-safety-parties a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.desk-safety-parties small {
+  display: block;
+  font-weight: 600;
+  color: #6a574c;
+}
+
+.desk-safety-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.desk-safety-note {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #3f0e0d;
+}
+
+.desk-safety-note span {
+  display: block;
+  margin-bottom: 0.15rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9a3412;
+}
+
 .desk-ticket-row-head {
   display: inline-flex;
   flex-wrap: wrap;

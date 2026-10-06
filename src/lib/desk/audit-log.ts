@@ -35,74 +35,70 @@ export const AUDIT_CSV_HEADERS = [
 
 export const AUDIT_EXPORT_LIMIT = 5000;
 
-const DETAIL_KEYS = [
-  "status",
-  "field",
-  "target",
-  "plan",
-  "plan_code",
-  "email",
-  "name",
-  "months",
-  "price",
-  "documentType",
-  "document_type",
-  "trustTier",
-  "section",
-  "memberCode",
-  "place",
-  "profile",
-] as const;
-
-const KEY_LABEL: Record<string, string> = {
-  status: "Status",
-  field: "Field",
-  target: "Target",
-  plan: "Plan",
-  plan_code: "Plan",
-  email: "Gmail",
-  name: "Name",
-  months: "Months",
-  price: "Price",
-  documentType: "Document",
-  document_type: "Document",
-  trustTier: "Trust",
-  section: "Section",
-  memberCode: "ID",
-  place: "Place",
-  profile: "Profile",
-};
-
 export type AuditSubjectNote = {
   title?: string;
   email?: string;
   place?: string;
   plan?: string;
+  fromTitle?: string;
+  toTitle?: string;
 };
 
+function nice(value: unknown) {
+  return String(value).replace(/_/g, " ").trim();
+}
+
+/** Action taken, plus the member it was taken on — without repeating other columns. */
 export function auditDetails(
-  metadata: Record<string, unknown> | null | undefined,
+  row: Pick<AuditEventRow, "action" | "entity_type" | "metadata"> | Record<string, unknown> | null | undefined,
   subject?: AuditSubjectNote | null,
 ): string {
-  const parts: string[] = [];
+  const action = row && "action" in row ? String(row.action ?? "") : "";
+  const metadata =
+    row && "metadata" in row && row.metadata && typeof row.metadata === "object"
+      ? (row.metadata as Record<string, unknown>)
+      : row && !("action" in (row as object)) && row && typeof row === "object"
+        ? (row as Record<string, unknown>)
+        : null;
+
+  if (action === "interest.accepted" || action === "interest.declined") {
+    const from = subject?.fromTitle || "a member";
+    const to = subject?.toTitle || "a member";
+    return action === "interest.accepted"
+      ? `${to} accepted interest from ${from}`
+      : `${to} declined interest from ${from}`;
+  }
+
+  const facts: string[] = [];
   const seen = new Set<string>();
-  function add(label: string, value: unknown) {
-    if (value == null || value === "") return;
-    const text = `${label} ${String(value)}`.trim();
+  function add(part: string) {
+    const text = part.replace(/\s+/g, " ").trim();
+    if (!text) return;
     const key = text.toLowerCase();
     if (seen.has(key)) return;
     seen.add(key);
-    parts.push(text);
+    facts.push(text);
   }
-  if (subject?.title) add("Profile", subject.title);
-  if (subject?.email) add("Gmail", subject.email);
-  if (subject?.place) add("Place", subject.place);
-  if (subject?.plan) add("Plan", subject.plan);
-  if (!metadata || typeof metadata !== "object") return parts.join(" · ");
-  for (const key of DETAIL_KEYS) {
-    add(KEY_LABEL[key] ?? key, metadata[key]);
+
+  if (metadata) {
+    if (metadata.status) add(nice(metadata.status));
+    const doc = metadata.documentType ?? metadata.document_type;
+    if (doc) add(`${nice(doc)} document`);
+    if (metadata.section) add(`edited ${nice(metadata.section)}`);
+    if (metadata.field) add(`field ${nice(metadata.field)}`);
+    if (metadata.trustTier) add(`trust ${nice(metadata.trustTier)}`);
+    const plan = subject?.plan || metadata.plan || metadata.plan_code;
+    if (plan) add(`plan ${nice(plan)}`);
+    if (metadata.months) add(`${metadata.months} months`);
+    if (metadata.price) add(`price ${metadata.price}`);
+  } else if (subject?.plan) {
+    add(`plan ${subject.plan}`);
   }
-  return parts.join(" · ");
+
+  if (subject?.title) add(`on ${subject.title}`);
+  if (subject?.place) add(subject.place);
+
+  return facts.join(" · ");
 }
 
 export function auditRecordLabel(
@@ -134,7 +130,7 @@ export function formatAuditCsvRow(
     auditActionLabel(row.action),
     row.entity_type,
     subject?.title || row.entity_id || "",
-    auditDetails(row.metadata, subject),
+    auditDetails(row, subject),
   ];
 }
 
