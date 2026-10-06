@@ -1765,6 +1765,11 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
   width: 100%;
   max-height: 22rem;
 }
+.bird-dock.is-inline .bird-dock-chat {
+  justify-self: center;
+  width: 3.1rem;
+  height: 3.1rem;
+}
 @media (max-width: 900px) {
   .pv-shell .pv-grid { grid-template-columns: 1fr; }
   .pv-shell .pv-tile.is-wide ul { grid-template-columns: 1fr; }

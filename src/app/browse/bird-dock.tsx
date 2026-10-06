@@ -144,7 +144,7 @@ export function BirdDock({
 }) {
   const [mounted, setMounted] = useState(false);
   const [phase, setPhase] = useState<Phase>("enter");
-  const [open, setOpen] = useState(inline);
+  const [open, setOpen] = useState(false);
   const [wide, setWide] = useState(false);
   const [badge, setBadge] = useState(0);
   const [line, setLine] = useState(0);
@@ -162,7 +162,6 @@ export function BirdDock({
   const stageRef = useRef<HTMLDivElement | null>(null);
   const storeKey = `sl-bird-chat:${profileId}`;
   const showChat = localThread === "sent" || localThread === "received" || localThread === "accepted";
-  const pinChat = inline && showChat;
   const pool = phase === "peck" ? CHIRPS.peck : chirpPool(localThread, needPlan, needQuota, canSend, awaitingReview);
   const chirp = pool[line % pool.length];
   const name = chat?.name ?? "Match";
@@ -230,7 +229,7 @@ export function BirdDock({
       const saved = sessionStorage.getItem(storeKey);
       if (saved) {
         const parsed = JSON.parse(saved) as { open?: boolean; wide?: boolean };
-        if (parsed.open || inline) setOpen(true);
+        if (parsed.open) setOpen(true);
         if (parsed.wide && parsed.open) setWide(true);
       }
     } catch {
@@ -240,8 +239,8 @@ export function BirdDock({
 
   useEffect(() => {
     if (!mounted) return;
-    sessionStorage.setItem(storeKey, JSON.stringify({ open: open || pinChat, wide: wide && (open || pinChat) }));
-  }, [open, wide, mounted, storeKey, pinChat]);
+    sessionStorage.setItem(storeKey, JSON.stringify({ open, wide: wide && open }));
+  }, [open, wide, mounted, storeKey]);
 
   useEffect(() => {
     setLine(0);
@@ -380,8 +379,8 @@ export function BirdDock({
   }
 
   function closeChat() {
+    setOpen(false);
     setWide(false);
-    if (!inline) setOpen(false);
   }
 
   function onSend(event: React.FormEvent<HTMLFormElement>) {
@@ -430,12 +429,12 @@ export function BirdDock({
   const dock = (
     <div
       ref={dockRef}
-      className={`bird-dock${open || pinChat ? " is-open" : ""}${wide ? " is-wide" : ""}${inline ? " is-inline" : ""}`}
+      className={`bird-dock${open ? " is-open" : ""}${wide ? " is-wide" : ""}${inline ? " is-inline" : ""}`}
       data-phase={phase}
       data-thread={localThread}
     >
       {wide ? <button type="button" className="bird-wa-scrim" aria-label="Restore chat" onClick={() => setWide(false)} /> : null}
-      {(open || pinChat) && showChat ? (
+      {open && showChat ? (
         <section className={`bird-wa${wide ? " is-max" : ""}`} aria-label="Chat">
           <header className="bird-wa-head">
             <ChatAvatar name={name} src={chat?.photo} size={wide ? "md" : "sm"} />
@@ -447,11 +446,9 @@ export function BirdDock({
               <button type="button" className="bird-wa-icon" onClick={() => setWide((on) => !on)} aria-label={wide ? "Restore" : "Maximize"}>
                 {wide ? "↙" : "↗"}
               </button>
-              {wide || !inline ? (
-                <button type="button" className="bird-wa-icon" onClick={closeChat} aria-label="Close">
-                  ✕
-                </button>
-              ) : null}
+              <button type="button" className="bird-wa-icon" onClick={closeChat} aria-label="Close">
+                ✕
+              </button>
             </div>
           </header>
           <div className="bird-wa-stage" ref={stageRef}>
@@ -515,9 +512,11 @@ export function BirdDock({
         </section>
       ) : null}
 
+      {showChat ? null : (
       <p className="bird-chirp" aria-live="polite">
         {chirp}
       </p>
+      )}
 
       <div className="bird-dock-stage">
         <span className="bird-dock-actor" aria-hidden>
@@ -598,19 +597,13 @@ export function BirdDock({
           )
         ) : null}
 
-        {localThread === "accepted" ? (
-          <button type="button" className="bird-dock-cta is-sent" onClick={openChat}>
-            Interest sent
-          </button>
-        ) : null}
-
         {localThread === "received" ? (
           <Link href="/app/interests" className="bird-dock-cta">
             {perchLabel}
           </Link>
         ) : null}
 
-        {showChat && !pinChat ? (
+        {showChat && !open ? (
           <button
             type="button"
             className={`bird-dock-chat${badge ? " has-mail" : ""}${phase === "deliver" ? " is-drop-in" : ""}`}
