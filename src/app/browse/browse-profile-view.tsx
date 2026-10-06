@@ -28,6 +28,7 @@ import {
   smsOtpRequiredFromEnv,
 } from "@/lib/profile/completeness";
 import { viewerEmailVerified } from "@/lib/profile/house-ready";
+import { verificationMarks } from "@/lib/verification/marks";
 import { maritalLabel, NATIVE_COUNTRIES, HOPE_ANY, MOTHER_TONGUES } from "@/lib/profile/options";
 import { asStringList, hopeDisplay, hopeValues, languagesKnown } from "@/lib/profile/multi-values";
 import { aboutPlainText } from "@/lib/profile/about-html";
@@ -325,12 +326,13 @@ export async function BrowseProfileView({
   let contact: ProfileData["contact"] = undefined;
   let shortlisted = false;
   const db = createServiceClient() ?? supabase;
-  const [access, ownerRes, myProfilesRes] = await Promise.all([
+  const [access, ownerRes, myProfilesRes, verifyCasesRes] = await Promise.all([
     loadMembership(db, me),
-    db.from("app_users").select("id, role, welcome_started_at, welcome_days, email").eq("id", profile.created_by).maybeSingle(),
+    db.from("app_users").select("id, role, welcome_started_at, welcome_days, email, email_otp_verified_at").eq("id", profile.created_by).maybeSingle(),
     own
       ? Promise.resolve({ data: [] as Record<string, unknown>[] })
       : db.from("profiles").select("*, religions(name), communities(name)").eq("created_by", me.id),
+    db.from("profile_verification_cases").select("document_type, status").eq("profile_id", id),
   ]);
   needPlan = !access.live;
   const owner = ownerRes.data;
@@ -838,6 +840,19 @@ export async function BrowseProfileView({
     contact,
     finishHref: "/app/profiles/" + (mine?.id || me.active_profile_id || ""),
     readiness,
+    verify: verificationMarks({
+      mobile: Boolean(profile.phone_otp_verified_at),
+      email: viewerEmailVerified({
+        email: typeof owner?.email === "string" ? owner.email : own ? me.email : null,
+        email_otp_verified_at:
+          typeof owner?.email_otp_verified_at === "string"
+            ? owner.email_otp_verified_at
+            : own
+              ? me.email_otp_verified_at
+              : null,
+      }),
+      cases: verifyCasesRes.data ?? [],
+    }),
     details,
     matches: !own && mine ? matchBanner(mine, profile, kundali) : [],
     hope,

@@ -1202,6 +1202,63 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
   border-color: rgb(22 101 52 / 35%);
   color: #14532d;
 }
+.pv-shell .pv-verify {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.28rem;
+  margin: 0.4rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.pv-shell .pv-verify li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  padding: 0.16rem 0.52rem 0.18rem 0.32rem;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.pv-shell .pv-verify li span {
+  display: inline-flex;
+  width: 0.95rem;
+  height: 0.95rem;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.62rem;
+  font-weight: 900;
+}
+.pv-shell .pv-verify em {
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  opacity: 0.88;
+}
+.pv-shell .pv-verify li.is-on {
+  color: #14532d;
+  background: linear-gradient(180deg, #fff, #bbf7d0);
+  border: 1px solid rgb(22 101 52 / 32%);
+  box-shadow: 0 2px 0 rgb(22 101 52 / 10%);
+}
+.pv-shell .pv-verify li.is-on span {
+  color: #fff;
+  background: linear-gradient(180deg, #4ade80, #15803d);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 35%);
+}
+.pv-shell .pv-verify li.is-off {
+  color: #7c2d12;
+  background: linear-gradient(180deg, #fffdf8, #f4e4c8);
+  border: 1px solid rgb(184 137 76 / 45%);
+  box-shadow: 0 2px 0 rgb(124 45 18 / 8%);
+}
+.pv-shell .pv-verify li.is-off span {
+  color: #7c2d12;
+  background: linear-gradient(180deg, #fff, #ead6b4);
+}
 .pv-shell .pv-bio {
   margin: 0.35rem 0 0;
   color: #5b4a43;
@@ -1700,6 +1757,7 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
   .pv-shell .pv-tile.is-wide ul { grid-template-columns: 1fr; }
   .pv-shell .pv-hero { aspect-ratio: auto; grid-template-columns: auto minmax(0, 1fr) auto; }
   .pv-shell .pv-top-actions { justify-content: flex-start; }
+  .pv-shell .pv-verify { margin-right: 0; }
   .pv-shell .pv-layout { grid-template-columns: 1fr; }
   .pv-shell .pv-media-col {
     position: static;

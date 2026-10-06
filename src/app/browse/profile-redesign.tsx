@@ -125,6 +125,7 @@ export type ProfileData = {
     pendingMandatory: CompletenessItem[];
     pendingRecommended: CompletenessItem[];
   } | null;
+  verify?: Array<{ id: string; label: string; on: boolean }>;
 };
 
 function RichLine({ text }: { text: string }) {
@@ -515,6 +516,17 @@ export function ProfileRedesign(props: ProfileData) {
                 </span>
               ) : null}
             </p>
+          ) : null}
+          {props.verify?.length ? (
+            <ul className="pv-verify" aria-label="Verification">
+              {props.verify.map((item) => (
+                <li key={item.id} className={item.on ? "is-on" : "is-off"} aria-label={`${item.label} ${item.on ? "verified" : "unverified"}`}>
+                  <span aria-hidden>{item.on ? "✓" : "✕"}</span>
+                  {item.label}
+                  <em>{item.on ? "verified" : "unverified"}</em>
+                </li>
+              ))}
+            </ul>
           ) : null}
         </div>
         {!props.own && props.user ? (

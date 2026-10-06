@@ -181,7 +181,11 @@ export function HeaderNav({
         <NavChip item={{ href: "/", label: "Home", icon: "home" }} overlay={overlay} current={pathMatches(pathname, "/", tab)} />
         <NavChip item={{ href: "/browse", label: "Discover", icon: "browse" }} overlay={overlay} current={pathMatches(pathname, "/browse", tab)} />
         {user ? (
-          <NavChip item={{ href: "/app/chat", label: "Inbox", icon: "chat", badge: chatUnread + alertUnread + likesPending }} overlay={overlay} current={pathMatches(pathname, "/app/chat", tab) || pathMatches(pathname, "/app/interests", tab) || pathMatches(pathname, "/app/alerts", tab)} />
+          <NavChip
+            item={{ href: "/app/account", label: "AccountHub", icon: "settings", badge: chatUnread + alertUnread + likesPending }}
+            overlay={overlay}
+            current={pathMatches(pathname, "/app/account", tab)}
+          />
         ) : (
           <Link href="/login" aria-current={registerHere ? "page" : undefined} className={`nav-3d${overlay ? " is-overlay" : ""}${registerHere ? " is-on" : ""}`}>
             <span className="nav-3d-ico">
@@ -190,13 +194,6 @@ export function HeaderNav({
             <span className="nav-3d-label">Sign in</span>
           </Link>
         )}
-        {user ? (
-          <NavChip
-            item={{ href: "/app/account", label: "AccountHub", icon: "settings" }}
-            overlay={overlay}
-            current={pathMatches(pathname, "/app/account", tab)}
-          />
-        ) : null}
         {staff ? <NavChip item={desk} overlay={overlay} current={pathMatches(pathname, desk.href, tab)} /> : null}
         <NavGroup
           label="More"

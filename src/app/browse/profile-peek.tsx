@@ -1,19 +1,18 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { btnGhost } from "@/lib/ui/classes";
+import { dismissTo } from "@/lib/ui/dismiss";
 
 export function ProfilePeek({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
-  function close() {
-    const cameFromHere = document.referrer.startsWith(window.location.origin);
-    if (cameFromHere && window.history.length > 1) router.back();
-    else router.push("/browse");
-  }
+  const close = useCallback(() => {
+    dismissTo(router, "/browse");
+  }, [router]);
 
   useEffect(() => {
     setMounted(true);
@@ -34,23 +33,17 @@ export function ProfilePeek({ children }: { children: ReactNode }) {
       document.body.style.overflow = prev;
       window.removeEventListener("keydown", onKey, true);
     };
-  }, []);
+  }, [close]);
 
   if (!mounted) return null;
 
   return createPortal(
-    <div
-      className="desk-ticket-layer portrait-peek-layer"
-      role="presentation"
-      onMouseDown={(event) => event.stopPropagation()}
-      onClick={(event) => event.stopPropagation()}
-    >
+    <div className="desk-ticket-layer portrait-peek-layer" role="presentation" onClick={close}>
       <div
         className="desk-ticket-modal card-3d portrait-peek-modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="portrait-peek-title"
-        onMouseDown={(event) => event.stopPropagation()}
         onClick={(event) => event.stopPropagation()}
       >
         <header className="desk-ticket-modal-head portrait-peek-head">

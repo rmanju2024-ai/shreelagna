@@ -3,8 +3,13 @@ import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { HouseCrest } from "@/components/house-crest";
 import { FieldMark } from "@/app/app/profiles/field-mark";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
+import { planByCode } from "@/lib/membership/catalog";
+import { planDaysLine, planQuotaLine, planWaitingLine } from "@/lib/membership/account-plan";
+import { fetchPendingPlanCode, fetchPlans, loadInterestQuota, loadMembership } from "@/lib/membership/load";
 import { findOwnProfile } from "@/lib/profile/own-profile";
 import { monthAgoIso, pulseNote, tallyMonthPulse } from "@/lib/profile/month-pulse";
+import { createServiceClient } from "@/lib/supabase/server";
+import { formatIstDate } from "@/lib/time/ist";
 import { redirect } from "next/navigation";
 import { cardClass } from "@/lib/ui/classes";
 
@@ -18,7 +23,17 @@ const groups = [
       { href: "/app", title: "My profile", mark: "Name", text: "Your story, media and completeness." },
       { href: "/app/shortlist", title: "Shortlist", mark: "Partner", text: "Private profiles you wish to revisit." },
       { href: "/app/blocked", title: "Blocked profiles", mark: "Safety", text: "Members you blocked. Unblock any time." },
-      { href: "/app/chat", title: "Inbox", mark: "Inbox", text: "Chat, interests and alerts — all in one place." },
+    ],
+  },
+  {
+    id: "inbox",
+    title: "Inbox",
+    kicker: "Messages",
+    mark: "Inbox",
+    items: [
+      { href: "/app/alerts", title: "Alerts", mark: "Hope", text: "Notices when families view, request or reply." },
+      { href: "/app/chat", title: "Chat", mark: "Contact", text: "Write after a family accepts." },
+      { href: "/app/interests", title: "Interests", mark: "Partner", text: "Requests you sent, received and accepted." },
     ],
   },
   {
@@ -96,14 +111,68 @@ function MonthPulseCard({
   );
 }
 
+function PlanSnapshot({
+  label,
+  waiting,
+  days,
+  lastDay,
+  quota,
+}: {
+  label: string;
+  waiting: string;
+  days: string;
+  lastDay: string | null;
+  quota: string;
+}) {
+  return (
+    <section className="account-plan" aria-label="Current membership">
+      <p className="browse-kicker">Current plan</p>
+      <h2>{label}</h2>
+      <ul>
+        <li>
+          <span>Waiting</span>
+          <strong>{waiting}</strong>
+        </li>
+        <li>
+          <span>Days left</span>
+          <strong>{days}</strong>
+        </li>
+        <li>
+          <span>Last day</span>
+          <strong>{lastDay ?? "No end date"}</strong>
+        </li>
+        <li>
+          <span>Usage</span>
+          <strong>{quota}</strong>
+        </li>
+      </ul>
+      <Link href="/app/plans">See plans</Link>
+    </section>
+  );
+}
+
 export default async function AccountHubPage() {
   const { supabase, user } = await getAuth();
   if (!supabase || !user) redirect("/login?next=/app/account");
   const me = await ensureAppUser(supabase, user);
   if (!me) redirect("/login?error=account");
+  const db = createServiceClient() ?? supabase;
   const own = await findOwnProfile(supabase, me.id);
   const profileId = me.active_profile_id || own?.id || null;
   const since = monthAgoIso();
+  const [access, mineRows, pendingCode, plans] = await Promise.all([
+    loadMembership(db, me),
+    db.from("profiles").select("id").eq("created_by", me.id),
+    fetchPendingPlanCode(db, me.id),
+    fetchPlans(db),
+  ]);
+  const quota = await loadInterestQuota(
+    db,
+    me,
+    access,
+    (mineRows.data ?? []).map((row) => String(row.id)),
+  );
+  const pending = planByCode(pendingCode, plans.filter((plan) => plan.forSale));
   let pulse = profileId
     ? tallyMonthPulse({ views: 0, received: [], sent: [], since })
     : null;
@@ -133,6 +202,13 @@ export default async function AccountHubPage() {
           </div>
         </header>
         {pulse ? <MonthPulseCard pulse={pulse} /> : null}
+        <PlanSnapshot
+          label={access.label}
+          waiting={planWaitingLine({ live: access.live, pendingName: pending?.name ?? null })}
+          days={planDaysLine(access)}
+          lastDay={access.until ? formatIstDate(access.until) : null}
+          quota={planQuotaLine(quota)}
+        />
         <div className="account-hub-layout">
           <aside className="account-hub-rail" aria-label="Account sections">
             {groups.map((group) => (

@@ -2,8 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
+import { dismissTo } from "@/lib/ui/dismiss";
 
-/** Goes back in history when the member came from inside the app, otherwise to the fallback page. */
+/** Closes the current overlay or page: history back when possible, otherwise the fallback. */
 export function BackLink({ fallback, className, children }: { fallback: string; className?: string; children: ReactNode }) {
   const router = useRouter();
   return (
@@ -12,9 +13,7 @@ export function BackLink({ fallback, className, children }: { fallback: string; 
       className={className}
       onClick={(event) => {
         event.preventDefault();
-        const cameFromHere = typeof document !== "undefined" && document.referrer.startsWith(window.location.origin) && !document.referrer.includes("/report");
-        if (cameFromHere && window.history.length > 1) router.back();
-        else router.push(fallback);
+        dismissTo(router, fallback);
       }}
     >
       {children}

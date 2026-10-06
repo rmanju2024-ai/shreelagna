@@ -122,12 +122,7 @@ export function TicketBoard({
   const dialog =
     ticket && mounted
       ? createPortal(
-          <div
-            className="desk-ticket-layer"
-            role="presentation"
-            onMouseDown={(event) => event.stopPropagation()}
-            onClick={(event) => event.stopPropagation()}
-          >
+          <div className="desk-ticket-layer" role="presentation" onClick={close}>
             <div
               className="desk-ticket-modal card-3d"
               role="dialog"

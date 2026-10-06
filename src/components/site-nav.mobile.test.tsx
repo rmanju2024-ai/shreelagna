@@ -64,11 +64,12 @@ describe("mobile primary navigation", () => {
     expect(screen.queryByRole("menu")).toBeNull();
   });
 
-  it("keeps every member destination available (Likes and Alerts live inside Inbox)", () => {
+  it("keeps every member destination available (Inbox lives on Account hub)", () => {
     render(<HeaderNav overlay={false} user staff />);
     const nav = screen.getByRole("navigation", { name: "Primary" });
-    for (const label of ["Home", "Discover", "Inbox", "AccountHub", "Desk", "More"]) {
+    for (const label of ["Home", "Discover", "AccountHub", "Desk", "More"]) {
       expect(nav.textContent).toContain(label);
     }
+    expect(nav.textContent).not.toContain("Inbox");
   });
 });

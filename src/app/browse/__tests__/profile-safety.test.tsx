@@ -4,7 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const push = vi.fn();
 const back = vi.fn();
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push, back }) }));
+const replace = vi.fn();
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push, back, replace }) }));
 vi.mock("@/app/app/safety/actions", () => ({ blockProfile: vi.fn(), reportProfile: vi.fn() }));
 
 import { BackLink } from "@/components/back-link";
@@ -22,10 +23,11 @@ describe("profile safety and close behaviour", () => {
   beforeEach(() => {
     push.mockClear();
     back.mockClear();
+    replace.mockClear();
     sessionStorage.clear();
   });
 
-  it("goes back when the member came from inside the app", () => {
+  it("goes back when there is history behind the overlay", () => {
     setReferrer(`${window.location.origin}/browse`);
     render(<BackLink fallback="/browse">Close</BackLink>);
     fireEvent.click(screen.getByText("Close"));
@@ -33,16 +35,13 @@ describe("profile safety and close behaviour", () => {
     expect(push).not.toHaveBeenCalled();
   });
 
-  it("falls back to the list when there is no history or the referrer is the report form", () => {
+  it("falls back to the list when there is no history", () => {
     setReferrer("", 1);
-    const { unmount } = render(<BackLink fallback="/browse">Close</BackLink>);
+    render(<BackLink fallback="/browse">Close</BackLink>);
     fireEvent.click(screen.getByText("Close"));
-    expect(push).toHaveBeenCalledWith("/browse");
-    unmount();
-    setReferrer(`${window.location.origin}/browse/abc/report`);
-    render(<BackLink fallback="/browse/abc">Cancel</BackLink>);
-    fireEvent.click(screen.getByText("Cancel"));
-    expect(push).toHaveBeenCalledWith("/browse/abc");
+    expect(back).not.toHaveBeenCalled();
+    expect(replace).toHaveBeenCalledWith("/browse");
+    expect(push).not.toHaveBeenCalled();
   });
 
   it("asks before blocking and can be cancelled", () => {
