@@ -44,7 +44,7 @@ const groups = [
     items: [
       { href: "/app/settings", title: "Privacy controls", mark: "Living", text: "Photos, details, contact release and alerts." },
       { href: "/app/safety", title: "Safety centre", mark: "Family", text: "Reports, blocks and practical help." },
-      { href: "/app/verification", title: "Verification", mark: "Identity", text: "Optional private checks with honest trust labels." },
+      { href: "/app/verification", title: "Verification", mark: "Identity", text: "Optional checks for identity, education and employment." },
     ],
   },
   {
