@@ -11,6 +11,8 @@ describe("shared mobile CSS contract", () => {
     expect(css).toContain("bottom: 0 !important");
     expect(css).toContain("body > .site-nav.is-mobile-dock");
     expect(css).toContain(".header-profile-chip {");
+    expect(css).toContain("width: max-content !important");
+    expect(css).toContain("flex: 0 0 auto !important");
     expect(css).toContain(".site-head-brand .brand-wordmark {");
     expect(css).toContain("display: flex !important");
     expect(css).toContain(".site-head-brand .live-clock {");

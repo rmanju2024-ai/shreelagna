@@ -1044,8 +1044,9 @@ body > .nav-menu {
   .header-profile-chip {
     display: inline-flex !important;
     visibility: visible !important;
-    flex: 1 1 100% !important;
-    width: auto !important;
+    flex: 0 0 auto !important;
+    align-self: flex-start !important;
+    width: max-content !important;
     min-width: 0 !important;
     max-width: 100% !important;
     background: rgb(255 252 247 / 96%) !important;
