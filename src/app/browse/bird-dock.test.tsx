@@ -47,13 +47,15 @@ describe("BirdDock chat chrome", () => {
   });
   afterEach(cleanup);
 
-  it("opens the chat from the icon, maximizes, then closes", () => {
+  it("opens chat maximized and closes with the close button only", () => {
     render(<BirdDock {...props} />);
     expect(screen.queryByLabelText("Chat")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: /open chat/i }));
-    expect(screen.getByLabelText("Chat")).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: /maximize/i }));
-    expect(screen.getByRole("button", { name: /restore/i })).toBeTruthy();
+    const panel = screen.getByLabelText("Chat");
+    expect(panel).toBeTruthy();
+    expect(panel.className).toContain("is-max");
+    expect(screen.queryByRole("button", { name: /maximize/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: /restore/i })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: /^close$/i }));
     expect(screen.queryByLabelText("Chat")).toBeNull();
     expect(screen.getByRole("button", { name: /open chat/i })).toBeTruthy();

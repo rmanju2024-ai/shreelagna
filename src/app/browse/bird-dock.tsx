@@ -155,7 +155,6 @@ export function BirdDock({
   const [mounted, setMounted] = useState(false);
   const [phase, setPhase] = useState<Phase>("enter");
   const [open, setOpen] = useState(false);
-  const [wide, setWide] = useState(false);
   const [badge, setBadge] = useState(0);
   const [line, setLine] = useState(0);
   const [draft, setDraft] = useState("");
@@ -285,19 +284,19 @@ export function BirdDock({
   }, [phase, mounted]);
 
   useEffect(() => {
-    if (!wide) return;
+    if (!open) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = prev;
     };
-  }, [wide]);
+  }, [open]);
 
   useEffect(() => {
     const stage = stageRef.current;
     if (!open || !stage) return;
     stage.scrollTop = stage.scrollHeight;
-  }, [open, notes, wide]);
+  }, [open, notes]);
 
   useEffect(() => {
     if (!open) return;
@@ -318,7 +317,7 @@ export function BirdDock({
       dock?.style.removeProperty("--bird-kb");
       dock?.style.removeProperty("--bird-vv-top");
     };
-  }, [open, wide]);
+  }, [open]);
 
   function markActed() {
     acted.current = true;
@@ -370,7 +369,6 @@ export function BirdDock({
     event?.stopPropagation();
     markActed();
     openedAt.current = Date.now();
-    setWide(false);
     setOpen(true);
     setBadge(0);
     const data = new FormData();
@@ -382,13 +380,6 @@ export function BirdDock({
   function closeChat(force = false) {
     if (!force && Date.now() - openedAt.current < 500) return;
     setOpen(false);
-    setWide(false);
-  }
-
-  function toggleWide(event: React.MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-    setWide((on) => !on);
   }
 
   function onSend(event: React.FormEvent<HTMLFormElement>) {
@@ -436,7 +427,7 @@ export function BirdDock({
 
   const panel =
     open && showChat ? (
-      <div ref={dockRef} className={`bird-chat-layer${wide ? " is-wide" : ""}`} role="presentation">
+      <div ref={dockRef} className="bird-chat-layer is-wide" role="presentation">
         <button
           type="button"
           className="bird-wa-scrim"
@@ -448,20 +439,17 @@ export function BirdDock({
           }}
         />
         <section
-          className={`bird-wa${wide ? " is-max" : ""}`}
+          className="bird-wa is-max"
           aria-label="Chat"
           onClick={(event) => event.stopPropagation()}
         >
           <header className="bird-wa-head">
-            <ChatAvatar name={name} src={chat?.photo} size={wide ? "md" : "sm"} />
+            <ChatAvatar name={name} src={chat?.photo} size="md" />
             <div className="bird-wa-who">
               <h2>{name}</h2>
               <p>{chat?.seen ?? "tap to chat"}</p>
             </div>
             <div className="bird-wa-tools">
-              <button type="button" className="bird-wa-icon" onClick={toggleWide} aria-label={wide ? "Restore" : "Maximize"}>
-                {wide ? "↙" : "↗"}
-              </button>
               <button
                 type="button"
                 className="bird-wa-icon"
