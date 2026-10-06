@@ -56,6 +56,8 @@ export const BROWSE_PROFILE_COLUMNS = [
 
 export const BROWSE_PROFILE_SELECT: string = `${BROWSE_PROFILE_COLUMNS}, religions(name), communities(name)`;
 export const BROWSE_PROFILE_SELECT_STAR: string = "*, religions(name), communities(name)";
+export const LOOK_PROFILE_SELECT =
+  "id, created_by, created_at, profile_type, status, subject_full_name, hide_last_seen, last_seen_at, date_of_birth, height_cm, diet, qualification, occupation, income_band, current_country, current_state, current_city, native_state, religions(name), communities(name)";
 export const BROWSE_LIST_LIMIT = 60;
 
 type PhotoRow = { profile_id: string; storage_path: string | null; is_primary?: boolean | null; error?: unknown };

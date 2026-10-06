@@ -20,14 +20,15 @@ export default async function DeskTicketsPage({
   const { rows, count } = await cachedDeskTickets(from, to).catch(() =>
     fetchDeskTickets(desk.supabase, from, to),
   );
-  const extra =
+  const extraP =
     openId && !rows.some((row) => String(row.id) === openId)
-      ? await fetchDeskTicket(desk.supabase, openId)
-      : null;
-  const notes = await fetchTicketNotes(
+      ? fetchDeskTicket(desk.supabase, openId)
+      : Promise.resolve(null);
+  const notesP = fetchTicketNotes(
     desk.supabase,
-    [...rows.map((row) => String(row.id)), extra ? String(extra.id) : ""].filter(Boolean),
+    [...rows.map((row) => String(row.id)), openId ?? ""].filter(Boolean),
   );
+  const [extra, notes] = await Promise.all([extraP, notesP]);
   const open = rows.filter((row) => isOpenTicket(String(row.status ?? ""))).length;
 
   return (

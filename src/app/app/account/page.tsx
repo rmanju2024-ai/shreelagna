@@ -2,11 +2,11 @@ import Link from "next/link";
 import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { HouseCrest } from "@/components/house-crest";
 import { FieldMark } from "@/app/app/profiles/field-mark";
+import { ACCOUNT_GROUPS, accountInboxCounts } from "@/lib/account/hub";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { planByCode } from "@/lib/membership/catalog";
 import { planHeaderMarks, type PlanMark } from "@/lib/membership/account-plan";
 import { fetchPendingPlanCode, fetchPlans, loadInterestQuota, loadMembership } from "@/lib/membership/load";
-import { findOwnProfile } from "@/lib/profile/own-profile";
 import { monthAgoIso, pulseNote, tallyMonthPulse } from "@/lib/profile/month-pulse";
 import { unreadLabel } from "@/lib/match/chat-ui";
 import { unreadNoticeBadge } from "@/lib/notices/unread-badge";
@@ -14,52 +14,32 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { cardClass } from "@/lib/ui/classes";
 
-const groups = [
-  {
-    id: "journey",
-    title: "My journey",
-    kicker: "Your story",
-    mark: "About",
-    items: [
-      { href: "/app", title: "My profile", mark: "Name", text: "Your story, media and completeness." },
-      { href: "/app/shortlist", title: "Shortlist", mark: "Partner", text: "Private profiles you wish to revisit." },
-      { href: "/app/blocked", title: "Blocked profiles", mark: "Safety", text: "Members you blocked. Unblock any time." },
-    ],
-  },
-  {
-    id: "inbox",
-    title: "Inbox",
-    kicker: "Messages",
-    mark: "Inbox",
-    columns: 3,
-    items: [
-      { href: "/app/chat", title: "Chat", mark: "Inbox", text: "Write when you send a request." },
-      { href: "/app/interests", title: "Interests", mark: "Partner", text: "Requests you sent, received and accepted." },
-      { href: "/app/alerts", title: "Alerts", mark: "Hope", text: "Notices when families view, request or reply." },
-    ],
-  },
-  {
-    id: "privacy",
-    title: "Privacy & safety",
-    kicker: "Kept private",
-    mark: "Health",
-    items: [
-      { href: "/app/settings", title: "Privacy controls", mark: "Living", text: "Photos, details, contact release and alerts." },
-      { href: "/app/safety", title: "Safety centre", mark: "Family", text: "Reports, blocks and practical help." },
-      { href: "/app/verification", title: "Verification", mark: "Identity", text: "Optional checks for identity, education and employment." },
-    ],
-  },
-  {
-    id: "membership",
-    title: "Membership & help",
-    kicker: "House support",
-    mark: "Work",
-    items: [
-      { href: "/app/plans", title: "Membership", mark: "Income", text: "Your plan, access and future upgrades." },
-      { href: "/contact", title: "Help & support", mark: "Contact", text: "Reach the Shree Lagna house team." },
-    ],
-  },
-];
+async function loadAccountPulse(
+  db: { from: (table: string) => { select: (cols: string, opts?: { count?: string; head?: boolean }) => unknown } },
+  profileId: string,
+  since: string,
+) {
+  const client = db as {
+    from: (table: string) => {
+      select: (cols: string, opts?: { count: "exact"; head: boolean } | undefined) => {
+        eq: (col: string, value: string) => {
+          gte: (col: string, value: string) => Promise<{ count?: number | null; data?: { created_at?: string | null; status?: string | null; responded_at?: string | null }[] | null }>;
+        };
+      };
+    };
+  };
+  const [views, received, sent] = await Promise.all([
+    client.from("profile_views").select("id", { count: "exact", head: true }).eq("viewed_profile_id", profileId).gte("viewed_at", since),
+    client.from("interests").select("created_at, status, responded_at").eq("to_profile_id", profileId).gte("created_at", since),
+    client.from("interests").select("created_at, status, responded_at").eq("from_profile_id", profileId).gte("created_at", since),
+  ]);
+  return tallyMonthPulse({
+    views: views.count ?? 0,
+    received: received.data ?? [],
+    sent: sent.data ?? [],
+    since,
+  });
+}
 
 function MonthPulseCard({
   pulse,
@@ -143,8 +123,6 @@ export default async function AccountHubPage() {
   const me = await ensureAppUser(supabase, user);
   if (!me) redirect("/login?error=account");
   const db = createServiceClient() ?? supabase;
-  const own = await findOwnProfile(supabase, me.id);
-  const profileId = me.active_profile_id || own?.id || null;
   const since = monthAgoIso();
   const [access, mineRows, pendingCode, plans, inbox] = await Promise.all([
     loadMembership(db, me),
@@ -153,17 +131,13 @@ export default async function AccountHubPage() {
     fetchPlans(db),
     unreadNoticeBadge(me.id).catch(() => ({ chatUnread: 0, alertUnread: 0, likesPending: 0 })),
   ]);
-  const quota = await loadInterestQuota(
-    db,
-    me,
-    access,
-    (mineRows.data ?? []).map((row) => String(row.id)),
-  );
-  const inboxCounts: Record<string, number> = {
-    "/app/chat": inbox.chatUnread,
-    "/app/interests": inbox.likesPending,
-    "/app/alerts": inbox.alertUnread,
-  };
+  const mineIds = (mineRows.data ?? []).map((row) => String(row.id));
+  const profileId = me.active_profile_id || mineIds[0] || null;
+  const [quota, pulse] = await Promise.all([
+    loadInterestQuota(db, me, access, mineIds),
+    profileId ? loadAccountPulse(db, profileId, since) : Promise.resolve(null),
+  ]);
+  const inboxCounts = accountInboxCounts(inbox);
   const pending = planByCode(pendingCode, plans.filter((plan) => plan.forSale));
   const planMarks = planHeaderMarks({
     access,
@@ -171,22 +145,6 @@ export default async function AccountHubPage() {
     used: quota.used,
     limit: quota.limit,
   });
-  let pulse = profileId
-    ? tallyMonthPulse({ views: 0, received: [], sent: [], since })
-    : null;
-  if (profileId) {
-    const [views, received, sent] = await Promise.all([
-      supabase.from("profile_views").select("id", { count: "exact", head: true }).eq("viewed_profile_id", profileId).gte("viewed_at", since),
-      supabase.from("interests").select("created_at, status, responded_at").eq("to_profile_id", profileId).gte("created_at", since),
-      supabase.from("interests").select("created_at, status, responded_at").eq("from_profile_id", profileId).gte("created_at", since),
-    ]);
-    pulse = tallyMonthPulse({
-      views: views.count ?? 0,
-      received: received.data ?? [],
-      sent: sent.data ?? [],
-      since,
-    });
-  }
   return (
     <PageShell>
       <main className="account-hub sx-stage">
@@ -202,7 +160,7 @@ export default async function AccountHubPage() {
         <MonthPulseCard pulse={pulse} planMarks={planMarks} />
         <div className="account-hub-layout">
           <aside className="account-hub-rail" aria-label="Account sections">
-            {groups.map((group) => (
+            {ACCOUNT_GROUPS.map((group) => (
               <a key={group.id} href={`#${group.id}`}>
                 <FieldMark label={group.mark} />
                 {group.title}
@@ -210,14 +168,14 @@ export default async function AccountHubPage() {
             ))}
           </aside>
           <div className="account-hub-content">
-            {groups.map((group) => (
+            {ACCOUNT_GROUPS.map((group) => (
               <section id={group.id} key={group.id} className="account-hub-section">
                 <p className="account-hub-section-kicker">{group.kicker}</p>
                 <h2>
                   <FieldMark label={group.mark} />
                   {group.title}
                 </h2>
-                <div className={`account-hub-grid${group.columns === 3 ? " is-trio" : ""}`}>
+                <div className={`account-hub-grid${"columns" in group && group.columns === 3 ? " is-trio" : ""}`}>
                   {group.items.map((item) => {
                     const count = inboxCounts[item.href] ?? 0;
                     const mark = unreadLabel(count);

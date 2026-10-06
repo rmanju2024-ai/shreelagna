@@ -17,16 +17,23 @@ export default async function DeskVerificationPage() {
   // Short-lived signed links (10 min) are created only for admins reviewing a case.
   const store = desk.admin && cases?.length ? await evidenceStore() : null;
   const links = new Map<string, { name: string; url: string }[]>();
-  for (const item of cases ?? []) {
-    if (!store) break;
-    const folder = evidenceFolder(item.profile_id, item.id);
-    const listed = await store.storage.from(EVIDENCE_BUCKET).list(folder);
-    const signed: { name: string; url: string }[] = [];
-    for (const file of listed.data ?? []) {
-      const url = await store.storage.from(EVIDENCE_BUCKET).createSignedUrl(`${folder}/${file.name}`, 600);
-      if (url.data?.signedUrl) signed.push({ name: file.name, url: url.data.signedUrl });
-    }
-    links.set(item.id, signed);
+  if (store && cases?.length) {
+    await Promise.all(
+      cases.map(async (item) => {
+        const folder = evidenceFolder(item.profile_id, item.id);
+        const listed = await store.storage.from(EVIDENCE_BUCKET).list(folder);
+        const signed = await Promise.all(
+          (listed.data ?? []).map(async (file) => {
+            const url = await store.storage.from(EVIDENCE_BUCKET).createSignedUrl(`${folder}/${file.name}`, 600);
+            return url.data?.signedUrl ? { name: file.name, url: url.data.signedUrl } : null;
+          }),
+        );
+        links.set(
+          item.id,
+          signed.filter((row): row is { name: string; url: string } => Boolean(row)),
+        );
+      }),
+    );
   }
   return (
     <section className="desk-panel">

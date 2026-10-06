@@ -177,9 +177,23 @@ export default async function DeskProfilesPage({
           .order("created_at", { ascending: false }),
         adminIds,
       );
+    const readyListed = view === "ready";
     const [readyResult, incompleteResult] = await Promise.all([
-      readyQuery().range(view === "ready" ? from : 0, view === "ready" ? to : 0),
-      incompleteQuery().range(view === "incomplete" ? from : 0, view === "incomplete" ? to : 0),
+      readyListed
+        ? readyQuery().range(from, to)
+        : excludeAdmins(
+            db
+              .from("profiles")
+              .select("id", { count: "exact", head: true })
+              .or("status.eq.pending_review,and(status.eq.draft,is_complete.eq.true)"),
+            adminIds,
+          ),
+      readyListed
+        ? excludeAdmins(
+            db.from("profiles").select("id", { count: "exact", head: true }).eq("status", "draft").eq("is_complete", false),
+            adminIds,
+          )
+        : incompleteQuery().range(from, to),
     ]);
     readyCount = readyResult.count ?? 0;
     incompleteCount = incompleteResult.count ?? 0;
