@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { refreshProfileCompleteness, saveIntroChoice } from "@/app/app/profiles/actions";
 import { MAX_INTRO_SECONDS } from "@/lib/profile/caps";
 import { btnGhost, btnPrimary, cardClass } from "@/lib/ui/classes";
+import { MediaMark } from "@/app/app/profiles/media-mark";
 import { removeStaleMedia } from "@/lib/media/discard-stale";
 
 type Clip = { id: string; storage_path: string; kind?: string };
