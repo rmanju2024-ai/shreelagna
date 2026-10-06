@@ -6162,7 +6162,7 @@ a.browse-view {
 }
 .account-hub-rail a .field-mark { width: 1rem; height: 1rem; color: var(--gold); flex: none; }
 .account-hub-rail a:hover { background: linear-gradient(180deg, #fff8ec, #f0ddbc); }
-.account-hub-content { display: grid; gap: 1.6rem; }
+.account-hub-content { display: grid; gap: 1.6rem; margin-top: 1.2rem; }
 .account-hub-section-kicker {
   margin: 0 0 0.2rem;
   font-size: 0.7rem;
