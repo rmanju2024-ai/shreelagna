@@ -18,7 +18,7 @@ export function KalyanBanner({
         // remains fully visible and undistorted.
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src="/graphics/shiva-parvati-kalyan-banner.png"
+          src="/graphics/shiva-parvati-kalyan-banner.jpg"
           alt=""
           decoding="async"
           className="absolute inset-[-4%] h-[108%] w-[108%] max-w-none object-cover opacity-45 blur-xl"
@@ -26,7 +26,7 @@ export function KalyanBanner({
       ) : null}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/graphics/shiva-parvati-kalyan-banner.png"
+        src="/graphics/shiva-parvati-kalyan-banner.jpg"
         alt=""
         decoding="async"
         fetchPriority={hero ? "high" : "low"}
