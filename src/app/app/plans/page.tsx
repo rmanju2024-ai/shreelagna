@@ -2,7 +2,7 @@ import { BackToAccount } from "@/components/back-to-account";
 import { requestPlan } from "@/app/app/plans/actions";
 import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
-import { WELCOME_INTEREST_LIMIT, formatInr, planByCode } from "@/lib/membership/catalog";
+import { WELCOME_INTEREST_LIMIT, formatInr, planBenefitLines, planByCode } from "@/lib/membership/catalog";
 import { fetchPendingPlanCode, fetchPlans, loadInterestQuota, loadMembership } from "@/lib/membership/load";
 import { formatIstDate } from "@/lib/time/ist";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -46,7 +46,9 @@ export default async function PlansPage({
         <div className="plans-header">
           <p className="browse-kicker">Membership</p>
           <h1>Plans</h1>
-          <p className="plans-intro">Welcome gift on joining. Paid cover thereafter. Chat after accept.</p>
+          <p className="plans-intro">
+            Welcome gift on joining. Paid cover thereafter. Chat opens as soon as you send a request — no need to wait for accept.
+          </p>
         </div>
 
         <div className={`plans-status is-${access.kind}`}>
@@ -81,8 +83,8 @@ export default async function PlansPage({
           <details className="plans-usage">
             <summary>How this count works · click for more details</summary>
             <p>
-              Send request, mobile, or email on the same person is one use. A later request or contact view on that
-              profile does not take another.
+              Send a request or open contact on one family counts as 1. Chat starts the moment you send interest. A later
+              message or contact view on that same family does not take another.
             </p>
             <p>
               This period: {quota.used} used · {quota.left ?? 0} left of {quota.limit}.
@@ -116,7 +118,10 @@ export default async function PlansPage({
         <div className="plans-welcome-banner">
           <div>
             <h3>🎁 Welcome offer</h3>
-            <p>{WELCOME_INTEREST_LIMIT} free profile uses in your first 2 months. Send request or contact on one person counts as 1. Chat opens after both of you send interest and accept.</p>
+            <p>
+              {WELCOME_INTEREST_LIMIT} free profile uses in your first 2 months. Interest or contact on one family counts as 1.
+              Chat opens as soon as you send a request — they do not need to accept first.
+            </p>
           </div>
         </div>
 
@@ -128,8 +133,9 @@ export default async function PlansPage({
             <p className="plans-price">Free <small>from joining</small></p>
             <p className="plans-desc">Applied automatically.</p>
             <ul className="plans-benefits">
-              <li>✔ {WELCOME_INTEREST_LIMIT} interests or views</li>
-              <li>✔ Chat after accept</li>
+              {planBenefitLines(WELCOME_INTEREST_LIMIT).map((line) => (
+                <li key={line}>✔ {line}</li>
+              ))}
             </ul>
             <p className="plans-status-badge">{access.kind === "welcome" ? "Live now" : "Completed"}</p>
           </li>
@@ -145,8 +151,9 @@ export default async function PlansPage({
                 <p className="plans-price">{formatInr(plan.priceInr)} <small>indicative</small></p>
                 <p className="plans-desc">{plan.tagline}</p>
                 <ul className="plans-benefits">
-                  <li>✔ {plan.interestLimit} interests or views</li>
-                  <li>✔ Chat after accept</li>
+                  {planBenefitLines(plan.interestLimit).map((line) => (
+                    <li key={line}>✔ {line}</li>
+                  ))}
                 </ul>
                 {house ? (
                   <p className="plans-note">Desk already has house access.</p>

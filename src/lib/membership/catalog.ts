@@ -1,6 +1,15 @@
 export const WELCOME_DAYS = 61;
 export const WELCOME_INTEREST_LIMIT = 20;
 
+export function planBenefitLines(interestLimit: number): string[] {
+  return [
+    `${interestLimit} interests or views`,
+    "Chat as soon as you send interest",
+    "Search and shortlist families",
+    "Open contact on a counted view",
+  ];
+}
+
 export type PlanCard = {
   code: string;
   name: string;
@@ -25,7 +34,7 @@ export const SALE_PLANS: PlanCard[] = [
     forSale: true,
     sortOrder: 1,
     interestLimit: 40,
-    perks: ["Send interest", "Chat after accept", "Search families"],
+    perks: planBenefitLines(40),
   },
   {
     code: "gold",
@@ -37,7 +46,7 @@ export const SALE_PLANS: PlanCard[] = [
     forSale: true,
     sortOrder: 2,
     interestLimit: 80,
-    perks: ["Send interest", "Chat after accept", "Search families", "Best value for most families"],
+    perks: planBenefitLines(80),
   },
   {
     code: "platinum",
@@ -49,7 +58,7 @@ export const SALE_PLANS: PlanCard[] = [
     forSale: true,
     sortOrder: 3,
     interestLimit: 150,
-    perks: ["Send interest", "Chat after accept", "Search families", "Longest cover"],
+    perks: planBenefitLines(150),
   },
 ];
 

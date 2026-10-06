@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isPlanCode, mapPlanRow, parsePerks, slugPlanCode } from "./catalog";
+import { isPlanCode, mapPlanRow, parsePerks, planBenefitLines, slugPlanCode } from "./catalog";
 
 describe("plan catalog", () => {
   it("slugs and rejects reserved codes", () => {
@@ -24,5 +24,12 @@ describe("plan catalog", () => {
     expect(plan?.interestLimit).toBe(80);
     expect(parsePerks("Chat\nBrowse")).toEqual(["Chat", "Browse"]);
     expect(plan?.featured).toBe(true);
+  });
+
+  it("lists four live benefits including chat on send", () => {
+    const lines = planBenefitLines(20);
+    expect(lines).toHaveLength(4);
+    expect(lines[1]).toMatch(/chat as soon as you send interest/i);
+    expect(lines[0]).toContain("20");
   });
 });
