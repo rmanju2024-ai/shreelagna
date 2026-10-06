@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
 import { stampPhotoFile } from "@/lib/media/stamp-photo";
+import { removeStaleMedia } from "@/lib/media/discard-stale";
 import { canAddPhoto, MAX_PHOTOS_PER_PROFILE } from "@/lib/profile/caps";
 import { cardClass } from "@/lib/ui/classes";
 
@@ -108,6 +109,7 @@ export function AlbumViewer({
           byte_size: stamped.size,
         });
         if (ins.error) {
+          await supabase.storage.from("profile-media").remove([path]);
           setError("This photograph could not be stored.");
           break;
         }
@@ -119,11 +121,51 @@ export function AlbumViewer({
     }
   }
 
+  async function replaceCurrent(files: FileList | null) {
+    if (!editable || !userId || !current || !files?.[0]) return;
+    const file = files[0];
+    if (!file.type.startsWith("image/")) {
+      setError("Photographs should be JPEG, PNG or WebP.");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const stamped = watermark ? await stampPhotoFile(file, watermark) : file;
+      const path = `${userId}/${profileId}/photo-${crypto.randomUUID()}-${stamped.name.replace(/[^\w.-]+/g, "")}`;
+      const up = await supabase.storage.from("profile-media").upload(path, stamped, {
+        upsert: false,
+        contentType: stamped.type,
+      });
+      if (up.error) {
+        setError("This photograph could not be saved just now.");
+        return;
+      }
+      const ins = await supabase.from("media").insert({
+        profile_id: profileId,
+        kind: "photo",
+        status: "approved",
+        storage_path: path,
+        is_primary: photos.length === 1 || current === photos[0],
+        byte_size: stamped.size,
+      });
+      if (ins.error) {
+        await supabase.storage.from("profile-media").remove([path]);
+        setError("This photograph could not be stored.");
+        return;
+      }
+      await removeStaleMedia(supabase, [current]);
+      await refreshProfileCompleteness(profileId);
+      router.refresh();
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function removeCurrent() {
     if (!editable || !current) return;
     setBusy(true);
-    await supabase.from("media").delete().eq("id", current.id);
-    await supabase.storage.from("profile-media").remove([current.storage_path]);
+    await removeStaleMedia(supabase, [current]);
     setIndex(0);
     setBusy(false);
     await refreshProfileCompleteness(profileId);
@@ -194,9 +236,21 @@ export function AlbumViewer({
       {editable || framed ? (
       <div className="album-toolbar">
         {editable && current ? (
-          <button type="button" className="album-tool" disabled={busy} onClick={removeCurrent}>
-            Remove this photograph
-          </button>
+          <>
+            <label className="album-tool album-tool-file">
+              {busy ? "Saving…" : "Replace this photograph"}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="sr-only"
+                disabled={busy}
+                onChange={(e) => void replaceCurrent(e.target.files)}
+              />
+            </label>
+            <button type="button" className="album-tool" disabled={busy} onClick={removeCurrent}>
+              Remove this photograph
+            </button>
+          </>
         ) : null}
         {editable && canAddPhoto(photos.length) && current ? (
           <label className="album-tool album-tool-file">

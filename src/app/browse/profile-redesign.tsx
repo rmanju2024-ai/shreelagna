@@ -8,6 +8,7 @@ import { SafetyProfileControl } from "@/app/app/safety/safety-profile-control";
 import { BirdDock, type PeekChatNote } from "@/app/browse/bird-dock";
 import { CompletenessMeter } from "@/app/app/profiles/completeness-meter";
 import { KindMark } from "@/components/kind-mark";
+import { EVIDENCE_RETENTION_NOTICE } from "@/lib/verification/copy";
 import { otherProfileLocked } from "@/lib/profile/view-gate";
 import type { CompletenessItem } from "@/lib/profile/completeness";
 import type { InterestThread } from "@/lib/match/interest-status";
@@ -518,6 +519,7 @@ export function ProfileRedesign(props: ProfileData) {
             </p>
           ) : null}
           {props.verify?.length ? (
+            <div className="pv-verify-block">
             <ul className="pv-verify" aria-label="Verification">
               {props.verify.map((item) => (
                 <li key={item.id} className={item.on ? "is-on" : "is-off"} aria-label={`${item.label} ${item.on ? "verified" : "unverified"}`}>
@@ -527,6 +529,8 @@ export function ProfileRedesign(props: ProfileData) {
                 </li>
               ))}
             </ul>
+            <p className="pv-verify-note">{EVIDENCE_RETENTION_NOTICE}</p>
+            </div>
           ) : null}
         </div>
         {!props.own && props.user ? (

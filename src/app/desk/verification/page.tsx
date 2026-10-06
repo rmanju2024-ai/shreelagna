@@ -2,7 +2,7 @@ import { requireDesk } from "@/lib/desk/access";
 import { createServiceClient } from "@/lib/supabase/server";
 import { reviewVerificationCase } from "@/app/desk/verification/actions";
 import { btnPrimary, cardClass } from "@/lib/ui/classes";
-import { EVIDENCE_BUCKET, evidenceFolder, evidenceStore } from "@/lib/verification/evidence";
+import { EVIDENCE_BUCKET, evidenceFolder, evidenceStore, purgeExpiredEvidence } from "@/lib/verification/evidence";
 
 export default async function DeskVerificationPage() {
   const desk = await requireDesk("/desk/verification");
@@ -15,7 +15,8 @@ export default async function DeskVerificationPage() {
     .order("created_at", { ascending: true })
     .limit(100);
   // Short-lived signed links (10 min) are created only for admins reviewing a case.
-  const store = desk.admin && cases?.length ? await evidenceStore() : null;
+  const store = desk.admin ? await evidenceStore() : null;
+  if (store) await purgeExpiredEvidence(store);
   const links = new Map<string, { name: string; url: string }[]>();
   if (store && cases?.length) {
     await Promise.all(
@@ -38,7 +39,7 @@ export default async function DeskVerificationPage() {
   return (
     <section className="desk-panel">
       <header className="desk-panel-head"><div><p className="browse-kicker">Restricted review</p><h2>Verification cases</h2></div><p>{cases?.length ?? 0} waiting</p></header>
-      <p className="desk-profile-queue-note">Only administrators can approve document-based checks. Evidence must stay in private storage and be deleted by the stated retention date.</p>
+      <p className="desk-profile-queue-note">Only administrators can approve document-based checks. After review, files stay private for 30 days and are then deleted; the profile keeps only the verification result.</p>
       {cases?.length ? <ul className="desk-ticket-list">{cases.map((item) => (
         <li key={item.id} className={`${cardClass} card-3d desk-ticket-row desk-profile-row`}>
           <div className="desk-profile-summary">

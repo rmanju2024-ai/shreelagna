@@ -4,7 +4,7 @@ import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { redirect } from "next/navigation";
 import { requestVerification, uploadVerificationEvidence } from "@/app/app/verification/actions";
-import { EVIDENCE_BUCKET, EVIDENCE_MAX_FILES, evidenceFolder, evidenceStore } from "@/lib/verification/evidence";
+import { EVIDENCE_BUCKET, EVIDENCE_MAX_FILES, EVIDENCE_RETENTION_NOTICE, evidenceFolder, evidenceStore } from "@/lib/verification/evidence";
 import { btnPrimary, cardClass } from "@/lib/ui/classes";
 
 const KINDS = [
@@ -57,7 +57,7 @@ export default async function MemberVerificationPage({ searchParams }: { searchP
             <li><b>3 · Review</b><span>An admin checks it privately within 3 working days.</span></li>
             <li><b>4 · Decision</b><span>You get a badge, or a reason and a way to appeal.</span></li>
           </ol>
-          <p className="verify-safe">Files are private, seen only by our admin team, and deleted within 90 days. Never share ID, bank details, passwords or OTPs in chat.</p>
+          <p className="verify-safe">{EVIDENCE_RETENTION_NOTICE} Never share ID, bank details, passwords or OTPs in chat.</p>
           {upload && NOTES[upload] ? <p className={`verify-note${upload === "ok" ? " is-ok" : ""}`}>{NOTES[upload]}</p> : null}
 
           <h2>Start a check</h2>
@@ -91,7 +91,7 @@ export default async function MemberVerificationPage({ searchParams }: { searchP
                       ))}
                     </ol>
                     {item.status === "rejected" && item.rejection_reason ? <p className="verify-note">Reason: {item.rejection_reason}</p> : null}
-                    {item.status === "approved" ? <p className="verify-note is-ok">Verified. Re-check due {item.recheck_due_at ? new Date(item.recheck_due_at).toLocaleDateString("en-IN") : "in 2 years"}.</p> : null}
+                    {item.status === "approved" ? <p className="verify-note is-ok">Verified. The document is not kept on your profile and will be deleted from our storage after 30 days. Re-check due {item.recheck_due_at ? new Date(item.recheck_due_at).toLocaleDateString("en-IN") : "in 2 years"}.</p> : null}
                     {open ? (
                       <form action={uploadVerificationEvidence} className="verify-upload">
                         <input type="hidden" name="case_id" value={item.id} />

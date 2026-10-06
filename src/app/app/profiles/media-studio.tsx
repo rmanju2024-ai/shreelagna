@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { refreshProfileCompleteness, saveIntroChoice } from "@/app/app/profiles/actions";
 import { MAX_INTRO_SECONDS } from "@/lib/profile/caps";
 import { btnGhost, btnPrimary, cardClass } from "@/lib/ui/classes";
-import { MediaMark } from "@/app/app/profiles/media-mark";
+import { removeStaleMedia } from "@/lib/media/discard-stale";
 
 type Clip = { id: string; storage_path: string; kind?: string };
 
@@ -241,6 +241,7 @@ export function IntroStudio({
     if (!editable || !userId) return;
     setBusy(true);
     setError(null);
+    const previous = kind === "audio" ? clipAudio : clipVideo;
     const localUrl = URL.createObjectURL(file);
     setPreview((prev) => {
       if (prev?.url) URL.revokeObjectURL(prev.url);
@@ -249,7 +250,6 @@ export function IntroStudio({
     if (kind === "video") setClipVideo({ id: "local", storage_path: "", kind: "video" });
     else setClipAudio({ id: "local", storage_path: "", kind: "audio" });
     try {
-      const existing = kind === "audio" ? clipAudio : clipVideo;
       const safeName = file.name.replace(/[^\w.-]+/g, "") || (kind === "audio" ? "voice.webm" : "clip.mp4");
       const path = `${userId}/${profileId}/${kind}-${crypto.randomUUID()}-${safeName}`;
       const [up, seconds] = await Promise.all([
@@ -291,6 +291,16 @@ export function IntroStudio({
         else setClipAudio(audio);
         return;
       }
+      const { data: leftovers } = await supabase
+        .from("media")
+        .select("id, storage_path")
+        .eq("profile_id", profileId)
+        .eq("kind", kind)
+        .neq("id", ins.data.id);
+      await removeStaleMedia(supabase, leftovers ?? []);
+      if (previous?.id && previous.id !== "local" && previous.storage_path && previous.id !== ins.data.id) {
+        await removeStaleMedia(supabase, [previous]);
+      }
       if (kind === "video") setClipVideo(ins.data);
       else setClipAudio(ins.data);
       const selected = await saveIntroChoice(profileId, kind);
@@ -300,10 +310,6 @@ export function IntroStudio({
         onStored?.();
       }
       void refreshProfileCompleteness(profileId);
-      if (existing?.id && existing.id !== "local" && existing.storage_path) {
-        void supabase.from("media").delete().eq("id", existing.id);
-        void supabase.storage.from("profile-media").remove([existing.storage_path]);
-      }
     } finally {
       setBusy(false);
     }
@@ -402,8 +408,7 @@ export function IntroStudio({
     onCleared?.();
     void refreshProfileCompleteness(profileId);
     if (item.id !== "local" && item.storage_path) {
-      void supabase.from("media").delete().eq("id", item.id);
-      void supabase.storage.from("profile-media").remove([item.storage_path]);
+      await removeStaleMedia(supabase, [item]);
     }
     setBusy(false);
   }
@@ -454,9 +459,21 @@ export function IntroStudio({
             </button>
           ) : null}
           {editable && clipVideo ? (
-            <button type="button" className={btnGhost} disabled={busy} onClick={() => remove(clipVideo)}>
-              Remove video
-            </button>
+            <>
+              <label className={`${btnGhost} album-tool-file`}>
+                Replace video
+                <input
+                  type="file"
+                  accept="video/mp4,video/webm,video/quicktime"
+                  className="sr-only"
+                  disabled={busy}
+                  onChange={(e) => onIntro("video", e.target.files)}
+                />
+              </label>
+              <button type="button" className={btnGhost} disabled={busy} onClick={() => remove(clipVideo)}>
+                Remove video
+              </button>
+            </>
           ) : null}
         </div>
       </div>
@@ -468,9 +485,21 @@ export function IntroStudio({
           <div className="voice-row">
             <VoicePlayer src={audioSrc} />
             {editable ? (
-              <button type="button" className={btnGhost} disabled={busy || recording} onClick={() => remove(clipAudio)}>
-                Remove
-              </button>
+              <>
+                <label className={`${btnGhost} album-tool-file`}>
+                  Replace
+                  <input
+                    type="file"
+                    accept="audio/mpeg,audio/mp4,audio/wav,audio/webm,audio/ogg,.m4a,.mp3,.wav,.webm"
+                    className="sr-only"
+                    disabled={busy || recording}
+                    onChange={(e) => onIntro("audio", e.target.files)}
+                  />
+                </label>
+                <button type="button" className={btnGhost} disabled={busy || recording} onClick={() => remove(clipAudio)}>
+                  Remove
+                </button>
+              </>
             ) : null}
           </div>
         ) : editable ? (

@@ -4,6 +4,7 @@ import { requireDesk } from "@/lib/desk/access";
 import { writeAudit } from "@/lib/desk/audit";
 import { createServiceClient } from "@/lib/supabase/server";
 import { refreshDesk } from "@/lib/desk/refresh";
+import { evidenceDeleteAfter, evidenceStore, purgeExpiredEvidence } from "@/lib/verification/evidence";
 
 const STATES = ["in_review", "approved", "rejected", "expired"] as const;
 
@@ -18,6 +19,7 @@ export async function reviewVerificationCase(formData: FormData) {
   if (status === "rejected" && !note) return;
   const db = createServiceClient() ?? desk.supabase;
   const reviewedAt = ["approved", "rejected", "expired"].includes(status) ? new Date().toISOString() : null;
+  const closed = ["approved", "rejected", "expired"].includes(status);
   const payload = {
     status,
     reviewer_user_id: desk.me?.id,
@@ -26,6 +28,7 @@ export async function reviewVerificationCase(formData: FormData) {
     reviewed_at: reviewedAt,
     recheck_due_at: status === "approved" ? new Date(Date.now() + 730 * 24 * 60 * 60 * 1000).toISOString() : null,
     updated_at: new Date().toISOString(),
+    ...(closed ? { evidence_delete_after: evidenceDeleteAfter() } : {}),
   };
   const { data: item, error } = await db.from("profile_verification_cases").update(payload).eq("id", id).select("profile_id, document_type").maybeSingle();
   if (error || !item) return;
@@ -53,4 +56,6 @@ export async function reviewVerificationCase(formData: FormData) {
     },
   });
   refreshDesk(["/desk/verification", "/desk/profiles"]);
+  const store = await evidenceStore();
+  if (store) await purgeExpiredEvidence(store);
 }

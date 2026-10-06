@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { stampPhotoFile } from "@/lib/media/stamp-photo";
+import { removeStaleMedia } from "@/lib/media/discard-stale";
 import { canAddPhoto, MAX_PHOTOS_PER_PROFILE } from "@/lib/profile/caps";
 import { btnGhost, cardClass } from "@/lib/ui/classes";
 
@@ -67,6 +68,7 @@ export function PhotoManager({
           byte_size: stamped.size,
         });
         if (ins.error) {
+          await supabase.storage.from("profile-media").remove([path]);
           setError(ins.error.message);
           break;
         }
@@ -78,10 +80,50 @@ export function PhotoManager({
     }
   }
 
+  async function replace(photo: Photo, files: FileList | null) {
+    const file = files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setError("Only images, please.");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const stamped = watermark ? await stampPhotoFile(file, watermark) : file;
+      const path = `${userId}/${profileId}/${crypto.randomUUID()}-${stamped.name.replace(/[^\w.-]+/g, "")}`;
+      const up = await supabase.storage.from("profile-media").upload(path, stamped, {
+        upsert: false,
+        contentType: stamped.type,
+      });
+      if (up.error) {
+        setError("Photos could not be saved. Please try again in a little while.");
+        return;
+      }
+      const ins = await supabase.from("media").insert({
+        profile_id: profileId,
+        kind: "photo",
+        status: "approved",
+        storage_path: path,
+        is_primary: photos[0]?.id === photo.id,
+        byte_size: stamped.size,
+      });
+      if (ins.error) {
+        await supabase.storage.from("profile-media").remove([path]);
+        setError(ins.error.message);
+        return;
+      }
+      await removeStaleMedia(supabase, [photo]);
+      router.refresh();
+      await refreshProfileCompleteness(profileId);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function remove(photo: Photo) {
     setBusy(true);
-    await supabase.from("media").delete().eq("id", photo.id);
-    await supabase.storage.from("profile-media").remove([photo.storage_path]);
+    await removeStaleMedia(supabase, [photo]);
     setBusy(false);
     await refreshProfileCompleteness(profileId);
     router.refresh();
@@ -109,6 +151,16 @@ export function PhotoManager({
             <button type="button" className={`${btnGhost} m-3 w-[calc(100%-1.5rem)]`} disabled={busy} onClick={() => remove(p)}>
               Remove
             </button>
+            <label className={`${btnGhost} mx-3 mb-3 w-[calc(100%-1.5rem)] text-center`}>
+              Replace
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="sr-only"
+                disabled={busy}
+                onChange={(e) => void replace(p, e.target.files)}
+              />
+            </label>
           </figure>
         ))}
         {canAddPhoto(photos.length) ? (

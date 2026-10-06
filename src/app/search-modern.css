@@ -1211,11 +1211,16 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
   border-color: rgb(22 101 52 / 35%);
   color: #14532d;
 }
+.pv-shell .pv-verify-block {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.4rem 0 0;
+}
 .pv-shell .pv-verify {
   display: flex;
   flex-wrap: wrap;
   gap: 0.28rem;
-  margin: 0.4rem 0 0;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
@@ -1267,6 +1272,14 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
 .pv-shell .pv-verify li.is-off span {
   color: #7c2d12;
   background: linear-gradient(180deg, #fff, #ead6b4);
+}
+.pv-shell .pv-verify-note {
+  margin: 0;
+  max-width: 38rem;
+  color: color-mix(in srgb, var(--theme-ink, #3f0e0d) 72%, transparent);
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.45;
 }
 .pv-shell .pv-bio {
   margin: 0.35rem 0 0;
