@@ -2,6 +2,7 @@ import { ProfileRedesign, type ProfileData } from "@/app/browse/profile-redesign
 import { profileViewedCopy } from "@/lib/match/alert-copy";
 import { canAlertProfileView } from "@/lib/match/profile-settings";
 import { displayFirstName } from "@/lib/profile/options";
+import { parentSentence } from "@/lib/profile/parent-line";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { kundaliScore } from "@/lib/match/kundali";
 import { photosVisible } from "@/lib/match/photo-privacy";
@@ -96,13 +97,6 @@ function asRole(value: unknown): string {
   if (!hasValue(text)) return text;
   if (text === text.toUpperCase()) return text;
   return text.charAt(0).toLowerCase() + text.slice(1);
-}
-
-function parentSentence(name: unknown, work: unknown, who: "Father" | "Mother"): string | null {
-  if (hasValue(name) && hasValue(work)) return `${who} is **${dash(name)}**, working as ${dash(work)}`;
-  if (hasValue(name)) return `${who} is **${dash(name)}**`;
-  if (hasValue(work)) return `${who}'s work is ${dash(work)}`;
-  return null;
 }
 
 function siblingPair(brothers: unknown, brothersMarried: unknown, sisters: unknown, sistersMarried: unknown): string | null {

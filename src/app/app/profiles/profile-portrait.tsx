@@ -7,14 +7,8 @@ import {
   smsOtpRequiredFromEnv,
 } from "@/lib/profile/completeness";
 import { asStringList, hopeDisplay, hopeValues, joinDisplay, languagesKnown } from "@/lib/profile/multi-values";
-import {
-  displayFirstName,
-  HOPE_ANY,
-  maritalLabel,
-  postedAsLabel,
-  profileKindLabel,
-  siblingLine,
-} from "@/lib/profile/options";
+import { displayFirstName, HOPE_ANY, maritalLabel, postedAsLabel, profileKindLabel, siblingLine } from "@/lib/profile/options";
+import { parentWorkLabel } from "@/lib/profile/parent-line";
 import { VAGUE_EDUCATIONS } from "@/lib/profile/catalog";
 import { AlbumViewer } from "@/app/app/profiles/album-viewer";
 import { IntroStudio } from "@/app/app/profiles/media-studio";
@@ -270,12 +264,12 @@ export function ProfilePortrait({
         {
           k: "Father",
           v: text("father_name"),
-          sub: text("father_occupation") === "—" ? undefined : text("father_occupation"),
+          sub: parentWorkLabel(typeof profile.father_occupation === "string" ? profile.father_occupation : null) || undefined,
         },
         {
           k: "Mother",
           v: text("mother_name"),
-          sub: text("mother_occupation") === "—" ? undefined : text("mother_occupation"),
+          sub: parentWorkLabel(typeof profile.mother_occupation === "string" ? profile.mother_occupation : null) || undefined,
         },
       ],
     },

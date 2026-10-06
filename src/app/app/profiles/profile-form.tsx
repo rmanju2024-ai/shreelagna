@@ -9,6 +9,7 @@ import {
   isIndiaNative,
   LIVING_ARRANGEMENTS,
   PROFILE_FORM_DEFAULTS,
+  PARENT_PROFESSIONS,
   SETTLE_ABROAD,
   DONT_KNOW,
   choiceLabel,
@@ -39,6 +40,11 @@ const WIZARD_STEPS = [
   { id: 4, short: "Story", title: "Your story", hint: "About and family", mark: "About" },
   { id: 5, short: "Match", title: "Preferences", hint: "What you are looking for", mark: "Partner" },
 ] as const;
+
+function parentProfessionChoices(current?: string | null) {
+  const extra = current?.trim() && !(PARENT_PROFESSIONS as readonly string[]).includes(current.trim()) ? [current.trim()] : [];
+  return [...PARENT_PROFESSIONS, ...extra];
+}
 
 export function ProfileForm({
   values,
@@ -839,7 +845,7 @@ export function ProfileForm({
               <option value="">Not mentioned</option>
               {lists.nakshatraPadas.map((item) => (
                 <option key={item} value={item}>
-                  {item === DONT_KNOW ? "I don't know" : `Pada ${item}`}
+                  {item === DONT_KNOW ? choiceLabel(item) : `Pada ${item}`}
                 </option>
               ))}
             </Select3d>
@@ -993,25 +999,31 @@ export function ProfileForm({
               className={inputClass}
             />
           </Field>
-          <Field label="Father's profession">
-            <input
-              name="father_occupation"
-              maxLength={120}
-              autoComplete="off"
-              placeholder="Service, business, retired…"
-              defaultValue={values?.father_occupation ?? ""}
-              className={inputClass}
-            />
+          <Field
+            label="Father's profession"
+            help="Pick the closest option so the profile can say this kindly — including if father has passed away."
+          >
+            <Select3d name="father_occupation" defaultValue={values?.father_occupation ?? ""} className={inputClass}>
+              <option value="">Not mentioned</option>
+              {parentProfessionChoices(values?.father_occupation).map((item) => (
+                <option key={`father-${item}`} value={item}>
+                  {choiceLabel(item)}
+                </option>
+              ))}
+            </Select3d>
           </Field>
-          <Field label="Mother's profession">
-            <input
-              name="mother_occupation"
-              maxLength={120}
-              autoComplete="off"
-              placeholder="Homemaker, service, retired…"
-              defaultValue={values?.mother_occupation ?? ""}
-              className={inputClass}
-            />
+          <Field
+            label="Mother's profession"
+            help="Pick the closest option so the profile can say this kindly — including if mother has passed away."
+          >
+            <Select3d name="mother_occupation" defaultValue={values?.mother_occupation ?? ""} className={inputClass}>
+              <option value="">Not mentioned</option>
+              {parentProfessionChoices(values?.mother_occupation).map((item) => (
+                <option key={`mother-${item}`} value={item}>
+                  {choiceLabel(item)}
+                </option>
+              ))}
+            </Select3d>
           </Field>
           <div className="field-3d sm:col-span-2">
             <span className="field-3d-label">

@@ -125,7 +125,7 @@ export function withDontKnow(list: readonly string[]): string[] {
 }
 
 export function choiceLabel(value: string) {
-  return value === DONT_KNOW ? "I don't know" : value;
+  return value === DONT_KNOW ? "Dont Know" : value;
 }
 
 export const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Don't know"] as const;
@@ -444,6 +444,28 @@ export const FAMILY_STATUSES = [
 ] as const;
 
 export const SETTLE_ABROAD = ["Yes", "No", "Open", "Don't know"] as const;
+
+/** How a parent earns a living, or that they have passed away — used to write the family line. */
+export const PARENT_PROFESSIONS = [
+  "Homemaker",
+  "Employed",
+  "Government employee",
+  "Business",
+  "Farmer",
+  "Teacher",
+  "Doctor",
+  "Engineer",
+  "Professional",
+  "Retired",
+  "Retired from government service",
+  "Retired businessman",
+  "Retired farmer",
+  "Passed away",
+  "Passed away · was employed",
+  "Passed away · was in business",
+  "Passed away · was a farmer",
+  "Don't know",
+] as const;
 
 export const LIVING_ARRANGEMENTS = ["Own house", "Parents' house", "Rented", "Leased"] as const;
 
