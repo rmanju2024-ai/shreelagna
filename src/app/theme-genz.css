@@ -1064,6 +1064,7 @@ body > .nav-menu {
     white-space: normal !important;
   }
   .header-profile-chip-copy span { color: #9a3412 !important; }
+  .account-hub-owner { display: none !important; }
 
   /* One readable card per row, with no accidental desktop minimum widths. */
   .sx-grid, .inbox-list.sx-grid, .alert-list, .plans-grid {
@@ -1637,6 +1638,11 @@ html[data-scene="couple"] .app-main {
     radial-gradient(circle at 0 100%, rgb(255 93 143 / 14%), transparent 45%),
     var(--paper);
 }
+.login-genz-visual h1 {
+  color: #fff7ea !important;
+  text-shadow: 0 1px 0 rgb(63 14 13 / 30%), 0 10px 28px rgb(20 8 4 / 50%);
+}
+.login-genz-card h2 { color: #5c1816; }
 .login-genz-card { max-width: 34rem; border-radius: 1.7rem; }
 .login-genz-chip, .profile-create-tip {
   display: inline-flex; width: fit-content; padding: 0.35rem 0.7rem; border-radius: 999px;

@@ -5980,11 +5980,7 @@ a.browse-view {
 }
 @media (max-width: 640px) {
   .account-hub-head { flex-wrap: wrap; }
-  .account-hub-owner {
-    flex: 1 1 100%;
-    margin: 0.1rem 0 0;
-    text-align: left;
-  }
+  .account-hub-owner { display: none; }
 }
 .account-hub-crest {
   display: grid;

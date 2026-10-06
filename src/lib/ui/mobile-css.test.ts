@@ -71,6 +71,7 @@ describe("shared mobile CSS contract", () => {
     expect(css).toContain("@media (prefers-reduced-motion: reduce)");
     expect(css).toContain(".public-card-grid");
     expect(css).toContain(".login-genz-action");
+    expect(css).toContain(".login-genz-visual h1");
     expect(css).toContain(".profile-create-shell");
     expect(css).toContain(".home-value-card");
   });
