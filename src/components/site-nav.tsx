@@ -183,7 +183,7 @@ export function HeaderNav({
         <NavChip item={{ href: "/browse", label: "Discover", icon: "browse" }} overlay={overlay} current={pathMatches(pathname, "/browse", tab)} />
         {user ? (
           <NavChip
-            item={{ href: "/app/account", label: "AccountHub", icon: "settings", badge: chatUnread + alertUnread + likesPending }}
+            item={{ href: "/app/account", label: "Account", icon: "account", badge: chatUnread + alertUnread + likesPending }}
             overlay={overlay}
             current={pathMatches(pathname, "/app/account", tab)}
           />

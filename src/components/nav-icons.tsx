@@ -66,6 +66,15 @@ export function NavGlyph({ name }: { name: string }) {
           <path d="m8.8 12 2.2 2.2 4.2-4.4" />
         </svg>
       );
+    case "account":
+      return (
+        <svg {...common}>
+          <rect {...duo} x="3.6" y="3.6" width="7.2" height="7.2" rx="1.8" />
+          <rect {...duo} x="13.2" y="3.6" width="7.2" height="7.2" rx="1.8" />
+          <rect {...duo} x="3.6" y="13.2" width="7.2" height="7.2" rx="1.8" />
+          <rect {...duo} x="13.2" y="13.2" width="7.2" height="7.2" rx="1.8" />
+        </svg>
+      );
     case "settings":
       return (
         <svg {...common}>

@@ -72,7 +72,7 @@ describe("mobile primary navigation", () => {
   it("keeps every member destination available (Inbox lives on Account hub)", () => {
     render(<HeaderNav overlay={false} user staff />);
     const nav = screen.getByRole("navigation", { name: "Primary" });
-    for (const label of ["Home", "Discover", "AccountHub", "Desk", "More"]) {
+    for (const label of ["Home", "Discover", "Account", "Desk", "More"]) {
       expect(nav.textContent).toContain(label);
     }
     expect(nav.textContent).not.toContain("Inbox");

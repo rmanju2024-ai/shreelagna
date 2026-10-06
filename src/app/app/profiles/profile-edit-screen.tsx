@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { InnerShell as PageShell } from "@/components/chrome-layout";
+import { BackToMyProfile } from "@/components/back-to-account";
 import { ProfileForm } from "@/app/app/profiles/profile-form";
 import { AlbumViewer } from "@/app/app/profiles/album-viewer";
 import { IntroductionEditor } from "@/app/app/profiles/introduction-editor";
@@ -30,6 +31,7 @@ export async function ProfileEditScreen({
   memberCode,
   error,
   section,
+  saved,
 }: {
   profile: Record<string, unknown> & { id: string; subject_full_name: string; profile_type: string };
   me: { id: string; email?: string | null };
@@ -39,6 +41,7 @@ export async function ProfileEditScreen({
   memberCode?: string;
   error?: string;
   section?: ProfileEditTarget;
+  saved?: boolean;
 }) {
   const aboutText = aboutPlainText(String(profile.about ?? ""));
   const backTab = portraitTabForSection(section);
@@ -50,12 +53,16 @@ export async function ProfileEditScreen({
 
   return (
     <PageShell>
+      <BackToMyProfile href={cancelHref} />
       <div className="page-head-panel atelier">
         <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)]">
           Amend profile
           {memberCode ? ` · ${memberCode}` : ""}
         </p>
         <h1 className="mt-2 font-[family-name:var(--font-british)] text-4xl">{profile.subject_full_name}</h1>
+        {saved ? (
+          <p className="mt-3 text-sm font-medium text-emerald-800">Saved. Stay here to keep editing, or go back to my profile when you are done.</p>
+        ) : null}
       </div>
       <div id="album" className="profile-studio mt-8">
         <nav className="profile-wizard-steps profile-studio-tabs" aria-label="Edit profile sections">
@@ -102,7 +109,7 @@ export async function ProfileEditScreen({
               <Link href={cancelHref} className={`${btnHeroGhost} form-3d-cancel`}>
                 Cancel
               </Link>
-              <Link href={`/app/profiles/${profile.id}?saved=1`} className={btnHero}>
+              <Link href={`/app/profiles/${profile.id}?edit=1&section=album&saved=1`} className={btnHero}>
                 Save
               </Link>
             </div>

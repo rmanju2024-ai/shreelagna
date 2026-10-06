@@ -3,6 +3,7 @@ import {
   creatorRolesForForm,
   parentLine,
   postedAsLabel,
+  profileKindLabel,
   siblingLine,
   toDbCreatorRelationship,
 } from "./options";
@@ -16,6 +17,13 @@ describe("toDbCreatorRelationship", () => {
   it("maps guardian to relative until the extra enum is applied", () => {
     expect(toDbCreatorRelationship("guardian")).toBe("relative");
     expect(toDbCreatorRelationship("self")).toBe("self");
+  });
+});
+
+describe("profileKindLabel", () => {
+  it("names bride and groom only", () => {
+    expect(profileKindLabel("vadhu")).toBe("Bride");
+    expect(profileKindLabel("vara")).toBe("Groom");
   });
 });
 

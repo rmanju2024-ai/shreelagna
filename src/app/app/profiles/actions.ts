@@ -420,7 +420,9 @@ export async function saveProfile(formData: FormData) {
 
   revalidatePath(`/app/profiles/${profileId}`);
   revalidatePath("/desk/profiles");
-  redirect(`/app/profiles/${profileId}?saved=1${section ? `&tab=${section}` : ""}`);
+  const stay = new URLSearchParams({ edit: "1", saved: "1" });
+  if (section) stay.set("section", section);
+  redirect(`/app/profiles/${profileId}?${stay.toString()}`);
 }
 
 export async function setActiveProfile(formData: FormData) {

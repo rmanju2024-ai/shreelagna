@@ -17,6 +17,8 @@ describe("amend profile tabs", () => {
   });
 
   it("keeps Save and Cancel on album and form chapters", () => {
+    expect(screen).toContain("BackToMyProfile");
+    expect(screen).toContain("edit=1&section=album&saved=1");
     expect(screen).toContain("Cancel");
     expect(screen).toMatch(/\n\s+Save\r?\n/);
     expect(screen).toContain("section={formSection}");

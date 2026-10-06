@@ -44,7 +44,7 @@ function makeProfiles(count: number, prefix = "p") {
 function show(extra: Partial<ComponentProps<typeof BrowseClient>> = {}) {
   return render(
     <BrowseClient
-      lookingFor="Bride / Vadhu"
+      lookingFor="Bride"
       notice={null}
       user
       initialView="fits"

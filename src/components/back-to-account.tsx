@@ -8,3 +8,12 @@ export function BackToAccount({ align = "wide" }: { align?: "wide" | "profile" }
     </nav>
   );
 }
+
+/** Leave amend-profile and open the public house view. */
+export function BackToMyProfile({ href }: { href: string }) {
+  return (
+    <nav className="back-to-account is-profile" aria-label="Back">
+      <Link href={href}>← Back to my profile</Link>
+    </nav>
+  );
+}

@@ -391,7 +391,7 @@ export function displayFirstName(fullName: string): string {
 }
 
 export function profileKindLabel(type: string | null | undefined): string {
-  return type === "vara" ? "Groom / Vara" : "Bride / Vadhu";
+  return type === "vara" ? "Groom" : "Bride";
 }
 
 export function postedAsLabel(rel: string | null | undefined, _profileType?: string | null): string {

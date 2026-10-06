@@ -85,8 +85,8 @@ export function IntroductionEditor({
     setStoredMessage(null);
   }
 
-  function goPortrait() {
-    window.location.assign(`/app/profiles/${profileId}?saved=1&tab=intro`);
+  function stayHere(message = "Saved. You can keep editing, or go back to my profile when you are done.") {
+    setStoredMessage(message);
   }
 
   async function saveWords(form: HTMLFormElement) {
@@ -109,7 +109,8 @@ export function IntroductionEditor({
       setSaving(false);
       return;
     }
-    goPortrait();
+    setSaving(false);
+    stayHere();
   }
 
   async function saveMedia(shown: "video" | "audio") {
@@ -122,7 +123,8 @@ export function IntroductionEditor({
       setSaving(false);
       return;
     }
-    goPortrait();
+    setSaving(false);
+    stayHere();
   }
 
   return (
@@ -200,6 +202,7 @@ export function IntroductionEditor({
               defaultValue={about}
             />
           </div>
+          {storedMessage ? <p className="mt-3 text-sm font-medium text-emerald-700">{storedMessage}</p> : null}
           <div className="form-3d-actions mt-6">
             <Link href={cancelHref} className={`${btnHeroGhost} form-3d-cancel`}>
               Cancel
@@ -233,7 +236,7 @@ export function IntroductionEditor({
           />
           {storedMessage ? <p className="mt-3 text-sm font-medium text-emerald-700">{storedMessage}</p> : null}
           <p className="mt-3 text-sm text-[var(--muted)]">
-            Upload saves and selects the clip. Tap Save to return to your profile.
+            Upload saves and selects the clip. Tap Save to keep this introduction.
           </p>
           <div className="form-3d-actions mt-6">
             <Link href={cancelHref} className={`${btnHeroGhost} form-3d-cancel`}>
@@ -273,7 +276,7 @@ export function IntroductionEditor({
           />
           {storedMessage ? <p className="mt-3 text-sm font-medium text-emerald-700">{storedMessage}</p> : null}
           <p className="mt-3 text-sm text-[var(--muted)]">
-            Upload saves and selects the voice note. Tap Save to return to your profile.
+            Upload saves and selects the voice note. Tap Save to keep this introduction.
           </p>
           <div className="form-3d-actions mt-6">
             <Link href={cancelHref} className={`${btnHeroGhost} form-3d-cancel`}>

@@ -105,6 +105,7 @@ export default async function ProfilePage({
         memberCode={memberCode}
         error={query.error}
         section={section}
+        saved={query.saved === "1"}
       />
     );
   }
