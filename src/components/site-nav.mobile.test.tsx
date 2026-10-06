@@ -3,6 +3,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { HeaderNav } from "./site-nav";
+import { InstallAppRoot } from "./install-app";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/browse",
@@ -37,14 +38,18 @@ beforeEach(() => {
 
 describe("mobile primary navigation", () => {
   it("portals every More option into a mobile sheet", () => {
-    render(<HeaderNav overlay={false} user staff chatUnread={2} alertUnread={3} likesPending={1} />);
+    render(
+      <InstallAppRoot>
+        <HeaderNav overlay={false} user staff chatUnread={2} alertUnread={3} likesPending={1} />
+      </InstallAppRoot>,
+    );
 
     fireEvent.click(screen.getByRole("button", { name: /more/i }));
 
     const menu = screen.getByRole("menu");
     expect(menu.parentElement).toBe(document.body);
     expect(menu.className).toContain("is-mobile-sheet");
-    for (const label of ["About", "Help", "Sign out"]) {
+    for (const label of ["About", "Help", "Install app", "Sign out"]) {
       expect(screen.getByText(label)).toBeTruthy();
     }
     expect(menu.textContent).not.toContain("AccountHub");

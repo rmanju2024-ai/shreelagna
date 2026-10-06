@@ -39,11 +39,19 @@ const nextConfig: NextConfig = {
               "media-src 'self' blob: https:",
               "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://accounts.google.com",
               "font-src 'self' data:",
+              "worker-src 'self'",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",
             ].join("; "),
           },
+        ],
+      },
+      {
+        source: "/sw.js",
+        headers: [
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+          { key: "Service-Worker-Allowed", value: "/" },
         ],
       },
     ];

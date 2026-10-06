@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 import { useEffect, useRef, useState } from "react";
 import { NavGlyph } from "@/components/nav-icons";
 import { SignOutButton } from "@/components/sign-out-button";
+import { InstallAppMenuItem } from "@/components/install-app";
 import { unreadLabel } from "@/lib/match/chat-ui";
 
 function pathMatches(pathname: string, href: string, tab: string | null) {
@@ -202,6 +203,7 @@ export function HeaderNav({
           current={moreOn}
         >
           {more.map((item) => <MenuLink key={item.href} item={item} current={pathMatches(pathname, item.href, tab)} />)}
+          <InstallAppMenuItem />
           {user ? <SignOutButton className="nav-menu-item" icon /> : null}
         </NavGroup>
       </div>

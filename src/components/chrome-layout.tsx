@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { ChromeSync } from "@/components/chrome-sync";
+import { InstallAppRoot } from "@/components/install-app";
 import { NavigationFeedback } from "@/components/navigation-feedback";
 import { SceneLayer } from "@/components/scene-layer";
 import { HeaderSkeleton, SiteFooter, SiteHeader, pageFull, pageInner, readScene } from "@/components/site-chrome";
@@ -12,17 +13,19 @@ import { ThemeQuickPicker } from "@/components/theme-quick-picker";
 export async function ChromeLayout({ children }: { children: React.ReactNode }) {
   const scene = await readScene();
   return (
-    <div className={`relative flex min-h-dvh w-full flex-col page-scene is-${scene}`}>
-      <NavigationFeedback />
-      <SceneLayer initial={scene} />
-      <Suspense fallback={<HeaderSkeleton overlay={false} />}>
-        <SiteHeader overlay={false} glass />
-      </Suspense>
-      <ThemeQuickPicker initial={scene} />
-      <ChromeSync />
-      {children}
-      <SiteFooter glass />
-    </div>
+    <InstallAppRoot>
+      <div className={`relative flex min-h-dvh w-full flex-col page-scene is-${scene}`}>
+        <NavigationFeedback />
+        <SceneLayer initial={scene} />
+        <Suspense fallback={<HeaderSkeleton overlay={false} />}>
+          <SiteHeader overlay={false} glass />
+        </Suspense>
+        <ThemeQuickPicker initial={scene} />
+        <ChromeSync />
+        {children}
+        <SiteFooter glass />
+      </div>
+    </InstallAppRoot>
   );
 }
 

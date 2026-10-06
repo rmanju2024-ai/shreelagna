@@ -32,6 +32,13 @@ export const metadata: Metadata = {
   },
   description:
     "A private Indian matrimonial house for families.",
+  applicationName: "Shree Lagna",
+  appleWebApp: {
+    capable: true,
+    title: "Shree Lagna",
+    statusBarStyle: "default",
+  },
+  formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {
