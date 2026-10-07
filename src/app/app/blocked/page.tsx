@@ -7,6 +7,8 @@ import { publicMediaUrl } from "@/lib/match/inbox-card";
 import { displayFirstName } from "@/lib/profile/options";
 import { createServiceClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import { profileOpenHref } from "@/lib/ui/dismiss";
 
 export default async function BlockedProfilesPage({ searchParams }: { searchParams: Promise<{ safety?: string }> }) {
   const { safety } = await searchParams;
@@ -54,7 +56,7 @@ export default async function BlockedProfilesPage({ searchParams }: { searchPara
               const name = displayFirstName(String(p.subject_full_name ?? "Member"));
               return (
                 <li key={id} className="list-card">
-                  <span className="list-card-main">
+                  <Link href={profileOpenHref(id, "blocked")} className="list-card-main">
                     <span className="list-card-photo">
                       {photo ? (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -67,7 +69,7 @@ export default async function BlockedProfilesPage({ searchParams }: { searchPara
                       <strong>{name}</strong>
                       <small>{[p.current_city, p.current_state].filter(Boolean).join(", ") || "India"}</small>
                     </span>
-                  </span>
+                  </Link>
                   <form action={unblockProfile}>
                     <input type="hidden" name="profile_id" value={id} />
                     <input type="hidden" name="return_to" value="/app/blocked" />

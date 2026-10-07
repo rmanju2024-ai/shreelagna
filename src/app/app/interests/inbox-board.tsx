@@ -7,11 +7,11 @@ import { useRef, useState, type MouseEvent, type ReactNode } from "react";
 import { respondInterest } from "@/app/app/match/actions";
 import { pageCount, pageItems, PROFILE_PAGE_SIZE } from "@/lib/match/inbox-card";
 import { btnGhost, btnPrimary } from "@/lib/ui/classes";
+import { withProfileFrom } from "@/lib/ui/dismiss";
 
 function profileHref(note: { href?: string; profileId?: string }): string | undefined {
-  if (note.href) return note.href;
-  if (note.profileId) return `/browse/${note.profileId}`;
-  return undefined;
+  const href = note.href ?? (note.profileId ? `/browse/${note.profileId}` : undefined);
+  return href ? withProfileFrom(href, "likes") : undefined;
 }
 
 export type InboxNote = {

@@ -9,6 +9,7 @@ import { displayFirstName, maritalLabel } from "@/lib/profile/options";
 import { createServiceClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { profileOpenHref } from "@/lib/ui/dismiss";
 
 export default async function ShortlistPage({ searchParams }: { searchParams: Promise<{ safety?: string }> }) {
   const { safety } = await searchParams;
@@ -71,7 +72,7 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
                 .join(" · ");
               return (
                 <li key={id} className="list-card">
-                  <Link href={`/browse/${id}`} className="list-card-main">
+                  <Link href={profileOpenHref(id, "shortlist")} className="list-card-main">
                     <span className="list-card-photo">
                       {photo ? (
                         // eslint-disable-next-line @next/next/no-img-element

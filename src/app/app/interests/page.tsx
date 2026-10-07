@@ -19,6 +19,7 @@ import { yearsFromDob } from "@/lib/profile/completeness";
 import { formatHeightImperial } from "@/lib/profile/match-compare";
 import { displayFirstName } from "@/lib/profile/options";
 import { isPublicProfileStatus } from "@/lib/profile/visibility";
+import { profileOpenHref } from "@/lib/ui/dismiss";
 import { createServiceClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -185,7 +186,7 @@ export async function InterestsView({ only }: { only?: SectionId } = {}) {
   function publicHref(profileId: string) {
     const other = nameMap.get(profileId) ?? viewerMap.get(profileId);
     if (other && !isPublicProfileStatus(other.status)) return undefined;
-    return `/browse/${profileId}`;
+    return profileOpenHref(profileId, "likes");
   }
 
   function nameFor(row: InterestRow) {
@@ -218,7 +219,7 @@ export async function InterestsView({ only }: { only?: SectionId } = {}) {
       when: extra.when,
       whenLabel: extra.whenLabel,
       profileId,
-      href: extra.href ?? (closed ? undefined : `/browse/${profileId}`),
+      href: extra.href ?? (closed ? undefined : profileOpenHref(profileId, "likes")),
       status: extra.status,
       photoUrl: photo,
       lastOnline: inboxLastOnlineNow(
@@ -277,8 +278,8 @@ export async function InterestsView({ only }: { only?: SectionId } = {}) {
       <header className="sx-hero">
         <div className="sx-hero-copy">
           <p className="sx-eyebrow">Inbox</p>
-          <h1>{only ? SECTIONS.find((item) => item.id === only)?.label ?? "Likes" : "Likes"}</h1>
-          {only ? <Link href="/app/interests" className="sx-back-to-discover">← Back to Likes</Link> : null}
+          <h1>{only ? SECTIONS.find((item) => item.id === only)?.label ?? "Interests" : "Interests"}</h1>
+          {only ? <Link href="/app/interests" className="sx-back-to-discover">← Back to Interests</Link> : null}
         </div>
       </header>
       <LikesSeen />

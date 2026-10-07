@@ -7,6 +7,7 @@ import { fetchPendingPlanCode, fetchPlans, loadInterestQuota, loadMembership } f
 import { formatIstDate } from "@/lib/time/ist";
 import { createServiceClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { profileOpenHref } from "@/lib/ui/dismiss";
 
 export const dynamic = "force-dynamic";
 
@@ -90,7 +91,7 @@ export default async function PlansPage({
               <ul className="plans-usage-list">
                 {(touchRows ?? []).map((row) => (
                   <li key={row.id}>
-                    <a href={`/browse/${row.id}`}>
+                    <a href={profileOpenHref(row.id, "plans")}>
                       {row.subject_full_name?.trim() || row.member_code || "Profile"}
                     </a>
                   </li>

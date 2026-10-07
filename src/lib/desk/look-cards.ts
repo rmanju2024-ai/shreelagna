@@ -3,6 +3,7 @@ import { inboxLastOnline, publicMediaUrl } from "@/lib/match/inbox-card";
 import { yearsFromDob } from "@/lib/profile/completeness";
 import { formatHeightImperial } from "@/lib/profile/match-compare";
 import { displayFirstName } from "@/lib/profile/options";
+import { profileOpenHref } from "@/lib/ui/dismiss";
 
 export const LOOK_LIST_LIMIT = 200;
 export const LOOK_STATUSES = ["active", "pending_review", "on_hold", "hidden"];
@@ -51,7 +52,7 @@ export function lookCardFromRow(
   const height = typeof row.height_cm === "number" ? formatHeightImperial(row.height_cm) : null;
   return {
     id: String(row.id),
-    href: `/browse/${row.id}`,
+    href: profileOpenHref(String(row.id), "look"),
     name: displayFirstName(typeof row.subject_full_name === "string" ? row.subject_full_name : "Profile"),
     photoUrl: publicMediaUrl(photoMap.get(String(row.id))),
     lastOnline:

@@ -4,14 +4,15 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { btnGhost } from "@/lib/ui/classes";
-import { dismissTo } from "@/lib/ui/dismiss";
+import { dismissTo, profileLeaveTarget } from "@/lib/ui/dismiss";
 
 export function ProfilePeek({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
   const close = useCallback(() => {
-    dismissTo(router, "/browse");
+    const from = new URLSearchParams(window.location.search).get("from");
+    dismissTo(router, profileLeaveTarget(from).href);
   }, [router]);
 
   useEffect(() => {

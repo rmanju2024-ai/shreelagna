@@ -34,7 +34,10 @@ describe("shared mobile CSS contract", () => {
 
   it("stacks chat and preserves a visible composer", () => {
     expect(css).toContain(".wc-shell.has-thread .wc-side { display: none; }");
-    expect(css).toContain(".wc-pane .wa-composer { position: relative");
+    expect(css).toContain(".wc-pane .wa-composer");
+    expect(css).toContain("position: relative");
+    expect(css).toContain(".bird-chat-layer");
+    expect(css).toContain("padding-bottom: calc(5.15rem + env(safe-area-inset-bottom) + var(--bird-kb, 0px))");
     expect(css).toContain("overflow-y: scroll !important");
     expect(css).toContain("-webkit-overflow-scrolling: touch");
     expect(css).toContain(".wc-pane .wa-stage::-webkit-scrollbar-thumb");

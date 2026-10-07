@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { dismissTo } from "./dismiss";
+import { dismissTo, profileLeaveTarget, profileOpenHref, withProfileFrom } from "./dismiss";
 
 describe("dismissTo", () => {
   it("goes back immediately when there is history", () => {
@@ -42,5 +42,17 @@ describe("dismissTo", () => {
     expect(router.back).not.toHaveBeenCalled();
     expect(router.replace).toHaveBeenCalledWith("/browse");
     vi.unstubAllGlobals();
+  });
+
+  it("sends every list back to its own section", () => {
+    expect(profileLeaveTarget("shortlist")).toEqual({ href: "/app/shortlist", label: "Back to shortlist" });
+    expect(profileLeaveTarget("blocked")).toEqual({ href: "/app/blocked", label: "Back to blocked" });
+    expect(profileLeaveTarget("likes")).toEqual({ href: "/app/interests", label: "Back to interests" });
+    expect(profileLeaveTarget("alerts")).toEqual({ href: "/app/alerts", label: "Back to alerts" });
+    expect(profileLeaveTarget("chat")).toEqual({ href: "/app/chat", label: "Back to inbox" });
+    expect(profileLeaveTarget()).toEqual({ href: "/browse", label: "Close" });
+    expect(profileOpenHref("p1", "blocked")).toBe("/browse/p1?from=blocked");
+    expect(withProfileFrom("/browse/p1", "alerts")).toBe("/browse/p1?from=alerts");
+    expect(withProfileFrom("/app/chat", "alerts")).toBe("/app/chat");
   });
 });

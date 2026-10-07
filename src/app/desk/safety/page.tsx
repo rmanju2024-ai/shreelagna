@@ -10,6 +10,7 @@ import {
 import { formatIstDateTime } from "@/lib/time/ist";
 import { btnGhost, btnPrimary, cardClass } from "@/lib/ui/classes";
 import Link from "next/link";
+import { profileOpenHref } from "@/lib/ui/dismiss";
 
 export default async function DeskSafetyPage() {
   const desk = await requireDesk("/desk/safety");
@@ -54,7 +55,7 @@ export default async function DeskSafetyPage() {
                       <dt>Reported by</dt>
                       <dd>
                         {reporter ? (
-                          <Link href={`/browse/${reporter.id}`}>{safetyPartyLabel(reporter)}</Link>
+                          <Link href={profileOpenHref(reporter.id, "safety")}>{safetyPartyLabel(reporter)}</Link>
                         ) : (
                           safetyPartyLabel(undefined, item.reporter_profile_id)
                         )}
@@ -66,13 +67,13 @@ export default async function DeskSafetyPage() {
                       <dt>Profile reported</dt>
                       <dd>
                         {reported ? (
-                          <Link href={`/browse/${reported.id}`}>{safetyPartyLabel(reported)}</Link>
+                          <Link href={profileOpenHref(reported.id, "safety")}>{safetyPartyLabel(reported)}</Link>
                         ) : (
                           safetyPartyLabel(undefined, item.reported_profile_id)
                         )}
                         {reported ? (
                           <span className="desk-safety-links">
-                            <Link href={`/browse/${reported.id}`} className={btnGhost}>
+                            <Link href={profileOpenHref(reported.id, "safety")} className={btnGhost}>
                               View
                             </Link>
                             <Link href={`/app/profiles/${reported.id}`} className={btnGhost}>

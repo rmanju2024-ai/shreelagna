@@ -10,6 +10,7 @@ import { CompletenessMeter } from "@/app/app/profiles/completeness-meter";
 import { KindMark } from "@/components/kind-mark";
 import { EVIDENCE_RETENTION_NOTICE } from "@/lib/verification/copy";
 import { otherProfileLocked } from "@/lib/profile/view-gate";
+import { BackLink } from "@/components/back-link";
 import type { CompletenessItem } from "@/lib/profile/completeness";
 import type { InterestThread } from "@/lib/match/interest-status";
 
@@ -127,6 +128,8 @@ export type ProfileData = {
     pendingRecommended: CompletenessItem[];
   } | null;
   verify?: Array<{ id: string; label: string; on: boolean }>;
+  closeHref?: string;
+  closeLabel?: string;
 };
 
 function RichLine({ text }: { text: string }) {
@@ -477,6 +480,13 @@ export function ProfileRedesign(props: ProfileData) {
   return (
     <div className="pv-shell">
       {shortlistMsg ? <div className="pv-toast">{shortlistMsg}</div> : null}
+      {!props.own ? (
+        <nav className="pv-close-bar" aria-label="Leave profile">
+          <BackLink fallback={props.closeHref ?? "/browse"} className="pv-close">
+            {props.closeLabel ?? "Close"}
+          </BackLink>
+        </nav>
+      ) : null}
 
       <header className="pv-hero">
         <KindMark type={props.profileType} className="pv-kind" />

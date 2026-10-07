@@ -8,7 +8,7 @@ export type InboxTab = "chats" | "likes" | "alerts";
 
 const TABS: { id: InboxTab; href: string; label: string; countKey: "chatUnread" | "likesPending" | "alertUnread" }[] = [
   { id: "chats", href: "/app/chat", label: "💬 Chats", countKey: "chatUnread" },
-  { id: "likes", href: "/app/interests", label: "💌 Likes", countKey: "likesPending" },
+  { id: "likes", href: "/app/interests", label: "💌 Interests", countKey: "likesPending" },
   { id: "alerts", href: "/app/alerts", label: "🔔 Alerts", countKey: "alertUnread" },
 ];
 
@@ -42,7 +42,7 @@ export function InboxSwitcherNav({
   );
 }
 
-/** One place for the three parts of the Inbox: Chats, Likes and Alerts. */
+/** One place for the three parts of the Inbox: Chats, Interests and Alerts. */
 export async function InboxSwitcher({ active }: { active: InboxTab }) {
   const { supabase, user } = await getAuth();
   const me = user && supabase ? await ensureAppUser(supabase, user) : null;

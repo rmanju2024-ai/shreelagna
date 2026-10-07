@@ -13,6 +13,7 @@ import { pairCanChat } from "@/lib/match/interest-status";
 import { pairPlanLive } from "@/lib/membership/access";
 import { loadMembership, loadMembershipForProfile } from "@/lib/membership/load";
 import { displayFirstName } from "@/lib/profile/options";
+import { profileOpenHref } from "@/lib/ui/dismiss";
 import { canSearchFamilies } from "@/lib/profile/visibility";
 import { createServiceClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
@@ -115,7 +116,7 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
             ‹
           </Link>
           {otherOpen ? (
-            <Link href={`/browse/${otherId}`} className="wa-head-person">
+            <Link href={profileOpenHref(otherId, "chat")} className="wa-head-person">
               {person}
             </Link>
           ) : (

@@ -1,4 +1,5 @@
 import { ProfileRedesign, type ProfileData } from "@/app/browse/profile-redesign";
+import { profileLeaveTarget } from "@/lib/ui/dismiss";
 import { profileViewedCopy } from "@/lib/match/alert-copy";
 import { canAlertProfileView } from "@/lib/match/profile-settings";
 import { displayFirstName } from "@/lib/profile/options";
@@ -277,11 +278,11 @@ export async function BrowseProfileView({
   editHref,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; sent?: string; contact?: string; wa?: string; safety?: string }>;
+  searchParams: Promise<{ error?: string; sent?: string; contact?: string; wa?: string; safety?: string; from?: string }>;
   editHref?: string;
 }) {
   const { id } = await params;
-  const { sent } = await searchParams;
+  const { sent, from } = await searchParams;
   const { supabase, user } = await getAuth();
   if (!supabase || !user) redirect(`/login?next=/browse/${id}`);
   const me = await ensureAppUser(supabase, user);
@@ -803,8 +804,11 @@ export async function BrowseProfileView({
         }),
       )
     : null;
+  const leave = profileLeaveTarget(from);
   const props: ProfileData = {
     id: String(profile.id),
+    closeHref: leave.href,
+    closeLabel: leave.label,
     name: headline.name,
     surname: headline.surname,
     age,

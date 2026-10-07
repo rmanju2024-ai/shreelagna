@@ -37,6 +37,7 @@ import { displayFirstName, profileKindLabel } from "@/lib/profile/options";
 import { fetchAdminUserIds } from "@/lib/desk/admin-ids";
 import { createServiceClient } from "@/lib/supabase/server";
 import { timed } from "@/lib/perf";
+import { profileOpenHref } from "@/lib/ui/dismiss";
 
 function nestedName(value: unknown): string | null {
   if (Array.isArray(value) && value[0] && typeof value[0] === "object" && value[0] && "name" in value[0]) {
@@ -58,7 +59,7 @@ function cardFromRow(row: Record<string, unknown>, photoMap: Map<string, string>
   const height = typeof row.height_cm === "number" ? formatHeightImperial(row.height_cm) : null;
   return {
     id: String(row.id),
-    href: `/browse/${row.id}`,
+    href: profileOpenHref(String(row.id), "discover"),
     name: displayFirstName(typeof row.subject_full_name === "string" ? row.subject_full_name : "Profile"),
     photoUrl: publicMediaUrl(photoMap.get(String(row.id))),
     lastOnline: inboxLastOnline(

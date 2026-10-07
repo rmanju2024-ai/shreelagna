@@ -10,7 +10,7 @@ describe("InboxSwitcher", () => {
     render(<InboxSwitcherNav active="chats" />);
     expect(screen.getByRole("link", { name: /back to account/i }).getAttribute("href")).toBe("/app/account");
     expect(screen.getByRole("link", { name: /chats/i }).getAttribute("href")).toBe("/app/chat");
-    expect(screen.getByRole("link", { name: /likes/i }).getAttribute("href")).toBe("/app/interests");
+    expect(screen.getByRole("link", { name: /interests/i }).getAttribute("href")).toBe("/app/interests");
     expect(screen.getByRole("link", { name: /alerts/i }).getAttribute("href")).toBe("/app/alerts");
   });
 

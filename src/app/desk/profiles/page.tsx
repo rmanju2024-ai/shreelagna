@@ -8,6 +8,7 @@ import { activeContactFlags, contentFlagLabel } from "@/lib/moderation/content-f
 import { formatIstDateTime } from "@/lib/time/ist";
 import { btnGhost, btnPrimary, cardClass, inputClass } from "@/lib/ui/classes";
 import Link from "next/link";
+import { profileOpenHref } from "@/lib/ui/dismiss";
 import { ProfileDeleteControl } from "@/app/app/profiles/profile-delete-control";
 
 const SELECT =
@@ -70,7 +71,7 @@ function ProfileDeskRow({ row, queue }: { row: DeskProfile; queue: QueueView }) 
         ) : null}
       </div>
       <div className="desk-ticket-ops desk-profile-actions">
-        <Link href={`/browse/${row.id}`} className={btnGhost}>
+        <Link href={profileOpenHref(row.id, "desk")} className={btnGhost}>
           View
         </Link>
         <Link href={`/app/profiles/${row.id}`} className={btnGhost}>

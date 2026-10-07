@@ -1158,9 +1158,28 @@ body > .nav-menu {
   }
 
   /* Chat uses the screen efficiently without hiding the composer. */
+  .bird-chat-layer,
+  .bird-chat-layer.is-wide {
+    padding: 0 !important;
+    padding-bottom: calc(5.15rem + env(safe-area-inset-bottom) + var(--bird-kb, 0px)) !important;
+    place-items: stretch !important;
+    align-content: stretch !important;
+  }
+  .bird-chat-layer .bird-wa.is-max,
+  .bird-wa.is-max {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+  }
+  .bird-wa-composer {
+    position: relative;
+    z-index: 6;
+    padding-bottom: 0.7rem !important;
+  }
   .wc-shell {
-    width: 100%; height: calc(100dvh - 10.5rem); min-height: 28rem;
-    max-height: calc(100dvh - 10.5rem); overflow: hidden;
+    width: 100%; height: calc(100dvh - 10.5rem - 5.15rem - env(safe-area-inset-bottom)); min-height: 22rem;
+    max-height: calc(100dvh - 10.5rem - 5.15rem - env(safe-area-inset-bottom)); overflow: hidden;
   }
   .inbox-unified .wc-shell:not(.has-thread) {
     height: auto;
@@ -1190,7 +1209,14 @@ body > .nav-menu {
   .wc-pane .wa-stage::-webkit-scrollbar-thumb {
     background: rgb(84 101 111 / 55%); border-radius: 999px;
   }
-  .wc-pane .wa-composer { position: relative; flex: none; bottom: auto; z-index: 5; }
+  .wc-pane .wa-composer {
+    position: relative; flex: none; bottom: auto; z-index: 5;
+    padding-bottom: 0.7rem !important;
+  }
+  .wc-pane .wa-stage {
+    min-height: 0 !important;
+    max-height: none !important;
+  }
 
   .site-footer {
     margin-bottom: calc(4.65rem + env(safe-area-inset-bottom));
