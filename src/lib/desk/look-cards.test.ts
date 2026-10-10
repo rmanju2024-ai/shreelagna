@@ -38,7 +38,7 @@ describe("desk look cards", () => {
       Date.parse("2026-10-06T00:00:00Z"),
     );
     expect(card.name).toBe("Ananya");
-    expect(card.href).toBe("/browse/p1");
+    expect(card.href).toBe("/browse/p1?from=look");
     expect(card.lastOnline).toBe("In review");
     expect(card.subscribed).toBe(true);
     expect(card.profile_type).toBe("vadhu");

@@ -23,7 +23,7 @@ import { canEditMemberProfile, isStaffRole } from "@/lib/desk/access";
 import { hasDeleteConfirmation } from "@/lib/profile/delete-confirmation";
 import { contentFlags, MEMBER_CONTACT_WARNING } from "@/lib/moderation/content-flags";
 import { writeAudit } from "@/lib/desk/audit";
-import { notifyInterestReceived } from "@/lib/notify/dispatch";
+import { deliverHouseNotice } from "@/lib/notify/deliver";
 import { digitsOnly } from "@/lib/notify/phone";
 import { complimentaryPaidProfileAccess, pairPlanLive } from "@/lib/membership/access";
 import { loadInterestQuota, loadMembership } from "@/lib/membership/load";
@@ -520,6 +520,13 @@ export async function saveShortlist(profileId: string, want: boolean): Promise<{
         viewerProfileId: viewerId,
         viewerName,
       });
+      await deliverHouseNotice({
+        userId: ownerId,
+        kind: "shortlist",
+        title: viewerName,
+        body: `${viewerName} shortlisted your profile.`,
+        href: `/browse/${viewerId}`,
+      });
       revalidatePath("/app/alerts");
     });
   }
@@ -622,7 +629,14 @@ export async function sendInterest(formData: FormData): Promise<{ ok: boolean; i
         href: "/app/interests",
         match_profile_id: mine.id,
       });
-      await notifyInterestReceived(ownerId, senderName, mobile);
+      await deliverHouseNotice({
+        userId: ownerId,
+        kind: copy.kind,
+        title: copy.title,
+        body: copy.body,
+        href: "/app/interests",
+        mobileHint: mobile,
+      });
       revalidatePath("/app/alerts");
       revalidatePath("/app/interests");
     });
@@ -771,6 +785,13 @@ export async function revealContact(toId: string): Promise<{
           match_profile_id: mine.id,
         });
       }
+      await deliverHouseNotice({
+        userId: ownerUserId,
+        kind: copy.kind,
+        title: copy.title,
+        body: copy.body,
+        href: `/browse/${mine.id}`,
+      });
     });
   } else {
     after(() => {

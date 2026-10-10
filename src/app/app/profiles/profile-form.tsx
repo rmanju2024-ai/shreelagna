@@ -420,7 +420,7 @@ export function ProfileForm({
           <Field
             label="Mobile"
             required
-            help="We send an Arattai code. No SMS."
+            help="We send an Arattai code. No SMS. WhatsApp is not used."
           >
             <MobileOtpField
               profileId={allowMobileOtp ? values?.id : undefined}

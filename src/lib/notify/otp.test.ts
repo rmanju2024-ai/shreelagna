@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { digitsCode, hashOtp, makeOtpCode, otpExpired, otpMatches } from "./otp";
 
-describe("WhatsApp OTP", () => {
+describe("mobile OTP", () => {
   it("makes a 6-digit code", () => {
     expect(makeOtpCode()).toMatch(/^\d{6}$/);
   });

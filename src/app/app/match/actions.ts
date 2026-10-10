@@ -2,7 +2,7 @@
 
 import { ensureAppUser } from "@/lib/auth/session";
 import { writeAudit } from "@/lib/desk/audit";
-import { notifyInterestAccepted } from "@/lib/notify/dispatch";
+import { deliverHouseNotice } from "@/lib/notify/deliver";
 import { missingPayloadColumn, isMissingColumnError } from "@/lib/profile/db-errors";
 import { chatReceivedCopy, interestAcceptedCopy, interestDeclinedCopy } from "@/lib/match/alert-copy";
 import { canAlertInterest } from "@/lib/match/profile-settings";
@@ -151,10 +151,13 @@ export async function respondInterest(formData: FormData) {
         href: thread?.id ? `/app/chat/${thread.id}` : "/app/chat",
         match_profile_id: mine.id,
       });
-      await notifyInterestAccepted(
-        other.created_by,
-        displayFirstName(mine.subject_full_name ?? "A member"),
-      );
+      await deliverHouseNotice({
+        userId: other.created_by,
+        kind: copy.kind,
+        title: copy.title,
+        body: copy.body,
+        href: thread?.id ? `/app/chat/${thread.id}` : "/app/chat",
+      });
     }
   }
 
@@ -172,6 +175,13 @@ export async function respondInterest(formData: FormData) {
         body: copy.body,
         href: "/app/interests",
         match_profile_id: mine.id,
+      });
+      await deliverHouseNotice({
+        userId: other.created_by,
+        kind: copy.kind,
+        title: copy.title,
+        body: copy.body,
+        href: "/app/interests",
       });
     }
   }

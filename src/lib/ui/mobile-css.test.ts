@@ -92,7 +92,7 @@ describe("shared mobile CSS contract", () => {
   });
 
   it("keeps every desk tab and its content inside the viewport", () => {
-    expect(css).toContain("grid-template-columns: clamp(10rem, 16vw, 13rem) minmax(0, 1fr)");
+    expect(css).toContain("grid-template-columns: minmax(0, 1fr)");
     expect(css).toContain(".desk-panel > * { min-width: 0; max-width: 100%; }");
     expect(css).toContain(".desk-board > .browse-views");
     expect(css).toContain("overflow-x: auto");

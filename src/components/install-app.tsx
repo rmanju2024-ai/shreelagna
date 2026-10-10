@@ -14,6 +14,10 @@ type InstallApi = {
 };
 
 const InstallContext = createContext<InstallApi | null>(null);
+
+export function useInstallApp() {
+  return useContext(InstallContext);
+}
 const HINT_KEY = "sl-install-hint";
 
 function isIosDevice() {
@@ -56,7 +60,8 @@ export function InstallAppRoot({ children }: { children?: React.ReactNode }) {
     }
     window.addEventListener("beforeinstallprompt", onPrompt);
     window.addEventListener("appinstalled", onInstalled);
-    if (process.env.NODE_ENV === "production" && "serviceWorker" in navigator) {
+    const vapid = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.trim();
+    if ((process.env.NODE_ENV === "production" || vapid) && "serviceWorker" in navigator) {
       void navigator.serviceWorker.register("/sw.js", { scope: "/" });
     }
     return () => {

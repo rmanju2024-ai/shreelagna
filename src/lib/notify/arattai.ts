@@ -1,48 +1,70 @@
+import { toWhatsAppNumber } from "@/lib/notify/phone";
+
 export type ArattaiResult = { ok: boolean; error?: string; token?: string };
 
-export type ArattaiTextInput = { to: string; text: string };
-
-export type ArattaiTemplateInput = {
+export type ArattaiMessageInput = {
   to: string;
-  name: string;
-  language?: string;
+  templateId: string;
   bodyParams?: string[];
+  otp?: string;
+  authentication?: boolean;
 };
 
-type TokenCache = { access: string; until: number };
+const DEFAULT_ACCOUNTS = "https://accounts.arattai.in";
+const DEFAULT_API = "https://business.arattai.in/api/v1";
+const DEFAULT_SCOPE = "ArattaiBusiness.messages.CREATE,ArattaiBusiness.authentications.CREATE";
 
-declare global {
-  var __slArattaiToken: TokenCache | undefined;
+let cachedToken: { value: string; expiresAt: number } | null = null;
+
+export function arattaiOperatorHint(): string {
+  return "Arattai Business is not configured. Set ARATTAI_CLIENT_ID, ARATTAI_CLIENT_SECRET, ARATTAI_COMPANY_ID, ARATTAI_BUSINESS_NUMBER_ID, and the OTP/alert template IDs. WhatsApp is not used.";
 }
 
 export function arattaiConfigured(): boolean {
   return Boolean(
-    process.env.ARATTAI_ACCESS_TOKEN?.trim() ||
-      (process.env.ARATTAI_REFRESH_TOKEN?.trim() &&
-        process.env.ARATTAI_CLIENT_ID?.trim() &&
-        process.env.ARATTAI_CLIENT_SECRET?.trim()),
+    process.env.ARATTAI_CLIENT_ID?.trim() &&
+      process.env.ARATTAI_CLIENT_SECRET?.trim() &&
+      process.env.ARATTAI_COMPANY_ID?.trim() &&
+      process.env.ARATTAI_BUSINESS_NUMBER_ID?.trim(),
   );
 }
 
+export function arattaiOtpTemplateId(): string {
+  return process.env.ARATTAI_OTP_TEMPLATE_ID?.trim() || "";
+}
+
+export function arattaiAlertTemplateId(): string {
+  return process.env.ARATTAI_ALERT_TEMPLATE_ID?.trim() || "";
+}
+
+export function arattaiAccountsUrl(): string {
+  return process.env.ARATTAI_ACCOUNTS_URL?.trim() || DEFAULT_ACCOUNTS;
+}
+
 export function arattaiApiBase(): string {
-  return (process.env.ARATTAI_API_BASE?.trim() || "https://arattai.zoho.in/arattai/v1").replace(/\/$/, "");
+  return (process.env.ARATTAI_API_BASE?.trim() || DEFAULT_API).replace(/\/$/, "");
 }
 
-export function arattaiAccountsBase(): string {
-  return (process.env.ARATTAI_ACCOUNTS_BASE?.trim() || "https://accounts.zoho.in").replace(/\/$/, "");
+export function toArattaiMobile(value: string | null | undefined): string | null {
+  return toWhatsAppNumber(value);
 }
 
-export function buildArattaiTextPayload(input: ArattaiTextInput): Record<string, unknown> {
-  return {
-    messaging_product: "arattai",
-    recipient_type: "individual",
-    to: input.to,
-    type: "text",
-    text: { body: input.text.slice(0, 4096) || "-" },
-  };
+export function buildArattaiAuthBody(): URLSearchParams {
+  const params = new URLSearchParams();
+  const refresh = process.env.ARATTAI_REFRESH_TOKEN?.trim();
+  params.set("client_id", process.env.ARATTAI_CLIENT_ID?.trim() || "");
+  params.set("client_secret", process.env.ARATTAI_CLIENT_SECRET?.trim() || "");
+  if (refresh) {
+    params.set("grant_type", "refresh_token");
+    params.set("refresh_token", refresh);
+  } else {
+    params.set("grant_type", "client_credentials");
+    params.set("scope", process.env.ARATTAI_OAUTH_SCOPE?.trim() || DEFAULT_SCOPE);
+  }
+  return params;
 }
 
-export function buildArattaiTemplatePayload(input: ArattaiTemplateInput): Record<string, unknown> {
+export function buildArattaiTemplatePayload(input: ArattaiMessageInput): Record<string, unknown> {
   const components: Record<string, unknown>[] = [];
   if (input.bodyParams?.length) {
     components.push({
@@ -50,87 +72,74 @@ export function buildArattaiTemplatePayload(input: ArattaiTemplateInput): Record
       parameters: input.bodyParams.map((text) => ({ type: "text", text: String(text).slice(0, 1024) || "-" })),
     });
   }
+  if (input.otp) {
+    components.push({
+      type: "button",
+      sub_type: "url",
+      index: "0",
+      parameters: [{ type: "text", text: input.otp }],
+    });
+  }
   return {
-    messaging_product: "arattai",
-    recipient_type: "individual",
+    company_id: process.env.ARATTAI_COMPANY_ID?.trim(),
+    business_number_id: process.env.ARATTAI_BUSINESS_NUMBER_ID?.trim(),
     to: input.to,
-    type: "template",
+    type: input.authentication ? "authentication" : "template",
     template: {
-      name: input.name,
-      language: { code: input.language || process.env.ARATTAI_LANGUAGE?.trim() || "en" },
+      id: input.templateId,
+      language: process.env.ARATTAI_TEMPLATE_LANGUAGE?.trim() || "en",
       ...(components.length ? { components } : {}),
     },
   };
 }
 
-export function otpMessage(code: string): string {
-  return `Shree Lagna verification code: ${code}. Valid for 10 minutes. Do not share this code.`;
-}
-
-export function interestMessage(senderFirst: string): string {
-  return `Shree Lagna: ${senderFirst.slice(0, 60) || "A member"} sent you an interest. Open Shree Lagna to respond.`;
-}
-
-export function acceptedMessage(otherFirst: string): string {
-  return `Shree Lagna: ${otherFirst.slice(0, 60) || "A member"} accepted your interest. You can now chat.`;
-}
-
-export function planMessage(planName: string, endsLabel: string): string {
-  return `Shree Lagna: ${planName.slice(0, 60) || "Your plan"} is active until ${endsLabel}.`;
-}
-
-function sendUrl(): string | null {
-  const custom = process.env.ARATTAI_SEND_URL?.trim();
-  if (custom) return custom;
-  const phoneId = process.env.ARATTAI_PHONE_NUMBER_ID?.trim();
-  const base = arattaiApiBase();
-  if (phoneId) return `${base}/${phoneId}/messages`;
-  return `${base}/messages`;
-}
-
 function authHeader(token: string): string {
   const scheme = process.env.ARATTAI_AUTH_SCHEME?.trim() || "Zoho-oauthtoken";
-  return scheme.toLowerCase() === "bearer" ? `Bearer ${token}` : `Zoho-oauthtoken ${token}`;
+  return `${scheme} ${token}`;
 }
 
-async function accessToken(): Promise<string | null> {
-  const direct = process.env.ARATTAI_ACCESS_TOKEN?.trim();
-  if (direct) return direct;
-  const cached = globalThis.__slArattaiToken;
-  if (cached && cached.until > Date.now() + 30_000) return cached.access;
-
-  const refresh = process.env.ARATTAI_REFRESH_TOKEN?.trim();
-  const clientId = process.env.ARATTAI_CLIENT_ID?.trim();
-  const clientSecret = process.env.ARATTAI_CLIENT_SECRET?.trim();
-  if (!refresh || !clientId || !clientSecret) return null;
-
-  const body = new URLSearchParams({
-    refresh_token: refresh,
-    client_id: clientId,
-    client_secret: clientSecret,
-    grant_type: "refresh_token",
-  });
-  const res = await fetch(`${arattaiAccountsBase()}/oauth/v2/token`, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body,
-  });
-  const json = (await res.json().catch(() => null)) as { access_token?: string; expires_in?: number } | null;
-  if (!res.ok || !json?.access_token) return null;
-  const ttlMs = Math.max(60, Number(json.expires_in) || 3600) * 1000;
-  globalThis.__slArattaiToken = { access: json.access_token, until: Date.now() + ttlMs };
-  return json.access_token;
-}
-
-async function postArattai(payload: Record<string, unknown>): Promise<ArattaiResult> {
-  const url = sendUrl();
-  const token = await accessToken();
-  if (!url || !token) return { ok: false, error: "Arattai is not configured yet." };
+async function accessToken(): Promise<ArattaiResult> {
+  if (cachedToken && cachedToken.expiresAt > Date.now() + 30_000) {
+    return { ok: true, token: cachedToken.value };
+  }
+  const url = `${arattaiAccountsUrl()}/oauth/v2/token`;
   try {
     const res = await fetch(url, {
       method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: buildArattaiAuthBody().toString(),
+    });
+    const body = (await res.json().catch(() => null)) as {
+      access_token?: string;
+      expires_in?: number;
+      error?: string;
+      error_description?: string;
+    } | null;
+    const token = body?.access_token?.trim();
+    if (!res.ok || !token) {
+      return {
+        ok: false,
+        error: body?.error_description || body?.error || `Arattai OAuth ${res.status}`,
+      };
+    }
+    const ttl = Number(body?.expires_in) > 0 ? Number(body?.expires_in) * 1000 : 50 * 60 * 1000;
+    cachedToken = { value: token, expiresAt: Date.now() + ttl };
+    return { ok: true, token };
+  } catch {
+    return { ok: false, error: "Arattai accounts could not be reached." };
+  }
+}
+
+async function postBusiness(path: string, payload: Record<string, unknown>): Promise<ArattaiResult> {
+  if (!arattaiConfigured()) return { ok: false, error: arattaiOperatorHint() };
+  const token = await accessToken();
+  const access = token.token;
+  if (!token.ok || !access) return { ok: false, error: token.error ?? arattaiOperatorHint() };
+  try {
+    const res = await fetch(`${arattaiApiBase()}${path}`, {
+      method: "POST",
       headers: {
-        Authorization: authHeader(token),
+        Authorization: authHeader(access),
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
@@ -149,43 +158,38 @@ async function postArattai(payload: Record<string, unknown>): Promise<ArattaiRes
         }
       }
     } catch {
-      /* keep status message */
+      /* keep status */
     }
     return { ok: false, error: message };
   } catch {
-    return { ok: false, error: "Arattai could not be reached." };
+    return { ok: false, error: "Arattai Business could not be reached." };
   }
-}
-
-export async function sendArattaiText(input: ArattaiTextInput): Promise<ArattaiResult> {
-  return postArattai(buildArattaiTextPayload(input));
-}
-
-export async function sendArattaiTemplate(input: ArattaiTemplateInput): Promise<ArattaiResult> {
-  return postArattai(buildArattaiTemplatePayload(input));
 }
 
 export async function sendArattaiOtp(to: string, code: string): Promise<ArattaiResult> {
-  const template = process.env.ARATTAI_OTP_TEMPLATE?.trim();
-  if (template) {
-    return sendArattaiTemplate({ to, name: template, bodyParams: [code] });
-  }
-  return sendArattaiText({ to, text: otpMessage(code) });
+  const templateId = arattaiOtpTemplateId();
+  if (!templateId) return { ok: false, error: "ARATTAI_OTP_TEMPLATE_ID is missing. Approve an OTP template in Arattai Business, then paste its id." };
+  const payload = buildArattaiTemplatePayload({
+    to,
+    templateId,
+    bodyParams: [code],
+    otp: code,
+    authentication: true,
+  });
+  const auth = await postBusiness("/authentications", payload);
+  if (auth.ok || !(auth.error ?? "").includes("404")) return auth;
+  return postBusiness("/messages", payload);
 }
 
-export async function sendArattaiAlert(to: string, kind: "interest" | "accepted" | "plan", params: string[]): Promise<ArattaiResult> {
-  const names = {
-    interest: process.env.ARATTAI_INTEREST_TEMPLATE?.trim(),
-    accepted: process.env.ARATTAI_ACCEPTED_TEMPLATE?.trim(),
-    plan: process.env.ARATTAI_PLAN_TEMPLATE?.trim(),
-  };
-  const template = names[kind];
-  if (template) return sendArattaiTemplate({ to, name: template, bodyParams: params });
-  const text =
-    kind === "interest"
-      ? interestMessage(params[0] ?? "")
-      : kind === "accepted"
-        ? acceptedMessage(params[0] ?? "")
-        : planMessage(params[0] ?? "", params[1] ?? "");
-  return sendArattaiText({ to, text });
+export async function sendArattaiAlert(to: string, bodyParams: string[]): Promise<ArattaiResult> {
+  const templateId = arattaiAlertTemplateId();
+  if (!templateId) return { ok: false, error: "ARATTAI_ALERT_TEMPLATE_ID is missing. Approve a transactional template in Arattai Business, then paste its id." };
+  return postBusiness(
+    "/messages",
+    buildArattaiTemplatePayload({
+      to,
+      templateId,
+      bodyParams,
+    }),
+  );
 }

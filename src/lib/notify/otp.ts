@@ -8,7 +8,7 @@ export function makeOtpCode(): string {
 }
 
 export function otpSecret(): string {
-  return process.env.WHATSAPP_OTP_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || "shreelagna-dev-otp";
+  return process.env.ARATTAI_OTP_SECRET || process.env.WHATSAPP_OTP_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || "shreelagna-dev-otp";
 }
 
 export function hashOtp(mobile: string, code: string, secret = otpSecret()): string {

@@ -50,7 +50,7 @@ export async function sendChannelAlert(
 ): Promise<ChannelResult> {
   const provider = notifyProvider();
   if (provider === "arattai") {
-    const sent = await sendArattaiAlert(to, kind, params);
+    const sent = await sendArattaiAlert(to, params);
     return sent.ok ? { ok: true } : { ok: false, error: sent.error || "Arattai could not send the alert." };
   }
   if (provider === "whatsapp") {

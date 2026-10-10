@@ -1,3 +1,4 @@
+import { PushAlertsControl } from "@/components/push-alerts";
 import { loadBlockedProfileIds } from "@/lib/safety/blocked";
 import Link from "next/link";
 import { after } from "next/server";
@@ -64,6 +65,7 @@ export async function AlertsFeed() {
   const shownAlerts = alerts; // unread ones stay highlighted this visit
   return (
     <div className="alerts-genz inbox-alerts">
+      <PushAlertsControl />
       <ul className="alert-list alerts-genz-list">
         {shownAlerts.map((note) => {
           const unread = !note.read_at;
