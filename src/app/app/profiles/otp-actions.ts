@@ -2,8 +2,7 @@
 
 import { ensureAppUser } from "@/lib/auth/session";
 import { digitsCode, hashOtp, makeOtpCode, OTP_RESEND_MS, OTP_TTL_MS, otpExpired, otpMatches } from "@/lib/notify/otp";
-import { toWhatsAppNumber } from "@/lib/notify/phone";
-import { otpTemplateName, sendWhatsAppTemplate, whatsappConfigured } from "@/lib/notify/whatsapp";
+import { arattaiConfigured, arattaiOperatorHint, sendArattaiOtp, toArattaiMobile } from "@/lib/notify/arattai";
 import { isUniqueViolation, missingPayloadColumn } from "@/lib/profile/db-errors";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { readSessionFromCookies } from "@/lib/supabase/user-rest";
@@ -35,7 +34,7 @@ export async function sendMobileOtp(profileId: string, mobileRaw: string): Promi
     .eq("created_by", me.id)
     .maybeSingle();
   if (!profile) return { ok: false, error: "Save the profile first, then confirm mobile." };
-  const mobile = toWhatsAppNumber(mobileRaw);
+  const mobile = toArattaiMobile(mobileRaw);
   if (!mobile) return { ok: false, error: "Enter a 10-digit Indian mobile." };
 
   const { data: latest } = await db
@@ -61,17 +60,12 @@ export async function sendMobileOtp(profileId: string, mobileRaw: string): Promi
   });
   if (insertError) return { ok: false, error: "Ask house to run SQL 053, then try again." };
 
-  if (!whatsappConfigured()) {
-    if (process.env.NODE_ENV === "production") return { ok: false, error: "WhatsApp is not configured yet." };
+  if (!arattaiConfigured()) {
+    if (process.env.NODE_ENV === "production") return { ok: false, error: arattaiOperatorHint() };
     return { ok: true, preview: code };
   }
 
-  const sent = await sendWhatsAppTemplate({
-    to: mobile,
-    name: otpTemplateName(),
-    bodyParams: [code],
-    copyCode: process.env.WHATSAPP_OTP_COPY_CODE === "false" ? undefined : code,
-  });
+  const sent = await sendArattaiOtp(mobile, code);
   if (!sent.ok) {
     if (process.env.NODE_ENV === "production") return { ok: false, error: sent.error };
     return { ok: true, preview: code };
@@ -94,9 +88,9 @@ export async function verifyMobileOtp(
     .eq("created_by", me.id)
     .maybeSingle();
   if (!profile) return { ok: false, error: "Save the profile first, then confirm mobile." };
-  const mobile = toWhatsAppNumber(mobileRaw);
+  const mobile = toArattaiMobile(mobileRaw);
   const code = digitsCode(codeRaw);
-  if (!mobile || code.length !== 6) return { ok: false, error: "Enter the 6-digit WhatsApp code." };
+  if (!mobile || code.length !== 6) return { ok: false, error: "Enter the 6-digit Arattai code." };
 
   const { data: row } = await db
     .from("whatsapp_otps")

@@ -270,7 +270,7 @@ export function completenessChecks(p: CompletenessInput): CompletenessItem[] {
   if (mobileOk && p.smsOtpRequired) {
     items.push({
       key: "sms",
-      label: "Confirm mobile on WhatsApp",
+      label: "Confirm mobile on Arattai",
       section: "personal",
       mandatory: true,
       filled: p.phoneOtpVerified,

@@ -61,8 +61,8 @@ export function MobileOtpField({
     setPreview(result.preview ?? null);
     setNote(
       result.preview
-        ? "WhatsApp template is not live yet. Use this code to test Confirm."
-        : "Code sent on WhatsApp.",
+        ? "Arattai is not live yet. Use this code to test Confirm."
+        : "Code sent on Arattai.",
     );
   }
 
@@ -80,7 +80,7 @@ export function MobileOtpField({
     setSent(false);
     setCode("");
     setPreview(null);
-    setNote("Mobile confirmed on WhatsApp.");
+    setNote("Mobile confirmed on Arattai.");
   }
 
   return (
@@ -102,15 +102,15 @@ export function MobileOtpField({
         />
       )}
       {staffView ? (
-        <p className="otp-hint">The member confirms this number on WhatsApp after they sign in.</p>
+        <p className="otp-hint">The member confirms this number on Arattai after they sign in.</p>
       ) : !profileId ? (
-        <p className="otp-hint">Save the profile, then confirm this number on WhatsApp.</p>
+        <p className="otp-hint">Save the profile, then confirm this number on Arattai.</p>
       ) : showVerified ? (
-        <VerifyFlag on tone="whatsapp" label="WhatsApp verified" />
+        <VerifyFlag on tone="whatsapp" label="Arattai verified" />
       ) : (
         <div className="otp-row">
           <button type="button" className={btnGhost} disabled={busy !== null || mobile.replace(/\D/g, "").length < 10} onClick={send}>
-            {busy === "send" ? "Sending…" : "Send WhatsApp code"}
+            {busy === "send" ? "Sending…" : "Send Arattai code"}
           </button>
           {sent ? (
             <>

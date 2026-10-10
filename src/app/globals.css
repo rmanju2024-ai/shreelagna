@@ -10123,3 +10123,31 @@ a.inbox-name.inbox-open:focus-visible {
   line-height: 1.45;
 }
 .install-app-card .install-app-go { width: 100%; }
+
+.push-alerts-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0 0 0.85rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 1rem;
+  background: #fffaf3;
+  border: 1px solid rgb(184 137 76 / 35%);
+  color: #3f0e0d;
+}
+.push-alerts-card p {
+  margin: 0;
+  flex: 1;
+  display: grid;
+  gap: 0.12rem;
+  min-width: 12rem;
+}
+.push-alerts-card b { font-size: 0.9rem; }
+.push-alerts-card span { font-size: 0.78rem; color: #7d6b63; line-height: 1.35; }
+.push-alerts-note {
+  flex: 1 0 100%;
+  margin: 0;
+  font-size: 0.78rem;
+  color: #7c2d12;
+}

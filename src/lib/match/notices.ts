@@ -1,3 +1,4 @@
+import { deliverHouseNotice } from "@/lib/notify/deliver";
 import { matchFoundCopy } from "@/lib/match/alert-copy";
 import { matchSelfFromProfile, preferenceFits } from "@/lib/profile/match-compare";
 import { displayFirstName } from "@/lib/profile/options";
@@ -62,6 +63,13 @@ export async function recordMatchNotices(
       body: copy.body,
       href: `/browse/${other.id}`,
       match_profile_id: other.id,
+    });
+    await deliverHouseNotice({
+      userId,
+      kind: copy.kind,
+      title: copy.title,
+      body: copy.body,
+      href: `/browse/${other.id}`,
     });
   }
 }

@@ -18,6 +18,7 @@ import {
 import { complimentaryPaidProfileAccess, pairPlanLive } from "@/lib/membership/access";
 import { loadInterestQuota, loadMembership } from "@/lib/membership/load";
 import { canViewProfile, isPublicProfileStatus, type ProfileType } from "@/lib/profile/visibility";
+import { deliverHouseNotice } from "@/lib/notify/deliver";
 import { createServiceClient } from "@/lib/supabase/server";
 import { after } from "next/server";
 import { redirect } from "next/navigation";
@@ -543,6 +544,13 @@ export async function BrowseProfileView({
             match_profile_id: String(mine.id),
           });
         }
+        await deliverHouseNotice({
+          userId: ownerId,
+          kind: copy.kind,
+          title: copy.title,
+          body: copy.body,
+          href: `/browse/${mine.id}`,
+        });
       }
     });
   }

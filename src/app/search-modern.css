@@ -354,7 +354,8 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
 .ph-bar .ph-ghost, .ph-bar .safety-btn { color: #3f0e0d; background: #fff; border-color: rgb(184 137 76 / 55%); backdrop-filter: none; }
 .ph-primary.is-on { background: linear-gradient(135deg, #7c2d12, #3f0e0d); }
 .ph-bar .safety-profile-control { margin: 0 0 0 auto; }
-.portrait-peek-modal .ph-back { display: none; }
+.portrait-peek-modal .ph-back,
+.portrait-peek-modal .pv-close-bar { display: none; }
 @media (max-width: 560px) { .ph-bar { border-radius: 1.4rem; } .ph-bar .safety-profile-control { margin-left: 0; } }
 .list-cards { list-style: none; margin: 0.6rem 0 0; padding: 0; display: grid; gap: 0.6rem; }
 .list-cards.is-hub { max-width: 34rem; }

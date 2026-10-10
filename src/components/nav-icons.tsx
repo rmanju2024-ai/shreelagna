@@ -112,6 +112,13 @@ export function NavGlyph({ name }: { name: string }) {
           <path d="M14 8.5 18 12l-4 3.5M18 12H9.5" />
         </svg>
       );
+    case "alerts":
+      return (
+        <svg {...common}>
+          <path {...duo} d="M6.2 16.5h11.6l-1.1-1.8V10.4a4.7 4.7 0 0 0-9.4 0v4.3l-1.1 1.8Z" />
+          <path d="M10 16.6a2 2 0 0 0 4 0" />
+        </svg>
+      );
     case "install":
       return (
         <svg {...common}>

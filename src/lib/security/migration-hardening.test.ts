@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 const sql = readFileSync(resolve(process.cwd(), "supabase/migrations/060_security_hardening.sql"), "utf8");
 const indexes = readFileSync(resolve(process.cwd(), "supabase/migrations/061_query_indexes.sql"), "utf8");
+const pushSql = readFileSync(resolve(process.cwd(), "supabase/migrations/072_push_subscriptions.sql"), "utf8");
 
 describe("security hardening migration", () => {
   it("allows only the recipient or staff to update interests", () => {
@@ -37,5 +38,13 @@ describe("query index migration", () => {
   it("deduplicates contact reveals before enforcing one reveal per pair", () => {
     expect(indexes).toContain("delete from public.contact_views newer");
     expect(indexes).toContain("contact_views_one_reveal_per_pair_uidx");
+  });
+});
+
+describe("push subscriptions migration", () => {
+  it("lets a member manage only their own endpoints", () => {
+    expect(pushSql).toContain("create table if not exists public.push_subscriptions");
+    expect(pushSql).toContain("using (user_id = auth.uid())");
+    expect(pushSql).toContain("with check (user_id = auth.uid())");
   });
 });

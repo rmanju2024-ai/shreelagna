@@ -2,6 +2,7 @@
 
 import { saveProfileSettings } from "@/app/app/match/actions";
 import { ProfileDeleteControl } from "@/app/app/profiles/profile-delete-control";
+import { PushAlertsControl } from "@/components/push-alerts";
 import type { ProfileSettings } from "@/lib/match/profile-settings";
 import { btnHero } from "@/lib/ui/classes";
 
@@ -88,6 +89,7 @@ export function SettingsForm({
 
       <section>
         <h3>Alerts</h3>
+        <PushAlertsControl />
         <Toggle
           name="notify_profile_views"
           title="Someone viewed my profile"
@@ -102,8 +104,8 @@ export function SettingsForm({
         />
         <Toggle
           name="notify_whatsapp"
-          title="WhatsApp alerts"
-          hint="Interest and plan notes on WhatsApp. No SMS. Confirm mobile on your profile first."
+          title="Arattai alerts"
+          hint="Interest, views and plan notes on Arattai. WhatsApp is not used. Confirm mobile on your profile first."
           checked={values.notifyWhatsapp}
         />
         <Toggle
