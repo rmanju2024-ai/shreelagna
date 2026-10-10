@@ -1,6 +1,6 @@
 import { toWhatsAppNumber } from "@/lib/notify/phone";
 
-export type ArattaiResult = { ok: true } | { ok: false; error: string };
+export type ArattaiResult = { ok: boolean; error?: string; token?: string };
 
 export type ArattaiMessageInput = {
   to: string;
@@ -98,7 +98,7 @@ function authHeader(token: string): string {
   return `${scheme} ${token}`;
 }
 
-async function accessToken(): Promise<ArattaiResult & { token?: string }> {
+async function accessToken(): Promise<ArattaiResult> {
   if (cachedToken && cachedToken.expiresAt > Date.now() + 30_000) {
     return { ok: true, token: cachedToken.value };
   }
@@ -133,22 +133,34 @@ async function accessToken(): Promise<ArattaiResult & { token?: string }> {
 async function postBusiness(path: string, payload: Record<string, unknown>): Promise<ArattaiResult> {
   if (!arattaiConfigured()) return { ok: false, error: arattaiOperatorHint() };
   const token = await accessToken();
-  if (!token.ok || !token.token) return { ok: false, error: token.error || arattaiOperatorHint() };
+  const access = token.token;
+  if (!token.ok || !access) return { ok: false, error: token.error ?? arattaiOperatorHint() };
   try {
     const res = await fetch(`${arattaiApiBase()}${path}`, {
       method: "POST",
       headers: {
-        Authorization: authHeader(token.token),
+        Authorization: authHeader(access),
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
     });
     if (res.ok) return { ok: true };
-    const body = (await res.json().catch(() => null)) as { message?: string; error?: { message?: string } } | null;
-    return {
-      ok: false,
-      error: body?.error?.message || body?.message || `Arattai ${res.status}`,
-    };
+    let message = `Arattai ${res.status}`;
+    try {
+      const raw: unknown = await res.json();
+      if (raw && typeof raw === "object") {
+        const rec = raw as Record<string, unknown>;
+        if (typeof rec.message === "string" && rec.message.trim()) message = rec.message;
+        else if (typeof rec.error === "string" && rec.error.trim()) message = rec.error;
+        else if (rec.error && typeof rec.error === "object") {
+          const nested = rec.error as Record<string, unknown>;
+          if (typeof nested.message === "string" && nested.message.trim()) message = nested.message;
+        }
+      }
+    } catch {
+      /* keep status */
+    }
+    return { ok: false, error: message };
   } catch {
     return { ok: false, error: "Arattai Business could not be reached." };
   }
@@ -165,7 +177,7 @@ export async function sendArattaiOtp(to: string, code: string): Promise<ArattaiR
     authentication: true,
   });
   const auth = await postBusiness("/authentications", payload);
-  if (auth.ok || !auth.error.includes("404")) return auth;
+  if (auth.ok || !(auth.error ?? "").includes("404")) return auth;
   return postBusiness("/messages", payload);
 }
 

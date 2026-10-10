@@ -2,8 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  compress: true,
   experimental: {
-    optimizePackageImports: ["@supabase/supabase-js"],
+    optimizePackageImports: ["@supabase/supabase-js", "@supabase/ssr"],
     serverActions: { bodySizeLimit: "6mb" },
     staleTimes: {
       dynamic: 30,
@@ -37,7 +38,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https:",
               "media-src 'self' blob: https:",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://accounts.google.com https://fcm.googleapis.com https://fcmregistrations.googleapis.com https://web.push.apple.com",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://accounts.google.com https://*.zoho.in https://*.arattai.in https://fcm.googleapis.com https://fcmregistrations.googleapis.com https://web.push.apple.com",
               "font-src 'self' data:",
               "worker-src 'self'",
               "frame-ancestors 'none'",
