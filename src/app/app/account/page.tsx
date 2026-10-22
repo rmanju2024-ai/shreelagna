@@ -39,6 +39,7 @@ function AccountHubHead({
               </li>
             ))}
           </ul>
+          <small>Profiles used = unique profiles you viewed or sent interest to.</small>
         </Link>
       ) : null}
       {ownerName ? (

@@ -15,10 +15,10 @@ describe("account hub plan marks", () => {
       limit: 20,
     });
     expect(marks.map((item) => `${item.hint}:${item.text}`)).toEqual([
-      "Name:Welcome gift",
+      "Plan:Welcome gift",
       "Days left:59d",
       "Expiry date:3 Dec",
-      "Profile counter:2/20",
+      "Profiles used:2 of 20",
     ]);
   });
 
@@ -38,15 +38,20 @@ describe("account hub plan marks", () => {
     });
   });
 
-  it("shows used profile count for house cover, not Open", () => {
-    const marks = planHeaderMarks({
-      access: { kind: "house", live: true, label: "House", daysLeft: 0, until: null },
-      used: 14,
-      limit: null,
-    });
-    expect(marks.map((item) => `${item.hint}:${item.text}`)).toEqual([
-      "Name:House",
-      "Profile counter:14",
-    ]);
+  it("names house cover Staff or Admin and shows profiles used", () => {
+    expect(
+      planHeaderMarks({
+        access: { kind: "house", live: true, label: "Staff house access", daysLeft: 0, until: null },
+        used: 14,
+        limit: null,
+      }).map((item) => `${item.hint}:${item.text}`),
+    ).toEqual(["Plan:Staff", "Profiles used:14"]);
+    expect(
+      planHeaderMarks({
+        access: { kind: "house", live: true, label: "Admin house access", daysLeft: 0, until: null },
+        used: 3,
+        limit: null,
+      }).find((item) => item.id === "plan")?.text,
+    ).toBe("Admin");
   });
 });

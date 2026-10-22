@@ -22,9 +22,11 @@ export function planHeaderMarks(input: {
       : access.kind === "none"
         ? "No plan"
         : access.kind === "house"
-          ? "House"
+          ? /admin/i.test(access.label)
+            ? "Admin"
+            : "Staff"
           : access.label.replace(/\s+plan$/i, "");
-  const marks: PlanMark[] = [{ id: "plan", text: name, hint: "Name", tone: access.live ? "live" : "wait" }];
+  const marks: PlanMark[] = [{ id: "plan", text: name, hint: "Plan", tone: access.live ? "live" : "wait" }];
   if (input.pendingName) marks.push({ id: "wait", text: input.pendingName, hint: "Waiting", tone: "wait" });
   else if (!access.live) marks.push({ id: "wait", text: "A live plan", hint: "Waiting", tone: "wait" });
   if (access.kind !== "house") {
@@ -40,8 +42,8 @@ export function planHeaderMarks(input: {
   }
   marks.push({
     id: "use",
-    text: input.limit == null ? `${input.used}` : `${input.used}/${input.limit}`,
-    hint: "Profile counter",
+    text: input.limit == null ? `${input.used}` : `${input.used} of ${input.limit}`,
+    hint: "Profiles used",
     tone: "soft",
   });
   return marks;

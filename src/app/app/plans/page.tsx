@@ -65,7 +65,7 @@ export default async function PlansPage({
                 Used {quota.used} of {quota.limit} · {quota.left ?? 0} left
               </p>
             ) : access.live ? (
-              <p>Profile counter: {quota.used} used</p>
+              <p>Profiles used: {quota.used} (unique profiles viewed or sent interest)</p>
             ) : (
               <p>Search remains open. A send request or contact view needs a plan.</p>
             )}
