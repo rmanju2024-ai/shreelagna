@@ -10,6 +10,7 @@ export function PlanCatalogForm({
   busyLabel,
   savedLabel,
   ghost = false,
+  theme = "is-custom",
   children,
 }: {
   action: (prev: PlanWriteState | null, formData: FormData) => Promise<PlanWriteState>;
@@ -17,6 +18,7 @@ export function PlanCatalogForm({
   busyLabel: string;
   savedLabel: string;
   ghost?: boolean;
+  theme?: string;
   children: ReactNode;
 }) {
   const [state, formAction, pending] = useActionState(action, null);
@@ -32,7 +34,7 @@ export function PlanCatalogForm({
   return (
     <form
       action={formAction}
-      className={`${cardClass} plan-edit-form${pending ? " is-saving" : ""}${saved ? " is-saved" : ""}${failed ? " is-failed" : ""}`}
+      className={`${cardClass} plan-edit-form ${theme}${pending ? " is-saving" : ""}${saved ? " is-saved" : ""}${failed ? " is-failed" : ""}`}
       onInput={() => setDirty(true)}
       aria-busy={pending}
     >

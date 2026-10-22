@@ -2,7 +2,14 @@ import { BackToAccount } from "@/components/back-to-account";
 import { requestPlan } from "@/app/app/plans/actions";
 import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
-import { WELCOME_INTEREST_LIMIT, WELCOME_PLAN_NAME, formatInr, planBenefitLines, planByCode } from "@/lib/membership/catalog";
+import {
+  WELCOME_INTEREST_LIMIT,
+  WELCOME_PLAN_NAME,
+  formatInr,
+  planBenefitLines,
+  planByCode,
+  planThemeClass,
+} from "@/lib/membership/catalog";
 import { QuotaSoftBeacon } from "@/components/quota-soft-toast";
 import { buildQuotaSoftNotice } from "@/lib/membership/quota-notice";
 import { fetchPendingPlanCode, fetchPlans, loadInterestQuota, loadMembership } from "@/lib/membership/load";
@@ -148,7 +155,7 @@ export default async function PlansPage({
             const on = access.planCode === plan.code;
             const asked = pending?.code === plan.code;
             return (
-              <li key={plan.code} className={`plans-card${plan.featured ? " is-featured" : ""}${on ? " is-active" : ""}`}>
+              <li key={plan.code} className={`plans-card ${planThemeClass(plan.code)}${plan.featured ? " is-featured" : ""}${on ? " is-active" : ""}`}>
                 {plan.featured ? <span className="plans-mark">Recommended</span> : null}
                 <p className="plans-months">{plan.months} months</p>
                 <h2>{plan.name}</h2>
@@ -181,7 +188,7 @@ export default async function PlansPage({
             {addons.map((plan) => {
               const asked = pending?.code === plan.code;
               return (
-                <li key={plan.code} className="plans-card is-addon">
+                <li key={plan.code} className={`plans-card is-addon ${planThemeClass(plan.code)}`}>
                   <p className="plans-months">Add-on</p>
                   <h2>{plan.name}</h2>
                   <p className="plans-price">{formatInr(plan.priceInr)} <small>indicative</small></p>

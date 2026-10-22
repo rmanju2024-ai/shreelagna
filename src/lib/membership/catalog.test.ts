@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isPlanCode, mapPlanRow, parsePerks, planBenefitLines, slugPlanCode } from "./catalog";
+import { isPlanCode, mapPlanRow, parsePerks, planBenefitLines, planThemeClass, slugPlanCode } from "./catalog";
 
 describe("plan catalog", () => {
   it("slugs and rejects reserved codes", () => {
@@ -24,6 +24,14 @@ describe("plan catalog", () => {
     expect(plan?.interestLimit).toBe(80);
     expect(parsePerks("Chat\nBrowse")).toEqual(["Chat", "Browse"]);
     expect(plan?.featured).toBe(true);
+  });
+
+  it("picks a visual theme from the plan code", () => {
+    expect(planThemeClass("gold")).toBe("is-gold");
+    expect(planThemeClass("SILVER")).toBe("is-silver");
+    expect(planThemeClass("platinum")).toBe("is-platinum");
+    expect(planThemeClass("plus5")).toBe("is-plus5");
+    expect(planThemeClass("pearl")).toBe("is-custom");
   });
 
   it("lists four live benefits including chat on send", () => {

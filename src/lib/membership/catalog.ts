@@ -175,6 +175,13 @@ export function formatInr(amount: number): string {
   return `₹${amount.toLocaleString("en-IN")}`;
 }
 
+export function planThemeClass(code?: string | null): string {
+  const key = String(code ?? "").toLowerCase();
+  if (key === "silver" || key === "gold" || key === "platinum" || key === "plus5") return `is-${key}`;
+  if (key === "welcome") return "is-welcome";
+  return "is-custom";
+}
+
 export function perkText(perks: string[]): string {
   return perks.join("\n");
 }

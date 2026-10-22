@@ -9063,27 +9063,190 @@ a.inbox-name.inbox-open:focus-visible {
 
 .plan-edit-stack {
   display: grid;
-  gap: 0.8rem;
-  margin: 0 0 1.2rem;
+  gap: 1rem;
+  margin: 0 0 1.4rem;
+  grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
 }
 
 .plan-edit-title {
-  margin: 0;
+  grid-column: 1 / -1;
+  margin: 0.2rem 0 0;
   font-family: var(--font-display), ui-serif, serif;
-  font-size: 1.35rem;
+  font-size: 1.45rem;
+}
+
+.plan-edit-lead {
+  grid-column: 1 / -1;
+  margin: -0.35rem 0 0.2rem;
+  color: var(--muted);
+  font-size: 0.92rem;
 }
 
 .plan-edit-form {
+  position: relative;
+  overflow: hidden;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: 0.7rem 0.8rem;
-  padding: 1rem 1.05rem;
+  padding: 0 1.05rem 1.1rem;
   align-items: end;
-  transition: box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+  border-width: 1.5px;
+  isolation: isolate;
+  transition: box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
 }
 
-.plan-edit-form .browse-kicker {
+.plan-edit-form::before {
+  content: "";
+  position: absolute;
+  inset: auto -20% 55% -20%;
+  height: 9rem;
+  pointer-events: none;
+  background: radial-gradient(circle at 80% 0, rgb(255 255 255 / 55%), transparent 55%);
+  z-index: 0;
+}
+
+.plan-edit-form > * {
+  position: relative;
+  z-index: 1;
+}
+
+.plan-edit-hero {
   grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.75rem;
+  align-items: center;
+  margin: 0 -1.05rem 0.15rem;
+  padding: 1.05rem 1.1rem 0.95rem;
+}
+
+.plan-edit-jewel {
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 1rem;
+  display: grid;
+  place-items: center;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 55%), 0 10px 18px -12px rgb(15 23 42 / 40%);
+}
+
+.plan-edit-jewel::after {
+  content: "";
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 0.28rem;
+  transform: rotate(45deg);
+  background: currentColor;
+}
+
+.plan-edit-kicker {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.plan-edit-hero h3 {
+  margin: 0.08rem 0 0.1rem;
+  font-family: var(--font-display), ui-serif, serif;
+  font-size: 1.55rem;
+  line-height: 1.1;
+}
+
+.plan-edit-meta {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 650;
+  opacity: 0.82;
+}
+
+.plan-edit-ribbon {
+  align-self: start;
+  padding: 0.22rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #fff8f0;
+  background: #7c2d12;
+}
+
+.plan-edit-ribbon.is-off {
+  background: #57534e;
+}
+
+.plan-edit-form.is-silver {
+  background: linear-gradient(165deg, #f8fafc 0%, #e2e8f0 55%, #cbd5e1 120%);
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.plan-edit-form.is-silver .plan-edit-hero {
+  background: linear-gradient(90deg, rgb(148 163 184 / 22%), transparent);
+}
+
+.plan-edit-form.is-silver .plan-edit-jewel {
+  color: #334155;
+  background: linear-gradient(145deg, #f8fafc, #94a3b8);
+}
+
+.plan-edit-form.is-gold {
+  background: linear-gradient(165deg, #fffbeb 0%, #fef3c7 42%, #f6d58b 130%);
+  border-color: #d4a017;
+  color: #5b3410;
+}
+
+.plan-edit-form.is-gold .plan-edit-hero {
+  background: linear-gradient(90deg, rgb(184 137 76 / 22%), transparent);
+}
+
+.plan-edit-form.is-gold .plan-edit-jewel {
+  color: #b45309;
+  background: linear-gradient(145deg, #fff7ed, #eab308);
+}
+
+.plan-edit-form.is-platinum {
+  background: linear-gradient(165deg, #f5f3ff 0%, #e0e7ff 48%, #c7d2fe 130%);
+  border-color: #6366f1;
+  color: #1e1b4b;
+}
+
+.plan-edit-form.is-platinum .plan-edit-hero {
+  background: linear-gradient(90deg, rgb(99 102 241 / 18%), transparent);
+}
+
+.plan-edit-form.is-platinum .plan-edit-jewel {
+  color: #312e81;
+  background: linear-gradient(145deg, #eef2ff, #818cf8);
+}
+
+.plan-edit-form.is-plus5 {
+  background: linear-gradient(165deg, #fff1f2 0%, #ffe4e6 55%, #fecdd3 130%);
+  border-color: #fb7185;
+  border-style: dashed;
+  color: #881337;
+}
+
+.plan-edit-form.is-plus5 .plan-edit-hero {
+  background: linear-gradient(90deg, rgb(251 113 133 / 18%), transparent);
+}
+
+.plan-edit-form.is-plus5 .plan-edit-jewel {
+  color: #be123c;
+  background: linear-gradient(145deg, #fff1f2, #fb7185);
+}
+
+.plan-edit-form.is-custom {
+  background: linear-gradient(165deg, #fffdf8, #f3e6d2);
+  border-color: rgb(184 137 76 / 40%);
+  border-style: dashed;
+  color: #3f0e0d;
+}
+
+.plan-edit-form.is-custom .plan-edit-jewel {
+  color: #9a3412;
+  background: linear-gradient(145deg, #fff7ed, #e7d3b0);
 }
 
 .plan-save-status {
@@ -9170,7 +9333,8 @@ a.inbox-name.inbox-open:focus-visible {
 
 @media (max-width: 900px) {
   .plans-grid,
-  .plan-edit-form {
+  .plan-edit-form,
+  .plan-edit-hero {
     grid-template-columns: 1fr;
   }
 }

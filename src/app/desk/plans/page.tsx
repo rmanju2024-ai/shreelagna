@@ -3,7 +3,7 @@ import { PlanCatalogForm } from "@/app/desk/plans/plan-catalog-form";
 import { DeskPager } from "@/app/desk/desk-pager";
 import { requireDesk } from "@/lib/desk/access";
 import { deskPage, deskRange } from "@/lib/desk/pager";
-import { formatInr, perkText, planByCode, WELCOME_PLAN_NAME, type PlanCard } from "@/lib/membership/catalog";
+import { formatInr, perkText, planByCode, planThemeClass, WELCOME_PLAN_NAME, type PlanCard } from "@/lib/membership/catalog";
 import { fetchPlans } from "@/lib/membership/load";
 import { createServiceClient } from "@/lib/supabase/server";
 import { formatIstDateTime } from "@/lib/time/ist";
@@ -12,6 +12,18 @@ import { btnGhost, btnPrimary, cardClass, inputClass } from "@/lib/ui/classes";
 function PlanFields({ plan }: { plan?: PlanCard }) {
   return (
     <>
+      <header className="plan-edit-hero">
+        <i className="plan-edit-jewel" aria-hidden />
+        <div>
+          <p className="plan-edit-kicker">{plan ? plan.code : "new"}</p>
+          <h3>{plan ? plan.name : "Compose a plan"}</h3>
+          <p className="plan-edit-meta">
+            {plan ? `${plan.months} months · ${formatInr(plan.priceInr)} · ${plan.interestLimit} families` : "Name it, price it, put it on sale"}
+          </p>
+        </div>
+        {plan?.featured ? <span className="plan-edit-ribbon">Recommended</span> : null}
+        {plan && !plan.forSale ? <span className="plan-edit-ribbon is-off">Off sale</span> : null}
+      </header>
       {!plan ? (
         <label className="desk-ticket-note-label">
           Code
@@ -140,6 +152,7 @@ export default async function DeskPlansPage({
       {desk.admin ? (
         <div className="plan-edit-stack">
           <h3 className="plan-edit-title">Catalog</h3>
+          <p className="plan-edit-lead">Each cover has its own metal. Save a card and it stays in that world.</p>
           {catalog.map((plan) => (
             <PlanCatalogForm
               key={plan.code}
@@ -147,8 +160,8 @@ export default async function DeskPlansPage({
               submitLabel={`Save ${plan.name}`}
               busyLabel="Saving…"
               savedLabel={`${plan.name} is saved`}
+              theme={planThemeClass(plan.code)}
             >
-              <p className="browse-kicker">{plan.code}</p>
               <PlanFields plan={plan} />
             </PlanCatalogForm>
           ))}
@@ -158,8 +171,8 @@ export default async function DeskPlansPage({
             busyLabel="Adding…"
             savedLabel="Plan added to the catalog"
             ghost
+            theme="is-custom"
           >
-            <p className="browse-kicker">New plan</p>
             <PlanFields />
           </PlanCatalogForm>
         </div>

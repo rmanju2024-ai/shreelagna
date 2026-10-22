@@ -506,10 +506,46 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
 .plans-welcome-banner p { margin: 0; color: #5b4a43; font-size: 0.92rem; line-height: 1.5; }
 
 .plans-grid { list-style: none; margin: 0 0.6rem; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 0.9rem; }
-.plans-card { position: relative; padding: 1.2rem; border-radius: 1.4rem; background: #fff; color: #3f0e0d; border: 1.5px solid rgb(184 137 76 / 40%); box-shadow: 0 16px 30px -22px rgb(63 14 13 / 60%); display: grid; gap: 0.35rem; align-content: start; }
-.plans-card.is-featured { border-color: #c2415a; box-shadow: 0 22px 40px -22px rgb(194 65 90 / 70%); }
+.plans-card { position: relative; overflow: hidden; padding: 1.2rem; border-radius: 1.4rem; background: #fff; color: #3f0e0d; border: 1.5px solid rgb(184 137 76 / 40%); box-shadow: 0 16px 30px -22px rgb(63 14 13 / 60%); display: grid; gap: 0.35rem; align-content: start; }
+.plans-card.is-featured { transform: translateY(-0.15rem); }
 .plans-card.is-addon { border-style: dashed; }
 .plans-card.is-active { outline: 3px solid #4ade80; }
+.plans-card.is-welcome {
+  background: linear-gradient(165deg, #fffdf8, #f3e6d2);
+  border-color: rgb(184 137 76 / 50%);
+}
+.plans-card.is-silver {
+  background: linear-gradient(165deg, #f8fafc, #e2e8f0);
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+.plans-card.is-silver .plans-months,
+.plans-card.is-silver .plans-price { color: #334155; }
+.plans-card.is-gold {
+  background: linear-gradient(165deg, #fffbeb, #fde68a);
+  border-color: #d4a017;
+  color: #5b3410;
+  box-shadow: 0 22px 40px -20px rgb(180 83 9 / 55%);
+}
+.plans-card.is-gold .plans-months,
+.plans-card.is-gold .plans-price { color: #92400e; }
+.plans-card.is-platinum {
+  background: linear-gradient(165deg, #eef2ff, #c7d2fe);
+  border-color: #6366f1;
+  color: #1e1b4b;
+}
+.plans-card.is-platinum .plans-months,
+.plans-card.is-platinum .plans-price { color: #312e81; }
+.plans-card.is-plus5 {
+  background: linear-gradient(165deg, #fff1f2, #fecdd3);
+  border-color: #fb7185;
+  color: #881337;
+}
+.plans-card.is-plus5 .plans-months,
+.plans-card.is-plus5 .plans-price { color: #be123c; }
+.plans-card.is-custom {
+  background: linear-gradient(165deg, #fffdf8, #f8efe3);
+}
 .plans-mark { position: absolute; top: -0.65rem; right: 0.85rem; padding: 0.15rem 0.75rem; border-radius: 999px; font-size: 0.68rem; font-weight: 900; letter-spacing: 0.05em; color: #fff; background: linear-gradient(135deg, #c2415a, #7c2d12); }
 .plans-months { margin: 0; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #9a3412; }
 .plans-card h2 { margin: 0; font-size: 1.3rem; color: #3f0e0d; }
