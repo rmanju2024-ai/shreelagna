@@ -6006,89 +6006,11 @@ a.browse-view {
   line-height: 1.1;
 }
 .account-hub-head .browse-kicker { margin: 0; }
-.account-pulse-line {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.25rem 0.55rem;
-  margin: 0.18rem 0 0;
-}
-.account-pulse-line strong {
-  color: var(--ink);
-  font-family: var(--font-british), serif;
-  font-size: 0.98rem;
-  font-weight: 600;
-}
-.account-pulse-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem 0.65rem;
-  margin: 0.28rem 0 0;
-  padding: 0;
-  list-style: none;
-}
-.account-pulse {
-  display: contents;
-}
-.account-pulse-moon {
-  position: relative;
-  flex: none;
-  width: 3.6rem;
-  height: 3.6rem;
-}
-.account-pulse-moon svg { width: 100%; height: 100%; }
-.account-pulse-track {
-  fill: none;
-  stroke: rgb(184 137 76 / 28%);
-  stroke-width: 5;
-}
-.account-pulse-glow {
-  fill: none;
-  stroke: url(#none);
-  stroke: #c2415a;
-  stroke-width: 5;
-  stroke-linecap: round;
-  filter: drop-shadow(0 0 6px rgb(194 65 90 / 35%));
-}
-.account-pulse-moon p {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-content: center;
-  margin: 0;
-  text-align: center;
-  line-height: 1;
-}
-.account-pulse-moon b {
-  font-family: var(--font-british), serif;
-  font-size: 1.15rem;
-  font-weight: 650;
-  color: #7c2d12;
-}
-.account-pulse-moon span {
-  margin-top: 0.12rem;
-  color: #9a3412;
-  font-size: 0.52rem;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-.account-pulse-stats li {
-  display: flex;
-  align-items: baseline;
-  gap: 0.28rem;
-  color: #6a574c;
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-.account-pulse-stats li strong {
-  color: #7c2d12;
-  font-size: 0.95rem;
-}
 .account-pulse-plan {
   display: grid;
   gap: 0.25rem;
   flex: none;
+  margin-left: auto;
   min-width: 12.5rem;
   padding: 0.1rem 0.1rem 0.1rem 0.85rem;
   border-left: 1px solid rgb(184 137 76 / 28%);

@@ -7,101 +7,26 @@ import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { planByCode } from "@/lib/membership/catalog";
 import { planHeaderMarks, type PlanMark } from "@/lib/membership/account-plan";
 import { fetchPendingPlanCode, fetchPlans, loadInterestQuota, loadMembership } from "@/lib/membership/load";
-import { monthAgoIso, pulseNote, tallyMonthPulse } from "@/lib/profile/month-pulse";
 import { unreadLabel } from "@/lib/match/chat-ui";
 import { unreadNoticeBadge } from "@/lib/notices/unread-badge";
 import { createServiceClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { cardClass } from "@/lib/ui/classes";
 
-async function loadAccountPulse(
-  db: { from: (table: string) => { select: (cols: string, opts?: { count?: string; head?: boolean }) => unknown } },
-  profileId: string,
-  since: string,
-) {
-  const client = db as {
-    from: (table: string) => {
-      select: (cols: string, opts?: { count: "exact"; head: boolean } | undefined) => {
-        eq: (col: string, value: string) => {
-          gte: (col: string, value: string) => Promise<{ count?: number | null; data?: { created_at?: string | null; status?: string | null; responded_at?: string | null }[] | null }>;
-        };
-      };
-    };
-  };
-  const [views, received, sent] = await Promise.all([
-    client.from("profile_views").select("id", { count: "exact", head: true }).eq("viewed_profile_id", profileId).gte("viewed_at", since),
-    client.from("interests").select("created_at, status, responded_at").eq("to_profile_id", profileId).gte("created_at", since),
-    client.from("interests").select("created_at, status, responded_at").eq("from_profile_id", profileId).gte("created_at", since),
-  ]);
-  return tallyMonthPulse({
-    views: views.count ?? 0,
-    received: received.data ?? [],
-    sent: sent.data ?? [],
-    since,
-  });
-}
-
-function MonthPulseCard({
-  pulse,
+function AccountHubHead({
   planMarks,
   ownerName,
 }: {
-  pulse: { views: number; received: number; sent: number; accepted: number; warmth: number } | null;
   planMarks: PlanMark[];
   ownerName: string | null;
 }) {
-  const ring = 2 * Math.PI * 26;
-  const drawn = pulse ? (pulse.warmth / 100) * ring : 0;
   return (
     <header className="account-hub-head" aria-label="Account overview">
       <span className="account-hub-crest" aria-hidden>
         <HouseCrest />
       </span>
-      {pulse ? (
-        <div className="account-pulse-moon">
-          <svg viewBox="0 0 64 64" aria-hidden>
-            <circle className="account-pulse-track" cx="32" cy="32" r="26" />
-            <circle
-              className="account-pulse-glow"
-              cx="32"
-              cy="32"
-              r="26"
-              strokeDasharray={`${drawn} ${ring}`}
-              transform="rotate(-90 32 32)"
-            />
-          </svg>
-          <p>
-            <b>{pulse.warmth}</b>
-            <span>warmth</span>
-          </p>
-        </div>
-      ) : null}
       <div className="account-hub-copy">
         <h1>Account hub</h1>
-        <p className="account-pulse-line">
-          <span className="browse-kicker">Last 30 days</span>
-          <strong>{pulse ? pulseNote(pulse.warmth) : "Ready when you are."}</strong>
-        </p>
-        {pulse ? (
-          <ul className="account-pulse-stats">
-            <li>
-              <strong>{pulse.views}</strong>
-              seen
-            </li>
-            <li>
-              <strong>{pulse.received}</strong>
-              received
-            </li>
-            <li>
-              <strong>{pulse.sent}</strong>
-              sent
-            </li>
-            <li>
-              <strong>{pulse.accepted}</strong>
-              accepted
-            </li>
-          </ul>
-        ) : null}
       </div>
       {planMarks.length ? (
         <Link href="/app/plans" className="account-pulse-plan">
@@ -132,7 +57,6 @@ export default async function AccountHubPage() {
   const me = await ensureAppUser(supabase, user);
   if (!me) redirect("/login?error=account");
   const db = createServiceClient() ?? supabase;
-  const since = monthAgoIso();
   const [access, mineRows, pendingCode, plans, inbox] = await Promise.all([
     loadMembership(db, me),
     db.from("profiles").select("id, subject_full_name").eq("created_by", me.id),
@@ -141,12 +65,8 @@ export default async function AccountHubPage() {
     unreadNoticeBadge(me.id).catch(() => ({ chatUnread: 0, alertUnread: 0, likesPending: 0 })),
   ]);
   const mineIds = (mineRows.data ?? []).map((row) => String(row.id));
-  const profileId = me.active_profile_id || mineIds[0] || null;
   const ownerName = accountOwnerName(mineRows.data ?? [], me.active_profile_id, me.display_name);
-  const [quota, pulse] = await Promise.all([
-    loadInterestQuota(db, me, access, mineIds),
-    profileId ? loadAccountPulse(db, profileId, since) : Promise.resolve(null),
-  ]);
+  const quota = await loadInterestQuota(db, me, access, mineIds);
   const inboxCounts = accountInboxCounts(inbox);
   const pending = planByCode(pendingCode, plans.filter((plan) => plan.forSale));
   const planMarks = planHeaderMarks({
@@ -158,7 +78,7 @@ export default async function AccountHubPage() {
   return (
     <PageShell>
       <main className="account-hub sx-stage">
-        <MonthPulseCard pulse={pulse} planMarks={planMarks} ownerName={ownerName} />
+        <AccountHubHead planMarks={planMarks} ownerName={ownerName} />
         <div className="account-hub-content">
           {ACCOUNT_GROUPS.map((group) => (
             <section id={group.id} key={group.id} className="account-hub-section">
