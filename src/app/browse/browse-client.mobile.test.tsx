@@ -10,10 +10,10 @@ import type { BrowseCardNote } from "./browse-card";
 import type { BrowseScoreRow } from "@/lib/match/browse-match";
 
 const scrollBy = vi.fn();
-const views: BrowseView[] = ["fits", "prefers", "kundali", "nearby", "community", "custom"];
 
 function emptyLists(): Record<BrowseView, BrowseScoreRow[]> {
   return {
+    smart: [],
     fits: [],
     prefers: [],
     kundali: [],
@@ -47,7 +47,7 @@ function show(extra: Partial<ComponentProps<typeof BrowseClient>> = {}) {
       lookingFor="Bride"
       notice={null}
       user
-      initialView="fits"
+      initialView="smart"
       initialFilters={EMPTY_BROWSE_FILTERS}
       catalog={{}}
       lists={emptyLists()}
@@ -67,7 +67,7 @@ beforeEach(() => {
 
 describe("discoverResultsHref", () => {
   it("keeps the selected category and custom filters", () => {
-    expect(discoverResultsHref("fits")).toBe("/browse/results?view=fits");
+    expect(discoverResultsHref("smart")).toBe("/browse/results?view=smart");
     expect(discoverResultsHref("custom", { ...EMPTY_BROWSE_FILTERS, ageMin: 25, city: ["Bengaluru"] })).toBe(
       "/browse/results?view=custom&age_min=25&city=Bengaluru",
     );
@@ -77,7 +77,7 @@ describe("discoverResultsHref", () => {
 describe("Discover feed", () => {
   it("shows every category as its own row", () => {
     show();
-    for (const label of ["Today’s picks", "They like you", "Kundali match", "Nearby", "Same community"]) {
+    for (const label of ["Smart picks", "Kundali match", "Nearby", "Same community"]) {
       expect(screen.getAllByRole("heading", { name: label })).toHaveLength(1);
     }
     expect(screen.queryByRole("link", { name: /view all/i })).toBeNull();
@@ -85,25 +85,25 @@ describe("Discover feed", () => {
 
   it("prints each category title once", () => {
     show();
-    expect(screen.getAllByText("Today’s picks")).toHaveLength(1);
-    expect(screen.getAllByText("Curated from your preference")).toHaveLength(1);
+    expect(screen.getAllByText("Smart picks")).toHaveLength(1);
+    expect(screen.getAllByText("Who fits you, and who already likes you")).toHaveLength(1);
   });
 
   it("scrolls a category row with both arrows", () => {
     const { catalog, rows } = makeProfiles(2);
-    show({ catalog, lists: { ...emptyLists(), fits: rows } });
-    fireEvent.click(screen.getByRole("button", { name: "Show more Today’s picks profiles" }));
+    show({ catalog, lists: { ...emptyLists(), smart: rows } });
+    fireEvent.click(screen.getByRole("button", { name: "Show more Smart picks profiles" }));
     expect(scrollBy).toHaveBeenCalledWith({ left: 280, behavior: "smooth" });
-    fireEvent.click(screen.getByRole("button", { name: "Show previous Today’s picks profiles" }));
+    fireEvent.click(screen.getByRole("button", { name: "Show previous Smart picks profiles" }));
     expect(scrollBy).toHaveBeenCalledWith({ left: -280, behavior: "smooth" });
   });
 
   it("previews five cards and links View all to that category", () => {
     const { catalog, rows } = makeProfiles(DISCOVER_PREVIEW_LIMIT + 2);
-    show({ catalog, lists: { ...emptyLists(), fits: rows } });
+    show({ catalog, lists: { ...emptyLists(), smart: rows } });
     expect(screen.getAllByRole("link", { name: /name \d/i })).toHaveLength(DISCOVER_PREVIEW_LIMIT);
     const viewAll = screen.getByRole("link", { name: /view all 7 profiles/i });
-    expect(viewAll.getAttribute("href")).toBe("/browse/results?view=fits");
+    expect(viewAll.getAttribute("href")).toBe("/browse/results?view=smart");
   });
 
   it("links to the advanced filter page without listing profiles", () => {
@@ -128,9 +128,9 @@ describe("Discover feed", () => {
 describe("Discover results", () => {
   it("lists one category vertically with ten per page", () => {
     const { catalog, rows } = makeProfiles(11);
-    show({ catalog, lists: { ...emptyLists(), fits: rows }, fullResults: true });
-    expect(screen.getByRole("heading", { level: 1, name: "Today’s picks" })).toBeTruthy();
-    expect(screen.getByRole("link", { name: /back to discover/i }).getAttribute("href")).toBe("/browse?view=fits");
+    show({ catalog, lists: { ...emptyLists(), smart: rows }, fullResults: true });
+    expect(screen.getByRole("heading", { level: 1, name: "Smart picks" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: /back to discover/i }).getAttribute("href")).toBe("/browse?view=smart");
     expect(screen.getByRole("link", { name: /name 0/i })).toBeTruthy();
     expect(screen.queryByRole("link", { name: /name 10/i })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: /next/i }));
@@ -142,7 +142,7 @@ describe("Discover results", () => {
     show({ notice: "Create a profile first, then search.", user: false });
     expect(screen.getByRole("heading", { name: /begin with a profile/i })).toBeTruthy();
     expect(screen.getByRole("link", { name: /sign in with gmail/i })).toBeTruthy();
-    expect(screen.queryByRole("heading", { name: "Today’s picks" })).toBeNull();
+    expect(screen.queryByRole("heading", { name: "Smart picks" })).toBeNull();
 
     cleanup();
     show({ error: "unavailable" });

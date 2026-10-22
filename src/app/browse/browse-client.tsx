@@ -18,8 +18,13 @@ type ViewItem = {
 };
 
 const DEFAULT_VIEWS: ViewItem[] = [
-  { id: "fits", label: "Today’s picks", short: "Today", hint: "Curated from your preference", empty: "No matching profiles here yet" },
-  { id: "prefers", label: "They like you", short: "They like you", hint: "10/15 of their preference", empty: "No one has you on their preference yet" },
+  {
+    id: "smart",
+    label: "Smart picks",
+    short: "Smart",
+    hint: "Who fits you, and who already likes you",
+    empty: "No matching profiles here yet",
+  },
   { id: "kundali", label: "Kundali match", short: "Kundali", hint: "18 or more of 36", empty: "No kundali matches here yet" },
 ];
 
@@ -144,7 +149,7 @@ function CategoryRow({
           />
           <ul className="sx-row" ref={scroller}>
             {preview.map((note, index) => (
-              <BrowseCard key={`${item.id}-${note.id}`} note={note} priority={item.id === "fits" && index < 3} />
+              <BrowseCard key={`${item.id}-${note.id}`} note={note} priority={item.id === "smart" && index < 3} />
             ))}
           </ul>
           <RowArrow

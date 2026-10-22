@@ -9,6 +9,7 @@ import {
   PREFERENCE_POINTS,
   preferencePoints,
   emptyBrowseBuckets,
+  mergeSmartPicks,
   parseBrowseView,
   type BrowseScoreRow,
   type BrowseView,
@@ -26,8 +27,10 @@ import {
   incomeRank,
   isSubscribedRow,
   sortByPriority,
+  UNKNOWN_NEARBY_KM,
   type BrowsePriority,
 } from "@/lib/match/browse-priority";
+import { subscribedOwnerIds } from "@/lib/desk/look-cards";
 import { yearsFromDob } from "@/lib/profile/completeness";
 import { loadFaithCatalog } from "@/lib/profile/load-form-lists";
 import { formatHeightImperial, matchSelfFromProfile } from "@/lib/profile/match-compare";
@@ -270,6 +273,29 @@ export async function BrowsePage({
               String(row.created_by) === me.id ||
               !(row.by_admin === true || adminIds.has(String(row.created_by))));
           const listed = rows.filter(keepHouse);
+          const ownerIds = [...new Set(listed.map((row) => String(row.created_by ?? "")).filter(Boolean))];
+          const paidRows =
+            ownerIds.length > 0
+              ? await (
+                  mediaClient as unknown as {
+                    from: (table: string) => {
+                      select: (cols: string) => {
+                        eq: (col: string, value: string) => {
+                          in: (
+                            col: string,
+                            values: string[],
+                          ) => Promise<{ data: { user_id?: string | null; ends_at?: string | null }[] | null }>;
+                        };
+                      };
+                    };
+                  }
+                )
+                  .from("memberships")
+                  .select("user_id, ends_at")
+                  .eq("status", "active")
+                  .in("user_id", ownerIds)
+              : { data: [] as { user_id?: string | null; ends_at?: string | null }[] };
+          const paidOwners = subscribedOwnerIds(paidRows.data ?? []);
           const photoMap: Map<string, string> = bundle
             ? new Map(
                 listed
@@ -300,14 +326,16 @@ export async function BrowsePage({
             card.matchPercent = Math.max(1, Math.min(100, Math.round((mutual / (2 * PREFERENCE_POINTS)) * 100)));
             catalog[card.id] = card;
             const theirAge = yearsFromDob(String(row.date_of_birth ?? ""));
+            const km = kmApart(myPlace, { city: card.city, state: card.state });
             priority.set(card.id, {
-              subscribed: isSubscribedRow(row),
+              subscribed: isSubscribedRow(row) || paidOwners.has(String(row.created_by)),
+              complete: row.is_complete === true,
+              nearbyKm: km ?? UNKNOWN_NEARBY_KM,
               activity: activityTier(row.last_seen_at, Boolean(row.hide_last_seen), now),
               income: incomeRank(row.income_band),
               ageGap: theirAge != null && myAge != null ? Math.abs(theirAge - myAge) : 99,
             });
             lists.custom.push({ id: card.id, score: null });
-            const km = kmApart(myPlace, { city: card.city, state: card.state });
             if (km != null && km <= 100) lists.nearby.push({ id: card.id, score: nearbyLabel(km) });
             if (sameCommunity(myCommunity, community)) {
               lists.community.push({ id: card.id, score: community ?? "Same community" });
@@ -318,7 +346,8 @@ export async function BrowsePage({
               lists[key].push({ id: card.id, score: rank.label });
             });
           }
-          (["fits", "prefers", "kundali"] as BrowseView[]).forEach((key) => {
+          lists.smart = mergeSmartPicks(lists.fits, lists.prefers);
+          (["smart", "kundali"] as BrowseView[]).forEach((key) => {
             lists[key].sort((a, b) => Number.parseInt(b.score ?? "0", 10) - Number.parseInt(a.score ?? "0", 10));
           });
           lists.nearby.sort((a, b) => {

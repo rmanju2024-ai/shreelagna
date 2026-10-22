@@ -1,13 +1,16 @@
 /**
  * Listing order used by every Discover category:
- * 1. subscribed profiles, 2. very active, 3. active, 4. higher income, 5. closest age, then the list's own order.
+ * paid plan, complete profile, nearer, then activity / income / age, then the list's own order.
  */
 const DAY = 86_400_000;
 export const VERY_ACTIVE_DAYS = 3;
 export const ACTIVE_DAYS = 30;
+export const UNKNOWN_NEARBY_KM = 999;
 
 export type BrowsePriority = {
   subscribed: boolean;
+  complete: boolean;
+  nearbyKm: number;
   /** 2 = very active, 1 = active, 0 = otherwise or hidden */
   activity: 0 | 1 | 2;
   income: number;
@@ -42,6 +45,8 @@ export function isSubscribedRow(row: Record<string, unknown>): boolean {
 export function compareBrowsePriority(a: BrowsePriority | undefined, b: BrowsePriority | undefined): number {
   if (!a || !b) return 0;
   if (a.subscribed !== b.subscribed) return a.subscribed ? -1 : 1;
+  if (a.complete !== b.complete) return a.complete ? -1 : 1;
+  if (a.nearbyKm !== b.nearbyKm) return a.nearbyKm - b.nearbyKm;
   if (a.activity !== b.activity) return b.activity - a.activity;
   if (a.income !== b.income) return b.income - a.income;
   return a.ageGap - b.ageGap;

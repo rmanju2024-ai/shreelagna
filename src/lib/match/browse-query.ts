@@ -5,6 +5,7 @@ export const BROWSE_PROFILE_COLUMNS = [
   "id",
   "created_by",
   "created_at",
+  "is_complete",
   "profile_type",
   "status",
   "subject_full_name",

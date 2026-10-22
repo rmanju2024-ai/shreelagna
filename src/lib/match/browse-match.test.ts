@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { browseRank, parseBrowseView, preferencePoints } from "./browse-match";
+import { browseRank, mergeSmartPicks, parseBrowseView, preferencePoints } from "./browse-match";
 import type { MatchSelf } from "@/lib/profile/match-compare";
 
 const me: MatchSelf = {
@@ -49,13 +49,30 @@ const kundali = {
 };
 
 describe("browse match views", () => {
-  it("defaults to matching your preference", () => {
-    expect(parseBrowseView(undefined)).toBe("fits");
+  it("defaults to smart picks and maps the old rows onto it", () => {
+    expect(parseBrowseView(undefined)).toBe("smart");
+    expect(parseBrowseView("fits")).toBe("smart");
+    expect(parseBrowseView("prefers")).toBe("smart");
     expect(parseBrowseView("kundali")).toBe("kundali");
-    expect(parseBrowseView("more")).toBe("fits");
+    expect(parseBrowseView("more")).toBe("smart");
     expect(parseBrowseView("nearby")).toBe("nearby");
     expect(parseBrowseView("community")).toBe("community");
     expect(parseBrowseView("custom")).toBe("custom");
+  });
+
+  it("merges preference rows without duplicating a profile", () => {
+    const merged = mergeSmartPicks(
+      [
+        { id: "a", score: "15/15 of your preference" },
+        { id: "b", score: "10/15 of your preference" },
+      ],
+      [
+        { id: "a", score: "12/15 of their preference" },
+        { id: "c", score: "14/15 of their preference" },
+      ],
+    );
+    expect(merged.map((row) => row.id)).toEqual(["a", "b", "c"]);
+    expect(merged[0]?.score).toMatch(/15\/15 of your preference/);
   });
 
   it("counts partner-preference points out of 15", () => {

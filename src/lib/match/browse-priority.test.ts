@@ -2,7 +2,15 @@ import { describe, expect, it } from "vitest";
 import { activityTier, incomeRank, sortByPriority, type BrowsePriority } from "./browse-priority";
 
 const now = Date.parse("2026-10-04T00:00:00Z");
-const p = (o: Partial<BrowsePriority>): BrowsePriority => ({ subscribed: false, activity: 0, income: 0, ageGap: 0, ...o });
+const p = (o: Partial<BrowsePriority>): BrowsePriority => ({
+  subscribed: false,
+  complete: false,
+  nearbyKm: 999,
+  activity: 0,
+  income: 0,
+  ageGap: 0,
+  ...o,
+});
 
 describe("browse priority", () => {
   it("tiers activity and ignores hidden last seen", () => {
@@ -18,17 +26,18 @@ describe("browse priority", () => {
     expect(incomeRank(null)).toBe(0);
   });
 
-  it("orders subscribed, activity, income, age, then original order", () => {
+  it("orders paid, complete, nearby, then activity, income, age", () => {
     const map = new Map<string, BrowsePriority>([
       ["plain", p({})],
       ["age", p({ income: 10, ageGap: 5 })],
       ["income", p({ income: 20 })],
       ["active", p({ activity: 1 })],
       ["very", p({ activity: 2 })],
+      ["near", p({ nearbyKm: 12 })],
+      ["done", p({ complete: true })],
       ["paid", p({ subscribed: true })],
-      ["near", p({ income: 10, ageGap: 1 })],
     ]);
     const out = sortByPriority([...map.keys()].map((id) => ({ id })), map).map((r) => r.id);
-    expect(out).toEqual(["paid", "very", "active", "income", "near", "age", "plain"]);
+    expect(out).toEqual(["paid", "done", "near", "very", "active", "income", "age", "plain"]);
   });
 });
