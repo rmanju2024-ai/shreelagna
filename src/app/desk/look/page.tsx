@@ -34,7 +34,9 @@ export default async function DeskLookPage() {
   const ids = rows.map((row) => String(row.id));
   const [paidResult, photoMap] = await Promise.all([
     (async () => {
-      if (!ownerIds.length) return { data: [] as { user_id?: string | null; ends_at?: string | null }[] };
+      if (!ownerIds.length) {
+        return { data: [] as { user_id?: string | null; ends_at?: string | null; plan_code?: string | null }[] };
+      }
       return (await db
         .from("memberships")
         .select("user_id, status, ends_at, plan_code")
