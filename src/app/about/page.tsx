@@ -19,7 +19,7 @@ export default async function AboutPage() {
       <div className="sx-stage public-stage">
         <PageHero
           kicker="Our story"
-          title="A private house for meaningful matches."
+          title="Where families meet with dignity."
           sub="Family-run, proudly Indian, and built for introductions that feel human—not transactional."
         />
 

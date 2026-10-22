@@ -286,7 +286,7 @@ a.inbox-photo { color: inherit; text-decoration: none; display: block; }
 }
 
 /* ===== Shared hero + modern Alerts / Plans / Desk / Settings ===== */
-.sx-hero-sub { margin: 0.45rem 0 0; max-width: 40rem; font-size: 0.95rem; color: rgb(255 248 231 / 82%); }
+.sx-hero-sub { margin: 0.45rem 0 0; max-width: 44rem; font-size: 1.02rem; line-height: 1.55; color: #3d2a22; }
 .desk-stage, .plans-stage { display: grid; gap: 1rem; width: 100%; max-width: 76rem; margin-inline: auto; }
 .alert-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.7rem; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); }
 .alert-card { display: flex; align-items: center; gap: 0.85rem; padding: 0.9rem 1rem; text-decoration: none; color: inherit; }
@@ -1376,32 +1376,28 @@ html[data-scene="couple"] .app-main {
 
 .sx-hero {
   overflow: hidden;
-  border: 1px solid rgb(255 255 255 / 72%);
-  background:
-    radial-gradient(circle at 92% 15%, rgb(255 255 255 / 48%) 0 3.2rem, transparent 3.3rem),
-    linear-gradient(120deg, var(--theme-surface), var(--theme-accent-soft) 58%, var(--theme-surface-alt));
-  color: var(--ink);
+  border: 1px solid rgb(63 14 13 / 12%);
+  background: rgb(255 252 246 / 97%);
+  color: #2b1a14;
   box-shadow: var(--gz-shadow);
-  backdrop-filter: blur(18px) saturate(1.2);
+  backdrop-filter: none;
 }
 .sx-hero h1 { color: var(--theme-ink); text-shadow: none; }
-.sx-hero-sub { color: color-mix(in srgb, var(--theme-ink) 76%, transparent); opacity: 1; }
+.sx-hero-sub { color: color-mix(in srgb, var(--theme-ink) 92%, #3d2a22); opacity: 1; }
 .sx-hero-count b { color: var(--theme-accent); }
 .sx-hero-count span { color: var(--muted); opacity: 1; }
 /* Settings had an older dark-maroon hero with inherited text colours. Keep it
    in the active theme palette so title, kicker and explanation always agree. */
 .app-main .settings-page > .sx-hero {
   color: var(--theme-ink);
-  background:
-    radial-gradient(circle at 92% 15%, rgb(255 255 255 / 48%) 0 3.2rem, transparent 3.3rem),
-    linear-gradient(120deg, var(--theme-surface), var(--theme-accent-soft) 58%, var(--theme-surface-alt));
+  background: rgb(255 252 246 / 97%);
 }
 .app-main .settings-page > .sx-hero :where(h1, p) {
   color: var(--theme-ink);
   text-shadow: none;
 }
 .app-main .settings-page > .sx-hero .sx-hero-sub {
-  color: color-mix(in srgb, var(--theme-ink) 76%, transparent);
+  color: color-mix(in srgb, var(--theme-ink) 92%, #3d2a22);
 }
 .sx-eyebrow {
   display: inline-flex;
@@ -1410,8 +1406,9 @@ html[data-scene="couple"] .app-main {
   width: fit-content;
   padding: 0.28rem 0.62rem;
   border-radius: 999px;
-  background: rgb(255 255 255 / 72%);
-  color: var(--theme-accent);
+  background: #fff;
+  color: #7c2d12;
+  font-weight: 800;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--theme-accent) 20%, transparent);
 }
 .sx-eyebrow::before { content: "✦"; color: var(--pop); }
@@ -1920,7 +1917,7 @@ html[data-scene="couple"] .app-main {
 .home-split-copy { display: flex; flex-direction: column; justify-content: center; gap: 1rem; padding: clamp(1.5rem, 5vw, 4rem); color: #3f0e0d; }
 .home-split-copy .home-hero-kicker { margin: 0; color: #9a3412; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; font-size: 0.78rem; }
 .home-split-title { margin: 0; font-size: clamp(2.2rem, 5vw, 4rem); line-height: 1.02; color: #3f0e0d; }
-.home-split-sub { margin: 0; max-width: 34rem; font-size: clamp(1rem, 1.5vw, 1.15rem); line-height: 1.55; color: #5b4a43; }
+.home-split-sub { margin: 0; max-width: 36rem; font-size: clamp(1.05rem, 1.6vw, 1.2rem); line-height: 1.65; font-weight: 600; color: #3f0e0d; }
 .home-split-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.7rem; margin: 0.4rem 0; padding: 0; list-style: none; max-width: 34rem; }
 .home-split-tiles li { display: grid; gap: 0.1rem; padding: 0.8rem 0.9rem; border-radius: 1.2rem; background: rgb(255 255 255 / 80%); border: 1px solid rgb(184 137 76 / 35%); box-shadow: 0 12px 24px -18px rgb(63 14 13 / 55%); }
 .home-split-tiles span { font-size: 1.5rem; }

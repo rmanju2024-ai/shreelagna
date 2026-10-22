@@ -18,9 +18,9 @@ export default async function ContactPage() {
     <PageShell>{user ? <BackToAccount /> : null}
       <div className="sx-stage public-stage">
         <PageHero
-          kicker="Help centre · real humans"
-          title="Stuck? We’ve got you."
-          sub="Profile help, account questions, or feedback—drop us a note and our family team will get back to you."
+          kicker="Help centre"
+          title="We’re here for you."
+          sub="Questions about a profile, account, or match? Write in your own words. A person from our team will reply."
         />
         <div className="help-genz-grid">
           <aside className="help-genz-side">

@@ -21,7 +21,7 @@ export function BrandMark({ light = false }: { light?: boolean }) {
         <span
           className={`mt-1 text-[12px] font-medium uppercase tracking-[0.2em] sm:text-sm ${light ? "text-[var(--gold-soft)]" : "text-[var(--gold)]"}`}
         >
-          Everyone welcome
+          Where families meet
         </span>
       </span>
     </Link>

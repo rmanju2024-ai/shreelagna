@@ -4,6 +4,7 @@ import { getAuth } from "@/lib/auth/session";
 import { safeNextPath } from "@/lib/auth/safe-next";
 import { KalyanBanner } from "@/components/home/kalyan-banner";
 import { BrandMark } from "@/components/brand-mark";
+import { SITE_TAGLINE } from "@/lib/brand";
 import { cardClass } from "@/lib/ui/classes";
 import { redirect } from "next/navigation";
 
@@ -27,7 +28,7 @@ export default async function LoginPage({
           <div className="relative z-10 flex h-full flex-col justify-end px-8 py-12 lg:justify-center lg:px-14">
             <BrandMark light />
             <p className="mt-8 text-[11px] uppercase tracking-[0.28em] text-[var(--gold-soft)]">
-              Members of the house
+              {SITE_TAGLINE}
             </p>
             <h1 className="mt-3 max-w-lg font-[family-name:var(--font-display)] text-4xl leading-tight text-[#f7efe4] sm:text-5xl">
               Sign in with the Gmail you registered with.

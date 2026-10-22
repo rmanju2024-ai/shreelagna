@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     template: `%s · ${SITE_NAME}`,
   },
   description:
-    "A private Indian matrimonial house for families.",
+    "Where families meet with dignity. Private introductions for Indian families.",
   applicationName: SITE_NAME,
   appleWebApp: {
     capable: true,

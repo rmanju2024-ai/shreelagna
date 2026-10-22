@@ -12,7 +12,7 @@ export function PageHero({
 }) {
   return (
     <header className="sx-hero">
-      <div>
+      <div className="sx-hero-copy">
         {kicker ? <p className="sx-eyebrow">{kicker}</p> : null}
         <h1>{title}</h1>
         {sub ? <p className="sx-hero-sub">{sub}</p> : null}
