@@ -30,6 +30,12 @@ export function istDayKey(at: Date): string {
   return `${y}-${m}-${day}`;
 }
 
+/** Instant of 00:00 IST for the IST calendar day of `at`. */
+export function istDayStart(at: Date = new Date()): Date {
+  const [year, month, day] = istDayKey(at).split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day, 0, 0, 0) - IST_OFFSET_MS);
+}
+
 /** Monday of the IST week as YYYY-MM-DD. */
 export function istWeekStartKey(at: Date = new Date()): string {
   const d = istClock(at);

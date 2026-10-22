@@ -8,6 +8,10 @@ import { ChatAvatar } from "@/app/app/chat/chat-avatar";
 import type { InterestThread } from "@/lib/match/interest-status";
 import { chatStamp } from "@/lib/match/chat-ui";
 import Link from "next/link";
+import { emitQuotaSoft } from "@/components/quota-soft-toast";
+import { buildQuotaSoftNotice } from "@/lib/membership/quota-notice";
+import { DAILY_NEW_FAMILY_CAP } from "@/lib/membership/quota";
+import type { MembershipKind } from "@/lib/membership/access";
 
 export type PeekChatNote = {
   id: string;
@@ -37,7 +41,8 @@ const CHIRPS: Record<string, string[]> = {
   accepted: ["You are connected. Open chat and keep it kind.", "The request was accepted. A short hello goes a long way."],
   closed: ["You can send a fresh request if this still feels right."],
   plan: ["A live plan unlocks sending a request on this profile."],
-  quota: ["This month's requests are used. A plan adds more."],
+  quota: ["These families are used on this cover. Five more adds five extra introductions."],
+  daily: ["Five new families a day. Tomorrow IST midnight opens five more."],
   finish: ["Complete your own profile first, then you can send a request."],
   review: ["Your profile is complete and waiting for review. Requests open after that."],
   peck: ["Ready when you are."],
@@ -47,10 +52,12 @@ function chirpPool(
   thread: InterestThread,
   needPlan: boolean,
   needQuota: boolean,
+  needDaily: boolean,
   canSend: boolean,
   awaitingReview: boolean,
 ) {
   if (thread === "none" && needPlan) return CHIRPS.plan;
+  if (thread === "none" && needDaily) return CHIRPS.daily;
   if (thread === "none" && needQuota) return CHIRPS.quota;
   if (thread === "none" && awaitingReview) return CHIRPS.review;
   if (thread === "none" && !canSend) return CHIRPS.finish;
@@ -126,8 +133,14 @@ export function BirdDock({
   canSend,
   needPlan,
   needQuota,
+  needDaily = false,
   awaitingReview = false,
   quotaLeft,
+  quotaUsed = 0,
+  quotaLimit = null,
+  dailyLeft = null,
+  daysLeft = 0,
+  accessKind = "welcome",
   finishHref,
   chat,
   inline = false,
@@ -138,8 +151,14 @@ export function BirdDock({
   canSend: boolean;
   needPlan: boolean;
   needQuota: boolean;
+  needDaily?: boolean;
   awaitingReview?: boolean;
   quotaLeft: number | null;
+  quotaUsed?: number;
+  quotaLimit?: number | null;
+  dailyLeft?: number | null;
+  daysLeft?: number;
+  accessKind?: MembershipKind;
   finishHref: string;
   inline?: boolean;
   chat?: {
@@ -172,7 +191,7 @@ export function BirdDock({
   const openedAt = useRef(0);
   const [host, setHost] = useState<HTMLElement | null>(null);
   const showChat = localThread === "sent" || localThread === "received" || localThread === "accepted";
-  const pool = phase === "peck" ? CHIRPS.peck : chirpPool(localThread, needPlan, needQuota, canSend, awaitingReview);
+  const pool = phase === "peck" ? CHIRPS.peck : chirpPool(localThread, needPlan, needQuota, needDaily, canSend, awaitingReview);
   const chirp = pool[line % pool.length];
   const name = chat?.name ?? "Match";
   const [liveNotes, setLiveNotes] = useState<PeekChatNote[]>([]);
@@ -240,7 +259,7 @@ export function BirdDock({
 
   useEffect(() => {
     setLine(0);
-  }, [localThread, needPlan, needQuota, canSend, awaitingReview]);
+  }, [localThread, needPlan, needQuota, needDaily, canSend, awaitingReview]);
 
   useEffect(() => {
     const id = window.setInterval(() => setLine((n) => n + 1), 6500);
@@ -357,8 +376,42 @@ export function BirdDock({
         if (res.ok) {
           setLocalThread("sent");
           if (res.interestId) setLocalInterestId(res.interestId);
+          emitQuotaSoft(
+            buildQuotaSoftNotice(
+              { kind: accessKind, live: true, daysLeft },
+              {
+                limit: res.limit ?? quotaLimit,
+                used: res.used ?? quotaUsed,
+                left: res.left ?? quotaLeft,
+                canSend: (res.left ?? quotaLeft ?? 1) > 0,
+                touchedIds: [],
+                dailyLimit: DAILY_NEW_FAMILY_CAP,
+                dailyUsed: 0,
+                dailyLeft: res.dailyLeft ?? dailyLeft,
+              },
+              "send",
+            ),
+          );
         } else {
           setLocalThread("none");
+          if (res.error === "daily" || res.error === "quota") {
+            emitQuotaSoft(
+              buildQuotaSoftNotice(
+                { kind: accessKind, live: true, daysLeft },
+                {
+                  limit: quotaLimit,
+                  used: quotaUsed,
+                  left: res.error === "quota" ? 0 : quotaLeft,
+                  canSend: false,
+                  touchedIds: [],
+                  dailyLimit: DAILY_NEW_FAMILY_CAP,
+                  dailyUsed: DAILY_NEW_FAMILY_CAP,
+                  dailyLeft: res.error === "daily" ? 0 : dailyLeft,
+                },
+                res.error,
+              ),
+            );
+          }
         }
       });
     });
@@ -417,8 +470,10 @@ export function BirdDock({
             ? "Reply now"
             : needPlan
               ? "Unlock & send"
-              : needQuota
-                ? "More requests"
+              : needDaily
+                ? "Tomorrow"
+                : needQuota
+                ? "Five more"
                 : canSend
                   ? "Send request"
                   : awaitingReview
@@ -556,7 +611,13 @@ export function BirdDock({
             </Link>
           ) : null}
 
-          {localThread === "none" && needQuota ? (
+          {localThread === "none" && needDaily ? (
+            <Link href="/app/plans" className="bird-dock-cta">
+              {perchLabel}
+            </Link>
+          ) : null}
+
+          {localThread === "none" && needQuota && !needDaily ? (
             <Link href="/app/plans" className="bird-dock-cta">
               {perchLabel}
             </Link>

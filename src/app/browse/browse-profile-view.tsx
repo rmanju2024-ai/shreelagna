@@ -309,9 +309,11 @@ export async function BrowseProfileView({
   let canSend = false;
   let needPlan = false;
   let needQuota = false;
+  let needDaily = false;
   let quotaLeft: number | null = null;
   let quotaUsed = 0;
   let quotaLimit: number | null = null;
+  let dailyLeft: number | null = null;
   let awaitingReview = false;
   let needComplete = false;
   let viewerReadyPct = 0;
@@ -379,6 +381,7 @@ export async function BrowseProfileView({
     quotaLeft = quota.left;
     quotaUsed = quota.used;
     quotaLimit = quota.limit;
+    dailyLeft = quota.dailyLeft;
     const viewerScore = completenessScore(
       completenessFromRecord(mine as Record<string, unknown>, extrasFromMedia(mineMediaRes.data ?? [], viewerEmailVerified(me))),
     );
@@ -396,7 +399,9 @@ export async function BrowseProfileView({
     accepted = interestStatus === "accepted";
     interestId = typeof link?.id === "string" ? link.id : null;
     const counted = quota.touchedIds.includes(id) || sentByMe;
-    needQuota = complete && !quota.canSend && !counted;
+    const dailyBlocked = quota.dailyLeft === 0 && quota.left !== 0;
+    needQuota = complete && !counted && !quota.canSend && !dailyBlocked;
+    needDaily = complete && live && !needPlan && !counted && dailyBlocked;
     canSend = Boolean(complete && live && !needPlan && (quota.canSend || counted));
     kundali = kundaliScore(
       {
@@ -840,6 +845,12 @@ export async function BrowseProfileView({
     canSend,
     needPlan,
     needQuota,
+    needDaily,
+    quotaUsed,
+    quotaLimit,
+    dailyLeft,
+    daysLeft: access.daysLeft,
+    accessKind: access.kind,
     awaitingReview,
     needComplete,
     viewerReadyPct,

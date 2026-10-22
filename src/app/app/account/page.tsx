@@ -12,6 +12,8 @@ import { unreadNoticeBadge } from "@/lib/notices/unread-badge";
 import { createServiceClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { cardClass } from "@/lib/ui/classes";
+import { QuotaSoftBeacon } from "@/components/quota-soft-toast";
+import { buildQuotaSoftNotice } from "@/lib/membership/quota-notice";
 
 function AccountHubHead({
   planMarks,
@@ -79,6 +81,7 @@ export default async function AccountHubPage() {
   return (
     <PageShell>
       <main className="account-hub sx-stage">
+        <QuotaSoftBeacon onceKey="mc-quota-visit" notice={buildQuotaSoftNotice(access, quota, "visit")} />
         <AccountHubHead planMarks={planMarks} ownerName={ownerName} />
         <div className="account-hub-content">
           {ACCOUNT_GROUPS.map((group) => (

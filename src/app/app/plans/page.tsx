@@ -3,6 +3,8 @@ import { requestPlan } from "@/app/app/plans/actions";
 import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { WELCOME_INTEREST_LIMIT, WELCOME_PLAN_NAME, formatInr, planBenefitLines, planByCode } from "@/lib/membership/catalog";
+import { QuotaSoftBeacon } from "@/components/quota-soft-toast";
+import { buildQuotaSoftNotice } from "@/lib/membership/quota-notice";
 import { fetchPendingPlanCode, fetchPlans, loadInterestQuota, loadMembership } from "@/lib/membership/load";
 import { formatIstDate } from "@/lib/time/ist";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -37,17 +39,22 @@ export default async function PlansPage({
   const { data: touchRows } = quota.touchedIds.length
     ? await db.from("profiles").select("id, subject_full_name, member_code").in("id", quota.touchedIds)
     : { data: [] as { id: string; subject_full_name?: string | null; member_code?: string | null }[] };
-  const catalog = plans.filter((plan) => plan.forSale);
-  const pending = planByCode(pendingCode, catalog);
+  const catalog = plans.filter((plan) => plan.forSale && !plan.addon);
+  const addons = plans.filter((plan) => plan.forSale && plan.addon);
+  const pending = planByCode(pendingCode, plans);
   const house = access.kind === "house";
 
   return (
     <PageShell><BackToAccount />
+      <QuotaSoftBeacon
+        onceKey="mc-quota-visit"
+        notice={buildQuotaSoftNotice(access, quota, "visit")}
+      />
       <section className="plans-stage">
         <div className="plans-header">
           <p className="browse-kicker">Membership</p>
           <h1>Plans</h1>
-          <p className="plans-intro">Welcome gift on joining, then paid cover. Chat is available when you send interest.</p>
+          <p className="plans-intro">One unique family is one count. Five new families a day. Chat stays open on families already introduced.</p>
         </div>
 
         <div className={`plans-status is-${access.kind}`}>
@@ -168,6 +175,37 @@ export default async function PlansPage({
             );
           })}
         </ul>
+
+        {addons.length ? (
+          <ul className="plans-grid">
+            {addons.map((plan) => {
+              const asked = pending?.code === plan.code;
+              return (
+                <li key={plan.code} className="plans-card is-addon">
+                  <p className="plans-months">Add-on</p>
+                  <h2>{plan.name}</h2>
+                  <p className="plans-price">{formatInr(plan.priceInr)} <small>indicative</small></p>
+                  <p className="plans-desc">{plan.tagline}</p>
+                  <ul className="plans-benefits">
+                    {plan.perks.map((line) => (
+                      <li key={line}>✔ {line}</li>
+                    ))}
+                  </ul>
+                  {house ? (
+                    <p className="plans-note">Desk already has house access.</p>
+                  ) : (
+                    <form action={requestPlan}>
+                      <input type="hidden" name="plan" value={plan.code} />
+                      <button type="submit" className="plans-btn is-primary">
+                        {asked ? "Requested ✓" : `Request ${plan.name}`}
+                      </button>
+                    </form>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        ) : null}
       </section>
     </PageShell>
   );

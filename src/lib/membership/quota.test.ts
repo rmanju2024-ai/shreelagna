@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { interestLimitFor, resolveQuota, usedInterestsSince, usedUniqueProfilesSince } from "./quota";
+import {
+  DAILY_NEW_FAMILY_CAP,
+  interestLimitFor,
+  newFamiliesOnDay,
+  periodWarns,
+  resolveQuota,
+  usedInterestsSince,
+  usedUniqueProfilesSince,
+  withBonusSlots,
+} from "./quota";
 
 describe("interest quota", () => {
   it("caps welcome at 20", () => {
@@ -40,5 +49,28 @@ describe("interest quota", () => {
   it("leaves house access unlimited", () => {
     expect(interestLimitFor("house")).toBeNull();
     expect(resolveQuota(null, 500).canSend).toBe(true);
+    expect(resolveQuota(null, 500).dailyLimit).toBeNull();
+  });
+
+  it("caps five new families a day and warns with five left", () => {
+    const mid = resolveQuota(20, 15, [], 3);
+    expect(mid.left).toBe(5);
+    expect(periodWarns(mid)).toBe(true);
+    expect(mid.dailyLeft).toBe(2);
+    const dayFull = resolveQuota(20, 10, [], DAILY_NEW_FAMILY_CAP);
+    expect(dayFull.canSend).toBe(false);
+    expect(dayFull.left).toBe(10);
+    expect(withBonusSlots(20, 5)).toBe(25);
+  });
+
+  it("counts only first-touch families toward the daily five", () => {
+    const ids = newFamiliesOnDay(
+      [{ from_profile_id: "me", to_profile_id: "new", created_at: "2026-01-10T08:00:00.000Z" }],
+      [{ viewer_profile_id: "me", viewed_profile_id: "old", created_at: "2026-01-08T08:00:00.000Z" }],
+      ["me"],
+      new Date("2026-01-10T00:00:00.000Z"),
+      new Date("2026-01-01T00:00:00.000Z"),
+    );
+    expect(ids).toEqual(["new"]);
   });
 });

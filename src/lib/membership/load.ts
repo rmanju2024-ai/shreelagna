@@ -2,11 +2,14 @@ import { resolveMembership, type Membership, type PaidRow } from "@/lib/membersh
 import { SALE_PLANS, mapPlanRow, type PlanCard, type PlanRow } from "@/lib/membership/catalog";
 import {
   interestLimitFor,
+  newFamiliesOnDay,
   quotaWindowStart,
   resolveQuota,
   usedUniqueProfilesSince,
+  withBonusSlots,
   type InterestQuota,
 } from "@/lib/membership/quota";
+import { istDayStart } from "@/lib/time/ist";
 
 type Query = {
   eq: (col: string, value: string) => Query;
@@ -65,9 +68,12 @@ export async function fetchPlans(db: unknown): Promise<PlanCard[]> {
       .select("code, name, tagline, months, price_inr, featured, for_sale, sort_order, perks, interest_limit");
     const rows = ((data ?? []) as PlanRow[])
       .map((row) => mapPlanRow(row))
-      .filter((row): row is PlanCard => Boolean(row))
-      .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name));
-    return rows.length ? rows : SALE_PLANS;
+      .filter((row): row is PlanCard => Boolean(row));
+    const byCode = new Map(rows.map((plan) => [plan.code, plan]));
+    for (const plan of SALE_PLANS) {
+      if (!byCode.has(plan.code)) byCode.set(plan.code, plan);
+    }
+    return [...byCode.values()].sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name));
   } catch {
     return SALE_PLANS;
   }
@@ -85,7 +91,8 @@ export async function loadInterestQuota(
   profileIds: string[],
 ): Promise<InterestQuota> {
   const plan = access.planCode && access.planCode !== "welcome" ? await fetchPlanByCode(db, access.planCode) : null;
-  const limit = interestLimitFor(access.kind, plan?.interestLimit);
+  const bonus = await readInterestBonus(db, me.id);
+  const limit = withBonusSlots(interestLimitFor(access.kind, plan?.interestLimit), bonus);
   if (!profileIds.length) return resolveQuota(limit, 0);
   const paid = access.kind === "paid" ? await fetchPaidMembership(db, me.id) : null;
   const since = quotaWindowStart(access.kind, {
@@ -115,9 +122,20 @@ export async function loadInterestQuota(
       created_at?: string | null;
     }[];
     const touchedIds = usedUniqueProfilesSince(interestRows, viewRows, profileIds, since);
-    return resolveQuota(limit, touchedIds.length, touchedIds);
+    const dailyIds = newFamiliesOnDay(interestRows, viewRows, profileIds, istDayStart(), since);
+    return resolveQuota(limit, touchedIds.length, touchedIds, dailyIds.length, access.kind === "house");
   } catch {
     return resolveQuota(limit, limit ?? 0);
+  }
+}
+
+async function readInterestBonus(db: unknown, userId: string): Promise<number> {
+  try {
+    const { data } = await asDb(db).from("app_users").select("interest_bonus").eq("id", userId).maybeSingle();
+    const n = Number((data as { interest_bonus?: number | null } | null)?.interest_bonus);
+    return Number.isFinite(n) && n > 0 ? Math.round(n) : 0;
+  } catch {
+    return 0;
   }
 }
 

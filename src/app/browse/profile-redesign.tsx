@@ -13,6 +13,9 @@ import { otherProfileLocked } from "@/lib/profile/view-gate";
 import { BackLink } from "@/components/back-link";
 import type { CompletenessItem } from "@/lib/profile/completeness";
 import type { InterestThread } from "@/lib/match/interest-status";
+import { emitQuotaSoft, QuotaSoftBeacon } from "@/components/quota-soft-toast";
+import { buildQuotaSoftNotice } from "@/lib/membership/quota-notice";
+import { DAILY_NEW_FAMILY_CAP } from "@/lib/membership/quota";
 
 type DetailGroup = {
   icon: string;
@@ -85,6 +88,7 @@ export type ProfileData = {
   canSend: boolean;
   needPlan: boolean;
   needQuota: boolean;
+  needDaily?: boolean;
   awaitingReview?: boolean;
   needComplete?: boolean;
   viewerReadyPct?: number;
@@ -92,6 +96,9 @@ export type ProfileData = {
   quotaLeft: number | null;
   quotaUsed?: number;
   quotaLimit?: number | null;
+  dailyLeft?: number | null;
+  daysLeft?: number;
+  accessKind?: import("@/lib/membership/access").MembershipKind;
   contact?: {
     revealed: boolean;
     mobile: string;
@@ -194,12 +201,32 @@ function ContactPanel({
         setFail(
           res.error === "incomplete"
             ? "Fill every house essential on your biodata first."
-            : "Could not show contact just now. Try again.",
+            : res.error === "daily"
+              ? "Five new families a day. Tomorrow IST midnight opens five more."
+              : res.error === "quota"
+                ? "This cover’s family limit is used. Request Five more on Plans."
+                : "Could not show contact just now. Try again.",
         );
         return;
       }
       setShown({ mobile: res.mobile || "Not on file", email: res.email || "Not on file" });
       if (res.limit != null) setQuota({ used: res.used ?? quota.used, left: res.left ?? quota.left, limit: res.limit });
+      emitQuotaSoft(
+        buildQuotaSoftNotice(
+          { kind: "welcome", live: true, daysLeft: 0 },
+          {
+            limit: res.limit ?? quota.limit,
+            used: res.used ?? quota.used,
+            left: res.left ?? quota.left,
+            canSend: (res.left ?? 1) > 0,
+            touchedIds: [],
+            dailyLimit: DAILY_NEW_FAMILY_CAP,
+            dailyUsed: 0,
+            dailyLeft: res.dailyLeft ?? null,
+          },
+          res.error === "daily" || res.error === "quota" ? res.error : "send",
+        ),
+      );
     });
   }
 
@@ -415,8 +442,14 @@ export function ProfileRedesign(props: ProfileData) {
       canSend={props.canSend}
       needPlan={props.needPlan}
       needQuota={props.needQuota}
+      needDaily={props.needDaily}
       awaitingReview={props.awaitingReview}
       quotaLeft={props.quotaLeft}
+      quotaUsed={props.quotaUsed}
+      quotaLimit={props.quotaLimit}
+      dailyLeft={props.dailyLeft}
+      daysLeft={props.daysLeft}
+      accessKind={props.accessKind}
       finishHref={props.finishHref}
       chat={props.chat}
     />
@@ -479,6 +512,25 @@ export function ProfileRedesign(props: ProfileData) {
 
   return (
     <div className="pv-shell">
+      {!props.own && props.user ? (
+        <QuotaSoftBeacon
+          onceKey="mc-quota-visit"
+          notice={buildQuotaSoftNotice(
+            { kind: props.accessKind ?? "welcome", live: !props.needPlan, daysLeft: props.daysLeft ?? 0 },
+            {
+              limit: props.quotaLimit ?? null,
+              used: props.quotaUsed ?? 0,
+              left: props.quotaLeft,
+              canSend: props.canSend,
+              touchedIds: [],
+              dailyLimit: DAILY_NEW_FAMILY_CAP,
+              dailyUsed: 0,
+              dailyLeft: props.dailyLeft ?? null,
+            },
+            props.needDaily ? "daily" : props.needQuota ? "quota" : "visit",
+          )}
+        />
+      ) : null}
       {shortlistMsg ? <div className="pv-toast">{shortlistMsg}</div> : null}
       {!props.own ? (
         <nav className="pv-close-bar" aria-label="Leave profile">

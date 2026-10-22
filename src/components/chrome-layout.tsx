@@ -5,6 +5,7 @@ import { NavigationFeedback } from "@/components/navigation-feedback";
 import { SceneLayer } from "@/components/scene-layer";
 import { HeaderSkeleton, SiteFooter, SiteHeader, pageFull, pageInner, readScene } from "@/components/site-chrome";
 import { ThemeQuickPicker } from "@/components/theme-quick-picker";
+import { QuotaSoftHost } from "@/components/quota-soft-toast";
 
 /**
  * Persistent page frame for /app and /browse. It lives in a layout, so the header, clock and menu
@@ -16,6 +17,7 @@ export async function ChromeLayout({ children }: { children: React.ReactNode }) 
     <InstallAppRoot>
       <div className={`relative flex min-h-dvh w-full flex-col page-scene is-${scene}`}>
         <NavigationFeedback />
+        <QuotaSoftHost />
         <SceneLayer initial={scene} />
         <Suspense fallback={<HeaderSkeleton overlay={false} />}>
           <SiteHeader overlay={false} glass />

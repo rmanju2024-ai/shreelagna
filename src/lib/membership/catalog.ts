@@ -22,7 +22,11 @@ export type PlanCard = {
   sortOrder: number;
   interestLimit: number;
   perks: string[];
+  addon?: boolean;
 };
+
+export const PLUS5_PLAN_CODE = "plus5";
+export const PLUS5_SLOTS = 5;
 
 export const SALE_PLANS: PlanCard[] = [
   {
@@ -61,7 +65,29 @@ export const SALE_PLANS: PlanCard[] = [
     interestLimit: 150,
     perks: planBenefitLines(150),
   },
+  {
+    code: PLUS5_PLAN_CODE,
+    name: "Five more",
+    tagline: "Add five extra unique families to the cover you already have.",
+    months: 1,
+    priceInr: 499,
+    featured: false,
+    forSale: true,
+    sortOrder: 4,
+    interestLimit: PLUS5_SLOTS,
+    addon: true,
+    perks: [
+      "5 extra unique families",
+      "Adds on to your current cover",
+      "Does not replace your plan",
+      "Chat stays open with families already introduced",
+    ],
+  },
 ];
+
+export function isAddonPlan(code: string | null | undefined): boolean {
+  return String(code ?? "") === PLUS5_PLAN_CODE;
+}
 
 export type PlanRow = {
   code?: string | null;
@@ -137,6 +163,7 @@ export function mapPlanRow(row: PlanRow): PlanCard | null {
       SALE_PLANS.find((plan) => plan.code === code)?.interestLimit ?? 80,
     ),
     perks: parsePerks(row.perks),
+    addon: code === PLUS5_PLAN_CODE,
   };
 }
 

@@ -551,7 +551,15 @@ export async function toggleShortlist(formData: FormData) {
   redirect(flag(result.on ? "shortlisted" : "unshortlisted"));
 }
 
-export async function sendInterest(formData: FormData): Promise<{ ok: boolean; interestId?: string | null; error?: string }> {
+export async function sendInterest(formData: FormData): Promise<{
+  ok: boolean;
+  interestId?: string | null;
+  error?: string;
+  used?: number;
+  left?: number | null;
+  limit?: number | null;
+  dailyLeft?: number | null;
+}> {
   const { supabase, me } = await requireMember();
   const toId = String(formData.get("to_profile_id") ?? "");
   if (!toId || !me.active_profile_id) return { ok: false, error: "need_profile" };
@@ -567,7 +575,10 @@ export async function sendInterest(formData: FormData): Promise<{ ok: boolean; i
     loadInterestQuota(supabase, me, access, [mine.id]),
     supabase.from("contact_views").select("id").eq("viewer_profile_id", mine.id).eq("viewed_profile_id", toId).maybeSingle(),
   ]);
-  if (!alreadyView.data && !quota.canSend) return { ok: false, error: "quota" };
+  const alreadyCounted = Boolean(alreadyView.data) || quota.touchedIds.includes(toId);
+  if (!alreadyCounted && !quota.canSend) {
+    return { ok: false, error: quota.dailyLeft === 0 && quota.left !== 0 ? "daily" : "quota" };
+  }
 
   let { data: target } = await supabase
     .from("profiles")
@@ -646,7 +657,10 @@ export async function sendInterest(formData: FormData): Promise<{ ok: boolean; i
       revalidatePath("/app/interests");
     });
   }
-  return { ok: true, interestId };
+  const nextUsed = alreadyCounted ? quota.used : quota.used + 1;
+  const nextLeft = alreadyCounted || quota.left == null ? quota.left : Math.max(0, quota.left - 1);
+  const nextDaily = alreadyCounted || quota.dailyLeft == null ? quota.dailyLeft : Math.max(0, quota.dailyLeft - 1);
+  return { ok: true, interestId, used: nextUsed, left: nextLeft, limit: quota.limit, dailyLeft: nextDaily };
 }
 
 export async function cancelInterest(formData: FormData): Promise<{ ok: boolean }> {
@@ -680,6 +694,7 @@ export async function revealContact(toId: string): Promise<{
   used?: number;
   left?: number | null;
   limit?: number | null;
+  dailyLeft?: number | null;
   error?: string;
 }> {
   const { supabase, me } = await requireMember();
@@ -702,6 +717,7 @@ export async function revealContact(toId: string): Promise<{
   let used = 0;
   let left: number | null = null;
   let limit: number | null = null;
+  let dailyLeft: number | null = null;
   if (!alreadyCounted) {
     const access = await loadMembership(supabase, me);
     if (!access.live) {
@@ -729,10 +745,11 @@ export async function revealContact(toId: string): Promise<{
       if (!guestPass) return { ok: false, error: "plan" };
     } else {
       const quota = await loadInterestQuota(supabase, me, access, [mine.id]);
-      if (!quota.canSend) return { ok: false, error: "quota" };
+      if (!quota.canSend) return { ok: false, error: quota.dailyLeft === 0 && quota.left !== 0 ? "daily" : "quota" };
       used = quota.used + 1;
       left = quota.left == null ? null : Math.max(0, quota.left - 1);
       limit = quota.limit;
+      dailyLeft = quota.dailyLeft == null ? null : Math.max(0, quota.dailyLeft - 1);
     }
   }
 
@@ -800,7 +817,7 @@ export async function revealContact(toId: string): Promise<{
     });
   }
 
-  return { ok: true, mobile, email, used, left, limit };
+  return { ok: true, mobile, email, used, left, limit, dailyLeft };
 }
 
 export async function viewContact(formData: FormData) {

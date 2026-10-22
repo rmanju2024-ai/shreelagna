@@ -3,7 +3,7 @@
 import { requireDesk } from "@/lib/desk/access";
 import { writeAudit } from "@/lib/desk/audit";
 import { notifyPlanActivated } from "@/lib/notify/dispatch";
-import { isPlanCode, readPlanForm } from "@/lib/membership/catalog";
+import { isAddonPlan, isPlanCode, PLUS5_SLOTS, readPlanForm } from "@/lib/membership/catalog";
 import { fetchPlanByCode } from "@/lib/membership/load";
 import { createServiceClient } from "@/lib/supabase/server";
 import { refreshDesk } from "@/lib/desk/refresh";
@@ -75,19 +75,34 @@ export async function confirmPlan(formData: FormData) {
   const userId = String(row.user_id ?? "");
   const rowId = String(row.id ?? "");
   const plan = await fetchPlanByCode(db, planCode);
-  const months = plan?.months ?? 3;
-  await activateRow(db, { id: rowId, user_id: userId, plan_code: planCode }, desk.me?.id, months);
+  if (isAddonPlan(planCode)) {
+    await applyPlusFive(db, userId, rowId);
+  } else {
+    const months = plan?.months ?? 3;
+    await activateRow(db, { id: rowId, user_id: userId, plan_code: planCode }, desk.me?.id, months);
+    const ends = addMonths(new Date(), months);
+    await notifyPlanActivated(userId, plan?.name ?? planCode, ends);
+  }
   await writeAudit({
     actorUserId: desk.me?.id,
     actorRole: desk.me?.role,
     action: "membership.confirm",
     entityType: "membership",
     entityId: rowId,
-    metadata: { plan: planCode, user: userId },
+    metadata: { plan: planCode, user: userId, addon: isAddonPlan(planCode) },
   });
-  const ends = addMonths(new Date(), months);
-  await notifyPlanActivated(userId, plan?.name ?? planCode, ends);
   refresh();
+}
+
+async function applyPlusFive(db: AnyDb, userId: string, rowId: string) {
+  const { data: user } = await db.from("app_users").select("interest_bonus").eq("id", userId).maybeSingle();
+  const current = Math.max(0, Math.round(Number(user?.interest_bonus) || 0));
+  await db.from("app_users").update({ interest_bonus: current + PLUS5_SLOTS }).eq("id", userId);
+  await db.from("memberships").update({
+    status: "cancelled",
+    note: "Five more applied",
+    activated_at: new Date().toISOString(),
+  }).eq("id", rowId);
 }
 
 export async function declinePlan(formData: FormData) {
@@ -139,12 +154,16 @@ export async function grantPlan(formData: FormData) {
     .select("id, user_id, plan_code")
     .maybeSingle();
   if (!inserted?.id) return;
-  await activateRow(
-    db,
-    { id: String(inserted.id), user_id: String(inserted.user_id ?? memberId), plan_code: String(inserted.plan_code ?? code) },
-    desk.me?.id,
-    plan.months,
-  );
+  if (isAddonPlan(code)) {
+    await applyPlusFive(db, memberId, String(inserted.id));
+  } else {
+    await activateRow(
+      db,
+      { id: String(inserted.id), user_id: String(inserted.user_id ?? memberId), plan_code: String(inserted.plan_code ?? code) },
+      desk.me?.id,
+      plan.months,
+    );
+  }
   await writeAudit({
     actorUserId: desk.me?.id,
     actorRole: desk.me?.role,
