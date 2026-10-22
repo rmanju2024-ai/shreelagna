@@ -58,7 +58,7 @@ export function BrowseCard({ note, priority = false }: { note: BrowseCardNote; p
   const place = [note.city, note.state].filter(Boolean).join(", ");
   const facts = [note.age, note.height].filter(Boolean).join(" · ");
   return (
-    <li className="sx-card">
+    <li className={`sx-card${note.staff ? " is-staff" : ""}`}>
       <Link href={note.href} className="sx-card-link" prefetch={false}>
         <div className="sx-photo">
           {note.photoUrl ? (
@@ -75,6 +75,8 @@ export function BrowseCard({ note, priority = false }: { note: BrowseCardNote; p
           )}
           {percent != null ? (
             <b className="sx-badge">{percent}% match</b>
+          ) : note.staff ? (
+            <b className="sx-badge">{note.staff.completePct}% profile</b>
           ) : note.score ? (
             <b className="sx-badge">{note.score}</b>
           ) : null}

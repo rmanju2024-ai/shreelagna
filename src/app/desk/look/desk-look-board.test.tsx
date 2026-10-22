@@ -24,7 +24,21 @@ function note(partial: Partial<BrowseCardNote> & { id: string; name: string }): 
 describe("Desk look board", () => {
   it("lists nothing until Apply, then lists both kinds when Any is kept", () => {
     const notes = [
-      note({ id: "b1", name: "Ananya", profile_type: "vadhu" }),
+      note({
+        id: "b1",
+        name: "Ananya",
+        profile_type: "vadhu",
+        staff: {
+          memberCode: "SL-12",
+          completePct: 64,
+          filled: 11,
+          total: 18,
+          ready: false,
+          nextGap: "Gharane / Surname",
+          cover: "Gold",
+          income: "₹10–15 lakh",
+        },
+      }),
       note({ id: "g1", name: "Arjun", profile_type: "vara" }),
     ];
     render(<DeskLookBoard notes={notes} religions={[]} communities={[]} />);
@@ -34,6 +48,9 @@ describe("Desk look board", () => {
     expect(screen.getByText("Ananya")).toBeTruthy();
     expect(screen.getByText("Arjun")).toBeTruthy();
     expect(screen.getByText("2 profiles")).toBeTruthy();
+    expect(screen.getByText(/64% profile/i)).toBeTruthy();
+    expect(screen.getByText(/Profile 11\/18/)).toBeTruthy();
+    expect(screen.getByText("Gold")).toBeTruthy();
   });
 
   it("uses the Discover advanced page size", () => {
