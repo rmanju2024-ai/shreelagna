@@ -26,7 +26,7 @@ export default async function SafetyPage({ searchParams }: { searchParams: Promi
       <main className="sx-stage safety-centre">
         <header className="page-head-panel"><p className="browse-kicker">Trust & safety</p>
         <h1>Your safety comes first</h1>
-        <p className="set-lead">Keep conversations on Shree Lagna until you are comfortable. Never share OTPs, UPI PINs, passwords, bank details, or money.</p></header>
+        <p className="set-lead">Keep conversations on MarriageConnect until you are comfortable. Never share OTPs, UPI PINs, passwords, bank details, or money.</p></header>
         <SafetyFlash code={safety} />
         <p><Link href="/app/blocked" className={btnPrimary}>Blocked profiles</Link></p>
         <section className={`${cardClass} safety-guidance`}>
@@ -41,7 +41,7 @@ export default async function SafetyPage({ searchParams }: { searchParams: Promi
         <section className={`${cardClass} safety-urgent`}>
           <p className="browse-kicker">Need help now?</p>
           <h2>Get real-world help first</h2>
-          <p>If there is immediate danger, threat, stalking, blackmail, or pressure to meet, stop the conversation and contact local emergency services. Shree Lagna cannot provide emergency response.</p>
+          <p>If there is immediate danger, threat, stalking, blackmail, or pressure to meet, stop the conversation and contact local emergency services. MarriageConnect cannot provide emergency response.</p>
           <div className="safety-helplines">
             <a href="tel:112"><b>112</b><span>India emergency response</span></a>
             <a href="tel:181"><b>181</b><span>Women helpline (availability can vary by state)</span></a>
@@ -52,7 +52,7 @@ export default async function SafetyPage({ searchParams }: { searchParams: Promi
         <section className={`${cardClass} safety-guidance`}>
           <h2>Meet safely, especially for women</h2>
           <ul>
-            <li>Keep early conversations in Shree Lagna. Do not share your OTP, address, UPI PIN, bank details, or private documents.</li>
+            <li>Keep early conversations in MarriageConnect. Do not share your OTP, address, UPI PIN, bank details, or private documents.</li>
             <li>Tell a trusted family member before meeting. Choose a public place, arrange your own travel, and keep your phone charged.</li>
             <li>Do not send money, invest, or respond to “urgent” financial stories. A genuine match will respect boundaries.</li>
             <li>Block and report anyone who pressures you, becomes abusive, asks for secrecy, or gives inconsistent profile information.</li>

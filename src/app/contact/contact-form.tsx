@@ -68,7 +68,7 @@ export function ContactForm() {
         <input name="company" tabIndex={-1} autoComplete="off" />
       </div>
       <p className="help-genz-privacy">
-        🔒 We use these details only to reply about Shree Lagna.
+        🔒 We use these details only to reply about MarriageConnect.
       </p>
       {state?.ok ? (
         <p className="help-genz-success">✨ Sent! Someone from the team will read this.</p>

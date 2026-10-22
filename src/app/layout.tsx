@@ -3,6 +3,7 @@ import { Geist, Playfair_Display, Source_Serif_4 } from "next/font/google";
 import { ChromeLayout } from "@/components/chrome-layout";
 import { WebVitals } from "@/components/web-vitals";
 import { Butterflies } from "@/components/butterflies";
+import { SITE_NAME } from "@/lib/brand";
 import "./globals.css";
 import "./search-modern.css";
 import "./theme-genz.css";
@@ -27,15 +28,15 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   title: {
-    default: "Shree Lagna Matrimony",
-    template: "%s · Shree Lagna",
+    default: SITE_NAME,
+    template: `%s · ${SITE_NAME}`,
   },
   description:
     "A private Indian matrimonial house for families.",
-  applicationName: "Shree Lagna",
+  applicationName: SITE_NAME,
   appleWebApp: {
     capable: true,
-    title: "Shree Lagna",
+    title: SITE_NAME,
     statusBarStyle: "default",
   },
   formatDetection: { telephone: false },

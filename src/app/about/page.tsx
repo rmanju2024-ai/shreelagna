@@ -8,7 +8,7 @@ import { btnPrimary, cardClass } from "@/lib/ui/classes";
 
 export const metadata: Metadata = {
   title: "About us",
-  description: "The house behind Shree Lagna Matrimony — family-operated, Indian, private.",
+  description: "The house behind MarriageConnect — family-operated, Indian, private.",
 };
 
 export default async function AboutPage() {

@@ -9,7 +9,7 @@ import { PageHero } from "@/components/page-hero";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Write to Shree Lagna Matrimony.",
+  description: "Write to MarriageConnect.",
 };
 
 export default async function ContactPage() {

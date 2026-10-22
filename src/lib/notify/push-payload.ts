@@ -1,3 +1,5 @@
+import { SITE_NAME } from "@/lib/brand";
+
 export type PushNoticeInput = {
   title: string;
   body: string;
@@ -19,7 +21,7 @@ export function defaultAlertUrl(href?: string | null): string {
 }
 
 export function buildPushPayload(input: PushNoticeInput): WebPushPayload {
-  const title = String(input.title || "Shree Lagna").slice(0, 80) || "Shree Lagna";
+  const title = String(input.title || SITE_NAME).slice(0, 80) || SITE_NAME;
   const body = String(input.body || "You have a new update.").slice(0, 180);
   return {
     title,

@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
+import { SITE_NAME } from "@/lib/brand";
 import { LiveClock } from "@/components/live-clock";
 import { getAuth, ensureAppUser } from "@/lib/auth/session";
 import { KalyanBanner } from "@/components/home/kalyan-banner";
@@ -172,10 +173,10 @@ export function SiteFooter({ glass = false }: { glass?: boolean }) {
       }`}
     >
       <div className={`${pageInner} site-footer-inner`}>
-        <Link href="/" className="site-footer-brand" aria-label="Shree Lagna home">
+        <Link href="/" className="site-footer-brand" aria-label={`${SITE_NAME} home`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/graphics/shreelagna-crest-3d.png" alt="" width={36} height={36} />
-          <span>Shree Lagna</span>
+          <span>{SITE_NAME}</span>
         </Link>
         <nav className="site-footer-links" aria-label="Footer">
           <Link href="/about">About</Link>

@@ -33,7 +33,7 @@ export function PushAlertsControl({ compact = false }: { compact?: boolean }) {
 
   const label = useMemo(() => {
     if (!publicKey) return "Alerts on this device need a VAPID key from house.";
-    if (iosNeedsHome) return "On iPhone, Add to Home Screen first, then open Shree Lagna from the icon (iOS 16.4+).";
+    if (iosNeedsHome) return "On iPhone, Add to Home Screen first, then open MarriageConnect from the icon (iOS 16.4+).";
     if (status === "granted") return "Device alerts are on.";
     if (status === "denied") return "Notifications are blocked in the browser. Allow them for this site, then try again.";
     return "Get a banner when someone views, shortlists, or sends interest.";

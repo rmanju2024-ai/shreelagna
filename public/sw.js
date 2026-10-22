@@ -11,7 +11,7 @@ self.addEventListener("fetch", () => {
 });
 
 self.addEventListener("push", (event) => {
-  let data = { title: "Shree Lagna", body: "You have a new update.", url: "/app/alerts" };
+  let data = { title: "MarriageConnect", body: "You have a new update.", url: "/app/alerts" };
   try {
     const parsed = event.data ? event.data.json() : null;
     if (parsed && typeof parsed === "object") {

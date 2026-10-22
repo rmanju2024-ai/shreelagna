@@ -10,8 +10,8 @@ const LABELS: Record<TrustTier, string> = {
 const EXPLAINERS: Record<TrustTier, string> = {
   submitted: "No verification claim has been made.",
   mobile_confirmed: "The profile mobile number was confirmed with a one-time code.",
-  details_reviewed: "A Shree Lagna team member reviewed the submitted profile details.",
-  identity_checked: "A Shree Lagna team member recorded an identity check. This is not a background-check guarantee.",
+  details_reviewed: "A MarriageConnect team member reviewed the submitted profile details.",
+  identity_checked: "A MarriageConnect team member recorded an identity check. This is not a background-check guarantee.",
 };
 
 export function trustTier(value: unknown): TrustTier {

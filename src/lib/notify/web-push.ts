@@ -17,7 +17,7 @@ export function vapidConfigured(): boolean {
 }
 
 export function vapidSubject(): string {
-  return process.env.VAPID_SUBJECT?.trim() || "mailto:house@shreelagna.com";
+  return process.env.VAPID_SUBJECT?.trim() || "mailto:house@marriageconnect.app";
 }
 
 export async function sendWebPushesToUser(userId: string, notice: PushNoticeInput): Promise<void> {

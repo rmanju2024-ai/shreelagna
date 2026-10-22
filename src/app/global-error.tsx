@@ -6,7 +6,7 @@ export default function GlobalError({ reset }: { error: Error & { digest?: strin
       <body style={{ margin: 0, minHeight: "100dvh", display: "grid", placeItems: "center", background: "#fbf5ec", fontFamily: "system-ui, sans-serif", color: "#1a100c", textAlign: "center", padding: "2rem" }}>
         <div>
           <div style={{ fontSize: "3.5rem" }} aria-hidden>🦋</div>
-          <h1>Shree Lagna will be right back</h1>
+          <h1>MarriageConnect will be right back</h1>
           <p style={{ color: "#6a574c" }}>Something went wrong. Please try again.</p>
           <button
             type="button"

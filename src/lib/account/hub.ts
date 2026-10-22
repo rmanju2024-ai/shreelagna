@@ -40,7 +40,7 @@ export const ACCOUNT_GROUPS = [
     mark: "Work",
     items: [
       { href: "/app/plans", title: "Membership", mark: "Income", text: "Your plan, access and future upgrades." },
-      { href: "/contact", title: "Help & support", mark: "Contact", text: "Reach the Shree Lagna house team." },
+      { href: "/contact", title: "Help & support", mark: "Contact", text: "Reach the MarriageConnect house team." },
     ],
   },
 ] as const;

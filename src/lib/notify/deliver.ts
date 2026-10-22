@@ -1,3 +1,4 @@
+import { SITE_NAME } from "@/lib/brand";
 import { arattaiConfigured, sendArattaiAlert, toArattaiMobile } from "@/lib/notify/arattai";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sendWebPushesToUser } from "@/lib/notify/web-push";
@@ -42,5 +43,5 @@ export async function deliverHouseNotice(notice: HouseNotice): Promise<void> {
   const mobile = await loadAlertMobile(notice.userId, notice.mobileHint);
   if (!mobile) return;
   const line = (notice.body || notice.title).slice(0, 120);
-  await sendArattaiAlert(mobile, [notice.title.slice(0, 60) || "Shree Lagna", line]).catch(() => undefined);
+  await sendArattaiAlert(mobile, [notice.title.slice(0, 60) || SITE_NAME, line]).catch(() => undefined);
 }

@@ -1,4 +1,4 @@
-export const SITE_NAME = "Shree Lagna";
+export const SITE_NAME = "MarriageConnect";
 
 export function watermarkLine(name?: string | null): string {
   const who = (name ?? "").trim();

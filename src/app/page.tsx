@@ -31,7 +31,7 @@ export default async function HomePage() {
           <KalyanBanner intensity="hero" presentation="complete" veil={false} />
         </div>
         <div className="home-split-copy">
-          <p className="home-hero-kicker">✦ Shree Lagna · Bharat</p>
+          <p className="home-hero-kicker">✦ MarriageConnect · Bharat</p>
           <h1 className="home-split-title font-[family-name:var(--font-display)]">A sacred beginning.</h1>
           <p className="home-split-sub">
             {user

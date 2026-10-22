@@ -49,7 +49,7 @@ export async function GET() {
   return new Response(`\uFEFF${csv}`, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="shree-lagna-audit-${day}.csv"`,
+      "Content-Disposition": `attachment; filename="marriageconnect-audit-${day}.csv"`,
       "Cache-Control": "no-store",
     },
   });

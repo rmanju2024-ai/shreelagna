@@ -28,7 +28,7 @@ export function PromoBubble({ name }: { name: string }) {
       {open ? (
         <div className="promo-card">
           <button type="button" className="promo-x" onClick={close} aria-label="Close">×</button>
-          <p className="promo-from"><span className="promo-dot" /> Shree Lagna · online</p>
+          <p className="promo-from"><span className="promo-dot" /> MarriageConnect · online</p>
           <p className="promo-msg">Hey 👋 {name} could be your match! Go premium to chat instantly, see contact details and send unlimited interests.</p>
           <a className="promo-cta" href="/app/plans">Unlock premium ✨</a>
         </div>

@@ -2,7 +2,7 @@ export default function AppLoading() {
   return (
     <div className="app-route-loading" aria-busy="true" aria-live="polite">
       <div className="app-route-loading-copy">
-        <p>Your Shree Lagna</p>
+        <p>Your MarriageConnect</p>
         <h2>Setting up your next step</h2>
       </div>
       <div className="app-route-loading-hero" />

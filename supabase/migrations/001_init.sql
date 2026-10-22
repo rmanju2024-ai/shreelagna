@@ -1,4 +1,4 @@
--- Shree Lagna Matrimony — schema, indexes, RLS
+-- MarriageConnect — schema, indexes, RLS
 -- Apply in Supabase SQL editor. Do not use the laptop Postgres of other apps.
 
 begin;

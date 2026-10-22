@@ -50,7 +50,7 @@ export function SettingsForm({
         <Toggle
           name="hide_last_seen"
           title="Hide last seen"
-          hint="Other families will not see when you were last on Shreelagna."
+          hint="Other families will not see when you were last on MarriageConnect."
           checked={values.hideLastSeen}
         />
         <Toggle
