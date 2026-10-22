@@ -86,7 +86,7 @@ describe("Discover feed", () => {
   it("prints each category title once", () => {
     show();
     expect(screen.getAllByText("Smart picks")).toHaveLength(1);
-    expect(screen.getAllByText("Who fits you, and who already likes you")).toHaveLength(1);
+    expect(screen.getAllByText("The introductions we’d put first")).toHaveLength(1);
   });
 
   it("scrolls a category row with both arrows", () => {

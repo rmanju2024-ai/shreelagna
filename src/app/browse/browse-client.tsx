@@ -22,7 +22,7 @@ const DEFAULT_VIEWS: ViewItem[] = [
     id: "smart",
     label: "Smart picks",
     short: "Smart",
-    hint: "Who fits you, and who already likes you",
+    hint: "The introductions we’d put first",
     empty: "No matching profiles here yet",
   },
   { id: "kundali", label: "Kundali match", short: "Kundali", hint: "18 or more of 36", empty: "No kundali matches here yet" },
