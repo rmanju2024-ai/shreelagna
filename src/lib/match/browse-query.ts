@@ -58,7 +58,7 @@ export const BROWSE_PROFILE_COLUMNS = [
 export const BROWSE_PROFILE_SELECT: string = `${BROWSE_PROFILE_COLUMNS}, religions(name), communities(name)`;
 export const BROWSE_PROFILE_SELECT_STAR: string = "*, religions(name), communities(name)";
 export const LOOK_PROFILE_SELECT =
-  "id, created_by, created_at, profile_type, status, subject_full_name, hide_last_seen, last_seen_at, date_of_birth, height_cm, diet, qualification, occupation, income_band, current_country, current_state, current_city, native_state, religions(name), communities(name)";
+  "id, created_by, created_at, profile_type, status, is_complete, member_code, subject_full_name, surname, hide_last_seen, last_seen_at, date_of_birth, height_cm, marital_status, diet, qualification, occupation, income_band, employed_in, employer_name, current_country, current_state, current_city, native_state, native_country, birth_city, birth_time, college_name, hobbies, about, pref_notes, pref_age_min, pref_age_max, brothers_count, sisters_count, father_occupation, mother_occupation, family_status, family_location, physical_status, living_arrangement, community_id, prefer_not_community, subject_mobile, phone_otp_verified_at, religions(name), communities(name)";
 export const BROWSE_LIST_LIMIT = 60;
 
 type PhotoRow = { profile_id: string; storage_path: string | null; is_primary?: boolean | null; error?: unknown };

@@ -25,6 +25,16 @@ export type BrowseCardNote = {
   created_at?: string | null;
   last_seen_at?: string | null;
   subscribed?: boolean;
+  staff?: {
+    memberCode: string | null;
+    completePct: number;
+    filled: number;
+    total: number;
+    ready: boolean;
+    nextGap: string | null;
+    cover: string;
+    income: string | null;
+  };
 };
 
 function chips(note: BrowseCardNote): string[] {
@@ -81,6 +91,25 @@ export function BrowseCard({ note, priority = false }: { note: BrowseCardNote; p
             ))}
           </ul>
           {note.score ? <p className="sx-why-match">Why this match: {note.score}</p> : null}
+          {note.staff ? (
+            <div className="sx-staff">
+              <p className="sx-staff-complete">
+                <span>
+                  Profile {note.staff.filled}/{note.staff.total} · {note.staff.completePct}%
+                </span>
+                <b className={note.staff.ready ? "is-ready" : "is-gap"}>{note.staff.ready ? "Ready" : "Incomplete"}</b>
+              </p>
+              <span className="sx-staff-meter" aria-hidden>
+                <i style={{ width: `${note.staff.completePct}%` }} />
+              </span>
+              <ul className="sx-staff-facts">
+                {note.staff.memberCode ? <li>ID {note.staff.memberCode}</li> : null}
+                <li>{note.staff.cover}</li>
+                {note.staff.income ? <li>{note.staff.income}</li> : null}
+              </ul>
+              {note.staff.nextGap && !note.staff.ready ? <p className="sx-staff-gap">Next: {note.staff.nextGap}</p> : null}
+            </div>
+          ) : null}
           <div className="sx-foot">
             <span>{note.lastOnline ?? ""}</span>
             <em>View profile →</em>

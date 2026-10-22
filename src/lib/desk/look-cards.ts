@@ -1,6 +1,6 @@
 import type { BrowseCardNote } from "@/app/browse/browse-card";
 import { inboxLastOnline, publicMediaUrl } from "@/lib/match/inbox-card";
-import { yearsFromDob } from "@/lib/profile/completeness";
+import { completenessFromRecord, completenessScore, yearsFromDob } from "@/lib/profile/completeness";
 import { formatHeightImperial } from "@/lib/profile/match-compare";
 import { displayFirstName } from "@/lib/profile/options";
 import { profileOpenHref } from "@/lib/ui/dismiss";
@@ -39,6 +39,32 @@ export function subscribedOwnerIds(
       .map((row) => String(row.user_id ?? ""))
       .filter(Boolean),
   );
+}
+
+export function lookStaffFromRow(
+  row: Record<string, unknown>,
+  hasPhoto: boolean,
+  planName?: string | null,
+): NonNullable<BrowseCardNote["staff"]> {
+  const score = completenessScore(
+    completenessFromRecord(row, {
+      hasApprovedPhoto: hasPhoto,
+      emailOtpVerified: true,
+      smsOtpRequired: false,
+    }),
+  );
+  const ready = row.is_complete === true || score.pendingMandatory.length === 0;
+  const next = score.pendingMandatory[0]?.label ?? score.pendingRecommended[0]?.label ?? null;
+  return {
+    memberCode: asText(row.member_code),
+    completePct: score.overallPct,
+    filled: score.overallFilled,
+    total: score.overallTotal,
+    ready,
+    nextGap: next,
+    cover: planName?.trim() || (row.subscribed === true ? "Paid plan" : "No paid plan"),
+    income: asText(row.income_band),
+  };
 }
 
 export function lookCardFromRow(
@@ -81,5 +107,6 @@ export function lookCardFromRow(
     last_seen_at: asText(row.last_seen_at),
     subscribed: Boolean(row.subscribed),
     score: null,
+    staff: lookStaffFromRow(row, Boolean(photoMap.get(String(row.id))), asText(row.plan_name)),
   };
 }

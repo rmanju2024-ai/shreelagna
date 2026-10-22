@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { lookCardFromRow, lookStatusLine, subscribedOwnerIds } from "./look-cards";
+import { lookCardFromRow, lookStaffFromRow, lookStatusLine, subscribedOwnerIds } from "./look-cards";
 
 describe("desk look cards", () => {
   it("labels review and hidden rows for staff", () => {
@@ -42,5 +42,26 @@ describe("desk look cards", () => {
     expect(card.lastOnline).toBe("In review");
     expect(card.subscribed).toBe(true);
     expect(card.profile_type).toBe("vadhu");
+    expect(card.staff?.cover).toBe("Paid plan");
+    expect(card.staff?.completePct).toBeGreaterThanOrEqual(0);
+  });
+
+  it("summarises completion and cover for staff", () => {
+    const staff = lookStaffFromRow(
+      {
+        subject_full_name: "Ananya Rao",
+        is_complete: false,
+        member_code: "SL-12",
+        income_band: "₹10–15 lakh",
+        subscribed: false,
+      },
+      false,
+      "Gold",
+    );
+    expect(staff.memberCode).toBe("SL-12");
+    expect(staff.cover).toBe("Gold");
+    expect(staff.income).toBe("₹10–15 lakh");
+    expect(staff.ready).toBe(false);
+    expect(staff.nextGap).toBeTruthy();
   });
 });
