@@ -200,11 +200,13 @@ function planPayload(plan: {
   };
 }
 
-export async function savePlan(formData: FormData) {
+export type PlanWriteState = { ok: true; name: string; code: string } | { ok: false; error: string };
+
+export async function savePlan(_prev: PlanWriteState | null, formData: FormData): Promise<PlanWriteState> {
   const desk = await requireDesk("/desk/plans");
-  if (!desk.allowed || !desk.admin) return;
+  if (!desk.allowed || !desk.admin) return { ok: false, error: "Only admins can change the catalog." };
   const plan = readPlanForm(formData, String(formData.get("code") ?? ""));
-  if (!plan) return;
+  if (!plan) return { ok: false, error: "Check the fields and try Save again." };
   const db = asDb(createServiceClient() ?? desk.supabase);
   if (plan.featured) {
     await db.from("member_plans").update({ featured: false }).neq("code", plan.code);
@@ -219,16 +221,17 @@ export async function savePlan(formData: FormData) {
     metadata: { name: plan.name, months: plan.months, price: plan.priceInr },
   });
   refresh();
+  return { ok: true, name: plan.name, code: plan.code };
 }
 
-export async function addPlan(formData: FormData) {
+export async function addPlan(_prev: PlanWriteState | null, formData: FormData): Promise<PlanWriteState> {
   const desk = await requireDesk("/desk/plans");
-  if (!desk.allowed || !desk.admin) return;
+  if (!desk.allowed || !desk.admin) return { ok: false, error: "Only admins can add a plan." };
   const plan = readPlanForm(formData);
-  if (!plan) return;
+  if (!plan) return { ok: false, error: "Check the fields and try Add again." };
   const db = asDb(createServiceClient() ?? desk.supabase);
   const { data: existing } = await db.from("member_plans").select("code").eq("code", plan.code).maybeSingle();
-  if (existing) return;
+  if (existing) return { ok: false, error: "That code is already in the catalog." };
   if (plan.featured) {
     await db.from("member_plans").update({ featured: false }).neq("code", plan.code);
   }
@@ -242,4 +245,5 @@ export async function addPlan(formData: FormData) {
     metadata: { name: plan.name },
   });
   refresh();
+  return { ok: true, name: plan.name, code: plan.code };
 }

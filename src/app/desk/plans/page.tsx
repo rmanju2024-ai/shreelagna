@@ -1,4 +1,5 @@
 import { addPlan, confirmPlan, declinePlan, grantPlan, savePlan } from "@/app/desk/plans/actions";
+import { PlanCatalogForm } from "@/app/desk/plans/plan-catalog-form";
 import { DeskPager } from "@/app/desk/desk-pager";
 import { requireDesk } from "@/lib/desk/access";
 import { deskPage, deskRange } from "@/lib/desk/pager";
@@ -140,21 +141,27 @@ export default async function DeskPlansPage({
         <div className="plan-edit-stack">
           <h3 className="plan-edit-title">Catalog</h3>
           {catalog.map((plan) => (
-            <form key={plan.code} action={savePlan} className={`${cardClass} plan-edit-form`}>
+            <PlanCatalogForm
+              key={plan.code}
+              action={savePlan}
+              submitLabel={`Save ${plan.name}`}
+              busyLabel="Saving…"
+              savedLabel={`${plan.name} is saved`}
+            >
               <p className="browse-kicker">{plan.code}</p>
               <PlanFields plan={plan} />
-              <button type="submit" className={btnPrimary}>
-                Save {plan.name}
-              </button>
-            </form>
+            </PlanCatalogForm>
           ))}
-          <form action={addPlan} className={`${cardClass} plan-edit-form`}>
+          <PlanCatalogForm
+            action={addPlan}
+            submitLabel="Add plan"
+            busyLabel="Adding…"
+            savedLabel="Plan added to the catalog"
+            ghost
+          >
             <p className="browse-kicker">New plan</p>
             <PlanFields />
-            <button type="submit" className={btnGhost}>
-              Add plan
-            </button>
-          </form>
+          </PlanCatalogForm>
         </div>
       ) : null}
       <form action={grantPlan} className="desk-ticket-note-form plans-grant">
