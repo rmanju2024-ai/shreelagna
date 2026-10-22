@@ -67,7 +67,7 @@ export async function sendMobileOtp(profileId: string, mobileRaw: string): Promi
 
   const sent = await sendArattaiOtp(mobile, code);
   if (!sent.ok) {
-    if (process.env.NODE_ENV === "production") return { ok: false, error: sent.error };
+    if (process.env.NODE_ENV === "production") return { ok: false, error: sent.error ?? arattaiOperatorHint() };
     return { ok: true, preview: code };
   }
   return { ok: true };

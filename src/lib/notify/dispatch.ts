@@ -40,7 +40,8 @@ async function loadNotifyTarget(userId: string, mobileHint?: string | null) {
 async function notifyWith(userId: string, bodyParams: string[], mobileHint?: string | null): Promise<NotifyResult> {
   const target = await loadNotifyTarget(userId, mobileHint);
   if ("error" in target) return { ok: false, error: String(target.error ?? arattaiOperatorHint()) };
-  return sendArattaiAlert(target.mobile, bodyParams);
+  const sent = await sendArattaiAlert(target.mobile, bodyParams);
+  return sent.ok ? { ok: true } : { ok: false, error: sent.error ?? arattaiOperatorHint() };
 }
 
 export async function notifyInterestReceived(userId: string, senderFirst: string, mobileHint?: string | null) {
