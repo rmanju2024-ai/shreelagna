@@ -86,7 +86,6 @@ export async function loadInterestQuota(
 ): Promise<InterestQuota> {
   const plan = access.planCode && access.planCode !== "welcome" ? await fetchPlanByCode(db, access.planCode) : null;
   const limit = interestLimitFor(access.kind, plan?.interestLimit);
-  if (limit === null) return resolveQuota(null, 0);
   if (!profileIds.length) return resolveQuota(limit, 0);
   const paid = access.kind === "paid" ? await fetchPaidMembership(db, me.id) : null;
   const since = quotaWindowStart(access.kind, {
@@ -104,7 +103,7 @@ export async function loadInterestQuota(
         .select("viewer_profile_id, viewed_profile_id, created_at")
         .in("viewer_profile_id", profileIds),
     ]);
-    if (interests.error || views.error) return resolveQuota(limit, limit);
+    if (interests.error || views.error) return resolveQuota(limit, limit ?? 0);
     const interestRows = (interests.data ?? []) as {
       from_profile_id?: string | null;
       to_profile_id?: string | null;
@@ -118,7 +117,7 @@ export async function loadInterestQuota(
     const touchedIds = usedUniqueProfilesSince(interestRows, viewRows, profileIds, since);
     return resolveQuota(limit, touchedIds.length, touchedIds);
   } catch {
-    return resolveQuota(limit, limit);
+    return resolveQuota(limit, limit ?? 0);
   }
 }
 

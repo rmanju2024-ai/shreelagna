@@ -40,7 +40,7 @@ export function planHeaderMarks(input: {
   }
   marks.push({
     id: "use",
-    text: input.limit == null ? "Open" : `${input.used}/${input.limit}`,
+    text: input.limit == null ? `${input.used}` : `${input.used}/${input.limit}`,
     hint: "Profile counter",
     tone: "soft",
   });

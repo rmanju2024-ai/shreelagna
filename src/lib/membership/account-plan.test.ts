@@ -37,4 +37,16 @@ describe("account hub plan marks", () => {
       tone: "wait",
     });
   });
+
+  it("shows used profile count for house cover, not Open", () => {
+    const marks = planHeaderMarks({
+      access: { kind: "house", live: true, label: "House", daysLeft: 0, until: null },
+      used: 14,
+      limit: null,
+    });
+    expect(marks.map((item) => `${item.hint}:${item.text}`)).toEqual([
+      "Name:House",
+      "Profile counter:14",
+    ]);
+  });
 });

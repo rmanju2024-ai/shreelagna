@@ -44,14 +44,19 @@ async function loadAccountPulse(
 function MonthPulseCard({
   pulse,
   planMarks,
+  ownerName,
 }: {
   pulse: { views: number; received: number; sent: number; accepted: number; warmth: number } | null;
   planMarks: PlanMark[];
+  ownerName: string | null;
 }) {
   const ring = 2 * Math.PI * 26;
   const drawn = pulse ? (pulse.warmth / 100) * ring : 0;
   return (
-    <section className="account-pulse" aria-label="Activity and current plan">
+    <header className="account-hub-head" aria-label="Account overview">
+      <span className="account-hub-crest" aria-hidden>
+        <HouseCrest />
+      </span>
       {pulse ? (
         <div className="account-pulse-moon">
           <svg viewBox="0 0 64 64" aria-hidden>
@@ -71,11 +76,14 @@ function MonthPulseCard({
           </p>
         </div>
       ) : null}
-      {pulse ? (
-        <div className="account-pulse-copy">
-          <p className="browse-kicker">Last 30 days</p>
-          <h2>{pulseNote(pulse.warmth)}</h2>
-          <ul>
+      <div className="account-hub-copy">
+        <h1>Account hub</h1>
+        <p className="account-pulse-line">
+          <span className="browse-kicker">Last 30 days</span>
+          <strong>{pulse ? pulseNote(pulse.warmth) : "Ready when you are."}</strong>
+        </p>
+        {pulse ? (
+          <ul className="account-pulse-stats">
             <li>
               <strong>{pulse.views}</strong>
               seen
@@ -93,13 +101,8 @@ function MonthPulseCard({
               accepted
             </li>
           </ul>
-        </div>
-      ) : (
-        <div className="account-pulse-copy">
-          <p className="browse-kicker">Last 30 days</p>
-          <h2>Ready when you are.</h2>
-        </div>
-      )}
+        ) : null}
+      </div>
       {planMarks.length ? (
         <Link href="/app/plans" className="account-pulse-plan">
           <p className="browse-kicker">Current plan</p>
@@ -113,7 +116,13 @@ function MonthPulseCard({
           </ul>
         </Link>
       ) : null}
-    </section>
+      {ownerName ? (
+        <p className="account-hub-owner">
+          <span>Profile</span>
+          <strong>{ownerName}</strong>
+        </p>
+      ) : null}
+    </header>
   );
 }
 
@@ -149,21 +158,7 @@ export default async function AccountHubPage() {
   return (
     <PageShell>
       <main className="account-hub sx-stage">
-        <header className="account-hub-head">
-          <span className="account-hub-crest" aria-hidden>
-            <HouseCrest />
-          </span>
-          <div className="account-hub-copy">
-            <h1>Account hub</h1>
-          </div>
-          {ownerName ? (
-            <p className="account-hub-owner">
-              <span>Profile</span>
-              <strong>{ownerName}</strong>
-            </p>
-          ) : null}
-        </header>
-        <MonthPulseCard pulse={pulse} planMarks={planMarks} />
+        <MonthPulseCard pulse={pulse} planMarks={planMarks} ownerName={ownerName} />
         <div className="account-hub-content">
           {ACCOUNT_GROUPS.map((group) => (
             <section id={group.id} key={group.id} className="account-hub-section">
