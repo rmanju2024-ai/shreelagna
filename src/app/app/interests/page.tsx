@@ -172,6 +172,20 @@ export async function InterestsView({ only }: { only?: SectionId } = {}) {
     }
   }
   const photoMap = pickPrimaryPhotoMap(photos);
+  const photoLists = new Map<string, string[]>();
+  for (const row of photos) {
+    const id = String(row.profile_id ?? "");
+    const path = typeof row.storage_path === "string" ? row.storage_path : "";
+    if (!id || !path) continue;
+    const list = photoLists.get(id) ?? [];
+    if (list.includes(path) || list.length >= 3) {
+      photoLists.set(id, list);
+      continue;
+    }
+    if (row.is_primary) list.unshift(path);
+    else list.push(path);
+    photoLists.set(id, list.slice(0, 3));
+  }
 
   function otherId(row: InterestRow) {
     return idSet.has(row.to_profile_id) ? row.from_profile_id : row.to_profile_id;
@@ -222,6 +236,9 @@ export async function InterestsView({ only }: { only?: SectionId } = {}) {
       href: extra.href ?? (closed ? undefined : profileOpenHref(profileId, "likes")),
       status: extra.status,
       photoUrl: photo,
+      photoUrls: publicProfile
+        ? (photoLists.get(profileId) ?? []).map((path) => publicMediaUrl(path)).filter((url): url is string => Boolean(url))
+        : [],
       lastOnline: inboxLastOnlineNow(
         Boolean(other?.hide_last_seen),
         other?.last_seen_at,
@@ -275,7 +292,7 @@ export async function InterestsView({ only }: { only?: SectionId } = {}) {
     <PageShell>
       <div className="sx-stage">
       <div className="inbox-unified"><InboxSwitcher active="likes" /></div>
-      <header className="sx-hero">
+      <header className="sx-hero is-inbox">
         <div className="sx-hero-copy">
           <p className="sx-eyebrow">Inbox</p>
           <h1>{only ? SECTIONS.find((item) => item.id === only)?.label ?? "Interests" : "Interests"}</h1>

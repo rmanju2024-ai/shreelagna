@@ -3,7 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useState, type MouseEvent, type ReactNode } from "react";
+import { DISCOVER_ROW_WINDOW, discoverRowStart } from "@/app/browse/browse-client";
 import { respondInterest } from "@/app/app/match/actions";
 import { pageCount, pageItems, PROFILE_PAGE_SIZE } from "@/lib/match/inbox-card";
 import { btnGhost, btnPrimary } from "@/lib/ui/classes";
@@ -23,6 +24,7 @@ export type InboxNote = {
   href?: string;
   status?: string;
   photoUrl?: string | null;
+  photoUrls?: string[] | null;
   lastOnline?: string | null;
   age?: string | null;
   height?: string | null;
@@ -93,7 +95,7 @@ export function InboxBoard({
   }
 
   return (
-    <article className="sx-feed inbox-modern">
+    <article className="sx-feed inbox-modern is-board">
       {SECTIONS.map((section) => (
         <LikesSection key={section.id} section={section} notes={notes[section.id]} actions={actions[section.id]} />
       ))}
@@ -110,8 +112,13 @@ function LikesSection({
   notes: InboxNote[];
   actions?: (note: InboxNote) => ReactNode;
 }) {
-  const scroller = useRef<HTMLUListElement>(null);
+  const [start, setStart] = useState(0);
   const count = notes.length;
+  const windowSize = Math.min(DISCOVER_ROW_WINDOW, Math.max(count, 1));
+  const shown = notes.slice(start, start + windowSize);
+  const canPrev = start > 0;
+  const canNext = start + windowSize < count;
+  const move = (delta: number) => setStart((current) => discoverRowStart(current, delta, count, windowSize));
   const id = `likes-${section.id}`;
   return (
     <section className="sx-feed-row" aria-labelledby={id}>
@@ -127,42 +134,56 @@ function LikesSection({
           <small>{count} {count === 1 ? "profile" : "profiles"}</small>
         </div>
       </header>
-      {!count ? (
+      {count ? (
+        <div className="sx-row-shell">
+          <div className="sx-row-nav">
+            {count > windowSize ? (
+              <button
+                type="button"
+                className="sx-row-arrow is-left"
+                aria-label={`Show previous ${section.label} profiles`}
+                disabled={!canPrev}
+                onClick={() => move(-1)}
+              >
+                ‹
+              </button>
+            ) : null}
+          </div>
+          <div className="sx-row-clip">
+            <ul className="sx-row" data-start={String(start)}>
+              {shown.map((note) => (
+                <PreviewCard key={note.id} note={note} actions={actions} />
+              ))}
+            </ul>
+          </div>
+          <div className="sx-row-nav">
+            {count > windowSize ? (
+              <button
+                type="button"
+                className="sx-row-arrow is-right"
+                aria-label={`Show more ${section.label} profiles`}
+                disabled={!canNext}
+                onClick={() => move(1)}
+              >
+                ›
+              </button>
+            ) : null}
+          </div>
+        </div>
+      ) : (
         <div className="sx-empty is-compact">
           <h3>{section.empty}</h3>
         </div>
-      ) : (
-        <div className="sx-row-shell">
-          <button
-            type="button"
-            className="sx-row-arrow is-left"
-            aria-label={`Show previous ${section.label} profiles`}
-            onClick={() => scroller.current?.scrollBy({ left: -280, behavior: "smooth" })}
-          >
-            ‹
-          </button>
-          <ul className="sx-row" ref={scroller}>
-            {notes.slice(0, LIKES_PREVIEW_LIMIT).map((note) => (
-              <PreviewCard key={note.id} note={note} actions={actions} />
-            ))}
-          </ul>
-          <button
-            type="button"
-            className="sx-row-arrow is-right"
-            aria-label={`Show more ${section.label} profiles`}
-            onClick={() => scroller.current?.scrollBy({ left: 280, behavior: "smooth" })}
-          >
-            ›
-          </button>
-        </div>
       )}
-      {count > LIKES_PREVIEW_LIMIT ? (
-        <div className="sx-view-all-center">
+      <div className="sx-view-all-center">
+        {count > LIKES_PREVIEW_LIMIT ? (
           <a className="sx-view-all" href={`/app/interests/all?s=${section.id}`}>
             View all {count} profiles <span aria-hidden>→</span>
           </a>
-        </div>
-      ) : null}
+        ) : (
+          <span className="sx-view-all-slot" aria-hidden />
+        )}
+      </div>
     </section>
   );
 }
@@ -264,14 +285,43 @@ function CardFace({ note, actions }: { note: InboxNote; actions?: ReactNode }) {
   const facts = [note.age, note.height].filter(Boolean).join(" · ");
   const place = [note.city, note.state].filter(Boolean).join(", ");
   const tags = [[note.religion, note.community].filter(Boolean).join(" · "), note.education ?? "", note.occupation ?? ""].filter(Boolean);
+  const album = [...new Set((note.photoUrls?.length ? note.photoUrls : note.photoUrl ? [note.photoUrl] : []).filter(Boolean))];
+  const [shot, setShot] = useState(0);
+  useEffect(() => {
+    if (album.length < 2) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const timer = window.setInterval(() => setShot((current) => (current + 1) % album.length), 10_000);
+    return () => window.clearInterval(timer);
+  }, [album.length]);
+  const shown = album[shot] ?? album[0];
   const inner = (
     <>
-      {note.photoUrl ? (
-        <Image src={note.photoUrl} alt="" fill sizes="(max-width: 640px) 50vw, 264px" quality={65} style={{ objectFit: "cover" }} />
+      {album.length ? (
+        <span className="sx-photo-album">
+          {album.map((src) => (
+            <Image
+              key={src}
+              src={src}
+              alt=""
+              fill
+              sizes="(max-width: 640px) 50vw, 264px"
+              quality={65}
+              className={src === shown ? "is-on" : undefined}
+              style={{ objectFit: "cover" }}
+            />
+          ))}
+        </span>
       ) : (
         <span className="sx-initial">{note.name.slice(0, 1)}</span>
       )}
       {note.status ? <b className="sx-badge">{note.status}</b> : null}
+      {album.length > 1 ? (
+        <span className="sx-photo-dots" aria-hidden>
+          {album.map((src, i) => (
+            <i key={src} className={i === shot ? "is-on" : undefined} />
+          ))}
+        </span>
+      ) : null}
       <div className="sx-photo-copy">
         <h3>{note.name}</h3>
         {facts ? <p>{facts}</p> : null}

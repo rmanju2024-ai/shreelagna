@@ -45,9 +45,9 @@ describe("Likes sections", () => {
     expect(screen.getAllByText("0 profiles")).toHaveLength(3);
   });
 
-  it("previews five cards and expands on View all", () => {
+  it("previews a window of cards and expands on View all", () => {
     render(<InboxBoard received={[]} sent={many(7)} accepted={[]} history={[]} />);
-    expect(screen.getAllByRole("link", { name: /name n\d/i })).toHaveLength(5);
+    expect(screen.getAllByRole("link", { name: /name n\d/i })).toHaveLength(4);
     expect(screen.getByRole("link", { name: /view all 7 profiles/i }).getAttribute("href")).toBe("/app/interests/all?s=sent");
   });
 
@@ -57,12 +57,14 @@ describe("Likes sections", () => {
     expect(screen.queryByRole("heading", { name: "Received" })).toBeNull();
   });
 
-  it("scrolls a row with both arrows", () => {
-    render(<InboxBoard received={[]} sent={many(2)} accepted={[]} history={[]} />);
+  it("moves a row one card with the arrows", () => {
+    render(<InboxBoard received={[]} sent={many(6)} accepted={[]} history={[]} />);
+    expect(screen.getByRole("link", { name: /name n0/i })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Show more Sent profiles" }));
-    expect(scrollBy).toHaveBeenCalledWith({ left: 280, behavior: "smooth" });
+    expect(screen.queryByRole("link", { name: /name n0/i })).toBeNull();
+    expect(screen.getByRole("link", { name: /name n4/i })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Show previous Sent profiles" }));
-    expect(scrollBy).toHaveBeenCalledWith({ left: -280, behavior: "smooth" });
+    expect(screen.getByRole("link", { name: /name n0/i })).toBeTruthy();
   });
 
   it("offers Accept and Decline on received cards", () => {
