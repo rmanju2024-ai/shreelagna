@@ -2,8 +2,9 @@ import { describe, expect, it } from "vitest";
 import { ACCOUNT_GROUPS, accountInboxCounts, accountOwnerName, bannerProfileChip } from "./hub";
 
 describe("account hub", () => {
-  it("keeps every section reachable from the rail", () => {
+  it("keeps every section reachable from the board", () => {
     expect(ACCOUNT_GROUPS.map((group) => group.id)).toEqual(["journey", "inbox", "privacy", "membership"]);
+    expect(ACCOUNT_GROUPS.flatMap((group) => group.items)).toHaveLength(11);
     const hrefs = ACCOUNT_GROUPS.flatMap((group) => group.items.map((item) => item.href));
     expect(hrefs).toContain("/app");
     expect(hrefs).toContain("/app/chat");

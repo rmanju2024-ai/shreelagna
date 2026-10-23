@@ -1324,7 +1324,7 @@ html[data-scene="couple"] .app-main {
   .desk-panel, .desk-admin-block, .desk-break-card, .wc-shell,
   .browse-profile-missing, .card-premium,
   .plans-header, .plans-welcome-banner, .plans-usage, .plans-card,
-  .account-hub-head, .account-pulse, .account-hub-card, .account-hub-rail
+  .account-hub-head, .account-pulse, .account-hub-card, .account-hub-panel, .account-hub-rail
 ) {
   border-color: var(--gz-stroke);
   background-color: var(--gz-surface);
@@ -1417,7 +1417,7 @@ html[data-scene="couple"] .app-main {
 .app-main :where(
   .sx-board, .card-premium, .alert-card, .plan-card, .desk-panel, .portrait-group,
   .plans-header, .plans-welcome-banner, .plans-usage, .plans-card, .plans-msg,
-  .account-hub-head, .account-pulse, .account-hub-card, .account-hub-rail, .page-head-panel
+  .account-hub-head, .account-pulse, .account-hub-card, .account-hub-panel, .account-hub-rail, .page-head-panel
 ) {
   color: var(--theme-ink);
   background-color: var(--theme-surface);
@@ -1443,6 +1443,7 @@ html[data-scene="couple"] .app-main {
   color: #3f0e0d;
 }
 .app-main .account-hub-section h2,
+.app-main .account-hub-panel h2,
 .app-main .account-hub-section-kicker {
   width: fit-content;
   max-width: 100%;

@@ -11,7 +11,6 @@ import { unreadLabel } from "@/lib/match/chat-ui";
 import { unreadNoticeBadge } from "@/lib/notices/unread-badge";
 import { createServiceClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { cardClass } from "@/lib/ui/classes";
 import { QuotaSoftBeacon } from "@/components/quota-soft-toast";
 import { buildQuotaSoftNotice } from "@/lib/membership/quota-notice";
 
@@ -83,31 +82,39 @@ export default async function AccountHubPage() {
       <main className="account-hub sx-stage">
         <QuotaSoftBeacon onceKey="mc-quota-visit" notice={buildQuotaSoftNotice(access, quota, "visit")} />
         <AccountHubHead planMarks={planMarks} ownerName={ownerName} />
-        <div className="account-hub-content">
+        <div className="account-hub-board">
           {ACCOUNT_GROUPS.map((group) => (
-            <section id={group.id} key={group.id} className="account-hub-section">
-              <p className="account-hub-section-kicker">{group.kicker}</p>
-              <h2>
-                <FieldMark label={group.mark} />
-                {group.title}
-              </h2>
-              <div className={`account-hub-grid${"columns" in group && group.columns === 3 ? " is-trio" : ""}`}>
+            <section id={group.id} key={group.id} className="account-hub-panel">
+              <header className="account-hub-panel-head">
+                <p className="account-hub-section-kicker">{group.kicker}</p>
+                <h2>
+                  <FieldMark label={group.mark} />
+                  {group.title}
+                </h2>
+              </header>
+              <ul className="account-hub-list">
                 {group.items.map((item) => {
                   const count = inboxCounts[item.href] ?? 0;
                   const mark = unreadLabel(count);
                   return (
-                  <Link key={item.href} href={item.href} className={`${cardClass} account-hub-card`}>
-                    {mark ? <b className="account-hub-badge">{mark}</b> : null}
-                    <em className="account-hub-ico" aria-hidden>
-                      <FieldMark label={item.mark} />
-                    </em>
-                    <h3>{item.title}</h3>
-                    <p>{item.text}</p>
-                    <span>Open</span>
-                  </Link>
+                    <li key={item.href}>
+                      <Link href={item.href} className="account-hub-row">
+                        <em className="account-hub-ico" aria-hidden>
+                          <FieldMark label={item.mark} />
+                        </em>
+                        <span className="account-hub-row-copy">
+                          <strong>{item.title}</strong>
+                          <small>{item.text}</small>
+                        </span>
+                        {mark ? <b className="account-hub-badge">{mark}</b> : null}
+                        <span className="account-hub-go" aria-hidden>
+                          →
+                        </span>
+                      </Link>
+                    </li>
                   );
                 })}
-              </div>
+              </ul>
             </section>
           ))}
         </div>
