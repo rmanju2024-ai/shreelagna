@@ -321,7 +321,7 @@ export function BrowseClient({
             ) : null}
           </section>
         ) : (
-          <div className="sx-feed">
+          <div className="sx-feed is-board">
             {PREVIEW_VIEWS.map((item) => (
               <CategoryRow
                 key={item.id}

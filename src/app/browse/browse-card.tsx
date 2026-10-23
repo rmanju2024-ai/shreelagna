@@ -1,11 +1,18 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+
+export const BROWSE_PHOTO_ROTATE_MS = 10_000;
+export const FEATURED_MATCH_FLOOR = 80;
 
 export type BrowseCardNote = {
   id: string;
   href: string;
   name: string;
   photoUrl?: string | null;
+  photoUrls?: string[] | null;
   lastOnline?: string | null;
   age?: string | null;
   height?: string | null;
@@ -25,6 +32,7 @@ export type BrowseCardNote = {
   created_at?: string | null;
   last_seen_at?: string | null;
   subscribed?: boolean;
+  complete?: boolean;
   staff?: {
     memberCode: string | null;
     completePct: number;
@@ -36,6 +44,20 @@ export type BrowseCardNote = {
     income: string | null;
   };
 };
+
+export function browseCardAlbum(note: BrowseCardNote): string[] {
+  const urls = (note.photoUrls ?? []).filter(Boolean);
+  if (urls.length) return [...new Set(urls)].slice(0, 3);
+  return note.photoUrl ? [note.photoUrl] : [];
+}
+
+/** Soft highlight only — never a filter or gate. */
+export function isFeaturedBrowseCard(note: BrowseCardNote): boolean {
+  if (note.staff) return false;
+  if (note.subscribed || note.complete) return true;
+  const percent = note.matchPercent ?? matchPercent(note.score);
+  return percent != null && percent >= FEATURED_MATCH_FLOOR;
+}
 
 function chips(note: BrowseCardNote): string[] {
   const kind = note.profile_type === "vara" ? "Groom" : note.profile_type === "vadhu" ? "Bride" : "";
@@ -53,38 +75,81 @@ function matchPercent(score?: string | null): number | null {
   return Math.max(1, Math.min(100, Math.round((Number(match[1]) / Number(match[2])) * 100)));
 }
 
-export function BrowseCard({ note, priority = false }: { note: BrowseCardNote; priority?: boolean }) {
-  const percent = note.matchPercent ?? matchPercent(note.score);
-  const place = [note.city, note.state].filter(Boolean).join(", ");
+function CardPhoto({
+  note,
+  priority,
+  percent,
+  featured,
+}: {
+  note: BrowseCardNote;
+  priority: boolean;
+  percent: number | null;
+  featured: boolean;
+}) {
+  const album = browseCardAlbum(note);
+  const [index, setIndex] = useState(0);
+  useEffect(() => {
+    if (album.length < 2) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return;
+    const timer = window.setInterval(() => {
+      setIndex((current) => (current + 1) % album.length);
+    }, BROWSE_PHOTO_ROTATE_MS);
+    return () => window.clearInterval(timer);
+  }, [album.length]);
+  const shown = album[index] ?? album[0];
   const facts = [note.age, note.height].filter(Boolean).join(" · ");
   return (
-    <li className={`sx-card${note.staff ? " is-staff" : ""}`}>
-      <Link href={note.href} className="sx-card-link" prefetch={false}>
-        <div className="sx-photo">
-          {note.photoUrl ? (
+    <div className="sx-photo">
+      {album.length ? (
+        <span className="sx-photo-album">
+          {album.map((src, i) => (
             <Image
-              src={note.photoUrl}
+              key={src}
+              src={src}
               alt=""
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1100px) 33vw, 264px"
               quality={70}
-              priority={priority}
+              priority={priority && i === 0}
+              className={src === shown ? "is-on" : undefined}
             />
-          ) : (
-            <span className="sx-initial">{note.name.slice(0, 1)}</span>
-          )}
-          {percent != null ? (
-            <b className="sx-badge">{percent}% match</b>
-          ) : note.staff ? (
-            <b className="sx-badge">{note.staff.completePct}% profile</b>
-          ) : note.score ? (
-            <b className="sx-badge">{note.score}</b>
-          ) : null}
-          <div className="sx-photo-copy">
-            <h3>{note.name}</h3>
-            {facts ? <p>{facts}</p> : null}
-          </div>
-        </div>
+          ))}
+        </span>
+      ) : (
+        <span className="sx-initial">{note.name.slice(0, 1)}</span>
+      )}
+      {percent != null ? (
+        <b className="sx-badge">{percent}% match</b>
+      ) : note.staff ? (
+        <b className="sx-badge">{note.staff.completePct}% profile</b>
+      ) : note.score ? (
+        <b className="sx-badge">{note.score}</b>
+      ) : null}
+      {featured ? <em className="sx-featured">Featured</em> : null}
+      {album.length > 1 ? (
+        <span className="sx-photo-dots" aria-hidden>
+          {album.map((src, i) => (
+            <i key={src} className={i === index ? "is-on" : undefined} />
+          ))}
+        </span>
+      ) : null}
+      <div className="sx-photo-copy">
+        <h3>{note.name}</h3>
+        {facts ? <p>{facts}</p> : null}
+      </div>
+    </div>
+  );
+}
+
+export function BrowseCard({ note, priority = false }: { note: BrowseCardNote; priority?: boolean }) {
+  const percent = note.matchPercent ?? matchPercent(note.score);
+  const place = [note.city, note.state].filter(Boolean).join(", ");
+  const featured = isFeaturedBrowseCard(note);
+  return (
+    <li className={`sx-card${note.staff ? " is-staff" : ""}${featured ? " is-featured" : ""}`}>
+      <Link href={note.href} className="sx-card-link" prefetch={false}>
+        <CardPhoto note={note} priority={priority} percent={percent} featured={featured} />
         <div className="sx-body">
           {place ? <p className="sx-place">{place}</p> : null}
           <ul className="sx-tags">

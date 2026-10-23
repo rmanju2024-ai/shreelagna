@@ -21,6 +21,7 @@ import {
   BROWSE_PROFILE_SELECT,
   BROWSE_PROFILE_SELECT_STAR,
   loadBrowsePhotoMap,
+  loadBrowsePhotoLists,
 } from "@/lib/match/browse-query";
 import {
   activityTier,
@@ -56,7 +57,13 @@ function asText(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value : null;
 }
 
-function cardFromRow(row: Record<string, unknown>, photoMap: Map<string, string>, now: number): BrowseCardNote {
+function cardFromRow(
+  row: Record<string, unknown>,
+  photoMap: Map<string, string>,
+  photoLists: Map<string, string[]>,
+  now: number,
+  paid: boolean,
+): BrowseCardNote {
   const community = nestedName(row.communities);
   const age = typeof row.date_of_birth === "string" ? yearsFromDob(row.date_of_birth) : null;
   const height = typeof row.height_cm === "number" ? formatHeightImperial(row.height_cm) : null;
@@ -64,7 +71,8 @@ function cardFromRow(row: Record<string, unknown>, photoMap: Map<string, string>
     id: String(row.id),
     href: profileOpenHref(String(row.id), "discover"),
     name: displayFirstName(typeof row.subject_full_name === "string" ? row.subject_full_name : "Profile"),
-    photoUrl: publicMediaUrl(photoMap.get(String(row.id))),
+    photoUrl: publicMediaUrl(photoMap.get(String(row.id)) ?? photoLists.get(String(row.id))?.[0]),
+    photoUrls: (photoLists.get(String(row.id)) ?? []).map((path) => publicMediaUrl(path)).filter((url): url is string => Boolean(url)),
     lastOnline: inboxLastOnline(
       Boolean(row.hide_last_seen),
       typeof row.last_seen_at === "string" ? row.last_seen_at : null,
@@ -85,6 +93,8 @@ function cardFromRow(row: Record<string, unknown>, photoMap: Map<string, string>
     profile_type: asText(row.profile_type),
     income_band: asText(row.income_band),
     created_at: asText(row.created_at),
+    subscribed: paid,
+    complete: row.is_complete === true,
     score: null,
   };
 }
@@ -306,6 +316,14 @@ export async function BrowsePage({
                 mediaClient,
                 listed.map((row) => String(row.id)),
               );
+          const photoLists = await loadBrowsePhotoLists(
+            mediaClient,
+            listed.map((row) => String(row.id)),
+          );
+          for (const [id, path] of photoMap) {
+            const current = photoLists.get(id) ?? [];
+            if (path && !current.includes(path)) photoLists.set(id, [path, ...current].slice(0, 3));
+          }
           const now = Date.now();
           const mySelf = matchSelfFromProfile(mine, {
             religion: nestedName(mine.religions),
@@ -319,7 +337,13 @@ export async function BrowsePage({
               religion: nestedName(row.religions),
               community,
             });
-            const card = cardFromRow(row, photoMap, now);
+            const card = cardFromRow(
+              row,
+              photoMap,
+              photoLists,
+              now,
+              isSubscribedRow(row) || paidOwners.has(String(row.created_by)),
+            );
             // One overall match % per profile (both directions), identical in every category.
             const mutual =
               preferencePoints(mine, theirSelf) + preferencePoints(row, mySelf);

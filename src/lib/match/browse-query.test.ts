@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { loadBrowsePhotoMap } from "./browse-query";
+import { loadBrowsePhotoLists, loadBrowsePhotoMap } from "./browse-query";
 
 function mediaDb(rows: Record<string, { path: string; primary?: boolean }[]>) {
   return {
@@ -9,15 +9,18 @@ function mediaDb(rows: Record<string, { path: string; primary?: boolean }[]>) {
           if (value === "photo" || value === true) {
             return {
               eq: () => ({
-                in: (_c: string, ids: string[]) =>
-                  Promise.resolve({
-                    data: ids.flatMap((id) =>
-                      (rows[id] ?? [])
-                        .filter((row) => row.primary)
-                        .map((row) => ({ profile_id: id, storage_path: row.path, is_primary: true })),
-                    ),
-                    error: null,
-                  }),
+                in: (_c: string, ids: string[]) => {
+                  const data = ids.flatMap((id) =>
+                    (rows[id] ?? []).map((row) => ({
+                      profile_id: id,
+                      storage_path: row.path,
+                      is_primary: Boolean(row.primary),
+                    })),
+                  );
+                  return Object.assign(Promise.resolve({ data, error: null }), {
+                    order: () => Promise.resolve({ data, error: null }),
+                  });
+                },
               }),
               in: (_c: string, ids: string[]) => {
                 const data = ids.flatMap((id) =>
@@ -55,5 +58,19 @@ describe("loadBrowsePhotoMap", () => {
     );
     expect(map.get("a")).toBe("a2.jpg");
     expect(map.get("b")).toBe("b1.jpg");
+  });
+});
+
+describe("loadBrowsePhotoLists", () => {
+  it("keeps primary first and at most three photos", async () => {
+    const lists = await loadBrowsePhotoLists(
+      mediaDb({
+        a: [{ path: "a1.jpg" }, { path: "a2.jpg", primary: true }, { path: "a3.jpg" }, { path: "a4.jpg" }],
+        b: [{ path: "b1.jpg" }],
+      }),
+      ["a", "b"],
+    );
+    expect(lists.get("a")).toEqual(["a2.jpg", "a1.jpg", "a3.jpg"]);
+    expect(lists.get("b")).toEqual(["b1.jpg"]);
   });
 });

@@ -115,3 +115,62 @@ export async function loadBrowsePhotoMap(db: unknown, ids: string[]): Promise<Ma
     ...rest,
   ]);
 }
+
+const PHOTO_ALBUM_MAX = 3;
+
+/** Up to three approved photos per profile, primary first. Extra photos are optional. */
+export async function loadBrowsePhotoLists(db: unknown, ids: string[]): Promise<Map<string, string[]>> {
+  const lists = new Map<string, string[]>();
+  if (!ids.length) return lists;
+  type MediaQuery = {
+    from: (table: string) => {
+      select: (cols: string) => {
+        eq: (col: string, value: string) => {
+          eq: (col: string, value: string) => {
+            in: (
+              col: string,
+              values: string[],
+            ) => {
+              order: (
+                col: string,
+                opts: { ascending: boolean },
+              ) => Promise<{ data: PhotoRow[] | null; error: unknown }>;
+            };
+          };
+          in: (
+            col: string,
+            values: string[],
+          ) => {
+            order: (
+              col: string,
+              opts: { ascending: boolean },
+            ) => Promise<{ data: PhotoRow[] | null; error: unknown }>;
+          };
+        };
+      };
+    };
+  };
+  const client = db as MediaQuery;
+  const photos = (kind: "approved" | "any") => {
+    const base = client.from("media").select("profile_id, storage_path, is_primary").eq("kind", "photo");
+    return kind === "approved"
+      ? base.eq("status", "approved").in("profile_id", ids).order("is_primary", { ascending: false })
+      : base.in("profile_id", ids).order("is_primary", { ascending: false });
+  };
+  const approved = await photos("approved");
+  const rows = approved.error ? ((await photos("any")).data ?? []) : (approved.data ?? []);
+  for (const row of rows) {
+    const id = String(row.profile_id ?? "");
+    const path = typeof row.storage_path === "string" ? row.storage_path : "";
+    if (!id || !path) continue;
+    const list = lists.get(id) ?? [];
+    if (list.includes(path) || list.length >= PHOTO_ALBUM_MAX) {
+      lists.set(id, list);
+      continue;
+    }
+    if (row.is_primary) list.unshift(path);
+    else list.push(path);
+    lists.set(id, list.slice(0, PHOTO_ALBUM_MAX));
+  }
+  return lists;
+}
