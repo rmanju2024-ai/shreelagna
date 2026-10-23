@@ -3,7 +3,13 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import type { ComponentProps } from "react";
-import { BrowseClient, DISCOVER_PREVIEW_LIMIT, discoverResultsHref, discoverRowStart } from "./browse-client";
+import {
+  BrowseClient,
+  DISCOVER_CARD_STRIDE_REM,
+  DISCOVER_PREVIEW_LIMIT,
+  discoverResultsHref,
+  discoverRowStart,
+} from "./browse-client";
 import { EMPTY_BROWSE_FILTERS } from "@/lib/match/browse-filters";
 import type { BrowseView } from "@/lib/match/browse-match";
 import type { BrowseCardNote } from "./browse-card";
@@ -100,7 +106,7 @@ describe("Discover feed", () => {
     expect(track?.getAttribute("data-start")).toBe("0");
     fireEvent.click(screen.getByRole("button", { name: "Show more Smart picks profiles" }));
     expect(track?.getAttribute("data-start")).toBe("1");
-    expect((track as HTMLElement | null)?.style.getPropertyValue("--sx-start")).toBe("1");
+    expect((track as HTMLElement | null)?.style.marginLeft).toBe(`-${DISCOVER_CARD_STRIDE_REM}rem`);
     fireEvent.click(screen.getByRole("button", { name: "Show previous Smart picks profiles" }));
     expect(track?.getAttribute("data-start")).toBe("0");
   });

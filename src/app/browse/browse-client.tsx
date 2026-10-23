@@ -39,6 +39,8 @@ const PREVIEW_VIEWS = ALL_VIEWS.filter((item) => item.id !== "custom");
 export const DISCOVER_PREVIEW_LIMIT = 5;
 export const DISCOVER_RESULTS_PAGE_SIZE = 10;
 export const ADVANCED_FILTER_HREF = "/browse/filter";
+export const DISCOVER_CARD_STRIDE_REM = 10.02;
+
 export function discoverRowStart(current: number, delta: number, count: number, visible = 1) {
   const max = Math.max(0, count - Math.max(1, visible));
   return Math.min(max, Math.max(0, current + delta));
@@ -94,7 +96,17 @@ function RowArrow({
   onClick: () => void;
 }) {
   return (
-    <button type="button" className={`sx-row-arrow is-${direction}`} aria-label={label} onClick={onClick}>
+    <button
+      type="button"
+      className={`sx-row-arrow is-${direction}`}
+      aria-label={label}
+      onPointerDown={(event) => event.stopPropagation()}
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        onClick();
+      }}
+    >
       {direction === "left" ? "‹" : "›"}
     </button>
   );
@@ -158,7 +170,7 @@ function CategoryRow({
             <ul
               className="sx-row"
               data-start={String(start)}
-              style={{ ["--sx-start" as string]: String(start) }}
+              style={{ marginLeft: `${-start * DISCOVER_CARD_STRIDE_REM}rem` }}
             >
               {preview.map((note, index) => (
                 <BrowseCard key={`${item.id}-${note.id}`} note={note} priority={item.id === "smart" && index < 3} />
