@@ -780,7 +780,9 @@ table { max-width: 100%; }
   background-color: #efeae2;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23d9d2c5' stroke-width='1.2' opacity='.7'%3E%3Ccircle cx='20' cy='22' r='6'/%3E%3Cpath d='M60 18l8 8-8 8-8-8z'/%3E%3Cpath d='M96 20c6-6 12 0 6 8s-12 2-6-8z'/%3E%3Cpath d='M22 74l10 4-4 10z'/%3E%3Ccircle cx='70' cy='78' r='4'/%3E%3Cpath d='M98 82h14M105 75v14'/%3E%3Cpath d='M30 108q8-8 16 0'/%3E%3C/g%3E%3C/svg%3E");
 }
-.wc-pane .wa-stream { display: flex; flex-direction: column; gap: 0.25rem; }
+.wc-pane .wa-stream { display: flex; flex-direction: column; gap: 0.25rem; overflow: visible; }
+.wc-pane .wa-bubble.is-open { z-index: 12; }
+.wc-pane .wa-msg-menu { right: calc(100% + 0.45rem); left: auto; top: 0; min-width: 8.8rem; }
 .wc-pane .wa-bubble {
   position: relative; width: fit-content; max-width: min(75%, 34rem); padding: 0.4rem 0.6rem 0.25rem; border: 0;
   border-radius: 0.5rem; box-shadow: 0 1px 0.5px rgb(11 20 26 / 13%); color: #111b21; animation: wa-in 0.18s ease both;

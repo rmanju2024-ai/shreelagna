@@ -8338,18 +8338,20 @@ a.inbox-name.inbox-open:focus-visible {
   border-bottom-left-radius: 0.18rem;
 }
 .wa-bubble.is-mine { position: relative; padding-right: 1.6rem; }
-.wa-msg-tools { position: absolute; top: 0.15rem; right: 0.15rem; z-index: 2; }
+.wa-bubble.is-open { z-index: 12; }
+.wa-msg-tools { position: absolute; top: 0.1rem; right: 0.1rem; z-index: 2; }
 .wa-msg-more {
   width: 1.35rem; height: 1.35rem; border: 0; border-radius: 999px; cursor: pointer;
   background: rgb(255 255 255 / 70%); color: #54656f; font-size: 0.95rem; line-height: 1;
 }
 .wa-msg-menu {
-  position: absolute; top: 1.45rem; right: 0; min-width: 7.5rem; display: grid;
-  background: #fff; border-radius: 0.7rem; box-shadow: 0 10px 24px -12px rgb(11 20 26 / 40%);
-  overflow: hidden; z-index: 5;
+  position: absolute; top: 0; right: calc(100% + 0.4rem); min-width: 8.8rem; display: grid;
+  background: #fff; border: 1px solid rgb(11 20 26 / 8%); border-radius: 0.7rem;
+  box-shadow: 0 12px 28px -10px rgb(11 20 26 / 45%); overflow: visible; z-index: 20;
 }
 .wa-msg-menu button {
-  border: 0; background: #fff; text-align: left; padding: 0.55rem 0.75rem; font: inherit; cursor: pointer;
+  border: 0; background: #fff; text-align: left; padding: 0.6rem 0.85rem; font: inherit; cursor: pointer;
+  white-space: nowrap; width: 100%;
 }
 .wa-msg-menu button:hover { background: #f0f2f5; }
 .wa-msg-menu .is-danger { color: #b42318; }

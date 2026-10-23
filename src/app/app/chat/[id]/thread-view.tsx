@@ -126,7 +126,7 @@ export function ThreadView({
               <li
                 key={msg.id}
                 ref={index === shown.length - 1 ? endRef : undefined}
-                className={`wa-bubble ${mine ? "is-mine" : "is-theirs"}${gone ? " is-deleted" : ""}`}
+                className={`wa-bubble ${mine ? "is-mine" : "is-theirs"}${gone ? " is-deleted" : ""}${menuId === msg.id ? " is-open" : ""}`}
               >
                 {mine && !msg.pending && !gone ? (
                   <div className="wa-msg-tools">
