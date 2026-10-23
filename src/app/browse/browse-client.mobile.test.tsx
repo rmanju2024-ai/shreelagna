@@ -61,11 +61,11 @@ afterEach(cleanup);
 
 describe("discoverRowStart", () => {
   it("steps one card and stops at the last full window", () => {
-    expect(discoverRowStart(0, 1, 11, 4)).toBe(1);
-    expect(discoverRowStart(6, 1, 11, 4)).toBe(7);
-    expect(discoverRowStart(7, 1, 11, 4)).toBe(7);
-    expect(discoverRowStart(1, -1, 11, 4)).toBe(0);
-    expect(discoverRowStart(0, -1, 11, 4)).toBe(0);
+    expect(discoverRowStart(0, 1, 11)).toBe(1);
+    expect(discoverRowStart(9, 1, 11)).toBe(10);
+    expect(discoverRowStart(10, 1, 11)).toBe(10);
+    expect(discoverRowStart(1, -1, 11)).toBe(0);
+    expect(discoverRowStart(0, -1, 11)).toBe(0);
   });
 });
 
@@ -100,6 +100,7 @@ describe("Discover feed", () => {
     expect(track?.getAttribute("data-start")).toBe("0");
     fireEvent.click(screen.getByRole("button", { name: "Show more Smart picks profiles" }));
     expect(track?.getAttribute("data-start")).toBe("1");
+    expect((track as HTMLElement | null)?.style.getPropertyValue("--sx-start")).toBe("1");
     fireEvent.click(screen.getByRole("button", { name: "Show previous Smart picks profiles" }));
     expect(track?.getAttribute("data-start")).toBe("0");
   });

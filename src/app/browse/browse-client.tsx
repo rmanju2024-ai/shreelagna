@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { BrowseCard, type BrowseCardNote } from "@/app/browse/browse-card";
 import { BrowseFilterDesk } from "@/app/browse/browse-filter-desk";
 import { EMPTY_BROWSE_FILTERS, profileFitsBrowse, type BrowseFilters } from "@/lib/match/browse-filters";
@@ -39,9 +39,7 @@ const PREVIEW_VIEWS = ALL_VIEWS.filter((item) => item.id !== "custom");
 export const DISCOVER_PREVIEW_LIMIT = 5;
 export const DISCOVER_RESULTS_PAGE_SIZE = 10;
 export const ADVANCED_FILTER_HREF = "/browse/filter";
-export const DISCOVER_ROW_VISIBLE = 4;
-
-export function discoverRowStart(current: number, delta: number, count: number, visible: number) {
+export function discoverRowStart(current: number, delta: number, count: number, visible = 1) {
   const max = Math.max(0, count - Math.max(1, visible));
   return Math.min(max, Math.max(0, current + delta));
 }
@@ -138,36 +136,9 @@ function CategoryRow({
   count: number;
   gate?: string;
 }) {
-  const clip = useRef<HTMLDivElement>(null);
-  const track = useRef<HTMLUListElement>(null);
   const [start, setStart] = useState(0);
-  const [visible, setVisible] = useState(DISCOVER_ROW_VISIBLE);
-  const [stride, setStride] = useState(0);
   const preview = notes;
-
-  useLayoutEffect(() => {
-    const box = clip.current;
-    const row = track.current;
-    if (!box || !row) return;
-    const measure = () => {
-      const card = row.querySelector(".sx-card");
-      if (!(card instanceof HTMLElement) || !card.offsetWidth) return;
-      const styles = getComputedStyle(row);
-      const gap = Number.parseFloat(styles.columnGap || styles.gap) || 0;
-      const nextStride = card.offsetWidth + gap;
-      const nextVisible = Math.max(1, Math.floor((box.clientWidth + gap) / nextStride));
-      setStride(nextStride);
-      setVisible(nextVisible);
-      setStart((current) => discoverRowStart(current, 0, preview.length, nextVisible));
-    };
-    measure();
-    if (typeof ResizeObserver === "undefined") return;
-    const observer = new ResizeObserver(measure);
-    observer.observe(box);
-    return () => observer.disconnect();
-  }, [preview.length]);
-
-  const canSlide = preview.length > visible;
+  const canSlide = preview.length > 1;
   return (
     <section className="sx-feed-row" aria-labelledby={`discover-${item.id}`}>
       <header className="sx-feed-head">
@@ -180,15 +151,14 @@ function CategoryRow({
             <RowArrow
               label={`Show previous ${item.label} profiles`}
               direction="left"
-              onClick={() => setStart((current) => discoverRowStart(current, -1, preview.length, visible))}
+              onClick={() => setStart((current) => discoverRowStart(current, -1, preview.length))}
             />
           ) : null}
-          <div className="sx-row-clip" ref={clip}>
+          <div className="sx-row-clip">
             <ul
               className="sx-row"
-              ref={track}
               data-start={String(start)}
-              style={stride ? { transform: `translate3d(${-start * stride}px, 0, 0)` } : undefined}
+              style={{ ["--sx-start" as string]: String(start) }}
             >
               {preview.map((note, index) => (
                 <BrowseCard key={`${item.id}-${note.id}`} note={note} priority={item.id === "smart" && index < 3} />
@@ -199,7 +169,7 @@ function CategoryRow({
             <RowArrow
               label={`Show more ${item.label} profiles`}
               direction="right"
-              onClick={() => setStart((current) => discoverRowStart(current, 1, preview.length, visible))}
+              onClick={() => setStart((current) => discoverRowStart(current, 1, preview.length))}
             />
           ) : null}
         </div>

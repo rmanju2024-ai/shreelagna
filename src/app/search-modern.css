@@ -109,18 +109,23 @@
 .sx-star.is-c { bottom: 0.32rem; left: 0.7rem; font-size: 0.58rem; animation-delay: 2.8s; }
 @keyframes sx-sheen { 0%, 55% { transform: translateX(-120%); } 100% { transform: translateX(140%); } }
 @keyframes sx-shine { 0%, 100% { opacity: 0.25; transform: scale(0.85); } 50% { opacity: 1; transform: scale(1.15); } }
-.sx-row-shell { position: relative; min-width: 0; }
+.sx-row-shell { position: relative; min-width: 0; overflow: hidden; }
 .sx-row-clip {
-  min-width: 0; overflow: hidden; touch-action: pan-y; overscroll-behavior-x: none;
+  width: 100%; min-width: 0; overflow: hidden; touch-action: pan-y; overscroll-behavior-x: none;
   margin-inline: 1.55rem;
 }
 .sx-feed .sx-row {
+  --sx-start: 0;
+  --sx-card: 9.6rem;
+  --sx-gap: 0.65rem;
   list-style: none; margin: 0; padding: 0.1rem 0 0.25rem;
-  display: flex; flex-flow: row nowrap; align-items: stretch; width: max-content;
-  gap: 0.65rem; overflow: visible; scroll-snap-type: none;
-  transition: transform 0.28s ease;
+  display: flex; flex-flow: row nowrap; align-items: stretch; width: max-content; max-width: none;
+  gap: var(--sx-gap); overflow: visible; scroll-snap-type: none;
+  transform: translate3d(calc(var(--sx-start) * -1 * (var(--sx-card) + var(--sx-gap))), 0, 0);
+  transition: transform 0.35s ease;
+  will-change: transform;
 }
-.sx-feed .sx-row .sx-card { flex: 0 0 9.6rem; width: 9.6rem; }
+.sx-feed .sx-row .sx-card { flex: 0 0 var(--sx-card); width: var(--sx-card); }
 .sx-row {
   list-style: none; margin: 0; padding: 0.1rem 2rem 0.25rem;
   display: grid; grid-auto-flow: column; grid-auto-columns: minmax(11.4rem, 12.2rem);
@@ -278,8 +283,7 @@
     display: grid;
     align-content: center;
   }
-  .sx-feed.is-board .sx-row { gap: 0.42rem; padding: 0.05rem 0 0.1rem; }
-  .sx-feed.is-board .sx-row .sx-card { flex-basis: 9.6rem; width: 9.6rem; }
+  .sx-feed.is-board .sx-row { --sx-gap: 0.42rem; --sx-card: 9.6rem; padding: 0.05rem 0 0.1rem; }
   .sx-feed.is-board .sx-view-all-center { display: flex; align-items: center; justify-content: center; min-height: 1.9rem; margin: 0; }
   .sx-feed.is-board .sx-view-all { padding: 0.35rem 0.7rem; font-size: 0.72rem; }
   .sx-feed.is-board .sx-row .sx-why-match { display: none; }
