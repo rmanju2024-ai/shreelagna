@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useRef, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { BrowseCard, type BrowseCardNote } from "@/app/browse/browse-card";
 import { BrowseFilterDesk } from "@/app/browse/browse-filter-desk";
 import { EMPTY_BROWSE_FILTERS, profileFitsBrowse, type BrowseFilters } from "@/lib/match/browse-filters";
@@ -39,6 +39,12 @@ const PREVIEW_VIEWS = ALL_VIEWS.filter((item) => item.id !== "custom");
 export const DISCOVER_PREVIEW_LIMIT = 5;
 export const DISCOVER_RESULTS_PAGE_SIZE = 10;
 export const ADVANCED_FILTER_HREF = "/browse/filter";
+export const DISCOVER_ROW_VISIBLE = 4;
+
+export function discoverRowStart(current: number, delta: number, count: number, visible: number) {
+  const max = Math.max(0, count - Math.max(1, visible));
+  return Math.min(max, Math.max(0, current + delta));
+}
 
 function fitsCustom(note: BrowseCardNote, filters: BrowseFilters): boolean {
   return profileFitsBrowse(
@@ -132,8 +138,36 @@ function CategoryRow({
   count: number;
   gate?: string;
 }) {
-  const scroller = useRef<HTMLUListElement>(null);
-  const preview = notes.slice(0, DISCOVER_PREVIEW_LIMIT);
+  const clip = useRef<HTMLDivElement>(null);
+  const track = useRef<HTMLUListElement>(null);
+  const [start, setStart] = useState(0);
+  const [visible, setVisible] = useState(DISCOVER_ROW_VISIBLE);
+  const [stride, setStride] = useState(0);
+  const preview = notes;
+
+  useLayoutEffect(() => {
+    const box = clip.current;
+    const row = track.current;
+    if (!box || !row) return;
+    const measure = () => {
+      const card = row.querySelector(".sx-card");
+      if (!(card instanceof HTMLElement) || !card.offsetWidth) return;
+      const styles = getComputedStyle(row);
+      const gap = Number.parseFloat(styles.columnGap || styles.gap) || 0;
+      const nextStride = card.offsetWidth + gap;
+      const nextVisible = Math.max(1, Math.floor((box.clientWidth + gap) / nextStride));
+      setStride(nextStride);
+      setVisible(nextVisible);
+      setStart((current) => discoverRowStart(current, 0, preview.length, nextVisible));
+    };
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(box);
+    return () => observer.disconnect();
+  }, [preview.length]);
+
+  const canSlide = preview.length > visible;
   return (
     <section className="sx-feed-row" aria-labelledby={`discover-${item.id}`}>
       <header className="sx-feed-head">
@@ -142,34 +176,47 @@ function CategoryRow({
       {gate && preview.length ? <p className="sx-note">{gate}</p> : null}
       {preview.length ? (
         <div className="sx-row-shell">
-          <RowArrow
-            label={`Show previous ${item.label} profiles`}
-            direction="left"
-            onClick={() => scroller.current?.scrollBy({ left: -280, behavior: "smooth" })}
-          />
-          <ul className="sx-row" ref={scroller}>
-            {preview.map((note, index) => (
-              <BrowseCard key={`${item.id}-${note.id}`} note={note} priority={item.id === "smart" && index < 3} />
-            ))}
-          </ul>
-          <RowArrow
-            label={`Show more ${item.label} profiles`}
-            direction="right"
-            onClick={() => scroller.current?.scrollBy({ left: 280, behavior: "smooth" })}
-          />
+          {canSlide ? (
+            <RowArrow
+              label={`Show previous ${item.label} profiles`}
+              direction="left"
+              onClick={() => setStart((current) => discoverRowStart(current, -1, preview.length, visible))}
+            />
+          ) : null}
+          <div className="sx-row-clip" ref={clip}>
+            <ul
+              className="sx-row"
+              ref={track}
+              data-start={String(start)}
+              style={stride ? { transform: `translate3d(${-start * stride}px, 0, 0)` } : undefined}
+            >
+              {preview.map((note, index) => (
+                <BrowseCard key={`${item.id}-${note.id}`} note={note} priority={item.id === "smart" && index < 3} />
+              ))}
+            </ul>
+          </div>
+          {canSlide ? (
+            <RowArrow
+              label={`Show more ${item.label} profiles`}
+              direction="right"
+              onClick={() => setStart((current) => discoverRowStart(current, 1, preview.length, visible))}
+            />
+          ) : null}
         </div>
       ) : (
         <div className="sx-empty is-compact">
           <h3>{gate || item.empty}</h3>
         </div>
       )}
-      {count > DISCOVER_PREVIEW_LIMIT ? (
-        <div className="sx-view-all-center">
+      <div className="sx-view-all-center">
+        {count > DISCOVER_PREVIEW_LIMIT ? (
           <a className="sx-view-all" href={discoverResultsHref(item.id)}>
             View all {count} profiles <span aria-hidden>→</span>
           </a>
-        </div>
-      ) : null}
+        ) : (
+          <span className="sx-view-all-slot" aria-hidden />
+        )}
+      </div>
     </section>
   );
 }

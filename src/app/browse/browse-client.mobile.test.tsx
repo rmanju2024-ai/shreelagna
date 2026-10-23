@@ -1,15 +1,14 @@
 // @vitest-environment jsdom
 
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import type { ComponentProps } from "react";
-import { BrowseClient, DISCOVER_PREVIEW_LIMIT, discoverResultsHref } from "./browse-client";
+import { BrowseClient, DISCOVER_PREVIEW_LIMIT, discoverResultsHref, discoverRowStart } from "./browse-client";
 import { EMPTY_BROWSE_FILTERS } from "@/lib/match/browse-filters";
 import type { BrowseView } from "@/lib/match/browse-match";
 import type { BrowseCardNote } from "./browse-card";
 import type { BrowseScoreRow } from "@/lib/match/browse-match";
 
-const scrollBy = vi.fn();
 
 function emptyLists(): Record<BrowseView, BrowseScoreRow[]> {
   return {
@@ -60,9 +59,14 @@ function show(extra: Partial<ComponentProps<typeof BrowseClient>> = {}) {
 
 afterEach(cleanup);
 
-beforeEach(() => {
-  scrollBy.mockClear();
-  Object.defineProperty(HTMLElement.prototype, "scrollBy", { configurable: true, value: scrollBy });
+describe("discoverRowStart", () => {
+  it("steps one card and stops at the last full window", () => {
+    expect(discoverRowStart(0, 1, 11, 4)).toBe(1);
+    expect(discoverRowStart(6, 1, 11, 4)).toBe(7);
+    expect(discoverRowStart(7, 1, 11, 4)).toBe(7);
+    expect(discoverRowStart(1, -1, 11, 4)).toBe(0);
+    expect(discoverRowStart(0, -1, 11, 4)).toBe(0);
+  });
 });
 
 describe("discoverResultsHref", () => {
@@ -89,19 +93,21 @@ describe("Discover feed", () => {
     expect(screen.getAllByText("The introductions we’d put first")).toHaveLength(1);
   });
 
-  it("scrolls a category row with both arrows", () => {
-    const { catalog, rows } = makeProfiles(2);
+  it("moves a category row one card with the arrows", () => {
+    const { catalog, rows } = makeProfiles(6);
     show({ catalog, lists: { ...emptyLists(), smart: rows } });
+    const track = document.querySelector(".sx-row");
+    expect(track?.getAttribute("data-start")).toBe("0");
     fireEvent.click(screen.getByRole("button", { name: "Show more Smart picks profiles" }));
-    expect(scrollBy).toHaveBeenCalledWith({ left: 280, behavior: "smooth" });
+    expect(track?.getAttribute("data-start")).toBe("1");
     fireEvent.click(screen.getByRole("button", { name: "Show previous Smart picks profiles" }));
-    expect(scrollBy).toHaveBeenCalledWith({ left: -280, behavior: "smooth" });
+    expect(track?.getAttribute("data-start")).toBe("0");
   });
 
-  it("previews five cards and links View all to that category", () => {
+  it("keeps the row cards and links View all to that category", () => {
     const { catalog, rows } = makeProfiles(DISCOVER_PREVIEW_LIMIT + 2);
     show({ catalog, lists: { ...emptyLists(), smart: rows } });
-    expect(screen.getAllByRole("link", { name: /name \d/i })).toHaveLength(DISCOVER_PREVIEW_LIMIT);
+    expect(screen.getAllByRole("link", { name: /name \d/i })).toHaveLength(DISCOVER_PREVIEW_LIMIT + 2);
     const viewAll = screen.getByRole("link", { name: /view all 7 profiles/i });
     expect(viewAll.getAttribute("href")).toBe("/browse/results?view=smart");
   });
