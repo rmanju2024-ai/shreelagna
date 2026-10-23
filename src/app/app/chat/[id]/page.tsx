@@ -63,10 +63,20 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
       .maybeSingle(),
     supabase
       .from("messages")
-      .select("id, sender_profile_id, body, created_at, read_at")
+      .select("id, sender_profile_id, body, created_at, read_at, edited_at, deleted_at")
       .eq("thread_id", id)
       .order("created_at", { ascending: false })
-      .limit(100),
+      .limit(100)
+      .then((first) =>
+        first.error
+          ? supabase
+              .from("messages")
+              .select("id, sender_profile_id, body, created_at, read_at")
+              .eq("thread_id", id)
+              .order("created_at", { ascending: false })
+              .limit(100)
+          : first,
+      ),
     db
       .from("media")
       .select("storage_path, is_primary")
@@ -127,11 +137,13 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
           threadId={id}
           myProfileId={mine.id}
           messages={[...(messages ?? [])].reverse().map((msg) => ({
-            id: msg.id,
+            id: String(msg.id),
             sender_profile_id: msg.sender_profile_id,
             body: msg.body,
             created_at: msg.created_at,
             read_at: msg.read_at,
+            edited_at: "edited_at" in msg ? msg.edited_at : null,
+            deleted_at: "deleted_at" in msg ? msg.deleted_at : null,
           }))}
           canSend={!thread.frozen && otherOpen && chatLive}
         />

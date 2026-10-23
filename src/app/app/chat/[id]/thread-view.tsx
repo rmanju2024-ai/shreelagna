@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
-import { sendPeekChat } from "@/app/app/match/actions";
-import { chatStamp } from "@/lib/match/chat-ui";
+import { deleteChatMessage, editChatMessage, sendPeekChat } from "@/app/app/match/actions";
+import { chatBodyLine, chatStamp } from "@/lib/match/chat-ui";
 import { btnPrimary, inputClass } from "@/lib/ui/classes";
 
 type Msg = {
@@ -11,6 +11,8 @@ type Msg = {
   body: string;
   created_at: string;
   read_at?: string | null;
+  edited_at?: string | null;
+  deleted_at?: string | null;
   pending?: boolean;
 };
 
@@ -29,6 +31,9 @@ export function ThreadView({
   const [pending, setPending] = useState<Msg[]>([]);
   const [draft, setDraft] = useState("");
   const [failed, setFailed] = useState(false);
+  const [menuId, setMenuId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [goneIds, setGoneIds] = useState<string[]>([]);
   const [, startTransition] = useTransition();
   const endRef = useRef<HTMLLIElement | null>(null);
   const boxRef = useRef<HTMLTextAreaElement | null>(null);
@@ -42,7 +47,7 @@ export function ThreadView({
   }, [messages, pending]);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ block: "end" });
+    endRef.current?.scrollIntoView?.({ block: "end" });
   }, [shown.length]);
 
   function send() {
@@ -50,6 +55,26 @@ export function ThreadView({
     const body = draft.trim();
     if (!body) return;
     sendLockRef.current = true;
+    const data = new FormData();
+    data.set("thread_id", threadId);
+    data.set("body", body);
+    if (editingId) {
+      data.set("message_id", editingId);
+      setDraft("");
+      setEditingId(null);
+      setMenuId(null);
+      boxRef.current?.focus();
+      startTransition(async () => {
+        const result = await editChatMessage(data).catch(() => null);
+        sendLockRef.current = false;
+        if (!result || !result.ok) {
+          setDraft(body);
+          setEditingId(editingId);
+          setFailed(true);
+        }
+      });
+      return;
+    }
     const temp: Msg = {
       id: `tmp-${Date.now()}`,
       sender_profile_id: myProfileId,
@@ -61,9 +86,6 @@ export function ThreadView({
     setDraft("");
     setFailed(false);
     boxRef.current?.focus();
-    const data = new FormData();
-    data.set("thread_id", threadId);
-    data.set("body", body);
     startTransition(async () => {
       const result = await sendPeekChat(data).catch(() => null);
       sendLockRef.current = false;
@@ -75,30 +97,76 @@ export function ThreadView({
     });
   }
 
+  function beginEdit(msg: Msg) {
+    setMenuId(null);
+    setEditingId(msg.id);
+    setDraft(msg.body);
+    boxRef.current?.focus();
+  }
+
+  function remove(msg: Msg) {
+    setMenuId(null);
+    setGoneIds((prev) => (prev.includes(msg.id) ? prev : [...prev, msg.id]));
+    const data = new FormData();
+    data.set("thread_id", threadId);
+    data.set("message_id", msg.id);
+    startTransition(async () => {
+      await deleteChatMessage(data).catch(() => null);
+    });
+  }
+
   return (
     <>
       <div className="wa-stage">
         <ul className="wa-stream">
-          {shown.map((msg, index) => (
-            <li
-              key={msg.id}
-              ref={index === shown.length - 1 ? endRef : undefined}
-              className={`wa-bubble ${msg.sender_profile_id === myProfileId ? "is-mine" : "is-theirs"}`}
-            >
-              <p>{msg.body}</p>
-              <time>
-                {msg.pending ? "" : chatStamp(msg.created_at)}
-                {msg.sender_profile_id === myProfileId ? (
-                  <span
-                    className={`wa-tick${msg.pending ? " is-wait" : msg.read_at ? " is-read" : ""}`}
-                    aria-label={msg.pending ? "Sending" : msg.read_at ? "Read" : "Delivered"}
-                  >
-                    {msg.pending ? "🕓" : "✓✓"}
-                  </span>
+          {shown.map((msg, index) => {
+            const mine = msg.sender_profile_id === myProfileId;
+            const gone = Boolean(msg.deleted_at) || goneIds.includes(msg.id);
+            return (
+              <li
+                key={msg.id}
+                ref={index === shown.length - 1 ? endRef : undefined}
+                className={`wa-bubble ${mine ? "is-mine" : "is-theirs"}${gone ? " is-deleted" : ""}`}
+              >
+                {mine && !msg.pending && !gone ? (
+                  <div className="wa-msg-tools">
+                    <button
+                      type="button"
+                      className="wa-msg-more"
+                      aria-label="Message options"
+                      aria-expanded={menuId === msg.id}
+                      onClick={() => setMenuId((current) => (current === msg.id ? null : msg.id))}
+                    >
+                      ⋯
+                    </button>
+                    {menuId === msg.id ? (
+                      <div className="wa-msg-menu" role="menu">
+                        <button type="button" role="menuitem" onClick={() => beginEdit(msg)}>
+                          Edit
+                        </button>
+                        <button type="button" role="menuitem" className="is-danger" onClick={() => remove(msg)}>
+                          Delete
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
                 ) : null}
-              </time>
-            </li>
-          ))}
+                <p>{chatBodyLine(msg.body, gone)}</p>
+                <time>
+                  {msg.pending ? "" : chatStamp(msg.created_at)}
+                  {msg.edited_at && !gone ? " · edited" : ""}
+                  {mine ? (
+                    <span
+                      className={`wa-tick${msg.pending ? " is-wait" : msg.read_at ? " is-read" : ""}`}
+                      aria-label={msg.pending ? "Sending" : msg.read_at ? "Read" : "Delivered"}
+                    >
+                      {msg.pending ? "🕓" : "✓✓"}
+                    </span>
+                  ) : null}
+                </time>
+              </li>
+            );
+          })}
         </ul>
       </div>
       {canSend ? (
@@ -109,11 +177,28 @@ export function ThreadView({
             send();
           }}
         >
+          {editingId ? (
+            <button
+              type="button"
+              className="wa-edit-cancel"
+              onClick={() => {
+                setEditingId(null);
+                setDraft("");
+              }}
+            >
+              Cancel edit
+            </button>
+          ) : null}
           <textarea
             ref={boxRef}
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
             onKeyDown={(event) => {
+              if (event.key === "Escape" && editingId) {
+                setEditingId(null);
+                setDraft("");
+                return;
+              }
               if (event.key === "Enter" && !event.shiftKey) {
                 event.preventDefault();
                 send();
@@ -122,10 +207,10 @@ export function ThreadView({
             maxLength={4000}
             rows={1}
             className={inputClass}
-            placeholder={failed ? "Not sent — try again" : "Message"}
-            aria-label="Message"
+            placeholder={editingId ? "Edit message" : failed ? "Not sent — try again" : "Message"}
+            aria-label={editingId ? "Edit message" : "Message"}
           />
-          <button type="submit" className={`${btnPrimary} wa-send`} aria-label="Send" disabled={!draft.trim()}>
+          <button type="submit" className={`${btnPrimary} wa-send`} aria-label={editingId ? "Save edit" : "Send"} disabled={!draft.trim()}>
             ➤
           </button>
         </form>

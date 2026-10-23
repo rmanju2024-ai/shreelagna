@@ -13,10 +13,17 @@ export function latestByThread<T extends { thread_id: string; created_at: string
   return map;
 }
 
+export const DELETED_CHAT_LINE = "This message was deleted";
+
 export function previewText(body: string | null | undefined, max = 42): string {
   const text = (body ?? "").replace(/\s+/g, " ").trim();
   if (!text) return "Tap to chat";
   return text.length > max ? `${text.slice(0, max - 1)}…` : text;
+}
+
+export function chatBodyLine(body: string, deleted?: boolean | string | null): string {
+  if (deleted) return DELETED_CHAT_LINE;
+  return body;
 }
 
 export function countByKey(items: Array<string | null | undefined>): Map<string, number> {

@@ -787,7 +787,9 @@ table { max-width: 100%; }
 }
 .wc-pane .wa-bubble p { font-size: 0.92rem; line-height: 1.35; }
 .wc-pane .wa-bubble time { display: inline-block; float: right; margin: 0.3rem 0 0 0.6rem; font-size: 0.66rem; color: #667781; }
-.wc-pane .wa-bubble.is-mine { align-self: flex-end; background: #d9fdd3; border-top-right-radius: 0; margin-left: 0; }
+.wc-pane .wa-bubble.is-mine { align-self: flex-end; background: #d9fdd3; border-top-right-radius: 0; margin-left: 0; padding-right: 1.7rem; }
+.wc-pane .wa-msg-more { background: rgb(217 253 211 / 85%); }
+.wc-pane .wa-bubble.is-deleted p { color: #667781; }
 .wc-pane .wa-bubble.is-theirs { align-self: flex-start; background: #fff; border-top-left-radius: 0; margin-right: 0; }
 .wc-pane .wa-bubble.is-mine::before, .wc-pane .wa-bubble.is-theirs::before { content: ""; position: absolute; top: 0; width: 0.6rem; height: 0.8rem; }
 .wc-pane .wa-bubble.is-mine::before { right: -0.5rem; background: #d9fdd3; clip-path: polygon(0 0, 0 100%, 100% 0); }

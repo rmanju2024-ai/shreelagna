@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { countByKey, latestByThread, pickFirstChat, previewText, unreadLabel } from "./chat-ui";
+import { chatBodyLine, countByKey, DELETED_CHAT_LINE, latestByThread, pickFirstChat, previewText, unreadLabel } from "./chat-ui";
 
 describe("chat list helpers", () => {
   it("keeps the newest message per thread", () => {
@@ -42,5 +42,10 @@ describe("chat list helpers", () => {
     expect(pickFirstChat(threads, ["me"], others)?.id).toBe("t2");
     expect(pickFirstChat(threads, ["me"], new Map())).toBeNull();
     expect(pickFirstChat([], ["me"], others)).toBeNull();
+  });
+
+  it("shows a deleted line without exposing the old text", () => {
+    expect(chatBodyLine("secret", true)).toBe(DELETED_CHAT_LINE);
+    expect(chatBodyLine("hello", null)).toBe("hello");
   });
 });

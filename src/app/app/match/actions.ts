@@ -368,6 +368,74 @@ async function postChatMessage(formData: FormData) {
   return { ok: true as const, bounce, threadId };
 }
 
+async function ownChatMessage(threadId: string, messageId: string) {
+  const { supabase, me } = await requireMember();
+  if (!threadId || !messageId || !me.active_profile_id) return { ok: false as const, supabase, me, row: null };
+  const { data: thread } = await supabase
+    .from("threads")
+    .select("id, profile_a, profile_b, frozen")
+    .eq("id", threadId)
+    .maybeSingle();
+  if (!thread || thread.frozen) return { ok: false as const, supabase, me, row: null };
+  if (thread.profile_a !== me.active_profile_id && thread.profile_b !== me.active_profile_id) {
+    return { ok: false as const, supabase, me, row: null };
+  }
+  const full = await supabase
+    .from("messages")
+    .select("id, thread_id, sender_profile_id, body, deleted_at")
+    .eq("id", messageId)
+    .eq("thread_id", threadId)
+    .maybeSingle();
+  const row =
+    full.error
+      ? (
+          await supabase
+            .from("messages")
+            .select("id, thread_id, sender_profile_id, body")
+            .eq("id", messageId)
+            .eq("thread_id", threadId)
+            .maybeSingle()
+        ).data
+      : full.data;
+  if (!row || row.sender_profile_id !== me.active_profile_id) return { ok: false as const, supabase, me, row: null };
+  return { ok: true as const, supabase, me, row };
+}
+
+export async function editChatMessage(formData: FormData) {
+  const threadId = String(formData.get("thread_id") ?? "");
+  const messageId = String(formData.get("message_id") ?? "");
+  const body = String(formData.get("body") ?? "").trim().slice(0, 4000);
+  if (body.length < 1) return { ok: false as const };
+  const owned = await ownChatMessage(threadId, messageId);
+  if (!owned.ok || owned.row?.deleted_at) return { ok: false as const };
+  const patch: Record<string, string> = { body, edited_at: new Date().toISOString() };
+  let updated = await owned.supabase.from("messages").update(patch).eq("id", messageId);
+  if (updated.error && isMissingColumnError(updated.error, "edited_at")) {
+    delete patch.edited_at;
+    updated = await owned.supabase.from("messages").update(patch).eq("id", messageId);
+  }
+  if (updated.error) return { ok: false as const };
+  revalidatePath(`/app/chat/${threadId}`);
+  revalidatePath("/app/chat");
+  return { ok: true as const };
+}
+
+export async function deleteChatMessage(formData: FormData) {
+  const threadId = String(formData.get("thread_id") ?? "");
+  const messageId = String(formData.get("message_id") ?? "");
+  const owned = await ownChatMessage(threadId, messageId);
+  if (!owned.ok) return { ok: false as const };
+  const now = new Date().toISOString();
+  const soft = await owned.supabase.from("messages").update({ deleted_at: now }).eq("id", messageId);
+  if (soft.error) {
+    const gone = await owned.supabase.from("messages").delete().eq("id", messageId);
+    if (gone.error) return { ok: false as const };
+  }
+  revalidatePath(`/app/chat/${threadId}`);
+  revalidatePath("/app/chat");
+  return { ok: true as const };
+}
+
 export async function recordProfileView(viewerId: string, viewedId: string) {
   if (!viewerId || !viewedId || viewerId === viewedId) return;
   const { supabase, me } = await requireMember();
