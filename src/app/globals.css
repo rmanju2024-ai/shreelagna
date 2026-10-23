@@ -10448,3 +10448,18 @@ a.inbox-name.inbox-open:focus-visible {
   font-size: 0.78rem;
   color: #7c2d12;
 }
+.push-alerts-toast {
+  position: fixed;
+  z-index: 12000;
+  left: 50%;
+  bottom: calc(5.4rem + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  max-width: min(28rem, calc(100vw - 1.4rem));
+  padding: 0.7rem 0.95rem;
+  border-radius: 0.9rem;
+  background: #1a100c;
+  color: #fff8e7;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  box-shadow: 0 16px 40px rgb(0 0 0 / 35%);
+}

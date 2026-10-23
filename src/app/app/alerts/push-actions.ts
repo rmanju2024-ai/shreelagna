@@ -1,8 +1,13 @@
 "use server";
 
 import { ensureAppUser } from "@/lib/auth/session";
-import { createClient } from "@/lib/supabase/server";
+import { vapidPublicKey } from "@/lib/notify/web-push";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { readSessionFromCookies } from "@/lib/supabase/user-rest";
+
+export async function getPushClientConfig(): Promise<{ publicKey: string }> {
+  return { publicKey: vapidPublicKey() };
+}
 
 export type PushActionResult = { ok: true } | { ok: false; error: string };
 
@@ -30,7 +35,8 @@ export async function savePushSubscription(input: PushKeys): Promise<PushActionR
   if (!endpoint.startsWith("https://") || !p256dh || !authKey) {
     return { ok: false, error: "That notification subscription is incomplete." };
   }
-  const { error } = await auth.db.from("push_subscriptions").upsert(
+  const db = createServiceClient() ?? auth.db;
+  const { error } = await db.from("push_subscriptions").upsert(
     {
       user_id: auth.me.id,
       profile_id: auth.me.active_profile_id,
@@ -41,7 +47,7 @@ export async function savePushSubscription(input: PushKeys): Promise<PushActionR
     },
     { onConflict: "endpoint" },
   );
-  if (error) return { ok: false, error: "Ask house to run SQL 072, then try again." };
+  if (error) return { ok: false, error: "Could not save this device. Try again in a moment." };
   return { ok: true };
 }
 
@@ -50,6 +56,7 @@ export async function dropPushSubscription(endpointRaw: string): Promise<PushAct
   if ("error" in auth) return { ok: false, error: String(auth.error ?? "Sign in again.") };
   const endpoint = String(endpointRaw ?? "").trim();
   if (!endpoint) return { ok: true };
-  await auth.db.from("push_subscriptions").delete().eq("user_id", auth.me.id).eq("endpoint", endpoint);
+  const db = createServiceClient() ?? auth.db;
+  await db.from("push_subscriptions").delete().eq("user_id", auth.me.id).eq("endpoint", endpoint);
   return { ok: true };
 }
