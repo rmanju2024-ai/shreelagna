@@ -7606,22 +7606,21 @@ a.browse-view {
 .legal-section p { margin: 0.55rem 0 0; color: var(--muted); font-size: 0.92rem; line-height: 1.65; }
 .help-genz-legal { margin: 1rem 0 0; color: var(--muted); font-size: 0.78rem; line-height: 1.55; }
 
-.inbox-unified {
-  display: grid;
+.inbox-unified { display: grid; gap: 0.55rem; }
+.inbox-unified:has(.wc-shell) {
   grid-template-rows: auto minmax(0, 1fr);
-  gap: 0.55rem;
   height: calc(100dvh - 6.4rem);
   max-height: calc(100dvh - 6.4rem);
   min-height: 0;
   overflow: hidden;
 }
-.app-main:has(.inbox-unified) {
+.app-main:has(.inbox-unified .wc-shell) {
   padding-top: 0.4rem !important;
   padding-bottom: 0.4rem !important;
   min-height: 0;
   overflow: hidden;
 }
-.inbox-unified .wc-shell {
+.inbox-unified:has(.wc-shell) .wc-shell {
   height: 100%;
   max-height: none;
   min-height: 0;
