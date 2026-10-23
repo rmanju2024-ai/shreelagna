@@ -279,6 +279,10 @@ a.inbox-photo { color: inherit; text-decoration: none; display: block; }
 .wc-pane .wa-back { display: none; }
 
 @media (max-width: 820px) {
+  .inbox-unified {
+    height: calc(100dvh - 10.2rem - 5.15rem - env(safe-area-inset-bottom));
+    max-height: calc(100dvh - 10.2rem - 5.15rem - env(safe-area-inset-bottom));
+  }
   .wc-shell { grid-template-columns: 1fr; height: min(calc(100dvh - 9rem), 52rem); }
   .wc-welcome { display: none; }
   .wc-shell.has-thread .wc-side { display: none; }
@@ -820,8 +824,16 @@ table { max-width: 100%; }
 }
 
 /* Chat scroll: old messages reachable (flex-end clipped the top), visible slim scrollbar */
-.wc-pane .wa-stage { display: flex; flex-direction: column; justify-content: flex-start !important; overflow-y: scroll; scrollbar-width: thin; scrollbar-color: #b8b0a2 transparent; overscroll-behavior: contain; }
+.wc-pane .wa-stage {
+  display: flex; flex-direction: column; justify-content: flex-end !important;
+  overflow-y: scroll; scrollbar-width: thin; scrollbar-color: #b8b0a2 transparent; overscroll-behavior: contain;
+}
 .wc-pane .wa-stream { margin-top: auto; }
+.inbox-unified .wc-shell.has-thread {
+  height: 100%; min-height: 0; max-height: none;
+}
+.inbox-unified .wa-app.wc-pane { min-height: 0 !important; height: 100%; }
+.inbox-unified .wc-pane .wa-composer { flex: none; position: sticky; bottom: 0; z-index: 8; }
 .wc-pane .wa-stage::-webkit-scrollbar { width: 8px; }
 .wc-pane .wa-stage::-webkit-scrollbar-thumb { background: #b8b0a2; border-radius: 8px; }
 .wc-pane .wa-stage::-webkit-scrollbar-track { background: transparent; }
