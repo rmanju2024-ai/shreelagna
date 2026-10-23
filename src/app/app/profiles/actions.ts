@@ -92,7 +92,7 @@ async function writeCompleteness(
   supabase: Awaited<ReturnType<typeof createClient>>,
   profileId: string,
   emailOtpVerified: boolean,
-  opts?: { contentChanged?: boolean },
+  opts?: { contentChanged?: boolean; actorUserId?: string | null; actorRole?: string | null },
 ) {
   const { data: photos } = await supabase
     .from("media")
@@ -119,13 +119,25 @@ async function writeCompleteness(
     emailOtpVerified,
     smsOtpRequired: smsOtpRequiredFromEnv(),
   });
+  const previous = typeof saved.status === "string" ? saved.status : null;
+  const status = nextReviewStatus(previous, complete, opts);
   await supabase
     .from("profiles")
     .update({
       is_complete: complete,
-      status: nextReviewStatus(typeof saved.status === "string" ? saved.status : null, complete, opts),
+      status,
     })
     .eq("id", profileId);
+  if (status !== previous && (status === "pending_review" || status === "draft")) {
+    await writeAudit({
+      actorUserId: opts?.actorUserId,
+      actorRole: opts?.actorRole,
+      action: status === "pending_review" ? "profile.submit" : "profile.status",
+      entityType: "profile",
+      entityId: profileId,
+      metadata: { status, from: previous ?? "new" },
+    });
+  }
 }
 
 async function insertOwnProfile(
@@ -404,7 +416,18 @@ export async function saveProfile(formData: FormData) {
 
   await writeCompleteness(supabase, profileId!, Boolean(me.email_otp_verified_at), {
     contentChanged: !houseEdit && section === "about",
+    actorUserId: me.id,
+    actorRole: me.role,
   });
+  if (!editingId && profileId) {
+    await writeAudit({
+      actorUserId: me.id,
+      actorRole: me.role,
+      action: "profile.create",
+      entityType: "profile",
+      entityId: profileId,
+    });
+  }
 
   if (!houseEdit && me.active_profile_id !== profileId) {
     await supabase.from("app_users").update({ active_profile_id: profileId }).eq("id", me.id);
@@ -657,6 +680,14 @@ export async function sendInterest(formData: FormData): Promise<{
       revalidatePath("/app/interests");
     });
   }
+  await writeAudit({
+    actorUserId: me.id,
+    actorRole: me.role,
+    action: "interest.sent",
+    entityType: "interest",
+    entityId: interestId,
+    metadata: { from: mine.id, to: toId },
+  });
   const nextUsed = alreadyCounted ? quota.used : quota.used + 1;
   const nextLeft = alreadyCounted || quota.left == null ? quota.left : Math.max(0, quota.left - 1);
   const nextDaily = alreadyCounted || quota.dailyLeft == null ? quota.dailyLeft : Math.max(0, quota.dailyLeft - 1);
@@ -680,6 +711,14 @@ export async function cancelInterest(formData: FormData): Promise<{ ok: boolean 
     return { ok: false };
   }
   await supabase.from("interests").delete().eq("id", row.id);
+  await writeAudit({
+    actorUserId: me.id,
+    actorRole: me.role,
+    action: "interest.cancelled",
+    entityType: "interest",
+    entityId: row.id,
+    metadata: { from: row.from_profile_id, to: row.to_profile_id },
+  });
   after(() => {
     revalidatePath("/app/interests");
     revalidatePath("/app/alerts");
@@ -763,6 +802,14 @@ export async function revealContact(toId: string): Promise<{
       { onConflict: "viewer_profile_id,viewed_profile_id", ignoreDuplicates: true },
     );
     if (error) return { ok: false, error: "could_not_send" };
+    await writeAudit({
+      actorUserId: me.id,
+      actorRole: me.role,
+      action: "contact.reveal",
+      entityType: "profile",
+      entityId: toId,
+      metadata: { from: mine.id, to: toId },
+    });
   }
 
   if (me.role !== "admin" && me.role !== "service") {
@@ -860,6 +907,8 @@ export async function saveAboutIntro(
   if (error) return { ok: false, error: saveErrorMessage(error) };
   await writeCompleteness(supabase, profileId, Boolean(me.email_otp_verified_at), {
     contentChanged: !isStaffRole(me.role),
+    actorUserId: me.id,
+    actorRole: me.role,
   });
   revalidatePath(`/app/profiles/${profileId}`);
   revalidatePath("/desk/profiles");
@@ -906,6 +955,8 @@ export async function saveIntroChoice(
   }
   await writeCompleteness(supabase, profileId, Boolean(me.email_otp_verified_at), {
     contentChanged: !isStaffRole(me.role),
+    actorUserId: me.id,
+    actorRole: me.role,
   });
   revalidatePath(`/app/profiles/${profileId}`);
   revalidatePath("/desk/profiles");
@@ -931,6 +982,8 @@ export async function refreshProfileCompleteness(profileId: string) {
   if (!data) return;
   await writeCompleteness(supabase, profileId, Boolean(me.email_otp_verified_at), {
     contentChanged: !isStaffRole(me.role),
+    actorUserId: me.id,
+    actorRole: me.role,
   });
   revalidatePath("/app");
   revalidatePath(`/app/profiles/${profileId}`);

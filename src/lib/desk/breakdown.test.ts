@@ -169,6 +169,11 @@ describe("desk breakdown", () => {
       { label: "No plan", count: 5 },
     ]);
     expect(auditActionLabel("profile.translate")).toBe("Profile translated");
+    expect(auditActionLabel("profile.create")).toBe("Profile created");
+    expect(auditActionLabel("interest.sent")).toBe("Interest sent");
+    expect(auditActionLabel("contact.reveal")).toBe("Contact revealed");
+    expect(auditActionLabel("safety.report")).toBe("Profile reported");
+    expect(auditActionLabel("chat.message.delete")).toBe("Chat message deleted");
     expect(houseRoleLabel("service")).toBe("Staff");
   });
 });

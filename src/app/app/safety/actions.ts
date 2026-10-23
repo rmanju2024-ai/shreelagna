@@ -1,6 +1,7 @@
 "use server";
 
 import { ensureAppUser } from "@/lib/auth/session";
+import { writeAudit } from "@/lib/desk/audit";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -25,6 +26,14 @@ export async function blockProfile(formData: FormData) {
     { onConflict: "blocker_profile_id,blocked_profile_id", ignoreDuplicates: true },
   );
   if (error) return { ok: false as const, error: "Could not block this profile just now. Please try again." };
+  await writeAudit({
+    actorUserId: me.id,
+    actorRole: me.role,
+    action: "safety.block",
+    entityType: "profile",
+    entityId: targetId,
+    metadata: { from: me.active_profile_id, to: targetId },
+  });
   revalidatePath("/browse");
   revalidatePath("/app/interests");
   revalidatePath("/app/chat");
@@ -50,6 +59,14 @@ export async function reportProfile(formData: FormData) {
   if (error && !error.message.toLowerCase().includes("duplicate")) {
     redirect(`${returnTo}?safety=report_error`);
   }
+  await writeAudit({
+    actorUserId: me.id,
+    actorRole: me.role,
+    action: "safety.report",
+    entityType: "profile",
+    entityId: targetId,
+    metadata: { from: me.active_profile_id, to: targetId, category },
+  });
   revalidatePath("/app/safety");
   redirect(`${returnTo}?safety=reported`);
 }
@@ -64,6 +81,16 @@ export async function unblockProfile(formData: FormData) {
     .delete()
     .eq("blocker_profile_id", me.active_profile_id)
     .eq("blocked_profile_id", targetId);
+  if (!error) {
+    await writeAudit({
+      actorUserId: me.id,
+      actorRole: me.role,
+      action: "safety.unblock",
+      entityType: "profile",
+      entityId: targetId,
+      metadata: { from: me.active_profile_id, to: targetId },
+    });
+  }
   revalidatePath("/app/blocked");
   revalidatePath("/browse");
   redirect(`${returnTo}${returnTo.includes("?") ? "&" : "?"}safety=${error ? "unblock_error" : "unblocked"}`);

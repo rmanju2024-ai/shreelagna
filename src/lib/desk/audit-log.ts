@@ -61,12 +61,13 @@ export function auditDetails(
         ? (row as Record<string, unknown>)
         : null;
 
-  if (action === "interest.accepted" || action === "interest.declined") {
+  if (action === "interest.accepted" || action === "interest.declined" || action === "interest.sent" || action === "interest.cancelled") {
     const from = subject?.fromTitle || "a member";
     const to = subject?.toTitle || "a member";
-    return action === "interest.accepted"
-      ? `${to} accepted interest from ${from}`
-      : `${to} declined interest from ${from}`;
+    if (action === "interest.accepted") return `${to} accepted interest from ${from}`;
+    if (action === "interest.declined") return `${to} declined interest from ${from}`;
+    if (action === "interest.sent") return `${from} sent interest to ${to}`;
+    return `${from} cancelled interest to ${to}`;
   }
 
   const facts: string[] = [];
@@ -87,6 +88,9 @@ export function auditDetails(
     if (metadata.section) add(`edited ${nice(metadata.section)}`);
     if (metadata.field) add(`field ${nice(metadata.field)}`);
     if (metadata.trustTier) add(`trust ${nice(metadata.trustTier)}`);
+    if (metadata.category) add(nice(metadata.category));
+    if (metadata.paused != null) add(metadata.paused ? "paused" : "live");
+    if (metadata.contactRelease) add(`contact ${nice(metadata.contactRelease)}`);
     const plan = subject?.plan || metadata.plan || metadata.plan_code;
     if (plan) add(`plan ${nice(plan)}`);
     if (metadata.months) add(`${metadata.months} months`);

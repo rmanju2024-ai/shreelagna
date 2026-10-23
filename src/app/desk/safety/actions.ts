@@ -1,6 +1,7 @@
 "use server";
 
 import { requireDesk } from "@/lib/desk/access";
+import { writeAudit } from "@/lib/desk/audit";
 import { createServiceClient } from "@/lib/supabase/server";
 import { refreshDesk } from "@/lib/desk/refresh";
 
@@ -18,5 +19,15 @@ export async function updateSafetyCase(formData: FormData) {
     reviewed_by: desk.me?.id ?? null,
     reviewed_at: ["resolved", "dismissed"].includes(status) ? new Date().toISOString() : null,
   }).eq("id", id);
-  if (!error) refreshDesk(["/desk/safety", "/desk/analytics"]);
+  if (!error) {
+    await writeAudit({
+      actorUserId: desk.me?.id,
+      actorRole: desk.me?.role,
+      action: "safety.case.review",
+      entityType: "safety_report",
+      entityId: id,
+      metadata: { status },
+    });
+    refreshDesk(["/desk/safety", "/desk/analytics"]);
+  }
 }

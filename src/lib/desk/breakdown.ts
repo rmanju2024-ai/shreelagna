@@ -300,13 +300,27 @@ export function tallyWeekPresence(
 export function auditActionLabel(action: string): string {
   if (action === "ticket.status") return "Ticket status";
   if (action === "ticket.note") return "Ticket note";
+  if (action === "interest.sent") return "Interest sent";
+  if (action === "interest.cancelled") return "Interest cancelled";
   if (action === "interest.accepted") return "Interest accepted";
   if (action === "interest.declined") return "Interest declined";
+  if (action === "profile.create") return "Profile created";
+  if (action === "profile.submit") return "Profile submitted";
   if (action === "profile.published") return "Profile published";
   if (action === "profile.status") return "Profile status";
   if (action === "profile.edit") return "Profile edited";
+  if (action === "profile.privacy") return "Privacy saved";
+  if (action === "profile.delete.self") return "Profile deleted";
   if (action === "profile.translate") return "Profile translated";
   if (action === "profile.flags.clear") return "Flags cleared";
+  if (action === "contact.reveal") return "Contact revealed";
+  if (action === "safety.block") return "Profile blocked";
+  if (action === "safety.unblock") return "Profile unblocked";
+  if (action === "safety.report") return "Profile reported";
+  if (action === "safety.case.review") return "Safety case reviewed";
+  if (action === "verification.request") return "Verification requested";
+  if (action === "verification.evidence.upload") return "Evidence uploaded";
+  if (action === "chat.message.delete") return "Chat message deleted";
   if (action === "staff.appoint") return "Staff appointed";
   if (action === "staff.remove") return "Staff removed";
   if (action === "membership.confirm") return "Plan payment confirmed";

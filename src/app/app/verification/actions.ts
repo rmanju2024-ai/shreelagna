@@ -1,6 +1,7 @@
 "use server";
 
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
+import { writeAudit } from "@/lib/desk/audit";
 import {
   EVIDENCE_BUCKET,
   EVIDENCE_MAX_BYTES,
@@ -20,6 +21,14 @@ export async function requestVerification(formData: FormData) {
   const me = await ensureAppUser(supabase, user);
   if (!me?.active_profile_id) return;
   await supabase.from("profile_verification_cases").insert({ profile_id: me.active_profile_id, requested_by: me.id, document_type: type });
+  await writeAudit({
+    actorUserId: me.id,
+    actorRole: me.role,
+    action: "verification.request",
+    entityType: "verification_case",
+    entityId: me.active_profile_id,
+    metadata: { documentType: type },
+  });
   revalidatePath("/app/verification");
 }
 
@@ -54,6 +63,14 @@ export async function uploadVerificationEvidence(formData: FormData) {
   });
   if (error) return back("storage");
   await store.from("profile_verification_cases").update({ status: "in_review", updated_at: new Date().toISOString() }).eq("id", item.id).eq("status", "requested");
+  await writeAudit({
+    actorUserId: me.id,
+    actorRole: me.role,
+    action: "verification.evidence.upload",
+    entityType: "verification_case",
+    entityId: item.id,
+    metadata: { status: "in_review" },
+  });
   revalidatePath("/app/verification");
   return back("ok");
 }

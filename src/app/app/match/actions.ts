@@ -244,6 +244,21 @@ export async function saveProfileSettings(formData: FormData) {
     emailUpdate = await supabase.from("app_users").update(mail).eq("id", me.id);
   }
   if (error || emailUpdate.error) redirect("/app/settings?error=save");
+  await writeAudit({
+    actorUserId: me.id,
+    actorRole: me.role,
+    action: "profile.privacy",
+    entityType: "profile",
+    entityId: profileId,
+    metadata: {
+      paused,
+      status: payload.status,
+      hideLastSeen: payload.hide_last_seen,
+      hidePhotos: payload.hide_photo_until_accept,
+      hideDetails: payload.hide_details_until_accept,
+      contactRelease: payload.contact_release_mode,
+    },
+  });
   revalidatePath(`/app/profiles/${profileId}`);
   revalidatePath("/app/settings");
   revalidatePath("/browse");
@@ -436,6 +451,14 @@ export async function deleteChatMessage(formData: FormData) {
     const gone = await owned.supabase.from("messages").delete().eq("id", messageId);
     if (gone.error) return { ok: false as const };
   }
+  await writeAudit({
+    actorUserId: owned.me.id,
+    actorRole: owned.me.role,
+    action: "chat.message.delete",
+    entityType: "message",
+    entityId: messageId,
+    metadata: { thread: threadId },
+  });
   revalidatePath(`/app/chat/${threadId}`);
   revalidatePath("/app/chat");
   return { ok: true as const };

@@ -13,6 +13,19 @@ describe("desk audit log", () => {
     expect(auditDetails(null)).toBe("");
   });
 
+  it("names who sent interest on which profile", () => {
+    expect(
+      auditDetails(
+        {
+          action: "interest.sent",
+          entity_type: "interest",
+          metadata: { from: "a", to: "b" },
+        },
+        { fromTitle: "Jayesh · SL010003 · Groom", toTitle: "Kavya · SL010002 · Bride" },
+      ),
+    ).toBe("Jayesh · SL010003 · Groom sent interest to Kavya · SL010002 · Bride");
+  });
+
   it("names who accepted interest on which profile", () => {
     expect(
       auditDetails(
