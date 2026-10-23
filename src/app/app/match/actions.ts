@@ -386,17 +386,22 @@ async function ownChatMessage(threadId: string, messageId: string) {
     .eq("id", messageId)
     .eq("thread_id", threadId)
     .maybeSingle();
-  const row =
-    full.error
-      ? (
-          await supabase
-            .from("messages")
-            .select("id, thread_id, sender_profile_id, body")
-            .eq("id", messageId)
-            .eq("thread_id", threadId)
-            .maybeSingle()
-        ).data
-      : full.data;
+  type ChatMsgRow = {
+    id: string | number;
+    thread_id: string;
+    sender_profile_id: string;
+    body: string;
+    deleted_at?: string | null;
+  };
+  const slim = full.error
+    ? await supabase
+        .from("messages")
+        .select("id, thread_id, sender_profile_id, body")
+        .eq("id", messageId)
+        .eq("thread_id", threadId)
+        .maybeSingle()
+    : full;
+  const row = (slim.data ?? null) as ChatMsgRow | null;
   if (!row || row.sender_profile_id !== me.active_profile_id) return { ok: false as const, supabase, me, row: null };
   return { ok: true as const, supabase, me, row };
 }

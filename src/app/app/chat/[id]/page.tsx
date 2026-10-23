@@ -136,15 +136,18 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
         <ThreadView
           threadId={id}
           myProfileId={mine.id}
-          messages={[...(messages ?? [])].reverse().map((msg) => ({
-            id: String(msg.id),
-            sender_profile_id: msg.sender_profile_id,
-            body: msg.body,
-            created_at: msg.created_at,
-            read_at: msg.read_at,
-            edited_at: "edited_at" in msg ? msg.edited_at : null,
-            deleted_at: "deleted_at" in msg ? msg.deleted_at : null,
-          }))}
+          messages={[...(messages ?? [])].reverse().map((msg) => {
+            const row = msg as typeof msg & { edited_at?: string | null; deleted_at?: string | null };
+            return {
+              id: String(row.id),
+              sender_profile_id: row.sender_profile_id,
+              body: row.body,
+              created_at: row.created_at,
+              read_at: row.read_at,
+              edited_at: typeof row.edited_at === "string" ? row.edited_at : null,
+              deleted_at: typeof row.deleted_at === "string" ? row.deleted_at : null,
+            };
+          })}
           canSend={!thread.frozen && otherOpen && chatLive}
         />
         {thread.frozen || !otherOpen ? (
