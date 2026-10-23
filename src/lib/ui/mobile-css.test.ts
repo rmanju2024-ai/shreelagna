@@ -118,4 +118,13 @@ describe("shared mobile CSS contract", () => {
     expect(css).toContain("scroll-snap-type: x mandatory");
     expect(css).toContain("min-height: 44px");
   });
+
+  it("keeps catalog, Look filters, public grids, and desk forms one-thumb operable", () => {
+    expect(css).toContain("Phone operability: one-thumb reach");
+    expect(css).toContain(".plan-edit-stack");
+    expect(css).toContain(".browse-filter-dialog");
+    expect(css).toContain(".sx-filter-actions");
+    expect(css).toContain(".public-card-grid");
+    expect(css).toContain(".inbox-board { grid-template-columns: minmax(0, 1fr) !important; }");
+  });
 });

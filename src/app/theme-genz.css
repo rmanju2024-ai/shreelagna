@@ -2049,3 +2049,85 @@ html[data-scene="couple"] .app-main {
 .desk-menu-tile[data-desk="staff"] { --theme-accent: #b45309; }
 .desk-menu-tile[data-desk="plans"] { --theme-accent: #e44f82; }
 
+/* Phone operability: one-thumb reach across member, public, and desk pages. */
+@media (max-width: 820px) {
+  .plan-edit-stack {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .plan-edit-form,
+  .plan-edit-hero {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .plan-edit-form .plan-save-btn,
+  .plans-grant button,
+  .desk-ticket-note-form button {
+    width: 100%;
+    justify-self: stretch;
+  }
+  .plan-check { min-height: 44px; }
+
+  .browse-filter-scrim {
+    align-items: end;
+    padding: max(0.45rem, env(safe-area-inset-top)) 0.45rem calc(5.4rem + env(safe-area-inset-bottom));
+  }
+  .browse-filter-dialog {
+    width: 100%;
+    max-height: min(92dvh, calc(100dvh - 5.8rem));
+    border-radius: 1.15rem 1.15rem 0.4rem 0.4rem;
+  }
+  .browse-filter-close { width: 44px; height: 44px; min-height: 44px; }
+  .browse-filter-dialog-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .browse-filter-dialog-actions button { width: 100%; }
+
+  .sx-filter { padding: 0.85rem; }
+  .sx-filter-actions {
+    position: sticky;
+    bottom: calc(4.8rem + env(safe-area-inset-bottom));
+    z-index: 4;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.45rem;
+    background: #fffdf8;
+    padding: 0.4rem 0 0.1rem;
+  }
+  .sx-filter-actions button { width: 100%; min-height: 44px; }
+  .sx-fields { grid-template-columns: minmax(0, 1fr) !important; }
+
+  .public-card-grid,
+  .public-contact-grid,
+  .help-genz-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .public-cta { flex-direction: column; align-items: stretch; }
+  .public-cta a, .public-cta button { width: 100%; min-height: 44px; }
+
+  .desk-id-search { flex-direction: column; align-items: stretch; }
+  .desk-id-search input { min-width: 0; max-width: 100%; flex: 1 1 auto; }
+  .desk-id-search button { width: 100%; }
+  .plans-grant { display: grid; gap: 0.55rem; }
+  .desk-ticket-note-form { justify-items: stretch; }
+  .plans-desk-actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .plans-desk-actions form,
+  .plans-desk-actions button { width: 100%; }
+  .desk-client-facts { grid-template-columns: minmax(0, 1fr) !important; }
+
+  .otp-row .input-premium { max-width: none; width: 100%; }
+  .inbox-board { grid-template-columns: minmax(0, 1fr) !important; }
+
+  .sx-pager { gap: 0.5rem; }
+  .sx-pager button { min-width: 44px; min-height: 44px; flex: 1 1 8rem; }
+
+  .home-split-tiles { grid-template-columns: minmax(0, 1fr); }
+  .home-split-copy { padding: 1rem 0.85rem 1.35rem; }
+  .home-split-art { aspect-ratio: 16 / 10; max-height: 42vw; }
+
+  .install-app-go { min-height: 44px; }
+  .account-hub-rail a { min-height: 44px; }
+  .sx-staff-complete { flex-wrap: wrap; }
+  .login-genz-action { width: 100%; min-height: 44px; }
+}
+
