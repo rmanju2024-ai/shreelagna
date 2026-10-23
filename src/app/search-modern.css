@@ -109,10 +109,13 @@
 .sx-star.is-c { bottom: 0.32rem; left: 0.7rem; font-size: 0.58rem; animation-delay: 2.8s; }
 @keyframes sx-sheen { 0%, 55% { transform: translateX(-120%); } 100% { transform: translateX(140%); } }
 @keyframes sx-shine { 0%, 100% { opacity: 0.25; transform: scale(0.85); } 50% { opacity: 1; transform: scale(1.15); } }
-.sx-row-shell { position: relative; z-index: 1; min-width: 0; overflow: visible; isolation: isolate; }
+.sx-row-shell {
+  display: grid; grid-template-columns: 2.4rem minmax(0, 1fr) 2.4rem; align-items: center;
+  gap: 0.4rem; min-width: 0; max-width: 100%; overflow: hidden;
+}
+.sx-row-nav { display: grid; place-items: center; min-height: 2.4rem; }
 .sx-row-clip {
-  width: auto; min-width: 0; overflow: hidden; touch-action: pan-y; overscroll-behavior-x: none;
-  margin-inline: 1.85rem;
+  width: 100%; max-width: 100%; min-width: 0; overflow: hidden; margin-inline: 0;
 }
 .sx-feed .sx-row {
   --sx-card: 9.6rem;
@@ -130,11 +133,12 @@
   gap: 0.65rem; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: thin;
 }
 .sx-row-arrow {
-  position: absolute; top: 50%; z-index: 40; width: 2.15rem; height: 2.15rem; border: 0; border-radius: 999px;
-  transform: translateY(-50%);
-  background: rgb(255 252 246 / 96%); color: var(--accent); font-size: 1.2rem; cursor: pointer;
-  pointer-events: auto; box-shadow: 0 8px 18px -10px rgb(63 14 13 / 55%);
+  position: static; z-index: 2; flex: none; width: 2.2rem; height: 2.2rem; border: 1px solid rgb(184 137 76 / 45%);
+  border-radius: 999px; transform: none;
+  background: linear-gradient(180deg, #fffaf0, #f4d39a); color: #8c2a27; font-size: 1.25rem; font-weight: 800;
+  cursor: pointer; pointer-events: auto; box-shadow: inset 0 1px 0 #fff, 0 6px 14px -10px rgb(63 14 13 / 50%);
 }
+.sx-row-arrow:disabled { opacity: 0.35; cursor: default; }
 .sx-row .sx-card { scroll-snap-align: start; }
 .sx-row .sx-card-link { border-radius: 1.05rem; }
 .sx-row .sx-photo { aspect-ratio: 3 / 4; }
@@ -148,8 +152,7 @@
 .sx-row .sx-tags li { padding: 0.12rem 0.42rem; font-size: 0.64rem; }
 .sx-row .sx-why-match { margin: 0; font-size: 0.68rem; }
 .sx-row .sx-foot { font-size: 0.66rem; padding-top: 0.35rem; }
-.sx-row-arrow.is-left { left: 0.15rem; }
-.sx-row-arrow.is-right { right: 0.15rem; }
+.sx-row-arrow.is-left, .sx-row-arrow.is-right { left: auto; right: auto; }
 .sx-card { min-width: 0; }
 .sx-card-link {
   display: flex; flex-direction: column; height: 100%; overflow: hidden; color: inherit; text-decoration: none;
@@ -278,8 +281,14 @@
   .sx-feed.is-board .sx-empty.is-compact {
     flex: 1;
     min-height: 16.4rem;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .sx-feed.is-board .sx-row-shell {
     display: grid;
-    align-content: center;
+    grid-template-columns: 2.3rem minmax(0, 1fr) 2.3rem;
+    align-items: center;
+    overflow: hidden;
   }
   .sx-feed.is-board .sx-row { --sx-gap: 0.42rem; --sx-card: 9.6rem; padding: 0.05rem 0 0.1rem; }
   .sx-feed.is-board .sx-view-all-center { display: flex; align-items: center; justify-content: center; min-height: 1.9rem; margin: 0; }
@@ -292,6 +301,8 @@
   .sx-feed-head { grid-template-columns: 1fr; }
   .sx-view-all, .sx-view-all-slot { width: fit-content; justify-self: start; }
   .sx-row { padding-inline: 0.1rem; grid-auto-columns: minmax(10.8rem, 58vw); }
+  .sx-row-shell { grid-template-columns: minmax(0, 1fr); }
+  .sx-row-nav { display: none; }
   .sx-feed .sx-row-clip { overflow-x: auto; margin-inline: 0; touch-action: auto; }
   .sx-feed .sx-row { transform: none !important; padding-inline: 0.1rem; }
   .sx-feed .sx-row .sx-card { flex-basis: min(14rem, 58vw); width: min(14rem, 58vw); }

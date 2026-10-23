@@ -37,11 +37,11 @@ const EXTRA_VIEWS: ViewItem[] = [
 const ALL_VIEWS = [...DEFAULT_VIEWS, ...EXTRA_VIEWS];
 const PREVIEW_VIEWS = ALL_VIEWS.filter((item) => item.id !== "custom");
 export const DISCOVER_PREVIEW_LIMIT = 5;
+export const DISCOVER_ROW_WINDOW = 4;
 export const DISCOVER_RESULTS_PAGE_SIZE = 10;
 export const ADVANCED_FILTER_HREF = "/browse/filter";
-export const DISCOVER_CARD_STRIDE_REM = 10.02;
 
-export function discoverRowStart(current: number, delta: number, count: number, visible = 1) {
+export function discoverRowStart(current: number, delta: number, count: number, visible = DISCOVER_ROW_WINDOW) {
   const max = Math.max(0, count - Math.max(1, visible));
   return Math.min(max, Math.max(0, current + delta));
 }
@@ -89,10 +89,12 @@ export function discoverResultsHref(view: BrowseView, filters: BrowseFilters = E
 function RowArrow({
   label,
   direction,
+  disabled,
   onClick,
 }: {
   label: string;
   direction: "left" | "right";
+  disabled?: boolean;
   onClick: () => void;
 }) {
   return (
@@ -100,6 +102,7 @@ function RowArrow({
       type="button"
       className={`sx-row-arrow is-${direction}`}
       aria-label={label}
+      disabled={disabled}
       onPointerDown={(event) => event.stopPropagation()}
       onClick={(event) => {
         event.preventDefault();
@@ -150,7 +153,11 @@ function CategoryRow({
 }) {
   const [start, setStart] = useState(0);
   const preview = notes;
-  const canSlide = preview.length > 1;
+  const windowSize = Math.min(DISCOVER_ROW_WINDOW, Math.max(preview.length, 1));
+  const shown = preview.slice(start, start + windowSize);
+  const canPrev = start > 0;
+  const canNext = start + windowSize < preview.length;
+  const move = (delta: number) => setStart((current) => discoverRowStart(current, delta, preview.length, windowSize));
   return (
     <section className="sx-feed-row" aria-labelledby={`discover-${item.id}`}>
       <header className="sx-feed-head">
@@ -159,31 +166,33 @@ function CategoryRow({
       {gate && preview.length ? <p className="sx-note">{gate}</p> : null}
       {preview.length ? (
         <div className="sx-row-shell">
-          {canSlide ? (
-            <RowArrow
-              label={`Show previous ${item.label} profiles`}
-              direction="left"
-              onClick={() => setStart((current) => discoverRowStart(current, -1, preview.length))}
-            />
-          ) : null}
+          <div className="sx-row-nav">
+            {preview.length > windowSize ? (
+              <RowArrow
+                label={`Show previous ${item.label} profiles`}
+                direction="left"
+                disabled={!canPrev}
+                onClick={() => move(-1)}
+              />
+            ) : null}
+          </div>
           <div className="sx-row-clip">
-            <ul
-              className="sx-row"
-              data-start={String(start)}
-              style={{ marginLeft: `${-start * DISCOVER_CARD_STRIDE_REM}rem` }}
-            >
-              {preview.map((note, index) => (
-                <BrowseCard key={`${item.id}-${note.id}`} note={note} priority={item.id === "smart" && index < 3} />
+            <ul className="sx-row" data-start={String(start)}>
+              {shown.map((note, index) => (
+                <BrowseCard key={`${item.id}-${note.id}`} note={note} priority={item.id === "smart" && start + index < 3} />
               ))}
             </ul>
           </div>
-          {canSlide ? (
-            <RowArrow
-              label={`Show more ${item.label} profiles`}
-              direction="right"
-              onClick={() => setStart((current) => discoverRowStart(current, 1, preview.length))}
-            />
-          ) : null}
+          <div className="sx-row-nav">
+            {preview.length > windowSize ? (
+              <RowArrow
+                label={`Show more ${item.label} profiles`}
+                direction="right"
+                disabled={!canNext}
+                onClick={() => move(1)}
+              />
+            ) : null}
+          </div>
         </div>
       ) : (
         <div className="sx-empty is-compact">
