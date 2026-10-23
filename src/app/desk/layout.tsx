@@ -28,11 +28,11 @@ export default async function DeskLayout({ children }: { children: React.ReactNo
   return (
     <PageShell>
       <div className="desk-stage">
-        <PageHero
-          kicker={desk.admin ? "Admin" : "Staff"}
-          title="House desk"
-          sub="Open one desk at a time."
-        />
+        <header className="desk-mast">
+          <p className="browse-kicker">{desk.admin ? "Admin" : "Staff"}</p>
+          <h1>House desk</h1>
+          <p>Tickets, safety, profiles and plans. Pick a tab.</p>
+        </header>
         <div className="browse-board desk-board is-menu">
           <DeskNav admin={desk.admin} />
           <div className="desk-main">

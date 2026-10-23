@@ -27,7 +27,7 @@ export function NavigationFeedback() {
   return (
     <>
       <div className={`nav-progress${loading ? " is-loading" : ""}`} aria-hidden />
-      {loading ? <p className="nav-loading-word" role="status">Opening your next step…</p> : null}
+      {loading ? <p className="nav-loading-word" role="status">Loading</p> : null}
     </>
   );
 }
