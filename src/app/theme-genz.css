@@ -867,26 +867,17 @@ table { max-width: 100%; }
 }
 .site-name-word {
   display: inline-block;
-  background-image: linear-gradient(110deg, #ff5d8f 0%, #ff9a62 22%, #f5c84c 42%, #4fd1c5 62%, #7c5cff 82%, #ff5d8f 100%);
-  background-size: 180% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: name-rainbow 7s ease-in-out infinite;
+  color: #6f1d1b;
+  background: none;
+  -webkit-text-fill-color: #6f1d1b;
   filter:
-    drop-shadow(0 1px 0 rgb(255 255 255 / 55%))
-    drop-shadow(0 3px 0 rgb(111 29 27 / 22%))
-    drop-shadow(0 8px 16px rgb(124 92 255 / 28%));
+    drop-shadow(0 1px 0 rgb(255 247 234 / 80%))
+    drop-shadow(0 2px 0 rgb(184 137 76 / 35%));
 }
 .site-name.is-light .site-name-word {
-  filter:
-    drop-shadow(0 1px 0 rgb(255 255 255 / 40%))
-    drop-shadow(0 3px 0 rgb(0 0 0 / 35%))
-    drop-shadow(0 10px 16px rgb(0 0 0 / 35%));
-}
-@keyframes name-rainbow {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+  color: #fff7ea;
+  -webkit-text-fill-color: #fff7ea;
+  filter: drop-shadow(0 2px 8px rgb(0 0 0 / 45%));
 }
 .site-tld {
   position: relative;
@@ -895,8 +886,8 @@ table { max-width: 100%; }
   margin-left: 0.04em;
   padding: 0.08em 0.22em 0.06em;
   border-radius: 0.32em;
-  color: #fff7ea;
-  background: linear-gradient(145deg, #ff5d8f, #f5c84c 40%, #7c5cff);
+  color: #3f0e0d;
+  background: linear-gradient(180deg, #ffe7a3, #f5c84c 55%, #c4922e);
   font-weight: 800;
   letter-spacing: 0.04em;
   line-height: 1;
@@ -906,24 +897,11 @@ table { max-width: 100%; }
     0 4px 10px rgb(180 120 40 / 28%);
   transform: translateY(-0.04em);
 }
-.site-tld::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(105deg, transparent 30%, rgb(255 255 255 / 70%) 48%, transparent 62%);
-  transform: translateX(-120%);
-  animation: tld-shine 2.8s ease-in-out infinite;
-}
-@keyframes tld-shine {
-  0%, 55% { transform: translateX(-120%); }
-  75%, 100% { transform: translateX(120%); }
-}
 .site-name.is-light .site-tld {
   color: #3f0e0d;
   background: linear-gradient(135deg, #ffe7a3, #f5c84c);
   box-shadow: 0 1px 0 rgb(0 0 0 / 25%);
 }
-.home-hero-kicker .site-name { font-weight: 800; }
 .site-footer-brand .site-name { font-size: inherit; }
 
 .garden-mark {
@@ -943,20 +921,6 @@ table { max-width: 100%; }
   overflow: visible;
 }
 .garden-bloom { transform-origin: center; }
-.garden-bloom.is-a { animation: bloom-sway 4.6s ease-in-out infinite; }
-.garden-bloom.is-b { animation: bloom-sway 5.2s ease-in-out infinite reverse; }
-.garden-bloom.is-c { animation: bloom-sway 3.8s ease-in-out infinite 0.4s; }
-.garden-bloom.is-d { animation: bloom-sway 4.2s ease-in-out infinite 0.2s; }
-.garden-bloom.is-e { animation: bloom-sway 5s ease-in-out infinite reverse; }
-@keyframes bloom-sway {
-  0%, 100% { transform: rotate(-5deg) translateY(0); }
-  50% { transform: rotate(6deg) translateY(-2px); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .garden-bloom,
-  .site-name-word,
-  .site-tld::after { animation: none; }
-}
 .site-head-brand .garden-mark.is-logo { --garden: 3.8rem; }
 .site-footer-brand .garden-mark.is-logo { --garden: 2.8rem; }
 
@@ -2056,7 +2020,14 @@ html[data-scene="couple"] .app-main {
 .home-split-art img { position: absolute !important; inset: 0 !important; width: 100% !important; height: 100% !important; max-width: none !important; object-fit: cover !important; filter: none !important; opacity: 1 !important; }
 .home-split-art img:first-of-type { display: none; }
 .home-split-copy { display: flex; flex-direction: column; justify-content: center; gap: 1rem; padding: clamp(1.5rem, 5vw, 4rem); color: #3f0e0d; }
-.home-split-copy .home-hero-kicker { margin: 0; color: #9a3412; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; font-size: 0.78rem; }
+.home-split-copy .home-hero-kicker {
+  margin: 0;
+  color: #7c2d12;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  font-size: 1rem;
+}
 .home-split-title { margin: 0; font-size: clamp(2.2rem, 5vw, 4rem); line-height: 1.02; color: #3f0e0d; }
 .home-split-sub { margin: 0; max-width: 36rem; font-size: clamp(1.05rem, 1.6vw, 1.2rem); line-height: 1.65; font-weight: 600; color: #3f0e0d; }
 .home-split-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.7rem; margin: 0.4rem 0; padding: 0; list-style: none; max-width: 34rem; }

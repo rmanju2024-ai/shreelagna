@@ -4,8 +4,7 @@ import { KalyanBanner } from "@/components/home/kalyan-banner";
 import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { pageInner } from "@/components/site-chrome";
 import { getAuth } from "@/lib/auth/session";
-import { SITE_PROMISE, SITE_TAGLINE } from "@/lib/brand";
-import { SiteName } from "@/components/site-name";
+import { SITE_BRAND, SITE_PROMISE, SITE_TAGLINE } from "@/lib/brand";
 import { btnHero, btnHeroGhost } from "@/lib/ui/classes";
 
 export const dynamic = "force-dynamic";
@@ -33,9 +32,7 @@ export default async function HomePage() {
           <KalyanBanner intensity="hero" presentation="complete" veil={false} />
         </div>
         <div className="home-split-copy">
-          <p className="home-hero-kicker">
-            ✦ <SiteName /> · Bharat
-          </p>
+          <p className="home-hero-kicker">✦ {SITE_BRAND} · Bharat</p>
           <h1 className="home-split-title font-[family-name:var(--font-display)]">{SITE_TAGLINE}</h1>
           <p className="home-split-sub">
             {user ? "Welcome back. Your next introduction is waiting." : SITE_PROMISE}
