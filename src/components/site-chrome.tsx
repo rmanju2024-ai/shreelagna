@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
 import { SITE_BRAND } from "@/lib/brand";
-import { IndiaGlobe } from "@/components/india-globe";
+import { GardenMark } from "@/components/garden-mark";
 import { SiteName } from "@/components/site-name";
 import { LiveClock } from "@/components/live-clock";
 import { getAuth, ensureAppUser } from "@/lib/auth/session";
@@ -176,7 +176,7 @@ export function SiteFooter({ glass = false }: { glass?: boolean }) {
     >
       <div className={`${pageInner} site-footer-inner`}>
         <Link href="/" className="site-footer-brand" aria-label={`${SITE_BRAND} home`}>
-          <IndiaGlobe size="logo" />
+          <GardenMark size="logo" />
           <SiteName light />
         </Link>
         <nav className="site-footer-links" aria-label="Footer">

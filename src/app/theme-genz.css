@@ -867,23 +867,26 @@ table { max-width: 100%; }
 }
 .site-name-word {
   display: inline-block;
-  background-image: linear-gradient(180deg, #ff9933 0 34%, #fff6e8 34% 50%, #138808 50% 100%);
+  background-image: linear-gradient(110deg, #ff5d8f 0%, #ff9a62 22%, #f5c84c 42%, #4fd1c5 62%, #7c5cff 82%, #ff5d8f 100%);
+  background-size: 180% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  -webkit-text-stroke: 0.7px rgb(63 14 13 / 32%);
+  animation: name-rainbow 7s ease-in-out infinite;
   filter:
-    drop-shadow(0 1px 0 rgb(255 233 160 / 55%))
-    drop-shadow(0 3px 0 rgb(111 29 27 / 28%))
-    drop-shadow(0 8px 14px rgb(63 14 13 / 22%));
+    drop-shadow(0 1px 0 rgb(255 255 255 / 55%))
+    drop-shadow(0 3px 0 rgb(111 29 27 / 22%))
+    drop-shadow(0 8px 16px rgb(124 92 255 / 28%));
 }
 .site-name.is-light .site-name-word {
-  background-image: linear-gradient(180deg, #ffb24d 0 34%, #fff7ea 34% 50%, #2f9e49 50% 100%);
-  -webkit-text-stroke: 0.55px rgb(20 8 6 / 50%);
   filter:
-    drop-shadow(0 1px 0 rgb(255 255 255 / 35%))
+    drop-shadow(0 1px 0 rgb(255 255 255 / 40%))
     drop-shadow(0 3px 0 rgb(0 0 0 / 35%))
-    drop-shadow(0 10px 16px rgb(0 0 0 / 40%));
+    drop-shadow(0 10px 16px rgb(0 0 0 / 35%));
+}
+@keyframes name-rainbow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 .site-tld {
   position: relative;
@@ -892,8 +895,8 @@ table { max-width: 100%; }
   margin-left: 0.04em;
   padding: 0.08em 0.22em 0.06em;
   border-radius: 0.32em;
-  color: #3f0e0d;
-  background: linear-gradient(145deg, #ffe9a8 0%, #f5c84c 48%, #c4922e 100%);
+  color: #fff7ea;
+  background: linear-gradient(145deg, #ff5d8f, #f5c84c 40%, #7c5cff);
   font-weight: 800;
   letter-spacing: 0.04em;
   line-height: 1;
@@ -923,38 +926,39 @@ table { max-width: 100%; }
 .home-hero-kicker .site-name { font-weight: 800; }
 .site-footer-brand .site-name { font-size: inherit; }
 
-.india-globe {
-  --globe: 3.6rem;
+.garden-mark {
+  --garden: 4.6rem;
   display: inline-flex;
-  width: var(--globe);
-  height: var(--globe);
+  width: var(--garden);
+  height: var(--garden);
   flex: none;
   align-self: center;
-  filter: drop-shadow(0 8px 14px rgb(15 50 100 / 35%));
+  filter: drop-shadow(0 10px 16px rgb(255 93 143 / 28%));
 }
-.india-globe.is-logo { --globe: 4.5rem; }
-.india-globe-art {
+.garden-mark.is-logo { --garden: 5.1rem; }
+.garden-mark-art {
   width: 100%;
   height: 100%;
   display: block;
   overflow: visible;
 }
-.india-globe-spin {
-  transform-origin: 60px 60px;
-  animation: globe-yaw 10s ease-in-out infinite;
-}
-.group:hover .india-globe-spin { animation-duration: 5s; }
-@keyframes globe-yaw {
-  0% { transform: rotate(-8deg) translateX(-4px); }
-  50% { transform: rotate(8deg) translateX(5px); }
-  100% { transform: rotate(-8deg) translateX(-4px); }
+.garden-bloom { transform-origin: center; }
+.garden-bloom.is-a { animation: bloom-sway 4.6s ease-in-out infinite; }
+.garden-bloom.is-b { animation: bloom-sway 5.2s ease-in-out infinite reverse; }
+.garden-bloom.is-c { animation: bloom-sway 3.8s ease-in-out infinite 0.4s; }
+.garden-bloom.is-d { animation: bloom-sway 4.2s ease-in-out infinite 0.2s; }
+.garden-bloom.is-e { animation: bloom-sway 5s ease-in-out infinite reverse; }
+@keyframes bloom-sway {
+  0%, 100% { transform: rotate(-5deg) translateY(0); }
+  50% { transform: rotate(6deg) translateY(-2px); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .india-globe-spin,
+  .garden-bloom,
+  .site-name-word,
   .site-tld::after { animation: none; }
 }
-.site-head-brand .india-globe.is-logo { --globe: 3.35rem; }
-.site-footer-brand .india-globe.is-logo { --globe: 2.6rem; }
+.site-head-brand .garden-mark.is-logo { --garden: 3.8rem; }
+.site-footer-brand .garden-mark.is-logo { --garden: 2.8rem; }
 
 .brand-tagline {
   margin-top: 0.2rem;
@@ -1158,8 +1162,8 @@ body > .nav-menu {
     text-transform: none !important;
     font-weight: 700 !important;
   }
-  .site-head-brand .india-globe.is-logo {
-    --globe: 2.7rem;
+  .site-head-brand .garden-mark.is-logo {
+    --garden: 3.1rem;
   }
   .site-head-brand .live-clock {
     display: block !important;
