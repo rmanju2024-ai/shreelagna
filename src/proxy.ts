@@ -1,9 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { canonicalSiteUrl } from "@/lib/site-url";
+import { canonicalSiteUrl, supabaseAuthUrl } from "@/lib/site-url";
 import { updateSession } from "@/lib/supabase/middleware";
 
 export async function proxy(request: NextRequest) {
-  const live = canonicalSiteUrl(`${request.nextUrl.pathname}${request.nextUrl.search}`, request.nextUrl.host);
+  const path = request.nextUrl.pathname;
+  if (path.startsWith("/auth/v1")) {
+    const supabase = supabaseAuthUrl(`${path}${request.nextUrl.search}`);
+    if (supabase) return NextResponse.redirect(supabase);
+  }
+  const live = canonicalSiteUrl(`${path}${request.nextUrl.search}`, request.nextUrl.host);
   if (live) {
     return NextResponse.redirect(live, 308);
   }

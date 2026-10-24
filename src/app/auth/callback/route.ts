@@ -1,5 +1,5 @@
 import { safeNextPath } from "@/lib/auth/safe-next";
-import { publicSiteOrigin } from "@/lib/site-url";
+import { requestSiteOrigin } from "@/lib/site-url";
 import { trustSystemCa } from "@/lib/node/trust-system-ca";
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
@@ -16,7 +16,7 @@ async function exchange(
   code: string,
   dest: string,
 ) {
-  const redirect = NextResponse.redirect(new URL(dest, publicSiteOrigin()));
+  const redirect = NextResponse.redirect(new URL(dest, requestSiteOrigin(request)));
   const supabase = createServerClient(url, key, {
     cookies: {
       getAll() {
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
   trustSystemCa();
 
   const { searchParams } = new URL(request.url);
-  const origin = publicSiteOrigin();
+  const origin = requestSiteOrigin(request);
   const code = searchParams.get("code");
   const oauthError = searchParams.get("error");
   const oauthDesc = searchParams.get("error_description");
