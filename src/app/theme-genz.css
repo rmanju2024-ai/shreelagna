@@ -857,6 +857,19 @@ table { max-width: 100%; }
   gap: 0.28em;
   white-space: nowrap;
 }
+.site-name-word {
+  background-image: linear-gradient(180deg, #ff9933 0 36%, #fff7ea 36% 50%, #138808 50% 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-stroke: 0.55px rgb(63 14 13 / 28%);
+  paint-order: stroke fill;
+}
+.site-name.is-light .site-name-word {
+  background-image: linear-gradient(180deg, #ffb24d 0 36%, #fff7ea 36% 50%, #2f9e49 50% 100%);
+  -webkit-text-stroke: 0.45px rgb(20 8 6 / 45%);
+  filter: drop-shadow(0 2px 8px rgb(0 0 0 / 45%));
+}
 .site-tld {
   position: relative;
   display: inline-block;
@@ -904,6 +917,18 @@ table { max-width: 100%; }
   flex: none;
   align-self: center;
   transform: translateY(0.04em);
+}
+.india-globe.is-logo {
+  width: 4.15rem;
+  height: 4.15rem;
+}
+.india-globe.is-logo .india-globe-sphere {
+  width: 3.45rem;
+  height: 3.45rem;
+}
+.india-globe.is-logo .india-globe-orbit {
+  inset: -0.2rem;
+  border-width: 2px;
 }
 .india-globe-halo {
   position: absolute;
@@ -980,21 +1005,21 @@ table { max-width: 100%; }
   .india-globe-halo,
   .site-tld::after { animation: none; }
 }
-.site-head-brand .india-globe {
-  width: 1.85rem;
-  height: 1.85rem;
+.site-head-brand .india-globe.is-logo {
+  width: 2.55rem;
+  height: 2.55rem;
 }
-.site-head-brand .india-globe-sphere {
-  width: 1.58rem;
-  height: 1.58rem;
+.site-head-brand .india-globe.is-logo .india-globe-sphere {
+  width: 2.15rem;
+  height: 2.15rem;
 }
-.site-footer-brand .india-globe {
-  width: 1.55rem;
-  height: 1.55rem;
+.site-footer-brand .india-globe.is-logo {
+  width: 2.15rem;
+  height: 2.15rem;
 }
-.site-footer-brand .india-globe-sphere {
-  width: 1.32rem;
-  height: 1.32rem;
+.site-footer-brand .india-globe.is-logo .india-globe-sphere {
+  width: 1.82rem;
+  height: 1.82rem;
 }
 .site-footer-links { display: flex; flex-wrap: wrap; align-items: center; gap: 0.55rem 0.85rem; margin-left: auto; }
 .site-footer-links a { color: #fff7ea; font-size: 0.78rem; font-weight: 700; text-decoration: none; }

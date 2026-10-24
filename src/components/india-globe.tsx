@@ -2,11 +2,11 @@
 
 import { useId } from "react";
 
-export function IndiaGlobe() {
+export function IndiaGlobe({ size = "mark" }: { size?: "mark" | "logo" }) {
   const raw = useId().replace(/:/g, "");
   const fill = `india-tri-${raw}`;
   return (
-    <span className="india-globe" aria-label="India" role="img">
+    <span className={`india-globe ${size === "logo" ? "is-logo" : "is-mark"}`} aria-label="India" role="img">
       <span className="india-globe-halo" aria-hidden />
       <span className="india-globe-orbit" aria-hidden />
       <span className="india-globe-sphere">

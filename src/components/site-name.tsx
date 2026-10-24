@@ -1,5 +1,4 @@
 import { SITE_NAME, SITE_TLD } from "@/lib/brand";
-import { IndiaGlobe } from "@/components/india-globe";
 
 export function SiteName({
   light = false,
@@ -14,7 +13,6 @@ export function SiteName({
       <span className="site-tld" aria-label={SITE_TLD}>
         {SITE_TLD}
       </span>
-      <IndiaGlobe />
     </span>
   );
 }
