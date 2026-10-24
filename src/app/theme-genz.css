@@ -858,17 +858,24 @@ table { max-width: 100%; }
   white-space: nowrap;
 }
 .site-name-word {
-  background-image: linear-gradient(180deg, #ff9933 0 36%, #fff7ea 36% 50%, #138808 50% 100%);
+  display: inline-block;
+  background-image: linear-gradient(180deg, #ff9933 0 34%, #fff6e8 34% 50%, #138808 50% 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  -webkit-text-stroke: 0.55px rgb(63 14 13 / 28%);
-  paint-order: stroke fill;
+  -webkit-text-stroke: 0.7px rgb(63 14 13 / 32%);
+  filter:
+    drop-shadow(0 1px 0 rgb(255 233 160 / 55%))
+    drop-shadow(0 3px 0 rgb(111 29 27 / 28%))
+    drop-shadow(0 8px 14px rgb(63 14 13 / 22%));
 }
 .site-name.is-light .site-name-word {
-  background-image: linear-gradient(180deg, #ffb24d 0 36%, #fff7ea 36% 50%, #2f9e49 50% 100%);
-  -webkit-text-stroke: 0.45px rgb(20 8 6 / 45%);
-  filter: drop-shadow(0 2px 8px rgb(0 0 0 / 45%));
+  background-image: linear-gradient(180deg, #ffb24d 0 34%, #fff7ea 34% 50%, #2f9e49 50% 100%);
+  -webkit-text-stroke: 0.55px rgb(20 8 6 / 50%);
+  filter:
+    drop-shadow(0 1px 0 rgb(255 255 255 / 35%))
+    drop-shadow(0 3px 0 rgb(0 0 0 / 35%))
+    drop-shadow(0 10px 16px rgb(0 0 0 / 40%));
 }
 .site-tld {
   position: relative;
@@ -909,118 +916,130 @@ table { max-width: 100%; }
 .site-footer-brand .site-name { font-size: inherit; }
 
 .india-globe {
+  --globe: 3.5rem;
   position: relative;
   display: inline-grid;
   place-items: center;
-  width: 2.15rem;
-  height: 2.15rem;
+  width: var(--globe);
+  height: var(--globe);
   flex: none;
   align-self: center;
-  transform: translateY(0.04em);
 }
-.india-globe.is-logo {
-  width: 4.15rem;
-  height: 4.15rem;
+.india-globe.is-logo { --globe: 4.35rem; }
+.india-globe-scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  perspective: 180px;
 }
-.india-globe.is-logo .india-globe-sphere {
-  width: 3.45rem;
-  height: 3.45rem;
+.india-globe-core {
+  position: relative;
+  width: 78%;
+  height: 78%;
+  display: grid;
+  place-items: center;
+  transform-style: preserve-3d;
+  animation: globe-float 5.6s ease-in-out infinite;
 }
-.india-globe.is-logo .india-globe-orbit {
-  inset: -0.2rem;
-  border-width: 2px;
-}
-.india-globe-halo {
+.india-globe-ring {
   position: absolute;
-  inset: -0.18rem;
+  inset: 4%;
   border-radius: 50%;
-  background: radial-gradient(circle, rgb(245 200 76 / 45%), transparent 70%);
-  filter: blur(2px);
-  animation: globe-pulse 3.2s ease-in-out infinite;
+  border: 1.6px solid rgb(245 200 76 / 0);
+  background: conic-gradient(from 120deg, transparent 0 18%, #ffe7a3 28%, #b8894c 46%, transparent 58% 100%);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1.5px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1.5px));
+  transform-style: preserve-3d;
 }
-.india-globe-orbit {
-  position: absolute;
-  inset: -0.14rem;
+.india-globe-ring.is-a {
+  transform: rotateX(68deg) rotateZ(12deg);
+  animation: globe-orbit-a 7s linear infinite;
+}
+.india-globe-ring.is-b {
+  inset: 9%;
+  transform: rotateX(-52deg) rotateZ(-28deg);
+  animation: globe-orbit-b 11s linear infinite;
+  opacity: 0.85;
+}
+.india-globe-bezel {
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
-  border: 1.5px solid rgb(245 200 76 / 85%);
-  border-left-color: transparent;
-  border-bottom-color: rgb(255 93 143 / 55%);
-  animation: globe-orbit 3.8s linear infinite;
+  padding: 6%;
+  background:
+    radial-gradient(circle at 30% 22%, #fff3c4, #f5c84c 38%, #8a5a18 78%, #3f0e0d 100%);
+  box-shadow:
+    0 10px 22px -8px rgb(63 14 13 / 55%),
+    inset 0 1px 0 rgb(255 255 255 / 55%);
 }
 .india-globe-sphere {
   position: relative;
-  width: 1.85rem;
-  height: 1.85rem;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   overflow: hidden;
-  background: radial-gradient(circle at 32% 28%, #e7f7ff 0 8%, #5eb0e0 34%, #1b4f8c 72%, #0b2348 100%);
+  background:
+    radial-gradient(circle at 28% 24%, #f3fbff 0 6%, #6db7e6 32%, #1e5a9c 68%, #071830 100%);
   box-shadow:
-    inset -6px -5px 10px rgb(8 20 48 / 45%),
-    inset 4px 5px 8px rgb(255 255 255 / 28%),
-    0 4px 10px rgb(63 14 13 / 28%);
+    inset -10px -12px 16px rgb(4 16 40 / 50%),
+    inset 6px 7px 10px rgb(255 255 255 / 28%);
 }
 .india-globe-grid {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  opacity: 0.9;
 }
 .india-globe-spin {
   position: absolute;
-  inset: -8%;
+  inset: -6%;
   display: grid;
   place-items: center;
-  animation: globe-yaw 11s linear infinite;
-  transform-origin: 50% 50%;
+  animation: globe-yaw 12s ease-in-out infinite;
 }
 .india-globe-land {
-  width: 78%;
-  height: 88%;
-  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 35%));
+  width: 86%;
+  height: 92%;
+  filter: drop-shadow(0 2px 2px rgb(0 0 0 / 45%));
 }
 .india-globe-shine {
   position: absolute;
-  inset: 8% 18% 48% 12%;
+  inset: 7% 20% 52% 10%;
   border-radius: 50%;
-  background: linear-gradient(180deg, rgb(255 255 255 / 55%), transparent);
+  background: linear-gradient(180deg, rgb(255 255 255 / 62%), transparent);
   pointer-events: none;
 }
+.group:hover .india-globe.is-logo .india-globe-core {
+  transform: translateY(-2px) rotateZ(-8deg);
+  animation-play-state: paused;
+}
 @keyframes globe-yaw {
-  0% { transform: rotate(-16deg) translateX(-10%) scale(1.04); }
-  35% { transform: rotate(10deg) translateX(12%) scale(1.1); }
-  70% { transform: rotate(-6deg) translateX(-6%) scale(1.06); }
-  100% { transform: rotate(-16deg) translateX(-10%) scale(1.04); }
+  0% { transform: rotateY(-26deg) rotateZ(-8deg) translateX(-6%); }
+  50% { transform: rotateY(28deg) rotateZ(7deg) translateX(8%); }
+  100% { transform: rotateY(-26deg) rotateZ(-8deg) translateX(-6%); }
 }
-@keyframes globe-orbit {
-  to { transform: rotate(360deg); }
+@keyframes globe-orbit-a {
+  from { transform: rotateX(68deg) rotateZ(12deg); }
+  to { transform: rotateX(68deg) rotateZ(372deg); }
 }
-@keyframes globe-pulse {
-  0%, 100% { opacity: 0.45; transform: scale(0.96); }
-  50% { opacity: 1; transform: scale(1.06); }
+@keyframes globe-orbit-b {
+  from { transform: rotateX(-52deg) rotateZ(-28deg); }
+  to { transform: rotateX(-52deg) rotateZ(332deg); }
+}
+@keyframes globe-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
 }
 @media (prefers-reduced-motion: reduce) {
   .india-globe-spin,
-  .india-globe-orbit,
-  .india-globe-halo,
+  .india-globe-ring,
+  .india-globe-core,
   .site-tld::after { animation: none; }
 }
-.site-head-brand .india-globe.is-logo {
-  width: 2.55rem;
-  height: 2.55rem;
-}
-.site-head-brand .india-globe.is-logo .india-globe-sphere {
-  width: 2.15rem;
-  height: 2.15rem;
-}
-.site-footer-brand .india-globe.is-logo {
-  width: 2.15rem;
-  height: 2.15rem;
-}
-.site-footer-brand .india-globe.is-logo .india-globe-sphere {
-  width: 1.82rem;
-  height: 1.82rem;
-}
+.site-head-brand .india-globe.is-logo { --globe: 3.05rem; }
+.site-footer-brand .india-globe.is-logo { --globe: 2.45rem; }
 .site-footer-links { display: flex; flex-wrap: wrap; align-items: center; gap: 0.55rem 0.85rem; margin-left: auto; }
 .site-footer-links a { color: #fff7ea; font-size: 0.78rem; font-weight: 700; text-decoration: none; }
 .site-footer-links a:hover { color: var(--gold-soft); }
