@@ -106,11 +106,10 @@ describe("shared mobile CSS contract", () => {
     expect(css).toContain("border-top: 4px solid var(--category)");
   });
 
-  it("has an accessible mobile-safe multilingual home banner", () => {
+  it("has a quiet pan-Bharat wedding banner on the home page", () => {
     expect(css).toContain(".home-language-banner");
-    expect(css).toContain("@keyframes home-marquee");
-    expect(css).toContain(".home-language-viewport { overflow-x: auto; }");
-    expect(css).toContain('.home-language-track p[aria-hidden="true"]');
+    expect(css).toContain(".home-bharat-banner");
+    expect(css).toContain(".home-language-still");
   });
 
   it("keeps amend-profile tabs thumb-sized and scrollable on phones", () => {

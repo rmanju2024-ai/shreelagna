@@ -3,7 +3,7 @@ export const SITE_TLD = ".in";
 export const SITE_BRAND = `${SITE_NAME}${SITE_TLD}`;
 export const SITE_TAGLINE = "A garden two families plant.";
 export const SITE_PROMISE =
-  "Private introductions across Bharat. Verified profiles. Conversations that stay respectful.";
+  "Two families. One lagna. Introductions with a gentle heart.";
 
 export function watermarkLine(name?: string | null): string {
   const who = (name ?? "").trim();

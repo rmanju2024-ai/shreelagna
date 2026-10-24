@@ -9,19 +9,6 @@ import { btnHero, btnHeroGhost } from "@/lib/ui/classes";
 
 export const dynamic = "force-dynamic";
 
-const welcomeMessages = [
-  ["English", "Made for Indian hearts, in every language"],
-  ["हिन्दी", "हर भाषा में, भारतीय दिलों के लिए"],
-  ["বাংলা", "প্রতিটি ভাষায়, ভারতীয় হৃদয়ের জন্য"],
-  ["తెలుగు", "ప్రతి భాషలో, భారతీయ హృదయాల కోసం"],
-  ["தமிழ்", "ஒவ்வொரு மொழியிலும், இந்திய இதயங்களுக்காக"],
-  ["मराठी", "प्रत्येक भाषेत, भारतीय हृदयांसाठी"],
-  ["ગુજરાતી", "દરેક ભાષામાં, ભારતીય હૃદયો માટે"],
-  ["ಕನ್ನಡ", "ಪ್ರತಿ ಭಾಷೆಯಲ್ಲೂ, ಭಾರತೀಯ ಹೃದಯಗಳಿಗಾಗಿ"],
-  ["മലയാളം", "ഓരോ ഭാഷയിലും, ഇന്ത്യൻ ഹൃദയങ്ങൾക്കായി"],
-  ["ਪੰਜਾਬੀ", "ਹਰ ਭਾਸ਼ਾ ਵਿੱਚ, ਭਾਰਤੀ ਦਿਲਾਂ ਲਈ"],
-] as const;
-
 export default async function HomePage() {
   const { user } = await getAuth();
 
@@ -32,7 +19,7 @@ export default async function HomePage() {
           <KalyanBanner intensity="hero" presentation="complete" veil={false} />
         </div>
         <div className="home-split-copy">
-          <p className="home-hero-kicker">Private introductions</p>
+          <p className="home-hero-kicker">Shubh lagna</p>
           <h1 className="home-split-title font-[family-name:var(--font-display)]">{SITE_TAGLINE}</h1>
           <p className="home-split-sub">
             {user ? "Welcome back. Your next introduction is waiting." : SITE_PROMISE}
@@ -50,34 +37,31 @@ export default async function HomePage() {
             </Link>
           </div>
           <ul className="home-split-proof" aria-label="Why members trust us">
-            <li>Verified profiles</li>
-            <li>Family-first</li>
-            <li>Private by default</li>
+            <li>Mangalsutra</li>
+            <li>Kundali</li>
+            <li>Ghar</li>
           </ul>
         </div>
       </section>
 
-      <section className="home-language-banner" aria-label="Welcome in Indian languages">
-        <div className="home-language-still">
-          {welcomeMessages.map(([language, message]) => (
-            <p key={language}>
-              <b>{language}</b>
-              <span>{message}</span>
-            </p>
+      <section className="home-language-banner home-bharat-banner" aria-label="Wedding blessings">
+        <div className="home-language-still home-bharat-rites">
+          {["Haldi", "Mehendi", "Sangeet", "Jaimala", "Pheras", "Saptapadi", "Thali"].map((rite) => (
+            <p key={rite}><span>{rite}</span></p>
           ))}
         </div>
       </section>
 
       <section className="home-values relative w-full">
         <div className={`${pageInner} home-values-intro`}>
-          <p>The house</p>
-          <h2 className="font-[family-name:var(--font-display)]">Tradition, with a fresh start.</h2>
+          <p>Ghar ki baat</p>
+          <h2 className="font-[family-name:var(--font-display)]">A lagna written with care.</h2>
         </div>
         <ul className={`${pageInner} home-value-row`}>
           {[
-            ["01", "Sanskar", "Respect for every family, every step."],
-            ["02", "Vishwas", "Your story stays in trusted hands."],
-            ["03", "Sambandh", "Real guidance when you need it."],
+            ["01", "Sanskar", "The warmth of a well-raised home."],
+            ["02", "Vishwas", "Your story stays in kind hands."],
+            ["03", "Sambandh", "A bond both families can bless."],
           ].map(([n, title, text]) => (
             <li key={title} className="home-value-card">
               <span className="home-value-count">{n}</span>
@@ -90,12 +74,12 @@ export default async function HomePage() {
 
       <section className="home-steps">
         <div className={pageInner}>
-          <h2 className="font-[family-name:var(--font-display)]">Three steps to a good introduction</h2>
+          <h2 className="font-[family-name:var(--font-display)]">Three quiet steps</h2>
           <ol>
             {[
-              ["01", "Create your profile", "Share your story, photos and what you hope for."],
-              ["02", "Discover matches", "Browse by values, community and Kundali match."],
-              ["03", "Connect with care", "Send interest, then chat once both families agree."],
+              ["01", "Share your ghar", "A few photos, a little of your story."],
+              ["02", "Find a match", "Values, community, and Kundali — gently."],
+              ["03", "Send a rishta", "Interest first. Chat when both say haan."],
             ].map(([n, title, text]) => (
               <li key={n}>
                 <b>{n}</b>
@@ -109,8 +93,8 @@ export default async function HomePage() {
 
       <section className="home-final">
         <div className={pageInner}>
-          <h2 className="font-[family-name:var(--font-display)]">Begin when you are ready</h2>
-          <p>Adults only. Considered introductions.</p>
+          <h2 className="font-[family-name:var(--font-display)]">Shubh aarambh</h2>
+          <p>When the heart feels ready.</p>
           <div className="home-welcome-buttons">
             {user ? (
               <Link href="/browse" className={btnHeroGhost}>Discover</Link>

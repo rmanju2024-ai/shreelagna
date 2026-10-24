@@ -1855,6 +1855,16 @@ html[data-scene="couple"] .app-main {
 .home-language-still b {
   color: #b8894c; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase;
 }
+.home-bharat-banner { text-align: center; padding: 1rem 0 1.15rem; }
+.home-bharat-lead {
+  margin: 0; padding: 0 1rem 0.35rem;
+  color: #b8894c; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+}
+.home-bharat-rites p span {
+  font-family: var(--font-display); font-size: 1.05rem; color: #3f0e0d;
+}
+.home-bharat-states { padding-top: 0; }
+.home-bharat-states p span { font-size: 0.72rem; letter-spacing: 0.04em; color: #7a4a28; }
 .home-value-card p:not(:last-child) { color: var(--theme-ink); }
 .home-value-card p:last-child { color: var(--muted); }
 
