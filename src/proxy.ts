@@ -1,7 +1,12 @@
-import { type NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+import { canonicalSiteUrl } from "@/lib/site-url";
 import { updateSession } from "@/lib/supabase/middleware";
 
 export async function proxy(request: NextRequest) {
+  const live = canonicalSiteUrl(`${request.nextUrl.pathname}${request.nextUrl.search}`, request.nextUrl.host);
+  if (live) {
+    return NextResponse.redirect(live, 308);
+  }
   return updateSession(request);
 }
 
