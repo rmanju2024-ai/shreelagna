@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "MarriageConnect",
-    short_name: "MarriageConnect",
+    name: "MarriageConnect.in",
+    short_name: "MarriageConnect.in",
     description: "Where families meet with dignity. Private introductions for Indian families.",
     start_url: "/",
     scope: "/",

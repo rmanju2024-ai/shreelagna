@@ -3,7 +3,7 @@ import { Geist, Playfair_Display, Source_Serif_4 } from "next/font/google";
 import { ChromeLayout } from "@/components/chrome-layout";
 import { WebVitals } from "@/components/web-vitals";
 import { Butterflies } from "@/components/butterflies";
-import { SITE_NAME } from "@/lib/brand";
+import { SITE_BRAND } from "@/lib/brand";
 import "./globals.css";
 import "./search-modern.css";
 import "./theme-genz.css";
@@ -28,15 +28,15 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   title: {
-    default: SITE_NAME,
-    template: `%s · ${SITE_NAME}`,
+    default: SITE_BRAND,
+    template: `%s · ${SITE_BRAND}`,
   },
   description:
     "Where families meet with dignity. Private introductions for Indian families.",
-  applicationName: SITE_NAME,
+  applicationName: SITE_BRAND,
   appleWebApp: {
     capable: true,
-    title: SITE_NAME,
+    title: SITE_BRAND,
     statusBarStyle: "default",
   },
   formatDetection: { telephone: false },

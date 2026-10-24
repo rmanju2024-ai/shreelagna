@@ -850,6 +850,42 @@ table { max-width: 100%; }
   font-family: var(--font-display), ui-serif, serif; font-size: 1.05rem; font-weight: 700;
 }
 .site-footer-brand img { width: 2.2rem; height: 2.2rem; object-fit: contain; }
+
+.site-name {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.22em;
+  white-space: nowrap;
+}
+.india-flag {
+  width: 1.12em;
+  height: 0.75em;
+  flex: none;
+  align-self: center;
+  border-radius: 1px;
+  box-shadow: 0 0 0 1px rgb(47 22 14 / 18%);
+  overflow: visible;
+}
+.site-tld {
+  display: inline-block;
+  margin-left: 0.04em;
+  padding: 0.04em 0.18em 0.02em;
+  border-radius: 0.28em;
+  color: #6f1d1b;
+  background: linear-gradient(135deg, #f5c84c, #ffe7a3);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  box-shadow: 0 1px 0 rgb(111 29 27 / 18%);
+  transform: translateY(-0.06em);
+}
+.site-name.is-light .site-tld {
+  color: #3f0e0d;
+  background: linear-gradient(135deg, #ffe7a3, #f5c84c);
+  box-shadow: 0 1px 0 rgb(0 0 0 / 25%);
+}
+.home-hero-kicker .site-name { font-weight: 800; }
+.site-footer-brand .site-name { font-size: inherit; }
 .site-footer-links { display: flex; flex-wrap: wrap; align-items: center; gap: 0.55rem 0.85rem; margin-left: auto; }
 .site-footer-links a { color: #fff7ea; font-size: 0.78rem; font-weight: 700; text-decoration: none; }
 .site-footer-links a:hover { color: var(--gold-soft); }

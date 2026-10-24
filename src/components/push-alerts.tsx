@@ -44,7 +44,7 @@ export function PushAlertsControl({ compact = false }: { compact?: boolean }) {
   const label = useMemo(() => {
     if (!ready) return "Checking this device…";
     if (!publicKey) return SETUP_HINT;
-    if (iosNeedsHome) return "On iPhone, Add to Home Screen first, then open MarriageConnect from the icon.";
+    if (iosNeedsHome) return "On iPhone, Add to Home Screen first, then open MarriageConnect.in from the icon.";
     if (status === "granted") return "Device alerts are on.";
     if (status === "denied") return "Notifications are blocked in the browser. Allow them for this site, then try again.";
     if (status === "unsupported") return "This browser cannot receive device alerts.";

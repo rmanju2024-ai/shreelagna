@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { SITE_NAME } from "@/lib/brand";
+import { SITE_BRAND } from "@/lib/brand";
+import { SiteName } from "@/components/site-name";
 
 export function BrandMark({ light = false }: { light?: boolean }) {
   return (
@@ -7,7 +8,7 @@ export function BrandMark({ light = false }: { light?: boolean }) {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/graphics/shreelagna-crest-3d.png"
-        alt={SITE_NAME}
+        alt={SITE_BRAND}
         width={88}
         height={88}
         className="logo-3d h-16 w-16 shrink-0 object-contain drop-shadow-[0_12px_22px_rgba(47,22,14,0.45)] sm:h-[88px] sm:w-[88px]"
@@ -16,7 +17,7 @@ export function BrandMark({ light = false }: { light?: boolean }) {
         <span
           className={`font-[family-name:var(--font-display)] text-[1.65rem] tracking-tight sm:text-4xl ${light ? "text-[#fff7ea] drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)]" : "text-[var(--ink)]"}`}
         >
-          {SITE_NAME}
+          <SiteName light={light} />
         </span>
         <span
           className={`mt-1 text-[12px] font-medium uppercase tracking-[0.2em] sm:text-sm ${light ? "text-[var(--gold-soft)]" : "text-[var(--gold)]"}`}

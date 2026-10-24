@@ -106,7 +106,7 @@ export function InstallAppRoot({ children }: { children?: React.ReactNode }) {
         ? createPortal(
             <div className="install-app-banner" role="region" aria-label="Install app">
               <p>
-                <b>Add MarriageConnect</b>
+                <b>Add MarriageConnect.in</b>
                 <span>Keep the house on your home screen.</span>
               </p>
               <button type="button" className="install-app-go" onClick={() => void api.install()}>
@@ -130,13 +130,13 @@ export function InstallAppRoot({ children }: { children?: React.ReactNode }) {
                     <>
                       <li>Tap the Share button in Safari.</li>
                       <li>Scroll and tap Add to Home Screen.</li>
-                      <li>Tap Add. MarriageConnect opens like an app.</li>
+                      <li>Tap Add. MarriageConnect.in opens like an app.</li>
                     </>
                   ) : (
                     <>
                       <li>Open the browser menu (⋮ or Share).</li>
                       <li>Tap Install app or Add to Home Screen.</li>
-                      <li>Confirm. MarriageConnect opens like an app.</li>
+                      <li>Confirm. MarriageConnect.in opens like an app.</li>
                     </>
                   )}
                 </ol>
