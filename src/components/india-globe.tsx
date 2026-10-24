@@ -2,51 +2,59 @@
 
 import { useId } from "react";
 
-const MAINLAND =
-  "M108 10c7 4 12 14 16 22 7 4 18 8 21 17 3 7-1 14 4 20 8 10 21 13 24 26 2 8-5 15-6 23-2 11 8 18 4 28-4 10-16 12-21 21-4 8 2 16-4 23-7 8-19 6-27 14-7 6-10 17-20 20-10 3-20-4-30-1-8 2-15 10-23 9-10-1-16-10-25-14-10-5-23-3-30-13-5-8 1-17-2-25-4-10-17-13-19-23-2-8 7-15 8-23 2-9-7-18-3-27 4-8 15-11 20-19 4-8 1-17 8-24 6-6 16-4 22-11 5-6 9-14 17-17 7-2 15 2 22-4 5-4 9-11 16-14z";
-const NORTHEAST =
-  "M168 92c16-6 36 2 41 16 4 11-8 20-23 20-11 0-21-8-23-18-2-7 1-14 5-18z";
+/** Classic India outline — large on the globe so it reads at header size. */
+const INDIA =
+  "M100 8 118 28 128 52 162 56 186 42 196 62 168 78 160 112 148 158 132 196 112 212 92 204 80 168 48 128 28 104 24 86 52 80 58 52 44 34 72 18Z";
+const NORTHEAST = "M162 56 198 48 204 72 176 86 162 76Z";
 
 export function IndiaGlobe({ size = "mark" }: { size?: "mark" | "logo" }) {
-  const raw = useId().replace(/:/g, "");
-  const fill = `india-tri-${raw}`;
+  const id = useId().replace(/:/g, "");
+  const ocean = `ocean-${id}`;
+  const tri = `tri-${id}`;
   return (
-    <span className={`india-globe ${size === "logo" ? "is-logo" : "is-mark"}`} aria-label="MarriageConnect.in" role="img">
-      <span className="india-globe-scene">
-        <span className="india-globe-ring is-a" aria-hidden />
-        <span className="india-globe-ring is-b" aria-hidden />
-        <span className="india-globe-core">
-          <span className="india-globe-bezel">
-            <span className="india-globe-sphere">
-              <svg className="india-globe-grid" viewBox="0 0 80 80" aria-hidden>
-                <ellipse cx="40" cy="40" rx="37" ry="37" fill="none" stroke="rgb(255 255 255 / 20%)" strokeWidth="0.5" />
-                <ellipse cx="40" cy="40" rx="24" ry="37" fill="none" stroke="rgb(255 255 255 / 16%)" strokeWidth="0.45" />
-                <ellipse cx="40" cy="40" rx="10" ry="37" fill="none" stroke="rgb(255 255 255 / 12%)" strokeWidth="0.45" />
-                <ellipse cx="40" cy="40" rx="37" ry="11" fill="none" stroke="rgb(255 255 255 / 18%)" strokeWidth="0.45" />
-                <ellipse cx="40" cy="40" rx="37" ry="23" fill="none" stroke="rgb(255 255 255 / 12%)" strokeWidth="0.45" />
-              </svg>
-              <span className="india-globe-spin">
-                <svg className="india-globe-land" viewBox="0 0 220 260" aria-hidden>
-                  <defs>
-                    <linearGradient id={fill} x1="0" x2="0" y1="0" y2="1">
-                      <stop offset="0%" stopColor="#FF9933" />
-                      <stop offset="42%" stopColor="#FF9933" />
-                      <stop offset="42%" stopColor="#fff" />
-                      <stop offset="58%" stopColor="#fff" />
-                      <stop offset="58%" stopColor="#138808" />
-                      <stop offset="100%" stopColor="#138808" />
-                    </linearGradient>
-                  </defs>
-                  <path fill={`url(#${fill})`} stroke="#1a100c" strokeWidth="2.2" d={MAINLAND} />
-                  <path fill={`url(#${fill})`} stroke="#1a100c" strokeWidth="1.8" d={NORTHEAST} />
-                  <circle cx="118" cy="108" r="7" fill="none" stroke="#000080" strokeWidth="1.6" />
-                </svg>
-              </span>
-              <span className="india-globe-shine" aria-hidden />
-            </span>
-          </span>
-        </span>
-      </span>
+    <span className={`india-globe ${size === "logo" ? "is-logo" : "is-mark"}`} aria-label="India" role="img">
+      <svg className="india-globe-art" viewBox="0 0 120 120" aria-hidden>
+        <defs>
+          <radialGradient id={ocean} cx="32%" cy="28%" r="75%">
+            <stop offset="0%" stopColor="#c9ecff" />
+            <stop offset="38%" stopColor="#3d9fe0" />
+            <stop offset="72%" stopColor="#1560a8" />
+            <stop offset="100%" stopColor="#0a2c5c" />
+          </radialGradient>
+          <linearGradient id={tri} x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="#FF9933" />
+            <stop offset="40%" stopColor="#FF9933" />
+            <stop offset="40%" stopColor="#ffffff" />
+            <stop offset="58%" stopColor="#ffffff" />
+            <stop offset="58%" stopColor="#138808" />
+            <stop offset="100%" stopColor="#138808" />
+          </linearGradient>
+          <clipPath id={`ball-${id}`}>
+            <circle cx="60" cy="60" r="46" />
+          </clipPath>
+        </defs>
+
+        <circle cx="60" cy="60" r="52" fill="none" stroke="#f5c84c" strokeWidth="3.2" />
+        <circle cx="60" cy="60" r="49" fill="none" stroke="#8a5a18" strokeWidth="0.6" opacity="0.5" />
+
+        <g clipPath={`url(#ball-${id})`}>
+          <circle cx="60" cy="60" r="46" fill={`url(#${ocean})`} />
+          <ellipse cx="60" cy="60" rx="46" ry="15" fill="none" stroke="rgb(255 255 255 / 28%)" strokeWidth="0.7" />
+          <ellipse cx="60" cy="60" rx="46" ry="28" fill="none" stroke="rgb(255 255 255 / 16%)" strokeWidth="0.6" />
+          <ellipse cx="60" cy="60" rx="18" ry="46" fill="none" stroke="rgb(255 255 255 / 18%)" strokeWidth="0.6" />
+          <ellipse cx="60" cy="60" rx="32" ry="46" fill="none" stroke="rgb(255 255 255 / 12%)" strokeWidth="0.6" />
+
+          <g className="india-globe-spin">
+            <g transform="translate(6 4) scale(0.5)">
+              <path d={INDIA} fill={`url(#${tri})`} stroke="#1a100c" strokeWidth="3.2" strokeLinejoin="round" />
+              <path d={NORTHEAST} fill={`url(#${tri})`} stroke="#1a100c" strokeWidth="2.6" strokeLinejoin="round" />
+              <circle cx="108" cy="92" r="6" fill="none" stroke="#000080" strokeWidth="1.8" />
+            </g>
+          </g>
+
+          <ellipse cx="42" cy="38" rx="18" ry="10" fill="rgb(255 255 255 / 28%)" />
+        </g>
+      </svg>
     </span>
   );
 }

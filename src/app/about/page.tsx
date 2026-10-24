@@ -19,8 +19,8 @@ export default async function AboutPage() {
       <div className="sx-stage public-stage">
         <PageHero
           kicker="Our story"
-          title="Where families meet with dignity."
-          sub="Family-run, proudly Indian, and built for introductions that feel human—not transactional."
+          title="A garden two families plant."
+          sub="Proudly Indian, and built for introductions that feel human—not transactional."
         />
 
       <div className="public-card-grid">
