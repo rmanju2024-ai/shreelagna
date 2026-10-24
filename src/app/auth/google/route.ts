@@ -1,5 +1,5 @@
 import { safeNextPath } from "@/lib/auth/safe-next";
-import { fixOAuthStartUrl, requestSiteOrigin } from "@/lib/site-url";
+import { fixOAuthStartUrl, requestSiteOrigin, supabaseApiOrigin } from "@/lib/site-url";
 import { trustSystemCa } from "@/lib/node/trust-system-ca";
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
 
   const origin = requestSiteOrigin(request);
   const next = safeNextPath(request.nextUrl.searchParams.get("next"));
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const url = supabaseApiOrigin();
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   console.error("[auth/google] start", {

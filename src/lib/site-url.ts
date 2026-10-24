@@ -1,4 +1,11 @@
 const DEFAULT_LIVE = "https://www.marriageconnect.in";
+/** Auth API host — never the public website. */
+const DEFAULT_SUPABASE = "https://polctldhftsztcjwsvel.supabase.co";
+
+function isSupabaseApiHost(host: string): boolean {
+  const name = host.toLowerCase();
+  return name.endsWith(".supabase.co") || name.endsWith(".supabase.in");
+}
 
 export function publicSiteOrigin(): string {
   const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim() || DEFAULT_LIVE;
@@ -17,37 +24,29 @@ export function requestSiteOrigin(request: { nextUrl: { protocol: string; host: 
   return publicSiteOrigin();
 }
 
-export function supabaseApiOrigin(): string | null {
+export function supabaseApiOrigin(): string {
   const raw = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim().replace(/\/$/, "") || "";
-  if (!raw) return null;
   try {
-    const host = new URL(raw).hostname.toLowerCase();
-    if (host.endsWith("supabase.co") || host.endsWith("supabase.in") || host.includes("supabase")) return raw;
+    if (raw && isSupabaseApiHost(new URL(raw).hostname)) return raw;
   } catch {
-    return null;
+    /* use default */
   }
-  return null;
+  return DEFAULT_SUPABASE;
 }
 
-export function supabaseAuthUrl(pathAndQuery: string): string | null {
-  const base = supabaseApiOrigin();
-  if (!base) return null;
+export function supabaseAuthUrl(pathAndQuery: string): string {
   const path = pathAndQuery.startsWith("/") ? pathAndQuery : `/${pathAndQuery}`;
-  return `${base}${path}`;
+  return `${supabaseApiOrigin()}${path}`;
 }
 
 export function fixOAuthStartUrl(raw: string): string {
   const base = supabaseApiOrigin();
-  if (!base) return raw;
   try {
     const url = new URL(raw, base);
-    const host = url.hostname.toLowerCase();
-    if (host.endsWith("supabase.co") || host.endsWith("supabase.in") || host.includes("supabase")) {
-      return url.toString();
-    }
+    if (isSupabaseApiHost(url.hostname)) return url.toString();
     return `${base}${url.pathname}${url.search}`;
   } catch {
-    return raw;
+    return `${base}/auth/v1/authorize`;
   }
 }
 

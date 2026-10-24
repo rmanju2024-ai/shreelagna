@@ -1,5 +1,5 @@
 import { safeNextPath } from "@/lib/auth/safe-next";
-import { requestSiteOrigin } from "@/lib/site-url";
+import { requestSiteOrigin, supabaseApiOrigin } from "@/lib/site-url";
 import { trustSystemCa } from "@/lib/node/trust-system-ca";
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/login?error=missing_code`);
   }
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const url = supabaseApiOrigin();
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) {
     return NextResponse.redirect(`${origin}/login?error=config`);

@@ -5,8 +5,7 @@ import { updateSession } from "@/lib/supabase/middleware";
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
   if (path.startsWith("/auth/v1")) {
-    const supabase = supabaseAuthUrl(`${path}${request.nextUrl.search}`);
-    if (supabase) return NextResponse.redirect(supabase);
+    return NextResponse.redirect(supabaseAuthUrl(`${path}${request.nextUrl.search}`));
   }
   const live = canonicalSiteUrl(`${path}${request.nextUrl.search}`, request.nextUrl.host);
   if (live) {

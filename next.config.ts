@@ -1,5 +1,9 @@
 import type { NextConfig } from "next";
 
+const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("supabase.co")
+  ? process.env.NEXT_PUBLIC_SUPABASE_URL.replace(/\/$/, "")
+  : "https://polctldhftsztcjwsvel.supabase.co";
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   compress: true,
@@ -17,6 +21,15 @@ const nextConfig: NextConfig = {
     deviceSizes: [360, 640, 828, 1080, 1440],
     imageSizes: [32, 64, 128, 256],
     remotePatterns: [{ protocol: "https", hostname: "*.supabase.co" }],
+  },
+  async redirects() {
+    return [
+      {
+        source: "/auth/v1/:path*",
+        destination: `${supabaseHost}/auth/v1/:path*`,
+        permanent: false,
+      },
+    ];
   },
   async headers() {
     return [

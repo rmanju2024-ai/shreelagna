@@ -30,4 +30,11 @@ describe("site url", () => {
     );
     expect(supabaseAuthUrl("/auth/v1/authorize?x=1")).toBe("https://abcd.supabase.co/auth/v1/authorize?x=1");
   });
+
+  it("does not treat the public website as supabase", () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://www.marriageconnect.in");
+    expect(supabaseAuthUrl("/auth/v1/authorize")).toBe(
+      "https://polctldhftsztcjwsvel.supabase.co/auth/v1/authorize",
+    );
+  });
 });
