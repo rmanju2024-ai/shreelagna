@@ -43,7 +43,7 @@ export default async function HomePage() {
       <section className="home-values relative w-full">
         <div className={`${pageInner} home-values-intro`}>
           <p>The house</p>
-          <h2 className="font-[family-name:var(--font-display)]">Sanskar, Vishwas, Sambandh.</h2>
+          <h2 className="font-[family-name:var(--font-display)]">What we keep.</h2>
         </div>
         <ul className={`${pageInner} home-value-row`}>
           {[
