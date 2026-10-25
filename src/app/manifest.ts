@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "MarriageConnect.in",
     short_name: "MarriageConnect.in",
-    description: "A garden two families plant. Private introductions across Bharat.",
+    description: "Where hearts unite and families bloom.",
     start_url: "/",
     scope: "/",
     display: "standalone",

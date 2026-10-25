@@ -854,16 +854,8 @@ table { max-width: 100%; }
 .site-name {
   display: inline-flex;
   align-items: baseline;
-  gap: 0;
+  gap: 0.18em;
   white-space: nowrap;
-}
-.site-birds {
-  width: 0.92em;
-  height: 0.62em;
-  margin: 0 0.02em -0.06em;
-  flex: none;
-  align-self: center;
-  overflow: visible;
 }
 .site-name-word {
   display: inline-block;
@@ -874,45 +866,53 @@ table { max-width: 100%; }
     drop-shadow(0 1px 0 rgb(255 247 234 / 80%))
     drop-shadow(0 2px 0 rgb(184 137 76 / 35%));
 }
+.site-name-word.is-connect {
+  color: #c47a22;
+  -webkit-text-fill-color: #c47a22;
+}
 .site-name.is-light .site-name-word {
   color: #fff7ea;
   -webkit-text-fill-color: #fff7ea;
   filter: drop-shadow(0 2px 8px rgb(0 0 0 / 45%));
 }
+.site-name.is-light .site-name-word.is-connect {
+  color: #f3c56a;
+  -webkit-text-fill-color: #f3c56a;
+}
 .site-tld {
   position: relative;
   display: inline-block;
   overflow: hidden;
-  margin-left: 0.04em;
-  padding: 0.08em 0.22em 0.06em;
-  border-radius: 0.32em;
-  color: #3f0e0d;
-  background: linear-gradient(180deg, #ffe7a3, #f5c84c 55%, #c4922e);
+  margin-left: 0.08em;
+  padding: 0.12em 0.28em 0.1em;
+  border-radius: 999px;
+  color: #f4fff4;
+  background: linear-gradient(180deg, #7ed47a, #2f9a44 52%, #1c6d2c);
   font-weight: 800;
   letter-spacing: 0.04em;
   line-height: 1;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 70%),
-    0 2px 0 rgb(111 29 27 / 22%),
-    0 4px 10px rgb(180 120 40 / 28%);
-  transform: translateY(-0.04em);
+    inset 0 1px 0 rgb(255 255 255 / 55%),
+    0 2px 0 rgb(20 80 28 / 35%),
+    0 4px 10px rgb(40 120 50 / 28%);
+  transform: translateY(-0.08em);
 }
 .site-name.is-light .site-tld {
-  color: #3f0e0d;
-  background: linear-gradient(135deg, #ffe7a3, #f5c84c);
-  box-shadow: 0 1px 0 rgb(0 0 0 / 25%);
+  color: #f4fff4;
+  background: linear-gradient(180deg, #7ed47a, #2f9a44 52%, #1c6d2c);
 }
 .site-footer-brand .site-name { font-size: inherit; }
 
 .brand-crest {
-  width: 3rem;
-  height: 3rem;
+  width: 4.6rem;
+  height: 4.6rem;
   flex: none;
   align-self: center;
+  filter: drop-shadow(0 8px 12px rgb(90 40 20 / 22%));
 }
-.brand-crest svg { width: 100%; height: 100%; display: block; }
-.site-head-brand .brand-crest { width: 2.6rem; height: 2.6rem; }
-.site-footer-brand .brand-crest { width: 2.15rem; height: 2.15rem; }
+.brand-crest svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.site-head-brand .brand-crest { width: 4.4rem; height: 4.4rem; }
+.site-footer-brand .brand-crest { width: 3.2rem; height: 3.2rem; }
 
 .brand-tagline {
   margin-top: 0.2rem;
@@ -1116,7 +1116,7 @@ body > .nav-menu {
     text-transform: none !important;
     font-weight: 700 !important;
   }
-  .site-head-brand .brand-crest { width: 2.35rem; height: 2.35rem; }
+  .site-head-brand .brand-crest { width: 3.6rem; height: 3.6rem; }
   .site-head-brand .live-clock {
     display: block !important;
     flex: none !important;
