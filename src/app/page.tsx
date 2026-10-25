@@ -5,7 +5,6 @@ import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { pageInner } from "@/components/site-chrome";
 import { getAuth } from "@/lib/auth/session";
 import { BrandMotto } from "@/components/brand-motto";
-import { SITE_PROMISE } from "@/lib/brand";
 import { btnHero, btnHeroGhost } from "@/lib/ui/classes";
 
 export const dynamic = "force-dynamic";
@@ -22,9 +21,6 @@ export default async function HomePage() {
         <div className="home-split-copy">
           <div className="home-invite">
             <BrandMotto as="h1" />
-            <p className="home-invite-line">
-              {user ? "Welcome back. Your next match is waiting." : SITE_PROMISE}
-            </p>
             <div className="home-invite-actions">
               {user ? (
                 <Link href="/app" className={btnHero}>
@@ -33,9 +29,6 @@ export default async function HomePage() {
               ) : (
                 <GoogleSignIn label="Continue with Gmail" tone="ivory" />
               )}
-              <Link href="/browse" className="home-invite-discover">
-                Discover
-              </Link>
             </div>
           </div>
         </div>

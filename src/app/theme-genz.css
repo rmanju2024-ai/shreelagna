@@ -1051,6 +1051,9 @@ body > .nav-menu {
 }
 
 @media (max-width: 820px) {
+  html, body {
+    overscroll-behavior-y: none;
+  }
   /* Portaled mobile menu: independent of page headers and stacking contexts. */
   body > .nav-menu.is-mobile-sheet {
     z-index: 1100 !important;
@@ -1354,18 +1357,11 @@ body > .nav-menu {
   }
 
   .site-footer {
-    display: block;
-    position: relative;
-    bottom: auto;
-    inset: auto;
-    transform: none;
-    margin-top: 2.2rem;
-    margin-bottom: 0;
-    padding-bottom: calc(4.65rem + env(safe-area-inset-bottom));
+    display: none !important;
   }
   .page-scene {
     background: var(--paper);
-    padding-bottom: 0 !important;
+    padding-bottom: calc(4.65rem + env(safe-area-inset-bottom));
   }
   .site-footer-inner {
     min-height: 3.25rem;
@@ -1422,6 +1418,15 @@ body > .nav-menu {
   --gz-shadow: 0 18px 46px -28px rgb(63 14 13 / 48%);
 }
 
+.page-scene.is-wedding .app-main,
+html[data-scene="wedding"] .app-main {
+  --theme-ink: #6f1d1b;
+  --theme-accent: #c47a22;
+  --theme-accent-soft: rgb(255 236 196 / 94%);
+  --theme-surface: rgb(255 250 240 / 94%);
+  --theme-surface-alt: rgb(247 232 198 / 92%);
+  --gz-shadow: 0 18px 46px -28px rgb(111 29 27 / 42%);
+}
 .page-scene.is-honeymoon .app-main,
 html[data-scene="honeymoon"] .app-main {
   --theme-ink: #174b70;

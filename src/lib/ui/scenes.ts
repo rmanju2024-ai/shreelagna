@@ -5,9 +5,9 @@ export type SceneId = (typeof SCENE_IDS)[number];
 export const SCENE_OPTIONS: { id: SceneId; label: string; hint: string; wash: string }[] = [
   {
     id: "wedding",
-    label: "Mandap décor",
-    hint: "Gold drapes, diyas and wedding petals",
-    wash: "linear-gradient(135deg, #f3d7a4 0%, #c9893f 42%, #8a1f1c 100%)",
+    label: "Royal foil 3D",
+    hint: "Sculpted gold, lotus and depth",
+    wash: "linear-gradient(145deg, #fff6d6 0%, #d4a85a 38%, #8a5a18 72%, #6f1d1b 100%)",
   },
   {
     id: "honeymoon",

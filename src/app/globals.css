@@ -9617,90 +9617,120 @@ a.inbox-name.inbox-open:focus-visible {
   contain: paint;
 }
 
-.wedding-saver {
+.foil-stage {
   position: absolute;
   inset: 0;
+  overflow: hidden;
+  perspective: 72rem;
   background:
-    radial-gradient(ellipse at 20% 0%, rgba(184, 137, 76, 0.28), transparent 46%),
-    radial-gradient(ellipse at 80% 100%, rgba(111, 29, 27, 0.18), transparent 42%),
-    linear-gradient(180deg, #f7ead6 0%, #efe0c6 48%, #e7d3b0 100%);
+    radial-gradient(ellipse at 50% -10%, #fff8e0 0%, transparent 42%),
+    radial-gradient(ellipse at 12% 80%, rgb(111 29 27 / 22%), transparent 40%),
+    linear-gradient(180deg, #f6ead4 0%, #e7d3b0 48%, #c9a56a 100%);
 }
-
-.wedding-saver-wash {
+.foil-stage-sky {
   position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(255, 248, 236, 0.35), transparent 40%, rgba(244, 234, 220, 0.45));
+  inset: 0 0 38%;
+  background:
+    radial-gradient(circle at 70% 18%, rgb(255 236 170 / 55%), transparent 28%),
+    linear-gradient(180deg, #fff7ea, transparent);
 }
-
-.wedding-saver-toran {
+.foil-stage-floor {
   position: absolute;
-  inset: 0 0 auto;
-  height: 4.5rem;
-  display: flex;
-  justify-content: space-between;
-  padding: 0 4%;
+  left: -20%;
+  right: -20%;
+  bottom: -18%;
+  height: 58%;
+  transform: rotateX(62deg);
+  transform-origin: 50% 0;
+  background:
+    repeating-linear-gradient(90deg, rgb(138 90 24 / 18%) 0 1px, transparent 1px 4.5rem),
+    repeating-linear-gradient(0deg, rgb(111 29 27 / 12%) 0 1px, transparent 1px 4.5rem),
+    linear-gradient(180deg, rgb(255 248 230 / 35%), rgb(138 90 24 / 28%));
+  box-shadow: 0 -40px 80px rgb(111 29 27 / 18%);
 }
-
-.wedding-saver-drape {
-  width: 4.2%;
-  height: 100%;
-  border-radius: 0 0 999px 999px;
-  background: linear-gradient(180deg, #8a1f1c, #c45c3a 55%, #e7b56a);
-  opacity: 0.85;
-}
-
-.wedding-saver-mandala {
+.foil-stage-world {
   position: absolute;
-  width: 16rem;
-  height: 16rem;
-  color: rgba(111, 29, 27, 0.16);
+  left: 50%;
+  top: 42%;
+  width: min(28rem, 72vw);
+  height: min(28rem, 72vw);
+  transform: translate(-50%, -54%) rotateX(18deg) rotateY(-16deg);
+  transform-style: preserve-3d;
 }
-
-.wedding-saver-mandala.is-left {
-  left: -3rem;
-  top: 18%;
-}
-
-.wedding-saver-mandala.is-right {
-  right: -3rem;
-  bottom: 12%;
-}
-
-.wedding-saver-diya {
+.foil-ring {
   position: absolute;
-  bottom: 8%;
-  width: 3.2rem;
-  height: 3.2rem;
+  inset: 8%;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 214, 120, 0.9), rgba(184, 80, 20, 0.15) 55%, transparent 70%);
+  border: 0.55rem solid transparent;
+  border-top-color: #fff3c8;
+  border-right-color: #d4a85a;
+  border-bottom-color: #8a5a18;
+  border-left-color: #6f1d1b;
+  box-shadow:
+    inset 0 8px 16px rgb(255 255 255 / 35%),
+    0 18px 36px rgb(63 14 13 / 28%);
+  animation: foil-spin 18s linear infinite;
 }
-
-.wedding-saver-diya.is-left {
-  left: 8%;
+.foil-ring.is-mid {
+  inset: 18%;
+  animation-duration: 12s;
+  animation-direction: reverse;
+  opacity: 0.9;
 }
-
-.wedding-saver-diya.is-right {
-  right: 10%;
+.foil-ring.is-inner {
+  inset: 30%;
+  animation-duration: 9s;
+  border-width: 0.4rem;
 }
-
-.wedding-saver-petal {
+.foil-lotus {
   position: absolute;
-  top: -8%;
-  border-radius: 80% 0 80% 0;
-  opacity: 0.75;
-  animation: petal-fall 16s linear infinite;
+  inset: 34%;
+  transform-style: preserve-3d;
+  animation: foil-bob 4.8s ease-in-out infinite;
 }
-
-.wedding-saver-petal.is-gold {
-  background: #d4a24a;
+.foil-lotus b {
+  position: absolute;
+  left: 50%;
+  top: 8%;
+  width: 1.65rem;
+  height: 4.2rem;
+  margin-left: -0.82rem;
+  border-radius: 80% 80% 40% 40%;
+  transform-origin: 50% 92%;
+  background: linear-gradient(180deg, #fff6d0, #d4a85a 55%, #8a3a2e);
+  box-shadow: 0 8px 16px rgb(63 14 13 / 28%);
 }
-
-.wedding-saver-petal.is-maroon {
-  background: #8a2a24;
+.foil-lotus em {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2.4rem;
+  height: 2.4rem;
+  margin: -1.2rem 0 0 -1.2rem;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 30%, #fff, #ffe9a8 28%, #c47a22 70%, #6f1d1b);
+  box-shadow:
+    0 10px 18px rgb(63 14 13 / 35%),
+    inset 0 2px 0 #fff8e7;
 }
-
-.wedding-saver-petal.is-ivory {
-  background: #fff4e4;
+.foil-orb {
+  position: absolute;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 28%, #fff, #ffe9a8 26%, #d4a85a 62%, rgb(111 29 27 / 0%) 78%);
+  filter: blur(0.2px);
+  animation: foil-float 6.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes foil-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes foil-bob {
+  50% { transform: translateZ(18px) translateY(-8px); }
+}
+@keyframes foil-float {
+  50% { transform: translateY(-12px) scale(1.06); opacity: 0.85; }
 }
 
 .scene-nature {
@@ -9870,7 +9900,7 @@ a.inbox-name.inbox-open:focus-visible {
 }
 
 .scene-theme-card.is-wedding .scene-pick-swatch {
-  background: linear-gradient(135deg, #f3d7a4, #8a1f1c);
+  background: linear-gradient(135deg, #fff6d6, #d4a85a 45%, #6f1d1b);
 }
 
 .scene-theme-card.is-honeymoon .scene-pick-swatch {
@@ -9961,7 +9991,9 @@ a.inbox-name.inbox-open:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .wedding-saver-petal,
+  .foil-ring,
+  .foil-lotus,
+  .foil-orb,
   .honeymoon-photo,
   .honeymoon-mist,
   .honeymoon-river,
