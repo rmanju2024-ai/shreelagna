@@ -21,6 +21,7 @@ export default async function ContactPage() {
           kicker="Help centre"
           title="We’re here for you."
           sub="Questions about a profile, account, or match? Write in your own words. A person from our team will reply."
+          motto={false}
         />
         <div className="help-genz-grid">
           <aside className="help-genz-side">

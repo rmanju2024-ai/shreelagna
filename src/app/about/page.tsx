@@ -21,6 +21,7 @@ export default async function AboutPage() {
           kicker="Our story"
           title="The house."
           sub="Proudly Indian, and built for introductions that feel human—not transactional."
+          motto={false}
         />
 
       <div className="public-card-grid">
