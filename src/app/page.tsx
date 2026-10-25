@@ -84,11 +84,6 @@ export default async function HomePage() {
           <h2 className="font-[family-name:var(--font-display)]">Begin when you are ready</h2>
           <p>A simple, careful start.</p>
           <div className="home-welcome-buttons">
-            {user ? (
-              <Link href="/browse" className={btnHeroGhost}>Discover</Link>
-            ) : (
-              <GoogleSignIn label="Continue with Gmail" tone="ivory" size="lg" />
-            )}
             <Link href="/about" className={btnHeroGhost}>Our story</Link>
           </div>
         </div>
