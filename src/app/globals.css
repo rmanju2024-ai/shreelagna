@@ -8311,7 +8311,7 @@ a.inbox-name.inbox-open:focus-visible {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 0.35rem;
   padding: 1rem 0.85rem 1.15rem;
   background:
@@ -8324,10 +8324,11 @@ a.inbox-name.inbox-open:focus-visible {
 
 .wa-stream {
   list-style: none;
-  margin: 0;
+  margin: auto 0 0;
   padding: 0;
   display: grid;
   gap: 0.4rem;
+  width: 100%;
 }
 
 .wa-bubble {
@@ -8368,17 +8369,19 @@ a.inbox-name.inbox-open:focus-visible {
   border-color: rgba(184, 137, 76, 0.42);
   border-bottom-left-radius: 0.18rem;
 }
-.wa-bubble.is-mine { position: relative; padding-right: 1.6rem; }
-.wa-bubble.is-open { z-index: 12; }
-.wa-msg-tools { position: absolute; top: 0.1rem; right: 0.1rem; z-index: 2; }
+.wa-bubble.is-mine { position: relative; padding-right: 2.4rem; }
+.wa-bubble.is-open { z-index: 12; overflow: visible; }
+.wa-msg-tools { position: absolute; top: 0.05rem; right: 0.05rem; z-index: 4; }
 .wa-msg-more {
-  width: 1.35rem; height: 1.35rem; border: 0; border-radius: 999px; cursor: pointer;
-  background: rgb(255 255 255 / 70%); color: #54656f; font-size: 0.95rem; line-height: 1;
+  width: 2.35rem; height: 2.35rem; min-width: 2.35rem; border: 0; border-radius: 999px; cursor: pointer;
+  display: grid; place-items: center;
+  background: rgb(17 27 33 / 8%); color: #54656f; font-size: 1.2rem; line-height: 1;
+  touch-action: manipulation;
 }
 .wa-msg-menu {
-  position: absolute; top: 0; right: calc(100% + 0.4rem); min-width: 8.8rem; display: grid;
+  position: absolute; top: calc(100% - 0.15rem); right: 0; left: auto; min-width: 9.2rem; display: grid;
   background: #fff; border: 1px solid rgb(11 20 26 / 8%); border-radius: 0.7rem;
-  box-shadow: 0 12px 28px -10px rgb(11 20 26 / 45%); overflow: visible; z-index: 20;
+  box-shadow: 0 12px 28px -10px rgb(11 20 26 / 45%); overflow: visible; z-index: 30;
 }
 .wa-msg-menu button {
   border: 0; background: #fff; text-align: left; padding: 0.6rem 0.85rem; font: inherit; cursor: pointer;

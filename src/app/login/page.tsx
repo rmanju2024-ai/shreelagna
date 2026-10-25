@@ -3,7 +3,7 @@ import { GoogleSignIn } from "./google-button";
 import { getAuth } from "@/lib/auth/session";
 import { safeNextPath } from "@/lib/auth/safe-next";
 import { KalyanBanner } from "@/components/home/kalyan-banner";
-import { SITE_TAGLINE } from "@/lib/brand";
+import { BrandMotto } from "@/components/brand-motto";
 import { cardClass } from "@/lib/ui/classes";
 import { redirect } from "next/navigation";
 
@@ -22,15 +22,12 @@ export default async function LoginPage({
   return (
     <PageShell bleed>
       <div className="login-genz grid min-h-0 flex-1 lg:grid-cols-2">
-        <section className="login-genz-visual relative overflow-hidden" aria-hidden>
-          <KalyanBanner intensity="hero" presentation="cover" veil={false} />
+        <section className="login-genz-visual home-split-art relative overflow-hidden" aria-hidden>
+          <KalyanBanner intensity="hero" presentation="complete" veil={false} />
         </section>
-        <section className="login-genz-action relative flex flex-col justify-center px-5 py-8 sm:px-10 lg:px-16">
-          <h1 className="home-split-title foil-title font-[family-name:var(--font-display)]">
-            {SITE_TAGLINE}
-          </h1>
-          <span className="home-tag-ornament" aria-hidden />
-          <div className={`${cardClass} card-3d login-genz-card mt-5 p-7 sm:p-8`}>
+        <section className="login-genz-action home-split-copy relative flex flex-col justify-center">
+          <BrandMotto />
+          <div className={`${cardClass} card-3d login-genz-card p-7 sm:p-8`}>
             <h2 className="font-[family-name:var(--font-display)] text-2xl sm:text-3xl">Sign in</h2>
             <p className="mb-6 mt-2 text-sm leading-relaxed text-[var(--muted)]">
               Use the Gmail you registered with.

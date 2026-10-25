@@ -4,7 +4,7 @@ import { KalyanBanner } from "@/components/home/kalyan-banner";
 import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { pageInner } from "@/components/site-chrome";
 import { getAuth } from "@/lib/auth/session";
-import { SITE_TAGLINE } from "@/lib/brand";
+import { BrandMotto } from "@/components/brand-motto";
 import { btnHero, btnHeroGhost } from "@/lib/ui/classes";
 
 export const dynamic = "force-dynamic";
@@ -19,10 +19,7 @@ export default async function HomePage() {
           <KalyanBanner intensity="hero" presentation="complete" veil={false} />
         </div>
         <div className="home-split-copy">
-          <h1 className="home-split-title foil-title font-[family-name:var(--font-display)]">
-            {SITE_TAGLINE}
-          </h1>
-          <span className="home-tag-ornament" aria-hidden />
+          <BrandMotto as="h1" />
           <p className="home-split-sub">
             {user ? "Welcome back. Your next match is waiting." : "A kind place to begin a marriage."}
           </p>

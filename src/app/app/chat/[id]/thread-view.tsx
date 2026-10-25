@@ -36,8 +36,10 @@ export function ThreadView({
   const [goneIds, setGoneIds] = useState<string[]>([]);
   const [, startTransition] = useTransition();
   const endRef = useRef<HTMLLIElement | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
   const boxRef = useRef<HTMLTextAreaElement | null>(null);
   const sendLockRef = useRef(false);
+  const holdRef = useRef<number | null>(null);
 
   const shown = useMemo(() => {
     const open = pending.filter(
@@ -47,8 +49,21 @@ export function ThreadView({
   }, [messages, pending]);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView?.({ block: "end" });
+    const stage = stageRef.current;
+    if (!stage) return;
+    stage.scrollTop = stage.scrollHeight;
   }, [shown.length]);
+
+  useEffect(() => {
+    if (!menuId) return;
+    function close(event: PointerEvent) {
+      const node = event.target;
+      if (node instanceof Element && node.closest(".wa-bubble.is-open")) return;
+      setMenuId(null);
+    }
+    document.addEventListener("pointerdown", close);
+    return () => document.removeEventListener("pointerdown", close);
+  }, [menuId]);
 
   function send() {
     if (sendLockRef.current) return;
@@ -104,6 +119,17 @@ export function ThreadView({
     boxRef.current?.focus();
   }
 
+  function clearHold() {
+    if (holdRef.current) window.clearTimeout(holdRef.current);
+    holdRef.current = null;
+  }
+
+  function startHold(msg: Msg, mine: boolean, gone: boolean) {
+    if (!mine || gone || msg.pending) return;
+    clearHold();
+    holdRef.current = window.setTimeout(() => setMenuId(msg.id), 420);
+  }
+
   function remove(msg: Msg) {
     setMenuId(null);
     setGoneIds((prev) => (prev.includes(msg.id) ? prev : [...prev, msg.id]));
@@ -117,7 +143,7 @@ export function ThreadView({
 
   return (
     <>
-      <div className="wa-stage">
+      <div className="wa-stage" ref={stageRef}>
         <ul className="wa-stream">
           {shown.map((msg, index) => {
             const mine = msg.sender_profile_id === myProfileId;
@@ -127,6 +153,15 @@ export function ThreadView({
                 key={msg.id}
                 ref={index === shown.length - 1 ? endRef : undefined}
                 className={`wa-bubble ${mine ? "is-mine" : "is-theirs"}${gone ? " is-deleted" : ""}${menuId === msg.id ? " is-open" : ""}`}
+                onPointerDown={() => startHold(msg, mine, gone)}
+                onPointerUp={clearHold}
+                onPointerCancel={clearHold}
+                onPointerLeave={clearHold}
+                onContextMenu={(event) => {
+                  if (!mine || gone || msg.pending) return;
+                  event.preventDefault();
+                  setMenuId(msg.id);
+                }}
               >
                 {mine && !msg.pending && !gone ? (
                   <div className="wa-msg-tools">

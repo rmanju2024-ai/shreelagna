@@ -460,7 +460,7 @@ table { max-width: 100%; }
   .wc-shell.has-thread .wc-side { display: none; }
   .wc-side { border-right: 0; }
   .wc-list { max-height: none; }
-  .wc-pane .wa-stage { min-height: 55dvh; max-height: 65dvh; }
+  .wc-pane .wa-stage { min-height: 0; max-height: none; }
   /* generic wide content */
   .profile-grid, .two-col, .form-grid { grid-template-columns: 1fr; }
 }
@@ -811,21 +811,21 @@ table { max-width: 100%; }
 @media (max-width: 820px) { .wc-pane .wa-back { display: grid !important; } }
 
 .wc-pane .wa-stage {
-  justify-content: flex-end; padding: 1rem 6%; gap: 0;
+  justify-content: flex-start; padding: 1rem 6%; gap: 0;
   background-color: #efeae2;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23d9d2c5' stroke-width='1.2' opacity='.7'%3E%3Ccircle cx='20' cy='22' r='6'/%3E%3Cpath d='M60 18l8 8-8 8-8-8z'/%3E%3Cpath d='M96 20c6-6 12 0 6 8s-12 2-6-8z'/%3E%3Cpath d='M22 74l10 4-4 10z'/%3E%3Ccircle cx='70' cy='78' r='4'/%3E%3Cpath d='M98 82h14M105 75v14'/%3E%3Cpath d='M30 108q8-8 16 0'/%3E%3C/g%3E%3C/svg%3E");
 }
 .wc-pane .wa-stream { display: flex; flex-direction: column; gap: 0.25rem; overflow: visible; }
 .wc-pane .wa-bubble.is-open { z-index: 12; }
-.wc-pane .wa-msg-menu { right: calc(100% + 0.45rem); left: auto; top: 0; min-width: 8.8rem; }
+.wc-pane .wa-msg-menu { right: 0; left: auto; top: calc(100% - 0.1rem); min-width: 9.2rem; }
 .wc-pane .wa-bubble {
   position: relative; width: fit-content; max-width: min(75%, 34rem); padding: 0.4rem 0.6rem 0.25rem; border: 0;
   border-radius: 0.5rem; box-shadow: 0 1px 0.5px rgb(11 20 26 / 13%); color: #111b21; animation: wa-in 0.18s ease both;
 }
 .wc-pane .wa-bubble p { font-size: 0.92rem; line-height: 1.35; }
 .wc-pane .wa-bubble time { display: inline-block; float: right; margin: 0.3rem 0 0 0.6rem; font-size: 0.66rem; color: #667781; }
-.wc-pane .wa-bubble.is-mine { align-self: flex-end; background: #d9fdd3; border-top-right-radius: 0; margin-left: 0; padding-right: 1.7rem; }
-.wc-pane .wa-msg-more { background: rgb(217 253 211 / 85%); }
+.wc-pane .wa-bubble.is-mine { align-self: flex-end; background: #d9fdd3; border-top-right-radius: 0; margin-left: 0; padding-right: 2.45rem; }
+.wc-pane .wa-msg-more { background: rgb(17 27 33 / 10%); }
 .wc-pane .wa-bubble.is-deleted p { color: #667781; }
 .wc-pane .wa-bubble.is-theirs { align-self: flex-start; background: #fff; border-top-left-radius: 0; margin-right: 0; }
 .wc-pane .wa-bubble.is-mine::before, .wc-pane .wa-bubble.is-theirs::before { content: ""; position: absolute; top: 0; width: 0.6rem; height: 0.8rem; }
@@ -854,12 +854,13 @@ table { max-width: 100%; }
   .wc-loading-bubbles i { animation: none; }
 }
 
-/* Chat scroll: old messages reachable (flex-end clipped the top), visible slim scrollbar */
+/* Chat scroll: do not use flex-end on the scroller — that clips older messages. */
 .wc-pane .wa-stage {
-  display: flex; flex-direction: column; justify-content: flex-end !important;
+  display: flex; flex-direction: column; justify-content: flex-start !important;
   overflow-y: scroll; scrollbar-width: thin; scrollbar-color: #b8b0a2 transparent; overscroll-behavior: contain;
+  touch-action: pan-y;
 }
-.wc-pane .wa-stream { margin-top: auto; }
+.wc-pane .wa-stream { margin-top: auto; width: 100%; }
 .inbox-unified .wc-shell.has-thread {
   height: 100%; min-height: 0; max-height: none;
 }
@@ -1326,8 +1327,10 @@ body > .nav-menu {
   .wc-shell:not(.has-thread) .wc-side { height: 100%; min-height: 0; }
   .wc-pane .wa-stage {
     flex: 1 1 auto; height: 0; min-height: 0; max-height: none;
+    justify-content: flex-start !important;
     overflow-y: scroll !important; -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain; scrollbar-width: thin;
+    touch-action: pan-y;
   }
   .wc-pane .wa-stage::-webkit-scrollbar { width: 6px; }
   .wc-pane .wa-stage::-webkit-scrollbar-thumb {
@@ -1447,6 +1450,11 @@ html[data-scene="couple"] .app-main {
 .app-main .foil-title.is-light {
   color: #fff8e7;
   background-image: linear-gradient(180deg, #fff8e7, #f3c56a 70%, #d4a85a);
+}
+.app-main .brand-motto,
+.app-main .brand-motto > span {
+  color: #6f1d1b;
+  -webkit-text-fill-color: #6f1d1b;
 }
 .app-main .home-split-title,
 .app-main .home-values-intro h2,
@@ -1838,7 +1846,6 @@ html[data-scene="couple"] .app-main {
   max-height: 44svh;
 }
 .login-genz-visual h1 { color: #fff7ea; }
-.login-genz-action .home-split-title { max-width: 16ch; }
 @media (min-width: 1024px) {
   .login-genz-visual {
     min-height: 100%;
@@ -2105,6 +2112,50 @@ html[data-scene="couple"] .app-main {
   object-fit: cover !important; opacity: 0.4 !important; filter: blur(22px) !important;
 }
 .home-split-copy { display: flex; flex-direction: column; justify-content: center; gap: 1.15rem; padding: clamp(1.8rem, 5.5vw, 4.5rem); color: #3f0e0d; }
+.brand-motto {
+  display: grid;
+  justify-items: start;
+  gap: 0.42rem;
+  margin: 0;
+  max-width: 22rem;
+}
+.brand-motto > span {
+  font-family: var(--font-display), ui-serif, serif;
+  font-size: clamp(0.92rem, 2.2vw, 1.12rem);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  line-height: 1.25;
+  text-transform: uppercase;
+  color: #6f1d1b;
+  text-shadow:
+    0 1px 0 #fff8e7,
+    0 2px 0 rgb(184 137 76 / 40%),
+    0 8px 16px rgb(111 29 27 / 18%);
+}
+.brand-motto-rule {
+  display: block;
+  width: 6.4rem;
+  height: 0.42rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffe9a8 0%, #d4a85a 48%, #8a5a18 100%);
+  box-shadow:
+    inset 0 1px 0 #fff6d0,
+    0 1px 0 rgb(111 29 27 / 22%),
+    0 4px 10px rgb(138 90 24 / 30%);
+  position: relative;
+}
+.brand-motto-rule::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 0.08rem;
+  transform: translate(-50%, -50%) rotate(45deg);
+  background: linear-gradient(135deg, #fff3c8, #d4a85a 55%, #8a5a18);
+  box-shadow: 0 1px 2px rgb(63 14 13 / 35%);
+}
 .home-split-copy .home-hero-kicker {
   display: block;
   width: auto;
