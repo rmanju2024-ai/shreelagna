@@ -3,7 +3,6 @@ import { GoogleSignIn } from "./google-button";
 import { getAuth } from "@/lib/auth/session";
 import { safeNextPath } from "@/lib/auth/safe-next";
 import { KalyanBanner } from "@/components/home/kalyan-banner";
-import { BrandMark } from "@/components/brand-mark";
 import { SITE_TAGLINE } from "@/lib/brand";
 import { cardClass } from "@/lib/ui/classes";
 import { redirect } from "next/navigation";
@@ -22,26 +21,18 @@ export default async function LoginPage({
 
   return (
     <PageShell bleed>
-      <div className="login-genz grid min-h-dvh flex-1 lg:grid-cols-2">
-        <section className="login-genz-visual relative min-h-[42vh] overflow-hidden lg:min-h-full">
-          <KalyanBanner intensity="hero" />
-          <div className="relative z-10 flex h-full flex-col justify-end px-8 py-12 lg:justify-center lg:px-14">
-            <BrandMark light />
-            <p className="foil-title is-light mt-8 max-w-lg font-[family-name:var(--font-display)] text-2xl leading-snug sm:text-3xl">
-              {SITE_TAGLINE}
-            </p>
-            <h1 className="mt-4 max-w-lg font-[family-name:var(--font-display)] text-3xl leading-tight text-[#f7efe4] sm:text-4xl">
-              Sign in with the Gmail you registered with.
-            </h1>
-          </div>
+      <div className="login-genz grid min-h-0 flex-1 lg:grid-cols-2">
+        <section className="login-genz-visual relative overflow-hidden" aria-hidden>
+          <KalyanBanner intensity="hero" presentation="cover" veil />
+          <p className="login-genz-tagline foil-title is-light font-[family-name:var(--font-display)]">
+            {SITE_TAGLINE}
+          </p>
         </section>
-        <section className="login-genz-action relative flex flex-col justify-center px-6 py-14 sm:px-10 lg:px-16">
-          <div className={`${cardClass} card-3d login-genz-card p-8`}>
-            <h2 className="font-[family-name:var(--font-display)] text-2xl">Welcome back</h2>
-            <p className="login-genz-chip">✨ One tap, you’re in</p>
-            <p className="mb-6 text-sm leading-relaxed text-[var(--muted)]">
-              Continue with the same Gmail. Your profile and member ID stay with
-              that address. New families may also begin here in this one step.
+        <section className="login-genz-action relative flex flex-col justify-center px-5 py-8 sm:px-10 lg:px-16">
+          <div className={`${cardClass} card-3d login-genz-card p-7 sm:p-8`}>
+            <h1 className="font-[family-name:var(--font-display)] text-2xl sm:text-3xl">Sign in</h1>
+            <p className="mb-6 mt-2 text-sm leading-relaxed text-[var(--muted)]">
+              Use the Gmail you registered with.
             </p>
             {error === "network" ? (
               <p className="mb-6 rounded-md border border-red-200 bg-white px-3 py-2 text-sm text-red-800">

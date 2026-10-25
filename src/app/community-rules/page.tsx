@@ -5,7 +5,7 @@ export const metadata: Metadata = { title: "Community Rules", description: "Safe
 
 export default function CommunityRulesPage() {
   return <LegalPage
-    kicker="Sambandha with respect"
+    kicker="Respect first"
     title="Community Rules"
     summary="A private place for serious introductions—kind, clear, and safe for every member."
     sections={[
