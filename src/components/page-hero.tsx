@@ -14,7 +14,7 @@ export function PageHero({
     <header className="sx-hero">
       <div className="sx-hero-copy">
         {kicker ? <p className="sx-eyebrow">{kicker}</p> : null}
-        <h1>{title}</h1>
+        <h1 className="foil-title">{title}</h1>
         {sub ? <p className="sx-hero-sub">{sub}</p> : null}
       </div>
       {stat ? (

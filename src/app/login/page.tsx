@@ -27,10 +27,10 @@ export default async function LoginPage({
           <KalyanBanner intensity="hero" />
           <div className="relative z-10 flex h-full flex-col justify-end px-8 py-12 lg:justify-center lg:px-14">
             <BrandMark light />
-            <p className="mt-8 text-[11px] uppercase tracking-[0.28em] text-[var(--gold-soft)]">
+            <p className="foil-title is-light mt-8 max-w-lg font-[family-name:var(--font-display)] text-2xl leading-snug sm:text-3xl">
               {SITE_TAGLINE}
             </p>
-            <h1 className="mt-3 max-w-lg font-[family-name:var(--font-display)] text-4xl leading-tight text-[#f7efe4] sm:text-5xl">
+            <h1 className="mt-4 max-w-lg font-[family-name:var(--font-display)] text-3xl leading-tight text-[#f7efe4] sm:text-4xl">
               Sign in with the Gmail you registered with.
             </h1>
           </div>

@@ -19,9 +19,10 @@ export default async function HomePage() {
           <KalyanBanner intensity="hero" presentation="complete" veil={false} />
         </div>
         <div className="home-split-copy">
-          <h1 className="home-split-title font-[family-name:var(--font-display)]">
+          <h1 className="home-split-title foil-title font-[family-name:var(--font-display)]">
             {SITE_TAGLINE}
           </h1>
+          <span className="home-tag-ornament" aria-hidden />
           <p className="home-split-sub">
             {user ? "Welcome back. Your next match is waiting." : "A kind place to begin a marriage."}
           </p>

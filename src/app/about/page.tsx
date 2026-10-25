@@ -27,7 +27,7 @@ export default async function AboutPage() {
         {[
           [
             "Who we serve",
-            "Families in every state and union territory of India.",
+            "Indian families, with care and respect.",
           ],
           [
             "How you begin",
