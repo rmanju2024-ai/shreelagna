@@ -904,15 +904,22 @@ table { max-width: 100%; }
 .site-footer-brand .site-name { font-size: inherit; }
 
 .brand-crest {
-  width: 4.6rem;
-  height: 4.6rem;
+  width: 5.1rem;
+  height: 5.1rem;
   flex: none;
+  flex-shrink: 0;
   align-self: center;
-  filter: drop-shadow(0 8px 12px rgb(90 40 20 / 22%));
 }
-.brand-crest svg { width: 100%; height: 100%; display: block; overflow: visible; }
-.site-head-brand .brand-crest { width: 4.4rem; height: 4.4rem; }
-.site-footer-brand .brand-crest { width: 3.2rem; height: 3.2rem; }
+.brand-crest img,
+.brand-crest svg {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  display: block;
+  object-fit: contain;
+}
+.site-head-brand .brand-crest { width: 5.1rem; height: 5.1rem; }
+.site-footer-brand .brand-crest { width: 3.6rem; height: 3.6rem; }
 
 .brand-tagline {
   margin-top: 0.2rem;
@@ -1098,40 +1105,26 @@ body > .nav-menu {
     display: flex !important;
     flex: 1 1 auto !important;
     min-width: 0 !important;
-    gap: 0.4rem !important;
+    gap: 0.45rem !important;
+    overflow: visible;
   }
   .site-head-brand .brand-wordmark {
     display: flex !important;
     min-width: 0 !important;
   }
   .site-head-brand .brand-wordmark > span:first-child {
-    font-size: 1.15rem !important;
-    line-height: 1.1;
+    font-size: 1.42rem !important;
+    line-height: 1.05;
   }
-  .site-head-brand .brand-wordmark > span:last-child,
   .site-head-brand .brand-tagline {
-    margin-top: 0.12rem !important;
-    font-size: 0.72rem !important;
-    letter-spacing: 0.03em !important;
-    text-transform: none !important;
-    font-weight: 700 !important;
+    display: none !important;
   }
-  .site-head-brand .brand-crest { width: 3.6rem; height: 3.6rem; }
+  .site-head-brand .brand-crest { width: 4.6rem !important; height: 4.6rem !important; }
+  .site-head-brand .site-name {
+    font-size: clamp(1.18rem, 5.4vw, 1.5rem);
+  }
   .site-head-brand .live-clock {
-    display: block !important;
-    flex: none !important;
-    min-width: 0 !important;
-    max-width: 42%;
-  }
-  .site-head-brand .live-clock p:first-child {
-    font-size: 0.62rem !important;
-    line-height: 1.2;
-    white-space: normal !important;
-  }
-  .site-head-brand .live-clock p:last-child {
-    margin-top: 0;
-    font-size: 1.05rem !important;
-    line-height: 1.15;
+    display: none !important;
   }
   .header-profile-chip {
     display: inline-flex !important;
