@@ -49,7 +49,7 @@ export default async function SettingsPage({
   return (
     <PageShell><BackToAccount />
       <div className="settings-page sx-stage">
-        <PageHero kicker="Account" title="Settings" sub="Look, alerts and privacy." />
+        <PageHero kicker="Account" title="Settings" sub="Look, alerts and privacy." motto={false} />
         {error === "save" ? (
           <p className="browse-flash is-warn" role="alert">
             Settings could not be saved. Please try again.

@@ -7,9 +7,8 @@ export function BrandMotto({
 }) {
   return (
     <Tag className="brand-motto" aria-label={SITE_TAGLINE}>
-      <span>Where hearts unite</span>
+      <span>Where hearts unite and families bloom.</span>
       <i className="brand-motto-rule" aria-hidden />
-      <span>and families bloom</span>
     </Tag>
   );
 }

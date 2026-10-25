@@ -5,6 +5,7 @@ import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { pageInner } from "@/components/site-chrome";
 import { getAuth } from "@/lib/auth/session";
 import { BrandMotto } from "@/components/brand-motto";
+import { SITE_PROMISE } from "@/lib/brand";
 import { btnHero, btnHeroGhost } from "@/lib/ui/classes";
 
 export const dynamic = "force-dynamic";
@@ -19,21 +20,23 @@ export default async function HomePage() {
           <KalyanBanner intensity="hero" presentation="complete" veil={false} />
         </div>
         <div className="home-split-copy">
-          <BrandMotto as="h1" />
-          <p className="home-split-sub">
-            {user ? "Welcome back. Your next match is waiting." : "A kind place to begin a marriage."}
-          </p>
-          <div className="home-welcome-buttons">
-            {user ? (
-              <Link href="/app" className={btnHero}>
-                My profile
+          <div className="home-invite">
+            <BrandMotto as="h1" />
+            <p className="home-invite-line">
+              {user ? "Welcome back. Your next match is waiting." : SITE_PROMISE}
+            </p>
+            <div className="home-invite-actions">
+              {user ? (
+                <Link href="/app" className={btnHero}>
+                  My profile
+                </Link>
+              ) : (
+                <GoogleSignIn label="Continue with Gmail" tone="ivory" />
+              )}
+              <Link href="/browse" className="home-invite-discover">
+                Discover
               </Link>
-            ) : (
-              <GoogleSignIn label="Continue with Gmail" tone="ivory" size="lg" />
-            )}
-            <Link href="/browse" className={btnHeroGhost}>
-              Discover
-            </Link>
+            </div>
           </div>
         </div>
       </section>

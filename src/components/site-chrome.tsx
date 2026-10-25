@@ -170,8 +170,8 @@ export function SiteFooter({ glass = false }: { glass?: boolean }) {
     <footer
       className={`site-footer ${
         glass
-          ? "relative z-20 mt-auto w-full border-t border-[var(--gold)]/30 bg-[#3f0e0d]/70 backdrop-blur-xl"
-          : "relative z-20 mt-auto w-full border-t border-[var(--gold)]/35 bg-[#3f0e0d]"
+          ? "relative z-20 w-full border-t border-[var(--gold)]/30 bg-[#3f0e0d]/70 backdrop-blur-xl"
+          : "relative z-20 w-full border-t border-[var(--gold)]/35 bg-[#3f0e0d]"
       }`}
     >
       <div className={`${pageInner} site-footer-inner`}>

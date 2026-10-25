@@ -4,6 +4,7 @@ import { getAuth } from "@/lib/auth/session";
 import { safeNextPath } from "@/lib/auth/safe-next";
 import { KalyanBanner } from "@/components/home/kalyan-banner";
 import { BrandMotto } from "@/components/brand-motto";
+import { SITE_PROMISE } from "@/lib/brand";
 import { cardClass } from "@/lib/ui/classes";
 import { redirect } from "next/navigation";
 
@@ -26,7 +27,10 @@ export default async function LoginPage({
           <KalyanBanner intensity="hero" presentation="complete" veil={false} />
         </section>
         <section className="login-genz-action home-split-copy relative flex flex-col justify-center">
-          <BrandMotto />
+          <div className="home-invite">
+            <BrandMotto />
+            <p className="home-invite-line">{SITE_PROMISE}</p>
+          </div>
           <div className={`${cardClass} card-3d login-genz-card p-7 sm:p-8`}>
             <h2 className="font-[family-name:var(--font-display)] text-2xl sm:text-3xl">Sign in</h2>
             <p className="mb-6 mt-2 text-sm leading-relaxed text-[var(--muted)]">

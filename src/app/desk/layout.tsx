@@ -15,6 +15,7 @@ export default async function DeskLayout({ children }: { children: React.ReactNo
             kicker="Private workspace"
             title="Staff access needed"
             sub="This desk is reserved for family operators. Ask an admin to add the service role to your Gmail."
+            motto={false}
           />
           <div className="gz-empty-state">
             <span className="gz-empty-icon" aria-hidden>🔐</span>

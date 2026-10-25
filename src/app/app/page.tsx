@@ -36,6 +36,7 @@ export default async function AppHome() {
         kicker="You’re signed in"
         title="Ready to start your story?"
         sub={`Create the profile connected to ${user.email}. You can save a draft and finish it anytime.`}
+        motto={false}
       />
       <div className={`${cardClass} gz-empty-state`}>
         <span className="gz-empty-icon" aria-hidden>✨</span>
