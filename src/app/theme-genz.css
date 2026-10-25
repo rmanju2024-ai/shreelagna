@@ -1343,8 +1343,11 @@ body > .nav-menu {
   }
 
   .site-footer {
-    margin-bottom: calc(4.65rem + env(safe-area-inset-bottom));
-    padding-bottom: 0;
+    display: none;
+  }
+  .page-scene {
+    background: var(--paper);
+  }
   }
   .site-footer-inner {
     min-height: 3.25rem;
@@ -1831,37 +1834,20 @@ html[data-scene="couple"] .app-main {
 }
 .login-genz-visual {
   min-height: 16rem;
-  aspect-ratio: 4 / 3.1;
-  max-height: 42svh;
+  aspect-ratio: 4 / 3.15;
+  max-height: 44svh;
 }
-.login-genz-visual .login-genz-tagline {
-  position: absolute;
-  left: 1.1rem;
-  right: 1.1rem;
-  bottom: 1.1rem;
-  z-index: 10;
-  margin: 0;
-  max-width: 18ch;
-  font-size: clamp(1.35rem, 4vw, 2rem);
-  line-height: 1.15;
-}
+.login-genz-action .home-split-title { max-width: 16ch; }
 @media (min-width: 1024px) {
   .login-genz-visual {
     min-height: 100%;
     aspect-ratio: auto;
     max-height: none;
   }
-  .login-genz-visual .login-genz-tagline {
-    left: 2.5rem;
-    right: 2.5rem;
-    bottom: auto;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: clamp(1.8rem, 3vw, 2.8rem);
-  }
   .login-genz-action { padding-bottom: 2rem; }
 }
-.login-genz-card h1 { color: #5c1816; }
+.login-genz-card h1,
+.login-genz-card h2 { color: #5c1816; }
 .login-genz-card { max-width: 34rem; width: 100%; border-radius: 1.7rem; }
 .login-genz-chip, .profile-create-tip {
   display: inline-flex; width: fit-content; padding: 0.35rem 0.7rem; border-radius: 999px;
