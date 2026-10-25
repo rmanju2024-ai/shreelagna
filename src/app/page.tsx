@@ -4,7 +4,7 @@ import { KalyanBanner } from "@/components/home/kalyan-banner";
 import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { pageInner } from "@/components/site-chrome";
 import { getAuth } from "@/lib/auth/session";
-import { SITE_PROMISE } from "@/lib/brand";
+import { SITE_TAGLINE } from "@/lib/brand";
 import { btnHero, btnHeroGhost } from "@/lib/ui/classes";
 
 export const dynamic = "force-dynamic";
@@ -19,12 +19,11 @@ export default async function HomePage() {
           <KalyanBanner intensity="hero" presentation="complete" veil={false} />
         </div>
         <div className="home-split-copy">
-          <p className="home-hero-kicker">Shubh vivah</p>
           <h1 className="home-split-title font-[family-name:var(--font-display)]">
-            Come home to a blessed yes.
+            {SITE_TAGLINE}
           </h1>
           <p className="home-split-sub">
-            {user ? "Your next introduction is waiting." : SITE_PROMISE}
+            {user ? "Welcome back. Your next match is waiting." : "A kind place to begin a marriage."}
           </p>
           <div className="home-welcome-buttons">
             {user ? (
@@ -44,7 +43,7 @@ export default async function HomePage() {
       <section className="home-values relative w-full">
         <div className={`${pageInner} home-values-intro`}>
           <p>The house</p>
-          <h2 className="font-[family-name:var(--font-display)]">Sanskar, vishwas, sambandh.</h2>
+          <h2 className="font-[family-name:var(--font-display)]">Sanskar, Vishwas, Sambandh.</h2>
         </div>
         <ul className={`${pageInner} home-value-row`}>
           {[
@@ -66,9 +65,9 @@ export default async function HomePage() {
           <h2 className="font-[family-name:var(--font-display)]">Begin in three steps</h2>
           <ol>
             {[
-              ["01", "Share your ghar", "A few photos, a little of your story."],
+              ["01", "Share your story", "A few photos, and a little about you."],
               ["02", "Find a match", "Values, community, and Kundali."],
-              ["03", "Send a rishta", "Interest first. Chat when both say haan."],
+              ["03", "Send interest", "Reach out first. Chat when both agree."],
             ].map(([n, title, text]) => (
               <li key={n}>
                 <b>{n}</b>
@@ -82,8 +81,8 @@ export default async function HomePage() {
 
       <section className="home-final">
         <div className={pageInner}>
-          <h2 className="font-[family-name:var(--font-display)]">Shubh aarambh</h2>
-          <p>When the heart feels ready.</p>
+          <h2 className="font-[family-name:var(--font-display)]">Begin when you are ready</h2>
+          <p>A simple, careful start.</p>
           <div className="home-welcome-buttons">
             {user ? (
               <Link href="/browse" className={btnHeroGhost}>Discover</Link>

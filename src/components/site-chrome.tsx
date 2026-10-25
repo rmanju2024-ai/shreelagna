@@ -188,7 +188,7 @@ export function SiteFooter({ glass = false }: { glass?: boolean }) {
           <Link href="/verification">Verification</Link>
           <Link href="/refunds">Refunds</Link>
         </nav>
-        <p>Adults only · Indian families · Private introductions</p>
+        <p>Adults only · Indian families</p>
       </div>
     </footer>
   );
