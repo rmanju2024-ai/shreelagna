@@ -1,137 +1,140 @@
 "use client";
 
-/* Natural sunrise lake — reference: warm peach sky, rolling hills, temple, birds, lotus */
+/**
+ * KalyanBanner — natural sunrise lake scene
+ * Sky: warm peach → rolling hills → temple → birds → teal lake → lotus
+ */
 
+/* ── Lotus bloom ─────────────────────────────────────────────── */
 function Lotus({ side }: { side: "l" | "r" }) {
-  const id = side;
+  const p = side; // gradient ID prefix (keeps left/right isolated)
+  // Petal angles for each ring
+  const outerA = [0, 45, 90, 135, 180, 225, 270, 315];
+  const midA   = [22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5];
+  const innerA = [0, 72, 144, 216, 288];
+
   return (
-    <svg viewBox="0 0 180 170" fill="none" aria-hidden>
+    <svg viewBox="0 0 200 210" fill="none" aria-hidden>
       <defs>
-        <radialGradient id={`lp-pad-${id}`} cx="50%" cy="35%">
-          <stop offset="0%" stopColor="#98d870" />
-          <stop offset="55%" stopColor="#5ab840" />
-          <stop offset="100%" stopColor="#2e8020" />
+        {/* Lily pad */}
+        <radialGradient id={`${p}pad`} cx="38%" cy="32%">
+          <stop offset="0%" stopColor="#b8e880" />
+          <stop offset="52%" stopColor="#58c038" />
+          <stop offset="100%" stopColor="#2a7c18" />
         </radialGradient>
-        <radialGradient id={`lp-ps-${id}`} cx="50%" cy="60%">
-          <stop offset="0%" stopColor="#228020" stopOpacity=".45" />
-          <stop offset="100%" stopColor="#228020" stopOpacity="0" />
+        {/* Outer petals — rich rose-pink, lighter at centre */}
+        <radialGradient id={`${p}op`} cx="50%" cy="48%">
+          <stop offset="0%"   stopColor="#fde4ef" />
+          <stop offset="40%"  stopColor="#f290b2" />
+          <stop offset="85%"  stopColor="#d85880" />
+          <stop offset="100%" stopColor="#c04870" />
         </radialGradient>
-        {/* Outer petals — vibrant rose-pink */}
-        <linearGradient id={`lp-o-${id}`} x1="90" y1="15" x2="90" y2="120" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#f8c8d8" />
-          <stop offset="40%" stopColor="#f090a8" />
-          <stop offset="85%" stopColor="#e05880" />
-          <stop offset="100%" stopColor="#c04060" />
-        </linearGradient>
-        {/* Mid petals */}
-        <linearGradient id={`lp-m-${id}`} x1="90" y1="30" x2="90" y2="112" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#fff0f4" />
-          <stop offset="35%" stopColor="#f8c0d0" />
-          <stop offset="100%" stopColor="#e87098" />
-        </linearGradient>
-        {/* Inner petals — soft blush */}
-        <linearGradient id={`lp-i-${id}`} x1="90" y1="40" x2="90" y2="100" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#fff" />
-          <stop offset="60%" stopColor="#ffe8f0" />
-          <stop offset="100%" stopColor="#f0b0c8" />
-        </linearGradient>
-        {/* Stamen */}
-        <radialGradient id={`lp-st-${id}`} cx="42%" cy="32%">
-          <stop offset="0%" stopColor="#fff8c0" />
-          <stop offset="45%" stopColor="#f0d040" />
-          <stop offset="100%" stopColor="#c89020" />
+        {/* Middle petals — softer rose */}
+        <radialGradient id={`${p}mp`} cx="50%" cy="48%">
+          <stop offset="0%"   stopColor="#fff4f8" />
+          <stop offset="38%"  stopColor="#f8b8d0" />
+          <stop offset="100%" stopColor="#e07098" />
         </radialGradient>
-        {/* Water glow under pad */}
-        <radialGradient id={`lp-gw-${id}`} cx="50%" cy="80%">
-          <stop offset="0%" stopColor="#c8f0e8" stopOpacity=".7" />
-          <stop offset="100%" stopColor="#c8f0e8" stopOpacity="0" />
+        {/* Inner petals — blush-white */}
+        <radialGradient id={`${p}ip`} cx="50%" cy="48%">
+          <stop offset="0%"   stopColor="#ffffff" />
+          <stop offset="30%"  stopColor="#fce8f2" />
+          <stop offset="100%" stopColor="#f0a8c4" />
+        </radialGradient>
+        {/* Stamen disc */}
+        <radialGradient id={`${p}st`} cx="40%" cy="32%">
+          <stop offset="0%"   stopColor="#fffde0" />
+          <stop offset="42%"  stopColor="#f5d040" />
+          <stop offset="100%" stopColor="#c08820" />
+        </radialGradient>
+        {/* Water glow */}
+        <radialGradient id={`${p}gw`} cx="50%" cy="60%">
+          <stop offset="0%"   stopColor="#c0f0e0" stopOpacity=".65" />
+          <stop offset="100%" stopColor="#c0f0e0" stopOpacity="0" />
         </radialGradient>
       </defs>
 
-      {/* water-glow beneath */}
-      <ellipse cx="90" cy="146" rx="62" ry="16" fill={`url(#lp-gw-${id})`} />
-      {/* pad shadow */}
-      <ellipse cx="90" cy="144" rx="52" ry="13" fill={`url(#lp-ps-${id})`} />
-      {/* lily pad */}
-      <ellipse cx="90" cy="140" rx="50" ry="13" fill={`url(#lp-pad-${id})`} />
-      {/* pad notch */}
-      <path d="M90 127 L90 140" stroke="#2e8020" strokeWidth="1.5" opacity=".5" />
+      {/* Water glow pool below pad */}
+      <ellipse cx="100" cy="168" rx="62" ry="17" fill={`url(#${p}gw)`} />
+      {/* Pad shadow */}
+      <ellipse cx="100" cy="163" rx="53" ry="12" fill="#1e6018" opacity=".22" />
+      {/* Lily pad */}
+      <ellipse cx="100" cy="160" rx="53" ry="13" fill={`url(#${p}pad)`} />
+      {/* Pad notch */}
+      <path d="M100 147 L100 160" stroke="#2a7c18" strokeWidth="1.6" strokeLinecap="round" opacity=".45" />
+      {/* Ripple rings */}
+      <ellipse cx="100" cy="162" rx="42" ry="5.5" fill="none" stroke="rgba(60,190,170,.45)" strokeWidth="1.2" />
+      <ellipse cx="100" cy="165" rx="63" ry="9"   fill="none" stroke="rgba(60,190,170,.20)" strokeWidth=".8"  />
 
-      {/* === Outer petals (6 petals, splayed wide) === */}
-      {/* back left */}
-      <path d="M90 118 C64 108 44 78 52 48 58 68 74 92 90 100Z" fill={`url(#lp-o-${id})`} opacity=".85" />
-      {/* back right */}
-      <path d="M90 118 C116 108 136 78 128 48 122 68 106 92 90 100Z" fill={`url(#lp-o-${id})`} opacity=".85" />
-      {/* far left */}
-      <path d="M90 118 C48 106 24 72 34 38 44 62 68 88 90 96Z" fill={`url(#lp-o-${id})`} opacity=".75" />
-      {/* far right */}
-      <path d="M90 118 C132 106 156 72 146 38 136 62 112 88 90 96Z" fill={`url(#lp-o-${id})`} opacity=".75" />
-      {/* front-left outer */}
-      <path d="M90 118 C64 108 50 88 56 62 64 80 76 96 90 104Z" fill={`url(#lp-o-${id})`} />
-      {/* front-right outer */}
-      <path d="M90 118 C116 108 130 88 124 62 116 80 104 96 90 104Z" fill={`url(#lp-o-${id})`} />
+      {/* ── Outer ring — 8 petals, 45° apart ── */}
+      {outerA.map(a => (
+        <g key={a} transform={`rotate(${a}, 100, 100)`}>
+          <ellipse cx="100" cy="65" rx="15" ry="38" fill={`url(#${p}op)`} />
+        </g>
+      ))}
 
-      {/* petal veins */}
-      <path d="M90 118 C82 100 78 82 82 62" stroke="rgba(255,255,255,0.35)" strokeWidth=".8" strokeLinecap="round"/>
-      <path d="M90 118 C98 100 102 82 98 62" stroke="rgba(255,255,255,0.35)" strokeWidth=".8" strokeLinecap="round"/>
+      {/* ── Middle ring — 8 petals, offset 22.5° ── */}
+      {midA.map(a => (
+        <g key={a} transform={`rotate(${a}, 100, 100)`}>
+          <ellipse cx="100" cy="77" rx="10.5" ry="26" fill={`url(#${p}mp)`} />
+        </g>
+      ))}
 
-      {/* === Mid petals === */}
-      <path d="M90 110 C70 98 64 74 72 52 76 70 84 88 90 96Z" fill={`url(#lp-m-${id})`} />
-      <path d="M90 110 C110 98 116 74 108 52 104 70 96 88 90 96Z" fill={`url(#lp-m-${id})`} />
-      <path d="M90 110 C76 96 72 72 80 48 82 66 86 84 90 92Z" fill={`url(#lp-m-${id})`} />
-      <path d="M90 110 C104 96 108 72 100 48 98 66 94 84 90 92Z" fill={`url(#lp-m-${id})`} />
+      {/* ── Inner ring — 5 upright petals ── */}
+      {innerA.map(a => (
+        <g key={a} transform={`rotate(${a}, 100, 100)`}>
+          <ellipse cx="100" cy="88" rx="7" ry="15" fill={`url(#${p}ip)`} />
+        </g>
+      ))}
 
-      {/* === Inner petals === */}
-      <path d="M90 104 C76 90 74 68 82 44 84 62 88 80 90 88Z" fill={`url(#lp-i-${id})`} />
-      <path d="M90 104 C104 90 106 68 98 44 96 62 92 80 90 88Z" fill={`url(#lp-i-${id})`} />
-      <path d="M90 102 C80 86 80 64 88 42 88 60 90 78 90 86Z" fill={`url(#lp-i-${id})`} />
-
-      {/* stamen */}
-      <circle cx="90" cy="76" r="12" fill={`url(#lp-st-${id})`} />
-      <circle cx="90" cy="74" r="6"  fill="#fffce0" opacity=".95" />
-      <circle cx="88" cy="72" r="2.5" fill="#fff" opacity=".7" />
-
-      {/* water ripples around pad */}
-      <ellipse cx="90" cy="142" rx="38" ry="5.5" fill="none" stroke="rgba(80,200,190,0.45)" strokeWidth="1.2" />
-      <ellipse cx="90" cy="144" rx="56" ry="8"   fill="none" stroke="rgba(80,200,190,0.25)" strokeWidth=".8" />
+      {/* Stamen disc */}
+      <circle cx="100" cy="100" r="14"   fill={`url(#${p}st)`} />
+      <circle cx="100" cy="98"  r="7"    fill="#fffde8" opacity=".95" />
+      {/* Stamen tip highlight */}
+      <circle cx="97"  cy="95"  r="2.8"  fill="#fff"    opacity=".65" />
     </svg>
   );
 }
 
-/* Small bird (seagull silhouette) */
+/* ── Bird (seagull silhouette) ──────────────────────────────── */
 function Bird({ className }: { className: string }) {
   return (
-    <svg className={className} viewBox="0 0 32 14" fill="none" aria-hidden>
-      <path d="M0 9 Q8 1 16 7 Q24 1 32 9"
-        stroke="#c47870" strokeWidth="2" strokeLinecap="round" fill="none" />
+    <svg className={className} viewBox="0 0 40 18" fill="none" aria-hidden>
+      {/* Left wing arc */}
+      <path d="M2 12 Q10 2 20 9" stroke="#b87870" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+      {/* Right wing arc */}
+      <path d="M20 9 Q30 2 38 12" stroke="#b87870" strokeWidth="2.2" strokeLinecap="round" fill="none" />
     </svg>
   );
 }
 
-/* Heart — gold stroke outline (as in reference) */
+/* ── Gold outline heart (as in reference) ───────────────────── */
 function HeartOutline() {
   return (
     <svg className="lotus-lake-heart" viewBox="0 0 60 56" fill="none" aria-hidden>
       <defs>
-        <linearGradient id="hrt-stroke" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#fde870" />
-          <stop offset="50%" stopColor="#f0a830" />
+        <linearGradient id="hrt-g" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%"   stopColor="#fde870" />
+          <stop offset="50%"  stopColor="#f0a030" />
           <stop offset="100%" stopColor="#fde870" />
         </linearGradient>
-        <filter id="hrt-glow" x="-30%" y="-30%" width="160%" height="160%">
-          <feGaussianBlur stdDeviation="2.5" result="b"/>
-          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        <filter id="hrt-f" x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur stdDeviation="3" />
         </filter>
       </defs>
-      <path
-        d="M30 50 C16 42 4 32 4 20 4 12 10 6 18 6 22 6 26 9 30 14 34 9 38 6 42 6 50 6 56 12 56 20 56 32 44 42 30 50Z"
-        stroke="url(#hrt-stroke)" strokeWidth="2.8" strokeLinejoin="round"
-        fill="rgba(253,232,120,0.12)" filter="url(#hrt-glow)"
+      {/* Outer glow */}
+      <path d="M30 50C16 42 4 31 4 19 4 11 10 6 18 6c4 0 8 2.5 12 7 4-4.5 8-7 12-7 8 0 14 5 14 13 0 12-12 23-26 31Z"
+        stroke="#f0a030" strokeWidth="6" strokeLinejoin="round" fill="none" filter="url(#hrt-f)" opacity=".6" />
+      {/* Main outline */}
+      <path d="M30 50C16 42 4 31 4 19 4 11 10 6 18 6c4 0 8 2.5 12 7 4-4.5 8-7 12-7 8 0 14 5 14 13 0 12-12 23-26 31Z"
+        stroke="url(#hrt-g)" strokeWidth="2.5" strokeLinejoin="round"
+        fill="rgba(253,232,120,0.10)"
       />
     </svg>
   );
 }
 
+/* ── Main banner ────────────────────────────────────────────── */
 export function KalyanBanner({
   intensity = "hero",
   veil = true,
@@ -143,25 +146,32 @@ export function KalyanBanner({
   const hero = intensity === "hero";
   return (
     <div className={`lotus-lake${hero ? " is-hero" : " is-wash"}`} aria-hidden>
-      {/* Sky layers */}
+
+      {/* Sky */}
       <div className="lotus-lake-sky" />
-      {/* Sun with rays */}
+
+      {/* Sun rays then orb */}
       <div className="lotus-lake-sunrays" />
       <div className="lotus-lake-sun" />
+
       {/* Landscape */}
-      <div className="lotus-lake-hill is-far" />
-      <div className="lotus-lake-hill is-mid" />
+      <div className="lotus-lake-hill is-far"  />
+      <div className="lotus-lake-hill is-mid"  />
       <div className="lotus-lake-hill is-near" />
       <div className="lotus-lake-temple" />
-      {/* Birds in sky */}
+
+      {/* Flock of birds — 5 */}
       <Bird className="lotus-lake-bird is-1" />
       <Bird className="lotus-lake-bird is-2" />
       <Bird className="lotus-lake-bird is-3" />
       <Bird className="lotus-lake-bird is-4" />
-      {/* Water */}
+      <Bird className="lotus-lake-bird is-5" />
+
+      {/* Lake */}
       <div className="lotus-lake-water" />
       <div className="lotus-lake-water-shimmer" />
-      <div className="lotus-lake-water-waves" />
+      <div className="lotus-lake-water-waves"   />
+
       {/* Lotus flowers */}
       <div className="lotus-lake-flower is-left">
         <Lotus side="l" />
@@ -169,18 +179,22 @@ export function KalyanBanner({
       <div className="lotus-lake-flower is-right">
         <Lotus side="r" />
       </div>
+
       {/* Heart outline */}
       <HeartOutline />
-      {/* Water sparkle dots */}
+
+      {/* Water sparkles */}
       <span className="lotus-lake-spark is-1" />
       <span className="lotus-lake-spark is-2" />
       <span className="lotus-lake-spark is-3" />
       <span className="lotus-lake-spark is-4" />
+
       {/* Falling petals */}
       <span className="lotus-lake-petal is-1" />
       <span className="lotus-lake-petal is-2" />
       <span className="lotus-lake-petal is-3" />
       <span className="lotus-lake-petal is-4" />
+
       {hero && veil ? <div className="lotus-lake-veil" /> : null}
     </div>
   );
