@@ -2120,214 +2120,264 @@ html[data-scene="dusk"] .app-main {
   background: #f6c7a0; overflow: hidden;
   box-shadow: inset 0 0 0 1px rgb(212 168 90 / 45%);
 }
-/* ── Premium sunrise lake banner ── */
+/* ══════════════════════════════════════════════════════════
+   Pearl-drop rain banner
+   Scene: blush dawn sky · teal hills · dark pond
+   Animation (9 s loop):
+     0 – 2.6 s  Pearl heart-drop falls through rain
+     2.6 – 4 s  Ripples on pond
+     4 – 7.5 s  Heart rises, golden halo + sparkles
+     7.5 – 9 s  Heart fades, rain resets
+   ══════════════════════════════════════════════════════════ */
 .lotus-lake {
   position: absolute; inset: 0; overflow: hidden; pointer-events: none;
-  /* Rich layered sunrise: warm ivory sky → peachy amber → golden horizon → jewel teal water */
+  /* Pearl scene base: lavender blush sky → teal water */
   background: linear-gradient(180deg,
-    #fef2e4  0%,   /* ivory-cream at crown */
-    #fce0c0 12%,   /* warm peach */
-    #f9c898 22%,   /* peachy orange */
-    #f7b080 32%,   /* salmon */
-    #f5d068 42%,   /* golden amber glow */
-    #fdeaa8 47%,   /* bright gold band at horizon */
-    #d4ede8 51%,   /* misty aqua transition */
-    #78ccca 57%,   /* bright teal water starts */
-    #46b4ae 72%,
-    #22989a 100%);
+    #f0e4f5  0%,   /* soft lavender crown */
+    #f8dce8  8%,   /* blush pink */
+    #fae6d4 18%,   /* warm peach */
+    #f8eedc 28%,   /* creamy horizon haze */
+    #e4eee8 40%,   /* pale teal-white transition */
+    #c8e4e0 44%,   /* misty teal hill base */
+    #1c4840 48%,   /* pond surface begins */
+    #132e28 65%,
+    #0c1e18 100%); /* deep pond bottom */
 }
-.lotus-lake.is-wash { opacity: 0.20; filter: saturate(0.65); }
+.lotus-lake.is-wash { opacity: 0.22; filter: saturate(0.65); }
 
-/* ── Sky — radial atmospheric glow from sun on horizon ── */
-.lotus-lake-sky {
+/* ── Sky overlay — soft blush radial haze above horizon ── */
+.pearl-sky {
   position: absolute; inset: 0 0 48%;
   background:
-    radial-gradient(ellipse 115% 100% at 50% 108%,
-      #fdeaa8 0%, #fac880 8%, #f6a060 22%, #f08068 40%,
-      #eeaaa8 60%, #f2cac8 78%, transparent 94%),
-    linear-gradient(180deg, #fef2e4, transparent 70%);
+    radial-gradient(ellipse 90% 80% at 50% 90%,
+      rgba(255,238,220,.45) 0%, rgba(255,200,190,.25) 45%, transparent 75%),
+    linear-gradient(180deg, #eedad0 0%, #f8dce8 35%, #faeee0 65%, transparent 100%);
 }
 
-/* ── Crepuscular rays — slow soft spokes ── */
-.lotus-lake-sunrays {
-  position: absolute; left: 50%; top: 0; width: 160%; height: 58%;
-  margin-left: -80%;
-  background: repeating-conic-gradient(from 0deg at 50% 84%,
-    rgb(255 240 190 / 30%) 0 4deg, transparent 4deg 16deg);
-  mask-image: radial-gradient(ellipse 88% 90% at 50% 100%, #000 0%, transparent 78%);
-  transform-origin: 50% 100%;
-  animation: lake-ray 44s linear infinite;
-}
-
-/* ── Sun orb — large, luminous, sits at horizon ── */
-.lotus-lake-sun {
-  position: absolute; left: 50%; top: 30%; width: 7.5rem; height: 7.5rem; margin-left: -3.75rem;
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 34%,
-    #fffef6 0%, #fff8d0 22%, #ffe880 48%, #f8c848 70%, #f0a030 100%);
-  box-shadow:
-    0 0 0 1.2rem rgb(255 238 160 / 28%),
-    0 0 0 3rem   rgb(255 220 130 / 16%),
-    0 0 6rem     rgb(252 200 100 / 60%),
-    0 0 16rem    rgb(245 170 70  / 25%);
-}
-
-/* ── Rolling hills — 3 soft pastel depth layers ── */
-.lotus-lake-hill { position: absolute; left: -2%; right: -2%; }
-
-/* Farthest — palest dusty rose, blurry (atmospheric perspective) */
-.lotus-lake-hill.is-far {
-  top: 32%; height: 20%;
-  background: linear-gradient(180deg, #f0d0da 0%, #e0b8c8 60%, transparent);
-  clip-path: polygon(0 100%,0 45%,6% 28%,13% 44%,20% 22%,28% 40%,36% 16%,44% 36%,52% 12%,60% 34%,68% 14%,76% 38%,84% 20%,92% 40%,100% 24%,100% 100%);
-  opacity: 0.5; filter: blur(2.5px);
-}
-/* Middle — dusty mauve */
-.lotus-lake-hill.is-mid {
-  top: 36%; height: 17%;
-  background: linear-gradient(180deg, #dca8bc 0%, #cc98ac 58%, transparent);
-  clip-path: polygon(0 100%,0 50%,4% 36%,9% 50%,15% 30%,22% 46%,28% 26%,35% 42%,42% 22%,50% 40%,56% 20%,63% 38%,70% 22%,77% 42%,84% 24%,91% 44%,96% 30%,100% 42%,100% 100%);
-  opacity: 0.72;
-}
-/* Nearest — warm rose-mauve, most defined */
-.lotus-lake-hill.is-near {
-  top: 40%; height: 12%;
-  background: linear-gradient(180deg, #c490a0 0%, #b07888 58%, transparent);
-  clip-path: polygon(0 100%,0 60%,3% 44%,8% 60%,14% 40%,20% 58%,27% 36%,33% 54%,40% 32%,47% 52%,54% 30%,60% 50%,67% 32%,73% 54%,79% 36%,85% 56%,92% 38%,97% 56%,100% 44%,100% 100%);
-  opacity: 0.9;
-}
-
-/* ── Temple / gopuram silhouette — right side ── */
-.lotus-lake-temple {
-  position: absolute; right: 14%; top: 26%; width: 4rem; height: 16%;
-  background: linear-gradient(180deg, #a07080, #8a6070);
-  clip-path: polygon(
-    32% 100%, 32% 74%, 16% 70%, 20% 60%, 10% 54%,
-    16% 46%, 8% 38%, 18% 30%, 12% 22%, 28% 14%,
-    38% 5%,  50% 0%,  62% 5%,  72% 14%, 88% 22%,
-    82% 30%, 92% 38%, 84% 46%, 90% 54%, 80% 60%,
-    84% 70%, 68% 74%, 68% 100%
+/* ── Rain — diagonal CSS stripe that scrolls ── */
+.pearl-rain {
+  position: absolute; inset: 0 0 46%;
+  background: repeating-linear-gradient(
+    172deg,
+    transparent 0px, transparent 7px,
+    rgba(160,210,240,.17) 7px, rgba(160,210,240,.17) 8.2px
   );
-  opacity: 0.68;
+  background-size: 22px 50px;
+  animation: pearl-rain-scroll .38s linear infinite;
+  will-change: background-position;
 }
 
-/* ── Birds — 5 clearly visible seagull shapes ── */
-.lotus-lake-bird { position: absolute; display: block; }
-/* Left cluster — three birds at different heights/sizes */
-.lotus-lake-bird.is-1 { left: 6%;  top: 7%;  width: 3.2rem; height: 1.45rem; opacity: 0.75; }
-.lotus-lake-bird.is-2 { left: 13%; top: 13%; width: 2.4rem; height: 1.1rem;  opacity: 0.62; }
-.lotus-lake-bird.is-3 { left: 19%; top: 9%;  width: 1.8rem; height: 0.82rem; opacity: 0.50; }
-/* Right pair — gently drifting */
-.lotus-lake-bird.is-4 { right: 16%; top: 6%;  width: 2.8rem; height: 1.28rem; opacity: 0.68; animation: lake-bird 9s ease-in-out infinite; }
-.lotus-lake-bird.is-5 { right: 9%;  top: 12%; width: 2rem;   height: 0.9rem;  opacity: 0.52; animation: lake-bird 9s ease-in-out infinite; animation-delay: -3.5s; }
-.lotus-lake-bird svg  { width: 100%; height: 100%; display: block; }
+/* ── Drifting mist bands ── */
+.pearl-mist {
+  position: absolute; left: -5%; right: -5%;
+  background: rgba(240,248,246,.55);
+  filter: blur(22px);
+  animation: pearl-mist-drift 9s ease-in-out infinite;
+  pointer-events: none;
+}
+.pearl-mist.is-a { top: 37%; height: 6%; animation-delay: 0s; }
+.pearl-mist.is-b { top: 42%; height: 5%; opacity: .7; animation-delay: -4s; }
 
-/* ── Water — clear bright teal lake ── */
-.lotus-lake-water {
-  position: absolute; inset: 48% 0 0;
+/* ── Three teal hill layers ── */
+.pearl-hill { position: absolute; left: -2%; right: -2%; }
+
+/* Far — palest teal, atmospheric blur */
+.pearl-hill.is-far {
+  top: 28%; height: 18%;
+  background: linear-gradient(180deg, #a0c8c4 0%, #88b4b0 55%, transparent);
+  clip-path: polygon(0 100%,0 45%,5% 28%,11% 44%,18% 22%,25% 40%,33% 16%,41% 36%,50% 10%,58% 33%,66% 14%,74% 38%,82% 20%,90% 40%,96% 26%,100% 36%,100% 100%);
+  opacity: .38; filter: blur(4px);
+}
+/* Mid — medium teal */
+.pearl-hill.is-mid {
+  top: 32%; height: 16%;
+  background: linear-gradient(180deg, #4c9898 0%, #3a8080 55%, transparent);
+  clip-path: polygon(0 100%,0 50%,4% 36%,9% 52%,15% 30%,22% 48%,28% 26%,35% 44%,42% 22%,50% 42%,57% 20%,64% 40%,71% 22%,78% 44%,85% 24%,92% 44%,97% 32%,100% 44%,100% 100%);
+  opacity: .7; filter: blur(1px);
+}
+/* Near — darkest teal, sharpest */
+.pearl-hill.is-near {
+  top: 37%; height: 12%;
+  background: linear-gradient(180deg, #1e5c58 0%, #184848 60%, transparent);
+  clip-path: polygon(0 100%,0 60%,3% 44%,8% 62%,14% 38%,20% 58%,27% 36%,33% 56%,40% 32%,47% 54%,54% 30%,61% 52%,67% 32%,74% 54%,80% 34%,87% 56%,93% 38%,98% 56%,100% 44%,100% 100%);
+  opacity: .9;
+}
+
+/* ── Swaying leaf clusters in top corners ── */
+.pearl-leaf {
+  position: absolute; top: 20%;
+  background: linear-gradient(145deg, #1a6858 0%, #2a8070 55%, #1c5848 100%);
+  border-radius: 100% 0 100% 0;
+  box-shadow: inset 0 -4px 12px rgba(0,0,0,.2);
+}
+.pearl-leaf.is-tl {
+  left: -1.5%; width: 4.8rem; height: 6.5rem;
+  transform-origin: 100% 100%;
+  animation: pearl-leaf-sway-l 3.8s ease-in-out infinite;
+}
+.pearl-leaf.is-tr {
+  right: -1.5%; width: 4.2rem; height: 5.8rem;
+  transform-origin: 0% 100%;
+  animation: pearl-leaf-sway-r 4.2s ease-in-out infinite; animation-delay: -1.8s;
+}
+
+/* ── Still dark pond ── */
+.pearl-pond {
+  position: absolute; inset: 46% 0 0;
   background: linear-gradient(180deg,
-    #fce8a0 0%,   /* sun mirror at top */
-    #c8ece4 4%,   /* soft transition */
-    #82cec4 10%,
-    #58bab2 30%,
-    #38a8a0 60%,
-    #209090 100%);
+    #1c4840 0%, #132e28 30%, #0c2018 70%, #081410 100%);
 }
-/* Wave lines — horizontal shimmers */
-.lotus-lake-water-waves {
-  position: absolute; left: 0; right: 0; top: 50%; height: 22%;
-  background: repeating-linear-gradient(180deg,
-    transparent 0, transparent 6px,
-    rgb(255 255 255 / 9%) 6px, rgb(255 255 255 / 9%) 7.5px);
-  mask-image: linear-gradient(180deg, transparent, #000 15%, #000 85%, transparent);
-}
-/* Wide sun shimmer column */
-.lotus-lake-water-shimmer {
-  position: absolute; left: 22%; right: 22%; top: 48%; height: 30%;
-  background: radial-gradient(ellipse 100% 100% at 50% 0%,
-    #fde8a0 0%, #f8c870 12%, transparent 100%);
-  filter: blur(12px); opacity: 0.6;
-  animation: lake-shimmer 5s ease-in-out infinite;
-}
-/* Water sparkle dots */
-.lotus-lake-spark {
-  position: absolute; border-radius: 50%; background: #fff; opacity: 0;
-  animation: lake-spark 4s ease-in-out infinite;
-}
-.lotus-lake-spark.is-1 { left: 28%; top: 55%; width: 5px; height: 5px; animation-delay: 0s; }
-.lotus-lake-spark.is-2 { left: 58%; top: 63%; width: 4px; height: 4px; animation-delay: 1.3s; }
-.lotus-lake-spark.is-3 { left: 40%; top: 72%; width: 3px; height: 3px; animation-delay: 2.5s; }
-.lotus-lake-spark.is-4 { left: 70%; top: 58%; width: 5px; height: 5px; animation-delay: 0.7s; }
-
-/* ── Lotus flowers — natural size with glow ── */
-.lotus-lake-flower {
-  position: absolute; bottom: 2%; width: min(38%, 14rem); height: auto;
-  filter:
-    drop-shadow(0 8px 14px rgb(0 90 70 / 25%))
-    drop-shadow(0 0 20px rgb(240 130 175 / 35%))
-    drop-shadow(0 0 6px  rgb(253 232 160 / 35%));
-  transform-origin: 50% 95%;
-}
-.lotus-lake-flower.is-left  { left: 2%;  animation: lake-meet-left  12s cubic-bezier(0.45,0,0.55,1) infinite; }
-.lotus-lake-flower.is-right { right: 2%; animation: lake-meet-right 12s cubic-bezier(0.45,0,0.55,1) infinite; }
-
-/* ── Heart — gold outline exactly like reference ── */
-.lotus-lake-heart {
-  position: absolute; left: 50%; top: 51%; width: 4.5rem; height: 4.2rem; margin: 0 0 0 -2.25rem;
-  filter: drop-shadow(0 0 14px rgb(245 195 70 / 75%));
-  transform-origin: 50% 80%;
-  animation: lake-heart 12s cubic-bezier(0.45,0,0.55,1) infinite;
+/* Faint sky/heart reflection column on pond surface */
+.pearl-pond-glow {
+  position: absolute; left: 28%; right: 28%; top: 46%; height: 22%;
+  background: radial-gradient(ellipse at 50% 0%,
+    rgba(240,200,160,.22) 0%, rgba(180,240,220,.1) 50%, transparent 100%);
+  filter: blur(10px);
 }
 
-/* ── Falling petal dots (like reference: small pink ovals) ── */
-.lotus-lake-petal {
-  position: absolute; top: -3%;
-  border-radius: 50%; background: #f090a8; opacity: 0;
-  animation: lake-petal linear infinite;
+/* ─────────────── ANIMATION: falling pearl drop ─────────────── */
+/* (positioned absolutely, left 50% with translateX(-50%) centres it) */
+.pearl-drop {
+  position: absolute;
+  left: 50%; top: -8%;
+  width: 1.7rem; height: 1.9rem;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 0 10px rgba(240,150,200,.8));
+  animation: pearl-drop-fall 9s cubic-bezier(.55,0,.85,.7) infinite;
+  will-change: top, opacity, transform;
 }
-.lotus-lake-petal.is-1 { left: 12%; width: 0.6rem;  height: 0.4rem; animation-duration: 12s; animation-delay: 0s;  background: #f090b0; }
-.lotus-lake-petal.is-2 { left: 30%; width: 0.65rem; height: 0.44rem; animation-duration: 15s; animation-delay: 3s;  background: #e8c0d0; }
-.lotus-lake-petal.is-3 { left: 58%; width: 0.58rem; height: 0.38rem; animation-duration: 13s; animation-delay: 6s;  background: #f8a0b8; }
-.lotus-lake-petal.is-4 { left: 80%; width: 0.5rem;  height: 0.34rem; animation-duration: 10s; animation-delay: 9s;  background: #f0b8c8; }
-.lotus-lake-veil { display: none; }
 
-@keyframes lake-meet-left  {
-  0%, 5%    { transform: translateX(0) scale(1); }
-  40%, 62%  { transform: translateX(55%) scale(1.05); }
-  96%, 100% { transform: translateX(0) scale(1); }
+/* ─────────────── ANIMATION: pond ripples at impact ─────────── */
+.pearl-ripple {
+  position: absolute;
+  left: 50%; top: 60%;
+  width: 0; height: 0;
+  border-radius: 50%;
+  border: 1.5px solid rgba(160,230,210,.65);
+  transform: translate(-50%, -50%);
+  animation: pearl-ripple-expand 9s ease-out infinite;
 }
-@keyframes lake-meet-right {
-  0%, 5%    { transform: translateX(0) scale(1); }
-  40%, 62%  { transform: translateX(-55%) scale(1.05); }
-  96%, 100% { transform: translateX(0) scale(1); }
+.pearl-ripple.is-1 { animation-delay: 0s;    }
+.pearl-ripple.is-2 { animation-delay: .45s;  }
+.pearl-ripple.is-3 { animation-delay: .9s;   }
+
+/* ─────────────── ANIMATION: rising glow-heart group ──────────
+   The group rises; the heart + sparkles move with it.          */
+.pearl-heart-group {
+  position: absolute;
+  left: 50%; top: 62%;
+  width: 3.4rem; height: 3.2rem;
+  transform: translateX(-50%);
+  animation: pearl-heart-rise 9s ease-in-out infinite;
+  will-change: top;
 }
-@keyframes lake-heart {
-  0%, 33%   { opacity: 0; transform: scale(0.2) translateY(16px); }
-  45%, 60%  { opacity: 1; transform: scale(1)   translateY(0); }
-  80%, 100% { opacity: 0; transform: scale(0.4) translateY(-10px); }
+.pearl-heart {
+  width: 100%; height: 100%;
+  animation: pearl-heart-appear 9s ease-in-out infinite;
+  filter: drop-shadow(0 0 14px rgba(248,192,96,.65));
+  will-change: opacity, transform;
 }
-@keyframes lake-spark {
-  0%, 38%   { opacity: 0; }
-  50%       { opacity: 0.9; }
-  70%, 100% { opacity: 0; }
+.pearl-heart svg { width: 100%; height: 100%; display: block; }
+
+/* Sparkles — positioned relative to the group */
+.pearl-sparkle {
+  position: absolute;
+  border-radius: 50%;
+  background: #fffee0;
+  box-shadow: 0 0 6px 3px rgba(255,215,100,.6);
+  animation: pearl-sparkle-anim 9s ease-in-out infinite;
 }
-@keyframes lake-ray     { to { transform: rotate(360deg); } }
-@keyframes lake-shimmer { 0%,100% { opacity: 0.5; } 50% { opacity: 0.72; transform: scaleX(1.1); } }
-@keyframes lake-bird    {
-  0%,100% { transform: translate(0,0) rotate(-3deg) scaleY(1); }
-  50%     { transform: translate(8px,-7px) rotate(3deg) scaleY(0.85); }
+.pearl-sparkle.is-1 { width: .30rem; height: .30rem; left: -1.8rem; top: -.4rem;  animation-delay:  .08s; }
+.pearl-sparkle.is-2 { width: .28rem; height: .28rem; left:  4.2rem; top: -.1rem;  animation-delay:  .26s; }
+.pearl-sparkle.is-3 { width: .22rem; height: .22rem; left: -2.2rem; top: 1.2rem;  animation-delay:  .50s; }
+.pearl-sparkle.is-4 { width: .28rem; height: .28rem; left:  4.5rem; top: 1.0rem;  animation-delay:  .15s; }
+.pearl-sparkle.is-5 { width: .20rem; height: .20rem; left:  1.5rem; top: -1.4rem; animation-delay:  .38s; }
+
+/* ── Veil for hero mode ── */
+.pearl-veil {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg,
+    rgba(0,0,0,.04) 0%, transparent 40%, rgba(0,0,0,.12) 100%);
 }
-@keyframes lake-petal   {
-  0%   { transform: translateY(0) rotate(-12deg); opacity: 0; }
-  5%   { opacity: 0.92; }
-  100% { transform: translateY(32rem) rotate(210deg); opacity: 0; }
+
+/* ══════════════════════ KEYFRAMES ══════════════════════════ */
+
+@keyframes pearl-rain-scroll {
+  from { background-position: 0 0; }
+  to   { background-position: -22px 50px; }
 }
+
+@keyframes pearl-mist-drift {
+  0%,100% { transform: translateX(0);   opacity: .55; }
+  50%     { transform: translateX(2%);  opacity: .75; }
+}
+
+/* Separate keyframes so each leaf keeps its own scaleX direction */
+@keyframes pearl-leaf-sway-l {
+  0%,100% { transform: rotate(-18deg); }
+  50%     { transform: rotate(-10deg); }
+}
+@keyframes pearl-leaf-sway-r {
+  0%,100% { transform: rotate(18deg) scaleX(-1); }
+  50%     { transform: rotate(10deg) scaleX(-1); }
+}
+
+/* Drop falls from -8% to 60% (pond surface), then disappears */
+@keyframes pearl-drop-fall {
+  0%   { top: -8%;  opacity: 0;   transform: translateX(-50%) scale(.55); }
+  3%   {            opacity: 1;   transform: translateX(-50%) scale(1);   }
+  27%  { top: 58%;  opacity: 1;   transform: translateX(-50%) scale(1);   }
+  30%  { top: 61%;  opacity: 0;   transform: translateX(-50%) scale(.25); }
+  100% { top: 61%;  opacity: 0;   transform: translateX(-50%) scale(.25); }
+}
+
+/* Ripples expand from impact point, span 27%→42% of cycle */
+@keyframes pearl-ripple-expand {
+  0%,  27% { width: 0;     height: 0;      opacity: 0;   }
+  29%       { width: 1rem;  height: .35rem; opacity: .9;  }
+  42%       { width: 9rem;  height: 2.2rem; opacity: 0;   }
+  100%      { width: 9rem;  height: 2.2rem; opacity: 0;   }
+}
+
+/* Group rises from pond (62%) to sky (15%) during 28%→84% of cycle */
+@keyframes pearl-heart-rise {
+  0%,  27% { top: 62%; }
+  35%       { top: 56%; }
+  75%       { top: 18%; }
+  86%       { top: 13%; }
+  100%      { top: 62%; }
+}
+
+/* Heart appears at 29%, fades at 85% */
+@keyframes pearl-heart-appear {
+  0%,  28% { opacity: 0; transform: scale(.2);  }
+  35%       { opacity: 1; transform: scale(1);   }
+  78%       { opacity: 1; transform: scale(1.08);}
+  87%       { opacity: 0; transform: scale(.75); }
+  100%      { opacity: 0; transform: scale(.2);  }
+}
+
+/* Sparkles appear with the heart, twinkle, fade with it */
+@keyframes pearl-sparkle-anim {
+  0%,  32% { opacity: 0; transform: scale(0);   }
+  40%       { opacity: 1; transform: scale(1);   }
+  60%       { opacity: .8; transform: scale(1.3);}
+  82%       { opacity: 1; transform: scale(.9);  }
+  88%       { opacity: 0; transform: scale(.3);  }
+  100%      { opacity: 0;                        }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .lotus-lake-flower, .lotus-lake-heart, .lotus-lake-sunrays,
-  .lotus-lake-petal, .lotus-lake-water-shimmer, .lotus-lake-bird { animation: none !important; }
-  .lotus-lake-flower.is-left  { transform: translateX(55%) scale(1.05); }
-  .lotus-lake-flower.is-right { transform: translateX(-55%) scale(1.05); }
-  .lotus-lake-heart { opacity: 1; transform: scale(1); }
+  .pearl-rain, .pearl-mist,
+  .pearl-leaf.is-tl, .pearl-leaf.is-tr,
+  .pearl-drop, .pearl-ripple,
+  .pearl-heart, .pearl-heart-group,
+  .pearl-sparkle { animation: none !important; }
+  .pearl-leaf.is-tl { transform: rotate(-18deg); }
+  .pearl-leaf.is-tr { transform: rotate(18deg) scaleX(-1); }
+  .pearl-heart-group { top: 22%; }
+  .pearl-heart { opacity: 1; transform: scale(1); }
+  .pearl-sparkle { opacity: .7; transform: scale(1); }
 }
 .home-split-copy { display: flex; flex-direction: column; justify-content: center; gap: 1.15rem; padding: clamp(1.8rem, 5.5vw, 4.5rem); color: #3f0e0d; }
 .home-invite {
