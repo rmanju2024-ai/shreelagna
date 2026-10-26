@@ -2120,31 +2120,32 @@ html[data-scene="dusk"] .app-main {
   background: #f6c7a0; overflow: hidden;
   box-shadow: inset 0 0 0 1px rgb(212 168 90 / 45%);
 }
-/* ── Natural sunrise lake — warm peach sky, rolling hills, temple, birds ── */
+/* ── Premium sunrise lake banner ── */
 .lotus-lake {
   position: absolute; inset: 0; overflow: hidden; pointer-events: none;
-  /* warm peachy sunrise — sky blending into clear teal water */
+  /* Rich layered sunrise: warm ivory sky → peachy amber → golden horizon → jewel teal water */
   background: linear-gradient(180deg,
-    #fce8d4 0%,   /* pale cream sky top */
-    #fbd4b0 16%,  /* warm peach */
-    #f8c098 28%,  /* peach-orange */
-    #f5a878 38%,  /* salmon */
-    #f8c860 44%,  /* golden glow at horizon */
-    #fde8a0 48%,  /* luminous horizon band */
-    #c0e8e0 52%,  /* misty horizon-water */
-    #7ccec8 58%,  /* light teal water */
-    #50b8b0 74%,
-    #2ea0a0 100%);
+    #fef2e4  0%,   /* ivory-cream at crown */
+    #fce0c0 12%,   /* warm peach */
+    #f9c898 22%,   /* peachy orange */
+    #f7b080 32%,   /* salmon */
+    #f5d068 42%,   /* golden amber glow */
+    #fdeaa8 47%,   /* bright gold band at horizon */
+    #d4ede8 51%,   /* misty aqua transition */
+    #78ccca 57%,   /* bright teal water starts */
+    #46b4ae 72%,
+    #22989a 100%);
 }
-.lotus-lake.is-wash { opacity: 0.22; filter: saturate(0.7); }
+.lotus-lake.is-wash { opacity: 0.20; filter: saturate(0.65); }
 
-/* ── Sky — soft warm radial sunrise glow ── */
+/* ── Sky — radial atmospheric glow from sun on horizon ── */
 .lotus-lake-sky {
   position: absolute; inset: 0 0 48%;
   background:
-    radial-gradient(ellipse 110% 95% at 50% 106%,
-      #fde8a0 0%, #f9cc80 10%, #f6a868 24%, #f09070 40%,
-      #eeaaa0 58%, #f0c8c0 76%, transparent 92%);
+    radial-gradient(ellipse 115% 100% at 50% 108%,
+      #fdeaa8 0%, #fac880 8%, #f6a060 22%, #f08068 40%,
+      #eeaaa8 60%, #f2cac8 78%, transparent 94%),
+    linear-gradient(180deg, #fef2e4, transparent 70%);
 }
 
 /* ── Crepuscular rays — slow soft spokes ── */
