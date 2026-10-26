@@ -1,15 +1,38 @@
 export function BrandCrest() {
   return (
     <span className="brand-crest" aria-hidden>
-      <svg viewBox="0 0 64 64" fill="none">
+      <svg viewBox="0 0 64 60" fill="none">
+        <defs>
+          <radialGradient id="crest-l" cx="35%" cy="30%">
+            <stop offset="0%" stopColor="#c45a6a" />
+            <stop offset="60%" stopColor="#8a1f2b" />
+            <stop offset="100%" stopColor="#5c0f18" />
+          </radialGradient>
+          <radialGradient id="crest-r" cx="65%" cy="30%">
+            <stop offset="0%" stopColor="#f3c56a" />
+            <stop offset="55%" stopColor="#c47a22" />
+            <stop offset="100%" stopColor="#8a5218" />
+          </radialGradient>
+          <filter id="crest-shadow">
+            <feDropShadow dx="0" dy="3" stdDeviation="3" floodColor="#3f0e0d" floodOpacity="0.35" />
+          </filter>
+        </defs>
+        {/* left half — maroon */}
         <path
-          d="M10 38c-1.2-8 5.2-14.6 12.4-12.8 3.2.8 5.2 3 7.6 6.2 2.4-3.2 4.4-5.4 7.6-6.2C45 23.4 51.4 30 50.2 38 48.6 48 32 56.5 32 56.5S15.4 48 10 38Z"
-          fill="#8a1f2b"
+          d="M32 53 C20 46 6 36 4 22 3 12 10 5 19 5 24 5 28 8 32 14"
+          fill="url(#crest-l)" filter="url(#crest-shadow)"
         />
-        <path d="M32 31.5c2.8-4.2 5.6-7 9.4-8.2 5.8-1.8 11.4 3.2 12.4 10.2.8 5.2-1.6 10.4-6.6 15.2" fill="#c47a22" />
-        <path d="M8 42c6-1 12 3 16 9-8 1.4-16.5-2-16-9Z" fill="#3f9a4a" />
-        <path d="M56 42c-6-1-12 3-16 9 8 1.4 16.5-2 16-9Z" fill="#2f8a3e" />
-        <path d="M24 50c3.2 2.2 6.2 3.6 8 4.2 1.8-.6 4.8-2 8-4.2-2.4 5-6.2 8.4-8 8.4s-5.6-3.4-8-8.4Z" fill="#7ac24a" />
+        {/* right half — gold */}
+        <path
+          d="M32 53 C44 46 58 36 60 22 61 12 54 5 45 5 40 5 36 8 32 14"
+          fill="url(#crest-r)" filter="url(#crest-shadow)"
+        />
+        {/* specular sheen on left */}
+        <path d="M14 11 C18 8 23 8 26 11" stroke="#ffd0d8" strokeWidth="2" strokeLinecap="round" opacity=".55" />
+        {/* specular sheen on right */}
+        <path d="M38 11 C41 8 46 8 50 11" stroke="#fff5c8" strokeWidth="2" strokeLinecap="round" opacity=".55" />
+        {/* centre join line */}
+        <line x1="32" y1="14" x2="32" y2="53" stroke="#fff" strokeWidth="0.8" opacity=".18" />
       </svg>
     </span>
   );

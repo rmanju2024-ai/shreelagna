@@ -86,9 +86,9 @@ describe("shared mobile CSS contract", () => {
     expect(css).toContain("background-color: var(--theme-surface)");
     expect(css).toContain(".plans-welcome-banner");
     expect(css).toContain(".plans-header");
-    expect(css).toContain('html[data-scene="nature"] .app-main');
-    expect(css).toContain('html[data-scene="honeymoon"] .app-main');
-    expect(css).toContain('html[data-scene="couple"] .app-main');
+    expect(css).toContain('html[data-scene="ivory"] .app-main');
+    expect(css).toContain('html[data-scene="jewel"] .app-main');
+    expect(css).toContain('html[data-scene="dusk"] .app-main');
     expect(css).toContain(".app-main .settings-page > .sx-hero");
   });
 

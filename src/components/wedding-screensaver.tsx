@@ -1,3 +1,5 @@
+import type { SceneId } from "@/lib/ui/scenes";
+
 const ORBS = [
   { x: "12%", y: "22%", s: "4.2rem", d: "0s" },
   { x: "78%", y: "18%", s: "3.1rem", d: "1.2s" },
@@ -6,10 +8,11 @@ const ORBS = [
   { x: "46%", y: "12%", s: "1.8rem", d: "0.3s" },
 ];
 
-export function WeddingScreensaver() {
+export function WeddingScreensaver({ tone = "wedding" }: { tone?: SceneId }) {
   return (
-    <div className="foil-stage" aria-hidden>
+    <div className={`foil-stage is-${tone}`} aria-hidden>
       <div className="foil-stage-sky" />
+      <div className="foil-stage-silk" />
       <div className="foil-stage-floor" />
       <div className="foil-stage-world">
         <i className="foil-ring is-outer" />

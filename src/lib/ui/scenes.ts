@@ -1,4 +1,4 @@
-export const SCENE_IDS = ["wedding", "honeymoon", "nature", "couple"] as const;
+export const SCENE_IDS = ["wedding", "ivory", "jewel", "dusk"] as const;
 
 export type SceneId = (typeof SCENE_IDS)[number];
 
@@ -10,22 +10,22 @@ export const SCENE_OPTIONS: { id: SceneId; label: string; hint: string; wash: st
     wash: "linear-gradient(145deg, #fff6d6 0%, #d4a85a 38%, #8a5a18 72%, #6f1d1b 100%)",
   },
   {
-    id: "honeymoon",
-    label: "Honeymoon valley",
-    hint: "Mountain light and travel skies",
-    wash: "linear-gradient(180deg, #7eb7e8 0%, #f3d7a4 55%, #4e7a3c 100%)",
+    id: "ivory",
+    label: "Ivory marble 3D",
+    hint: "Pearl stone, cool gold inlay",
+    wash: "linear-gradient(145deg, #fffef8 0%, #e8dcc4 42%, #c4b08a 78%, #8a7a5c 100%)",
   },
   {
-    id: "nature",
-    label: "Open nature",
-    hint: "Hills, trees and open daylight",
-    wash: "linear-gradient(180deg, #9ad0ef 0%, #cfe9c8 48%, #4e7a3c 100%)",
+    id: "jewel",
+    label: "Midnight jewel 3D",
+    hint: "Wine velvet, gem light and gold",
+    wash: "linear-gradient(145deg, #2a0e18 0%, #6f1d1b 40%, #c47a22 78%, #f3c56a 100%)",
   },
   {
-    id: "couple",
-    label: "Couple goals",
-    hint: "Dusk glow and togetherness",
-    wash: "linear-gradient(180deg, #2a1540 0%, #7a3358 46%, #e08a6a 100%)",
+    id: "dusk",
+    label: "Silk dusk 3D",
+    hint: "Rose-gold silk and evening glow",
+    wash: "linear-gradient(145deg, #3f1a28 0%, #a43f72 38%, #e08a6a 70%, #f3c56a 100%)",
   },
 ];
 
