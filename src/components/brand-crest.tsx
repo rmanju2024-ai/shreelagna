@@ -1,8 +1,16 @@
 export function BrandCrest() {
   return (
     <span className="brand-crest" aria-hidden>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/brand/crest.jpg" alt="" width={176} height={176} />
+      <svg viewBox="0 0 64 64" fill="none">
+        <path
+          d="M10 38c-1.2-8 5.2-14.6 12.4-12.8 3.2.8 5.2 3 7.6 6.2 2.4-3.2 4.4-5.4 7.6-6.2C45 23.4 51.4 30 50.2 38 48.6 48 32 56.5 32 56.5S15.4 48 10 38Z"
+          fill="#8a1f2b"
+        />
+        <path d="M32 31.5c2.8-4.2 5.6-7 9.4-8.2 5.8-1.8 11.4 3.2 12.4 10.2.8 5.2-1.6 10.4-6.6 15.2" fill="#c47a22" />
+        <path d="M8 42c6-1 12 3 16 9-8 1.4-16.5-2-16-9Z" fill="#3f9a4a" />
+        <path d="M56 42c-6-1-12 3-16 9 8 1.4 16.5-2 16-9Z" fill="#2f8a3e" />
+        <path d="M24 50c3.2 2.2 6.2 3.6 8 4.2 1.8-.6 4.8-2 8-4.2-2.4 5-6.2 8.4-8 8.4s-5.6-3.4-8-8.4Z" fill="#7ac24a" />
+      </svg>
     </span>
   );
 }
