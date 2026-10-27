@@ -22,14 +22,12 @@ export default async function HomePage() {
         </div>
         <div className="home-split-copy">
           <div className="home-invite">
-            {/* Logged-in: show personalised time greeting; guest: show brand motto */}
             {user ? (
-              <Suspense fallback={<BrandMotto as="h1" />}>
+              <Suspense fallback={null}>
                 <BannerGreeting />
               </Suspense>
-            ) : (
-              <BrandMotto as="h1" />
-            )}
+            ) : null}
+            <BrandMotto as="h1" />
             <div className="home-invite-actions">
               {user ? (
                 <Link href="/app" className={btnHero}>

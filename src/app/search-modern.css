@@ -833,14 +833,15 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
 .quota-soft p {
   margin: 0;
   font-family: var(--font-british), var(--font-display), Palatino, serif;
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   font-weight: 700;
+  font-style: italic;
   line-height: 1.3;
   color: #3f0e0d;
 }
 .quota-soft span {
   display: block;
-  margin-top: 0.5rem;
+  margin-top: 0.45rem;
   color: #5b4a43;
   font-size: 0.95rem;
   font-weight: 600;

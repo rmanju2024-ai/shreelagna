@@ -13,9 +13,14 @@ export async function fetchQuotaSoftNotice(): Promise<QuotaSoftNotice | null> {
   const db = createServiceClient() ?? supabase;
   const [access, mineRows] = await Promise.all([
     loadMembership(db, me),
-    db.from("profiles").select("id").eq("created_by", me.id),
+    db.from("profiles").select("id, subject_full_name").eq("created_by", me.id),
   ]);
   const mineIds = (mineRows.data ?? []).map((row) => String(row.id));
   const quota = await loadInterestQuota(db, me, access, mineIds);
-  return buildQuotaSoftNotice(access, quota, "visit");
+  const active = me.active_profile_id
+    ? (mineRows.data ?? []).find((row) => String(row.id) === me.active_profile_id)
+    : (mineRows.data ?? [])[0];
+  const name =
+    typeof active?.subject_full_name === "string" ? active.subject_full_name : me.display_name;
+  return buildQuotaSoftNotice(access, quota, "visit", { name });
 }

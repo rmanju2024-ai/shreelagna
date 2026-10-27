@@ -27,18 +27,14 @@ export function BannerGreetingTagline({
 
   return (
     <p
-      className="brand-motto home-greeting-motto"
+      className="home-greeting"
       aria-label={g ? `${g.text}, ${name}` : `Welcome back, ${name}`}
     >
-      {/* Time greeting line */}
-      <span className="home-greeting-salute">
+      <span className="home-greeting-chip">
         {g ? `${g.text} ${g.emoji}` : "Welcome back"}
       </span>
-      {/* Name + badge */}
       <strong className="home-greeting-name">{name}</strong>
       <span className="home-greeting-role">{roleLabel}</span>
-      {/* Decorative rule — same as BrandMotto */}
-      <i className="brand-motto-rule" aria-hidden />
     </p>
   );
 }
