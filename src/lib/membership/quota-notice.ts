@@ -16,7 +16,7 @@ function firstName(name?: string | null) {
   return part || "member";
 }
 
-function planName(access: Pick<Membership, "kind" | "label">) {
+function planName(access: Pick<Membership, "kind"> & { label?: string | null }) {
   if (access.kind === "welcome") return WELCOME_PLAN_NAME;
   const label = typeof access.label === "string" ? access.label.trim() : "";
   if (!label) return "your plan";

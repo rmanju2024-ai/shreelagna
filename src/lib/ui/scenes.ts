@@ -6,25 +6,25 @@ export const SCENE_OPTIONS: { id: SceneId; label: string; hint: string; wash: st
   {
     id: "wedding",
     label: "Royal foil 3D",
-    hint: "Sculpted gold, lotus and depth",
+    hint: "Raised gold plates and maroon steps",
     wash: "linear-gradient(145deg, #fff6d6 0%, #d4a85a 38%, #8a5a18 72%, #6f1d1b 100%)",
   },
   {
     id: "ivory",
     label: "Ivory marble 3D",
-    hint: "Pearl stone, cool gold inlay",
+    hint: "Carved stone with cool gold inlay",
     wash: "linear-gradient(145deg, #fffef8 0%, #e8dcc4 42%, #c4b08a 78%, #8a7a5c 100%)",
   },
   {
     id: "jewel",
     label: "Midnight jewel 3D",
-    hint: "Wine velvet, gem light and gold",
+    hint: "Faceted gems and hard sparkle",
     wash: "linear-gradient(145deg, #2a0e18 0%, #6f1d1b 40%, #c47a22 78%, #f3c56a 100%)",
   },
   {
     id: "dusk",
     label: "Silk dusk 3D",
-    hint: "Rose-gold silk and evening glow",
+    hint: "Soft silk pillows and rose glow",
     wash: "linear-gradient(145deg, #3f1a28 0%, #a43f72 38%, #e08a6a 70%, #f3c56a 100%)",
   },
 ];
