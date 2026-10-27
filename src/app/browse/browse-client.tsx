@@ -364,18 +364,6 @@ export function BrowseClient({
           </section>
         ) : (
           <div className="sx-feed is-board">
-            <a className="sx-filter-promo" href={ADVANCED_FILTER_HREF}>
-              <span className="sx-filter-promo-icon" aria-hidden>
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <path d="M4 6h16M7 12h10M10 18h4" />
-                </svg>
-              </span>
-              <span className="sx-filter-promo-copy">
-                <strong>Looking for someone specific?</strong>
-                <em>Filter by age, city, community and more</em>
-              </span>
-              <span className="sx-filter-promo-go">Open filters</span>
-            </a>
             {PREVIEW_VIEWS.map((item) => (
               <CategoryRow
                 key={item.id}
