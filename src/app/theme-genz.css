@@ -2224,18 +2224,18 @@ html[data-scene="dusk"] .app-main {
    ══════════════════════════════════════════════════════════ */
 .lotus-lake {
   position: absolute;
-  inset: 1.1rem;
-  border-radius: 1.4rem;
+  inset: 0.88rem;
+  border-radius: 1.12rem;
   overflow: hidden;
   pointer-events: none;
   background: #05101a;
   z-index: 1;
 
   /* Pulsing glow border — animates in sync with the mat shimmer */
-  border: 2px solid rgba(222, 182, 88, 0.80);
+  border: 1.6px solid rgba(222, 182, 88, 0.80);
   box-shadow:
-    0 0 0 3px rgba(253, 232, 100, 0.22),
-    0 0 18px 2px rgba(212, 168, 60, 0.35),
+    0 0 0 2.4px rgba(253, 232, 100, 0.22),
+    0 0 14px 2px rgba(212, 168, 60, 0.35),
     0 14px 44px -10px rgba(0, 0, 0, 0.55),
     inset 0 1px 0 rgba(255, 248, 200, 0.22);
   animation: pearl-border-pulse 4s ease-in-out infinite;
@@ -2245,7 +2245,7 @@ html[data-scene="dusk"] .app-main {
 /* ── Corner ornaments (absolute inside .home-split-art, z above lotus-lake) ── */
 .pearl-corner {
   position: absolute;
-  width: 3.2rem; height: 3.2rem;
+  width: 2.56rem; height: 2.56rem;
   z-index: 5;
   pointer-events: none;
   filter: drop-shadow(0 0 5px rgba(220, 170, 60, 0.75));
@@ -2258,8 +2258,8 @@ html[data-scene="dusk"] .app-main {
 
 /* Mobile: smaller corners */
 @media (max-width: 860px) {
-  .pearl-corner { width: 2rem; height: 2rem; }
-  .home-split-art .lotus-lake { inset: 0.55rem; border-radius: 0.9rem; }
+  .pearl-corner { width: 1.6rem; height: 1.6rem; }
+  .home-split-art .lotus-lake { inset: 0.44rem; border-radius: 0.72rem; }
   .pearl-corner.tl { top: 0; left: 0; }
   .pearl-corner.tr { top: 0; right: 0; }
   .pearl-corner.bl { bottom: 0; left: 0; }
@@ -2867,7 +2867,7 @@ html[data-scene="dusk"] .app-main {
   .home-split-tiles { grid-template-columns: minmax(0, 1fr); }
   .home-split-copy { padding: 0.85rem 0.85rem 5.4rem; }
   .home-split-art { aspect-ratio: 4 / 3.15; max-height: 44svh; min-height: 0; }
-  .home-split-art .lotus-lake { inset: 0.55rem; border-radius: 0.9rem; }
+  .home-split-art .lotus-lake { inset: 0.44rem; border-radius: 0.72rem; }
   .home-value-row { grid-template-columns: minmax(0, 1fr); padding-bottom: 2rem; }
   .home-steps { padding: 1.6rem 0 2rem; }
   .home-final { padding: 2.4rem 0.85rem 5.5rem; }
