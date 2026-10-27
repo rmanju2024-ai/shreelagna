@@ -32,7 +32,11 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
         db.from("media").select("profile_id, storage_path, is_primary").in("profile_id", ids).eq("kind", "photo").order("created_at"),
       ])
     : [{ data: [] }, { data: [] }];
-  const byId = new Map((profiles ?? []).filter((row) => row.status === "active").map((row) => [row.id as string, row]));
+  const byId = new Map(
+    (profiles ?? [])
+      .filter((row) => row.status === "active" || row.status === "pending_review")
+      .map((row) => [row.id as string, row]),
+  );
   const photoOf = new Map<string, string>();
   for (const row of photos ?? []) {
     const key = row.profile_id as string;

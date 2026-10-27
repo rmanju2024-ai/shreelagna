@@ -91,6 +91,7 @@ export type ProfileData = {
   needQuota: boolean;
   needDaily?: boolean;
   awaitingReview?: boolean;
+  targetAwaitingReview?: boolean;
   needComplete?: boolean;
   viewerReadyPct?: number;
   pendingEssentials?: number;
@@ -370,16 +371,27 @@ function PlanLock({
 function ReadyBanner({
   needComplete,
   needPlan,
+  targetAwaitingReview,
   pct,
   pending,
   finishHref,
 }: {
   needComplete: boolean;
   needPlan: boolean;
+  targetAwaitingReview?: boolean;
   pct: number;
   pending: number;
   finishHref: string;
 }) {
+  if (targetAwaitingReview && !needComplete && !needPlan) {
+    return (
+      <aside className="pv-ready-banner" role="status">
+        <p className="pv-ready-kicker">House review</p>
+        <h2>This profile is listed with limited details until the house marks it live.</h2>
+        <p>Name, photo and basics are open. Work, family, kundali, extra photos and contact wait for approval.</p>
+      </aside>
+    );
+  }
   const left = Math.max(0, pending);
   const both = needComplete && needPlan;
   const kicker = both ? "Profile and plan open this house" : needComplete ? "Your biodata opens this house" : "A live plan opens this house";
@@ -429,15 +441,18 @@ export function ProfileRedesign(props: ProfileData) {
     own: props.own,
     needComplete: props.needComplete,
     needPlan: props.needPlan,
+    targetAwaitingReview: props.targetAwaitingReview,
   });
   const visiblePhotos = gate ? photos.slice(0, 1) : photos;
   const locked = gate;
-  const lockHref = props.needComplete ? props.finishHref : "/app/plans";
-  const lockCta = props.needComplete ? "Complete my profile" : "See plans";
+  const lockHref = props.needComplete ? props.finishHref : props.targetAwaitingReview ? props.finishHref : "/app/plans";
+  const lockCta = props.needComplete ? "Complete my profile" : props.targetAwaitingReview ? "Awaiting review" : "See plans";
   const lockMessage = props.needComplete
     ? props.needPlan
       ? "Complete your biodata and keep a live plan to open this chapter of their story."
       : "Complete your biodata to open this chapter of their story."
+    : props.targetAwaitingReview
+      ? "The house is still reviewing this profile. Full details open when it goes live."
     : "A live plan unlocks the full profile, extra photos, video and voice.";
   const personalDetails = (props.details ?? []).filter((group) => group.title === "Personal");
   const closedDetails = (props.details ?? []).filter((group) => group.title !== "Personal");
@@ -619,6 +634,7 @@ export function ProfileRedesign(props: ProfileData) {
         <ReadyBanner
           needComplete={Boolean(props.needComplete)}
           needPlan={Boolean(props.needPlan)}
+          targetAwaitingReview={Boolean(props.targetAwaitingReview)}
           pct={props.viewerReadyPct ?? 0}
           pending={props.pendingEssentials ?? 0}
           finishHref={props.finishHref}

@@ -1,4 +1,5 @@
 import { loadBlockedProfileIds } from "@/lib/safety/blocked";
+import { isListedProfileStatus } from "@/lib/profile/visibility";
 import { collapseNotices, noticesForActiveProfiles } from "@/lib/match/collapse-notices";
 import { effectiveInterestStatus, pairCanChat } from "@/lib/match/interest-status";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -32,7 +33,7 @@ export async function unreadNoticeBadge(userId: string) {
   // Stage 2: everything that depends only on stage 1.
   const [activeResult, threadResult, pairResult] = await Promise.all([
     profileIds.length
-      ? db.from("profiles").select("id").in("id", profileIds).eq("status", "active")
+      ? db.from("profiles").select("id, status").in("id", profileIds)
       : Promise.resolve({ data: [] as { id: string }[], error: null }),
     ownIds.length
       ? db.from("threads").select("id, profile_a, profile_b").or(`profile_a.in.(${ownList}),profile_b.in.(${ownList})`)
@@ -50,7 +51,11 @@ export async function unreadNoticeBadge(userId: string) {
   const blocked = await loadBlockedProfileIds(db, ownIds);
   const open = noticesForActiveProfiles(
     collapsed,
-    new Set((activeResult.data ?? []).map((row) => row.id).filter((id) => !blocked.has(id))),
+    new Set(
+      (activeResult.data ?? [])
+        .filter((row) => isListedProfileStatus((row as { status?: string }).status) && !blocked.has(row.id))
+        .map((row) => row.id),
+    ),
   );
   const threads = (threadResult.data ?? []) as Thread[];
 

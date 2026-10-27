@@ -8,6 +8,11 @@ export function isPublicProfileStatus(status: string | null | undefined): boolea
   return status === "active";
 }
 
+/** Discover and profile peek: live members, plus complete profiles still in house review. */
+export function isListedProfileStatus(status: string | null | undefined): boolean {
+  return status === "active" || status === "pending_review";
+}
+
 /** A member may open Discover with a draft or a profile awaiting house review. */
 export function canSearchFamilies(status: string | null | undefined): boolean {
   if (!status || status === "draft" || status === "pending_review" || status === "active") return true;
@@ -28,7 +33,7 @@ export function canViewProfile(args: {
   if (args.isOwner) return true;
   if (args.targetOwnerIsAdmin && !args.viewerIsAdmin) return false;
   if (args.isStaff) return true;
-  if (!isPublicProfileStatus(args.targetStatus)) return false;
+  if (!isListedProfileStatus(args.targetStatus)) return false;
   if (args.linkedByInterest) return true;
   if (args.viewerStatus != null && !canSearchFamilies(args.viewerStatus)) return false;
   if (!args.viewerType) return false;

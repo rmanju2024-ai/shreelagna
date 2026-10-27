@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { canSearchFamilies, canViewProfile, isPublicProfileStatus, oppositeType } from "./visibility";
+import {
+  canSearchFamilies,
+  canViewProfile,
+  isListedProfileStatus,
+  isPublicProfileStatus,
+  oppositeType,
+} from "./visibility";
 
 describe("visibility", () => {
   it("maps vadhu to vara and back", () => {
@@ -65,7 +71,14 @@ describe("visibility", () => {
     ).toBe(true);
   });
 
-  it("lets staff open a profile awaiting review", () => {
+  it("lists complete profiles in review, but not as fully live", () => {
+    expect(isListedProfileStatus("pending_review")).toBe(true);
+    expect(isListedProfileStatus("active")).toBe(true);
+    expect(isListedProfileStatus("draft")).toBe(false);
+    expect(isPublicProfileStatus("pending_review")).toBe(false);
+  });
+
+  it("lets members open a profile awaiting review with restricted details", () => {
     expect(
       canViewProfile({
         viewerType: null,
@@ -84,7 +97,7 @@ describe("visibility", () => {
         isOwner: false,
         isStaff: false,
       }),
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it("lets a draft member open an active opposite profile", () => {

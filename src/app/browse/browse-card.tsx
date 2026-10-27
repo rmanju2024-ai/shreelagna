@@ -33,6 +33,7 @@ export type BrowseCardNote = {
   last_seen_at?: string | null;
   subscribed?: boolean;
   complete?: boolean;
+  reviewing?: boolean;
   staff?: {
     memberCode: string | null;
     completePct: number;
@@ -53,7 +54,7 @@ export function browseCardAlbum(note: BrowseCardNote): string[] {
 
 /** Soft highlight only — never a filter or gate. */
 export function isFeaturedBrowseCard(note: BrowseCardNote): boolean {
-  if (note.staff) return false;
+  if (note.staff || note.reviewing) return false;
   if (note.subscribed || note.complete) return true;
   const percent = note.matchPercent ?? matchPercent(note.score);
   return percent != null && percent >= FEATURED_MATCH_FLOOR;
@@ -61,6 +62,9 @@ export function isFeaturedBrowseCard(note: BrowseCardNote): boolean {
 
 function chips(note: BrowseCardNote): string[] {
   const kind = note.profile_type === "vara" ? "Groom" : note.profile_type === "vadhu" ? "Bride" : "";
+  if (note.reviewing) {
+    return [kind, [note.religion, note.community].filter(Boolean).join(" · "), "In house review"].filter(Boolean);
+  }
   return [
     kind,
     [note.religion, note.community].filter(Boolean).join(" · "),

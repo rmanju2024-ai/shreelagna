@@ -17,7 +17,7 @@ import {
 } from "@/lib/match/interest-status";
 import { complimentaryPaidProfileAccess, pairPlanLive } from "@/lib/membership/access";
 import { loadInterestQuota, loadMembership } from "@/lib/membership/load";
-import { canViewProfile, isPublicProfileStatus, type ProfileType } from "@/lib/profile/visibility";
+import { canViewProfile, isListedProfileStatus, isPublicProfileStatus, type ProfileType } from "@/lib/profile/visibility";
 import { recordAndDeliverNotice } from "@/lib/notify/house-notice";
 import { createServiceClient } from "@/lib/supabase/server";
 import { after } from "next/server";
@@ -338,7 +338,7 @@ export async function BrowseProfileView({
   const mineList = (myProfilesRes.data ?? []) as Record<string, unknown>[];
   const mine =
     mineList.find((row) => row.id === me.active_profile_id) ??
-    mineList.find((row) => isPublicProfileStatus(typeof row.status === "string" ? row.status : null)) ??
+    mineList.find((row) => isListedProfileStatus(typeof row.status === "string" ? row.status : null)) ??
     mineList[0] ??
     null;
   const myIds = mineList.map((row) => String(row.id)).filter((profileId) => profileId !== id);
@@ -511,6 +511,9 @@ export async function BrowseProfileView({
         }),
     );
   if (!allowed) return <UnavailableBrowse />;
+  if (!own && !isStaff && !isPublicProfileStatus(typeof profile.status === "string" ? profile.status : null)) {
+    contact = undefined;
+  }
 
   if (!isStaff && me.active_profile_id && me.active_profile_id !== id && !own && mine) {
     const viewerId = me.active_profile_id;
@@ -550,9 +553,11 @@ export async function BrowseProfileView({
   const sortedPhotos = mediaRows
     .filter((m) => m.kind === "photo")
     .sort((a, b) => Number(Boolean((b as { is_primary?: boolean }).is_primary)) - Number(Boolean((a as { is_primary?: boolean }).is_primary)));
-  const photos = showAlbum ? sortedPhotos : sortedPhotos.slice(0, 1);
-  const videos = mediaRows.filter((m) => m.kind === "video");
-  const voices = mediaRows.filter((m) => m.kind === "audio");
+  const reviewingOther =
+    !own && !isStaff && typeof profile.status === "string" && profile.status === "pending_review";
+  const photos = showAlbum && !reviewingOther ? sortedPhotos : sortedPhotos.slice(0, 1);
+  const videos = reviewingOther ? [] : mediaRows.filter((m) => m.kind === "video");
+  const voices = reviewingOther ? [] : mediaRows.filter((m) => m.kind === "audio");
 
   const dobText = typeof profile.date_of_birth === "string" ? profile.date_of_birth : "";
   const age = dobText ? (ageFromDob(dobText)?.years ?? null) : null;
@@ -831,6 +836,7 @@ export async function BrowseProfileView({
     daysLeft: access.daysLeft,
     accessKind: access.kind,
     awaitingReview,
+    targetAwaitingReview: !own && !isStaff && typeof profile.status === "string" && profile.status === "pending_review",
     needComplete,
     viewerReadyPct,
     pendingEssentials,

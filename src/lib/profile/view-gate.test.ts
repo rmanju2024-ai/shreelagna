@@ -17,4 +17,9 @@ describe("other profile view gate", () => {
   it("opens details when biodata and plan are ready", () => {
     expect(otherProfileLocked({ own: false, needComplete: false, needPlan: false })).toBe(false);
   });
+
+  it("locks another family while that profile awaits house review", () => {
+    expect(otherProfileLocked({ own: false, targetAwaitingReview: true })).toBe(true);
+    expect(otherProfileLocked({ own: true, targetAwaitingReview: true })).toBe(false);
+  });
 });

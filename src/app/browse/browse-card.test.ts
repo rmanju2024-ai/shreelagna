@@ -23,6 +23,7 @@ describe("isFeaturedBrowseCard", () => {
     expect(isFeaturedBrowseCard(note({ complete: true }))).toBe(true);
     expect(isFeaturedBrowseCard(note({ matchPercent: 80 }))).toBe(true);
     expect(isFeaturedBrowseCard(note({ matchPercent: 79 }))).toBe(false);
+    expect(isFeaturedBrowseCard(note({ complete: true, reviewing: true }))).toBe(false);
     expect(
       isFeaturedBrowseCard(
         note({

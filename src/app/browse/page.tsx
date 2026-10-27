@@ -72,7 +72,10 @@ function cardFromRow(
     href: profileOpenHref(String(row.id), "discover"),
     name: displayFirstName(typeof row.subject_full_name === "string" ? row.subject_full_name : "Profile"),
     photoUrl: publicMediaUrl(photoMap.get(String(row.id)) ?? photoLists.get(String(row.id))?.[0]),
-    photoUrls: (photoLists.get(String(row.id)) ?? []).map((path) => publicMediaUrl(path)).filter((url): url is string => Boolean(url)),
+    photoUrls: (photoLists.get(String(row.id)) ?? [])
+      .map((path) => publicMediaUrl(path))
+      .filter((url): url is string => Boolean(url))
+      .slice(0, row.status === "pending_review" ? 1 : 3),
     lastOnline: inboxLastOnline(
       Boolean(row.hide_last_seen),
       typeof row.last_seen_at === "string" ? row.last_seen_at : null,
@@ -85,13 +88,14 @@ function cardFromRow(
     community,
     city: asText(row.current_city),
     state: asText(row.current_state) || asText(row.native_state),
-    education: asText(row.qualification),
-    occupation: asText(row.occupation),
+    education: row.status === "pending_review" ? null : asText(row.qualification),
+    occupation: row.status === "pending_review" ? null : asText(row.occupation),
     date_of_birth: asText(row.date_of_birth),
     current_country: asText(row.current_country),
     diet: asText(row.diet),
     profile_type: asText(row.profile_type),
-    income_band: asText(row.income_band),
+    income_band: row.status === "pending_review" ? null : asText(row.income_band),
+    reviewing: row.status === "pending_review",
     created_at: asText(row.created_at),
     subscribed: paid,
     complete: row.is_complete === true,
@@ -224,7 +228,7 @@ export async function BrowsePage({
           const query = db
             .from("profiles")
             .select(cols)
-            .eq("status", "active")
+            .in("status", ["active", "pending_review"])
             .neq("id", mineId)
             .order("updated_at", { ascending: false })
             .limit(BROWSE_LIST_LIMIT);
@@ -323,6 +327,13 @@ export async function BrowsePage({
           for (const [id, path] of photoMap) {
             const current = photoLists.get(id) ?? [];
             if (path && !current.includes(path)) photoLists.set(id, [path, ...current].slice(0, 3));
+          }
+          const reviewingIds = new Set(
+            listed.filter((row) => row.status === "pending_review").map((row) => String(row.id)),
+          );
+          for (const id of reviewingIds) {
+            const current = photoLists.get(id) ?? [];
+            if (current.length > 1) photoLists.set(id, current.slice(0, 1));
           }
           const now = Date.now();
           const mySelf = matchSelfFromProfile(mine, {

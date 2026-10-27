@@ -17,7 +17,7 @@ import { NavigationFeedback } from "@/components/navigation-feedback";
 import { collapseNotices, noticesForActiveProfiles } from "@/lib/match/collapse-notices";
 import { unreadNoticeBadge } from "@/lib/notices/unread-badge";
 import { effectiveInterestStatus } from "@/lib/match/interest-status";
-import { isPublicProfileStatus } from "@/lib/profile/visibility";
+import { isListedProfileStatus, isPublicProfileStatus } from "@/lib/profile/visibility";
 import { SyncSession } from "@/components/sync-session";
 import { parseScene, SCENE_COOKIE } from "@/lib/ui/scenes";
 
@@ -50,9 +50,16 @@ export async function SiteHeader({ overlay = false, glass = false }: { overlay?:
           const collapsed = collapseNotices(unread ?? []);
           const profileIds = [...new Set(collapsed.map((row) => row.match_profile_id).filter(Boolean))] as string[];
           const { data: profiles } = profileIds.length
-            ? await supabase.from("profiles").select("id").in("id", profileIds).eq("status", "active")
+            ? await supabase.from("profiles").select("id, status").in("id", profileIds)
             : { data: [] as { id: string }[] };
-          const open = noticesForActiveProfiles(collapsed, new Set((profiles ?? []).map((profile) => profile.id)));
+          const open = noticesForActiveProfiles(
+            collapsed,
+            new Set(
+              (profiles ?? [])
+                .filter((profile) => isListedProfileStatus((profile as { status?: string }).status))
+                .map((profile) => profile.id),
+            ),
+          );
           return {
             chatUnread: open.filter((row) => row.kind === "chat").length,
             alertUnread: open.filter((row) => row.kind !== "chat").length,

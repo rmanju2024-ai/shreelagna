@@ -18,7 +18,7 @@ import { inboxLastOnlineNow, pickPrimaryPhotoMap, publicMediaUrl } from "@/lib/m
 import { yearsFromDob } from "@/lib/profile/completeness";
 import { formatHeightImperial } from "@/lib/profile/match-compare";
 import { displayFirstName } from "@/lib/profile/options";
-import { isPublicProfileStatus } from "@/lib/profile/visibility";
+import { isListedProfileStatus } from "@/lib/profile/visibility";
 import { profileOpenHref } from "@/lib/ui/dismiss";
 import { createServiceClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -150,7 +150,7 @@ export async function InterestsView({ only }: { only?: SectionId } = {}) {
   // Both profile lookups run together.
   const [names, viewers] = await Promise.all([loadProfiles(otherIds), loadProfiles(viewIds)]);
   const nameMap = new Map(names.map((n) => [n.id, n]));
-  const viewerRows = viewers.filter((n) => isPublicProfileStatus(n.status));
+  const viewerRows = viewers.filter((n) => isListedProfileStatus(n.status));
   const viewerMap = new Map(viewerRows.map((n) => [n.id, n]));
 
   const photoIds = [...new Set([...nameMap.keys(), ...viewerMap.keys()])];
@@ -193,13 +193,13 @@ export async function InterestsView({ only }: { only?: SectionId } = {}) {
 
   function rowStatus(row: InterestRow): InterestStatus {
     const other = nameMap.get(otherId(row));
-    if (!other || !isPublicProfileStatus(other.status)) return "deleted";
+    if (!other || !isListedProfileStatus(other.status)) return "deleted";
     return effectiveInterestStatus(row.status, row.created_at);
   }
 
   function publicHref(profileId: string) {
     const other = nameMap.get(profileId) ?? viewerMap.get(profileId);
-    if (other && !isPublicProfileStatus(other.status)) return undefined;
+    if (other && !isListedProfileStatus(other.status)) return undefined;
     return profileOpenHref(profileId, "likes");
   }
 
@@ -222,7 +222,7 @@ export async function InterestsView({ only }: { only?: SectionId } = {}) {
     },
   ) {
     const other = nameMap.get(profileId) ?? viewerMap.get(profileId);
-    const publicProfile = Boolean(other && isPublicProfileStatus(other.status));
+    const publicProfile = Boolean(other && isListedProfileStatus(other.status));
     const photo = publicProfile ? publicMediaUrl(photoMap.get(profileId) ?? null) : null;
     const age = other?.date_of_birth ? yearsFromDob(other.date_of_birth) : null;
     const height = typeof other?.height_cm === "number" ? formatHeightImperial(other.height_cm) : null;

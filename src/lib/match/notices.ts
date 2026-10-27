@@ -33,7 +33,7 @@ export async function recordMatchNotices(
   const { data: others } = await client
     .from("profiles")
     .select("*, religions(name), communities(name)")
-    .eq("status", "active")
+    .in("status", ["active", "pending_review"])
     .eq("is_complete", true)
     .eq("profile_type", want)
     .neq("id", profileId)
