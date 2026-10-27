@@ -969,18 +969,29 @@ table { max-width: 100%; }
 
 /* ── Tagline in header (below site name) ── */
 .brand-header-tagline {
-  display: block;
-  font-size: clamp(0.58rem, 2.4vw, 0.72rem);
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: min(100%, 22rem);
+  margin-top: 0.12rem;
+  padding: 0.22rem 0.55rem 0.24rem;
+  border-radius: 999px;
+  font-size: clamp(0.56rem, 2.2vw, 0.7rem);
   font-style: italic;
-  font-weight: 600;
-  color: #7a4a28;
-  white-space: normal;
+  font-weight: 700;
+  color: #6f1d1b;
   line-height: 1.25;
-  opacity: 0.95;
-  max-width: 22rem;
+  white-space: normal;
+  border: 1px solid rgba(184, 137, 76, 0.55);
+  background: linear-gradient(180deg, #fffdf8 0%, #f4e4c8 52%, #e7d3b0 100%);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 -2px 4px rgba(120, 80, 40, 0.16),
+    0 3px 0 #c9ae82,
+    0 7px 12px rgba(47, 22, 14, 0.14);
 }
 .brand-header-tagline.is-light {
-  color: rgba(255, 235, 185, 0.90);
+  color: #3f0e0d;
 }
 
 .brand-tagline {
@@ -1183,7 +1194,7 @@ body > .nav-menu {
   }
   .site-head-brand .brand-tagline,
   .site-head-brand .brand-header-tagline {
-    display: block !important;
+    display: inline-flex !important;
     white-space: normal !important;
     max-width: 16rem;
   }
@@ -2976,7 +2987,10 @@ html[data-scene="jewel"] header .site-name-word.is-connect {
   -webkit-text-fill-color: #f3c56a;
 }
 html[data-scene="jewel"] header .brand-header-tagline {
-  color: rgb(253 230 138 / 88%);
+  color: #2a0808;
+  border-color: rgb(243 197 106 / 55%);
+  background: linear-gradient(135deg, #ffe9a8, #d4a85a 55%, #a07020);
+  box-shadow: 3px 4px 0 #140408, inset 0 1px 0 rgb(255 248 210 / 55%);
 }
 html[data-scene="jewel"] .btn-3d-maroon,
 .page-scene.is-jewel .btn-3d-maroon {

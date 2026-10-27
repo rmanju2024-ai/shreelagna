@@ -26,8 +26,9 @@ export default async function HomePage() {
               <Suspense fallback={null}>
                 <BannerGreeting />
               </Suspense>
-            ) : null}
-            <BrandMotto as="h1" />
+            ) : (
+              <BrandMotto as="h1" />
+            )}
             <div className="home-invite-actions">
               {user ? (
                 <Link href="/app" className={btnHero}>
