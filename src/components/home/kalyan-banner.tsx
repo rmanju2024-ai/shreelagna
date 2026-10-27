@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /* ═══════════════════════════════════════════════════════════════
    The Oyster & the Swati Star — canvas animation
@@ -509,16 +509,10 @@ function render(
   }
 }
 
-// ── Component ─────────────────────────────────────────────────────
+// ── Canvas fallback component (Swati/Oyster myth animation) ───────
 const CYCLE = 720; // frames — ≈ 12 s at 60 fps
 
-export function KalyanBanner({
-  intensity = "hero",
-}: {
-  intensity?: "hero" | "wash";
-  presentation?: "cover" | "complete";
-  veil?: boolean;
-}) {
+function OysterCanvas({ hidden }: { hidden: boolean }) {
   const cvRef    = useRef<HTMLCanvasElement>(null);
   const frameRef = useRef(0);
   const rafRef   = useRef(0);
@@ -527,6 +521,7 @@ export function KalyanBanner({
   const sizeRef  = useRef({ W: 0, H: 0 });
 
   useEffect(() => {
+    if (hidden) return; // stop drawing once video is playing
     const cv = cvRef.current;
     if (!cv) return;
     const ctx = cv.getContext("2d");
@@ -558,7 +553,6 @@ export function KalyanBanner({
       ctx.setTransform(dprRef.current, 0, 0, dprRef.current, 0, 0);
       render(ctx, W, H, p, dropsRef.current, frameRef.current);
 
-      // Advance rain drops
       for (const d of dropsRef.current) {
         d.y += d.spd; d.x -= d.spd * 0.17;
         if (d.y - d.len > H * 0.57 || d.x < -40) {
@@ -577,6 +571,46 @@ export function KalyanBanner({
       cancelAnimationFrame(rafRef.current);
       ro.disconnect();
     };
+  }, [hidden]);
+
+  return (
+    <canvas
+      ref={cvRef}
+      style={{
+        display: "block", position: "absolute", inset: 0,
+        transition: "opacity 0.8s ease",
+        opacity: hidden ? 0 : 1,
+      }}
+    />
+  );
+}
+
+// ── Main banner component ─────────────────────────────────────────
+export function KalyanBanner({
+  intensity = "hero",
+}: {
+  intensity?: "hero" | "wash";
+  presentation?: "cover" | "complete";
+  veil?: boolean;
+}) {
+  // Track whether the video has started playing
+  const [videoPlaying, setVideoPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    // Some browsers fire 'playing' immediately; others need a nudge
+    const onPlaying = () => setVideoPlaying(true);
+    const onError   = () => setVideoPlaying(false); // stay on canvas fallback
+    v.addEventListener("playing", onPlaying);
+    v.addEventListener("error",   onError);
+    // If the video is already playing (cached), mark it now
+    if (!v.paused && v.readyState >= 3) setVideoPlaying(true);
+    return () => {
+      v.removeEventListener("playing", onPlaying);
+      v.removeEventListener("error",   onError);
+    };
   }, []);
 
   const wash = intensity === "wash";
@@ -586,9 +620,26 @@ export function KalyanBanner({
       aria-hidden
       style={wash ? { opacity: 0.25, filter: "saturate(0.6)" } : undefined}
     >
-      <canvas
-        ref={cvRef}
-        style={{ display: "block", position: "absolute", inset: 0 }}
+      {/* Canvas fallback — plays until video is ready */}
+      <OysterCanvas hidden={videoPlaying} />
+
+      {/* Video — primary, fades in once playing */}
+      <video
+        ref={videoRef}
+        src="/banner.mp4"
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        style={{
+          position: "absolute", inset: 0,
+          width: "100%", height: "100%",
+          objectFit: "cover",
+          objectPosition: "center",
+          transition: "opacity 0.8s ease",
+          opacity: videoPlaying ? 1 : 0,
+        }}
       />
     </div>
   );
