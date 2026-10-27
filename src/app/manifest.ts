@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
+import { SITE_BRAND, SITE_NAME } from "@/lib/brand";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "MarriageConnect.in",
-    short_name: "MarriageConnect.in",
+    name: SITE_BRAND,
+    short_name: SITE_NAME,
     description: "Where hearts unite and families bloom.",
     start_url: "/",
     scope: "/",

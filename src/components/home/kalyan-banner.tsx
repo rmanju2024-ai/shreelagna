@@ -671,12 +671,8 @@ export function KalyanBanner({
           playsInline
           preload="auto"
           poster="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
+          className="lotus-lake-video"
           style={{
-            position: "absolute", inset: 0,
-            width: "100%", height: "100%",
-            objectFit: "cover",
-            objectPosition: "center",
-            transition: "opacity 0.8s ease",
             opacity: videoPlaying ? 1 : 0,
           }}
         />

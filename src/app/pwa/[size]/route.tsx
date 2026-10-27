@@ -23,7 +23,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ siz
           letterSpacing: "-0.04em",
         }}
       >
-        SL
+        MC
       </div>
     ),
     { width: px, height: px },
