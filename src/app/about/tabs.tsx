@@ -38,9 +38,9 @@ function AboutContent({ user }: { user: boolean }) {
           ["How you begin",  "A Gmail sign-in. Members return to their profile. Family may write on behalf of the bride or groom."],
           ["How we keep faith", "For adults only. Private details stay private. Community, if shared, is treated with care."],
         ].map(([t, d]) => (
-          <article key={t} className={cardClass}>
-            <h2 className="font-[family-name:var(--font-display)] text-2xl">{t}</h2>
-            <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">{d}</p>
+          <article key={t} className={`${cardClass} public-story-card`}>
+            <h2 className="font-[family-name:var(--font-display)]">{t}</h2>
+            <p>{d}</p>
           </article>
         ))}
       </div>
