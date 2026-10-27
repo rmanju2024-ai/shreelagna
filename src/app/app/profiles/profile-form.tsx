@@ -1222,15 +1222,18 @@ export function ProfileForm({
       ) : null}
 
       {wizard ? (
-        <div className="profile-wizard-actions">
-          <button
-            type="button"
-            className={btnHeroGhost}
-            onClick={() => moveWizard(wizardStep - 1)}
-            disabled={wizardStep === 1}
-          >
-            ← Back
-          </button>
+        <div className={`profile-wizard-actions${wizardStep === 1 ? " is-start" : ""}`}>
+          {wizardStep > 1 ? (
+            <button
+              type="button"
+              className={btnHeroGhost}
+              onClick={() => moveWizard(wizardStep - 1)}
+            >
+              ← Back
+            </button>
+          ) : (
+            <span className="profile-wizard-actions-spacer" aria-hidden="true" />
+          )}
           <span>
             Step {wizardStep} of {WIZARD_STEPS.length}
           </span>

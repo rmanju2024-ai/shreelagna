@@ -529,10 +529,13 @@ table { max-width: 100%; }
 
 /* ===== Guided profile creation wizard ===== */
 .form-3d.is-wizard { display: grid; gap: 1rem; }
+.form-3d.is-wizard > .profile-wizard { order: 1; }
+.form-3d.is-wizard > .wizard-panel { order: 2; }
+.form-3d.is-wizard > .profile-wizard-actions { order: 3; }
+.form-3d.is-wizard > .profile-readiness { order: 4; }
+.form-3d.is-wizard > .form-3d-actions { order: 5; }
 .is-wizard .wizard-panel { display: none; }
 .is-wizard .wizard-panel.is-current { display: block; animation: pv-up 0.28s ease both; }
-/* Sticky Back/Next must never cover the last field in a step. */
-.is-wizard .wizard-panel.is-current { padding-bottom: 7.5rem; scroll-margin-bottom: 8rem; }
 .profile-wizard {
   display: grid; gap: 0.8rem; padding: 1rem; border-radius: 1.4rem;
   border: 1px solid rgb(255 255 255 / 75%);
@@ -694,15 +697,19 @@ table { max-width: 100%; }
 }
 .profile-wizard-guide p { margin: 0; font-size: 0.8rem; }
 .profile-wizard-actions {
-  position: sticky; bottom: 5.3rem; z-index: 35; display: grid;
+  position: static; z-index: 35; display: grid;
   grid-template-columns: minmax(6rem, auto) 1fr minmax(6rem, auto);
   align-items: center; gap: 0.6rem; padding: 0.65rem;
+  margin-top: 0.15rem;
   border: 1px solid rgb(184 137 76 / 25%); border-radius: 1.1rem;
   background: rgb(255 250 243 / 94%); backdrop-filter: blur(14px);
   box-shadow: 0 12px 28px -16px rgb(63 14 13 / 45%);
 }
 .profile-wizard-actions > span { color: var(--muted); font-size: 0.76rem; text-align: center; }
 .profile-wizard-actions button:last-child { grid-column: 3; }
+.profile-wizard-actions.is-start { grid-template-columns: 1fr minmax(6rem, auto); }
+.profile-wizard-actions.is-start > span { text-align: left; }
+.profile-wizard-actions-spacer { display: none; }
 .profile-readiness {
   display: flex; align-items: flex-start; gap: 0.7rem; margin-bottom: 1rem; padding: 0.9rem;
   border-radius: 1rem; border: 1px solid rgb(245 200 76 / 45%);
@@ -724,13 +731,15 @@ table { max-width: 100%; }
   .profile-wizard-steps button { flex: 0 0 8.25rem; scroll-snap-align: center; min-height: 44px; }
   .profile-wizard-guide { align-items: flex-start; }
   .profile-wizard-actions {
+    position: sticky;
     bottom: calc(4.7rem + env(safe-area-inset-bottom));
     grid-template-columns: minmax(5.5rem, auto) 1fr minmax(5.5rem, auto);
     padding: 0.5rem;
   }
+  .profile-wizard-actions.is-start { grid-template-columns: 1fr minmax(5.5rem, auto); }
   .is-wizard .wizard-panel.is-current {
-    padding-bottom: calc(8.5rem + env(safe-area-inset-bottom));
-    scroll-margin-bottom: calc(9rem + env(safe-area-inset-bottom));
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+    scroll-margin-bottom: calc(6rem + env(safe-area-inset-bottom));
   }
   .profile-wizard-actions button { min-height: 2.75rem; padding-inline: 0.7rem; }
   .profile-readiness { padding: 0.75rem; }
