@@ -2108,7 +2108,7 @@ html[data-scene="dusk"] .app-main {
 
 /* Home: 50/50 split hero */
 .home-split {
-  display: grid; grid-template-columns: 1.05fr 1fr; align-items: stretch;
+  display: grid; grid-template-columns: 1fr 1fr; align-items: stretch;
   min-height: calc(100svh - 5rem);
   background:
     radial-gradient(ellipse at 88% 12%, rgb(255 214 140 / 42%), transparent 42%),
@@ -2116,21 +2116,94 @@ html[data-scene="dusk"] .app-main {
     linear-gradient(165deg, #fffaf1 0%, #f6e7cf 52%, #efe0c4 100%);
 }
 .home-split-art {
-  position: relative; width: 100%; min-height: 32rem; height: auto; justify-self: stretch;
-  background: #f6c7a0; overflow: hidden;
-  box-shadow: inset 0 0 0 1px rgb(212 168 90 / 45%);
+  position: relative; width: 100%; min-height: 28rem; height: auto; justify-self: stretch;
+  display: flex; align-items: stretch;
+  /* ── Creative border: sweeping-shimmer gold mat ── */
+  background: linear-gradient(
+    135deg,
+    #fde8a8 0%, #f0c870 18%, #d8a038 36%,
+    #f5d468 52%, #fde8a8 68%, #e8b840 84%, #d8a038 100%
+  );
+  background-size: 300% 300%;
+  animation: pearl-mat-sweep 4s ease-in-out infinite;
 }
 /* ══════════════════════════════════════════════════════════
    Oyster & Swati banner — canvas draws everything;
    this container just provides dark fallback + clip.
    ══════════════════════════════════════════════════════════ */
 .lotus-lake {
-  position: absolute; inset: 0; overflow: hidden; pointer-events: none;
-  background: #05101a; /* matches canvas sky color — prevents flash */
+  position: absolute;
+  inset: 1.1rem;
+  border-radius: 1.4rem;
+  overflow: hidden;
+  pointer-events: none;
+  background: #05101a;
+  z-index: 1;
+
+  /* Pulsing glow border — animates in sync with the mat shimmer */
+  border: 2px solid rgba(222, 182, 88, 0.80);
+  box-shadow:
+    0 0 0 3px rgba(253, 232, 100, 0.22),
+    0 0 18px 2px rgba(212, 168, 60, 0.35),
+    0 14px 44px -10px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 248, 200, 0.22);
+  animation: pearl-border-pulse 4s ease-in-out infinite;
 }
 /* wash mode: the component applies opacity/filter inline */
 
-/* (canvas renders all visual elements — no pearl-* CSS rules needed) */
+/* ── Corner ornaments (absolute inside .home-split-art, z above lotus-lake) ── */
+.pearl-corner {
+  position: absolute;
+  width: 3.2rem; height: 3.2rem;
+  z-index: 5;
+  pointer-events: none;
+  filter: drop-shadow(0 0 5px rgba(220, 170, 60, 0.75));
+  animation: pearl-corner-glow 4s ease-in-out infinite;
+}
+.pearl-corner.tl { top:    0.05rem; left:   0.05rem; }
+.pearl-corner.tr { top:    0.05rem; right:  0.05rem; }
+.pearl-corner.bl { bottom: 0.05rem; left:   0.05rem; }
+.pearl-corner.br { bottom: 0.05rem; right:  0.05rem; }
+
+/* Mobile: smaller corners */
+@media (max-width: 860px) {
+  .pearl-corner { width: 2rem; height: 2rem; }
+  .home-split-art .lotus-lake { inset: 0.55rem; border-radius: 0.9rem; }
+  .pearl-corner.tl { top: 0; left: 0; }
+  .pearl-corner.tr { top: 0; right: 0; }
+  .pearl-corner.bl { bottom: 0; left: 0; }
+  .pearl-corner.br { bottom: 0; right: 0; }
+}
+
+/* ── Keyframes ── */
+@keyframes pearl-mat-sweep {
+  0%, 100% { background-position: 0%   0%;   }
+  50%       { background-position: 100% 100%; }
+}
+
+@keyframes pearl-border-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 3px rgba(253, 232, 100, 0.22),
+      0 0 18px 2px rgba(212, 168, 60, 0.35),
+      0 14px 44px -10px rgba(0, 0, 0, 0.55),
+      inset 0 1px 0 rgba(255, 248, 200, 0.22);
+  }
+  50% {
+    box-shadow:
+      0 0 0 5px rgba(253, 232, 100, 0.42),
+      0 0 28px 6px rgba(240, 190, 60, 0.55),
+      0 14px 44px -10px rgba(0, 0, 0, 0.55),
+      inset 0 1px 0 rgba(255, 248, 200, 0.35);
+  }
+}
+
+@keyframes pearl-corner-glow {
+  0%, 100% { filter: drop-shadow(0 0 5px rgba(220,170,60,0.75)); }
+  50%       { filter: drop-shadow(0 0 10px rgba(253,232,100,0.95)); }
+}
+
+/* (canvas renders all visual elements — no additional CSS rules needed) */
 .home-split-copy { display: flex; flex-direction: column; justify-content: center; gap: 1.15rem; padding: clamp(1.8rem, 5.5vw, 4.5rem); color: #3f0e0d; }
 .home-invite {
   display: grid;
@@ -2559,6 +2632,7 @@ html[data-scene="dusk"] .app-main {
   .home-split-tiles { grid-template-columns: minmax(0, 1fr); }
   .home-split-copy { padding: 0.85rem 0.85rem 5.4rem; }
   .home-split-art { aspect-ratio: 4 / 3.15; max-height: 44svh; min-height: 0; }
+  .home-split-art .lotus-lake { inset: 0.55rem; border-radius: 0.9rem; }
   .home-value-row { grid-template-columns: minmax(0, 1fr); padding-bottom: 2rem; }
   .home-steps { padding: 1.6rem 0 2rem; }
   .home-final { padding: 2.4rem 0.85rem 5.5rem; }

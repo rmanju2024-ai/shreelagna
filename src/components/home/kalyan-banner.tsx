@@ -509,6 +509,43 @@ function render(
   }
 }
 
+// ── Decorative corner ornament ────────────────────────────────────
+// An L-bracket with pearl dot accents — flipped per corner via CSS transform.
+type Corner = "tl" | "tr" | "bl" | "br";
+function CornerOrnament({ pos }: { pos: Corner }) {
+  const sx = pos.includes("r") ? -1 : 1;
+  const sy = pos.includes("b") ? -1 : 1;
+  return (
+    <svg
+      className={`pearl-corner ${pos}`}
+      viewBox="0 0 44 44"
+      fill="none"
+      aria-hidden
+      style={{ transform: `scale(${sx},${sy})` }}
+    >
+      {/* Outer L-bracket */}
+      <path
+        d="M5 32 L5 8 Q5 5 8 5 L32 5"
+        stroke="#d4a843" strokeWidth="2.6" strokeLinecap="round"
+      />
+      {/* Inner shorter bracket */}
+      <path
+        d="M5 24 L5 12 Q5 9 8 9 L20 9"
+        stroke="#d4a843" strokeWidth="1.3" strokeLinecap="round" opacity=".55"
+      />
+      {/* End dots */}
+      <circle cx="5"  cy="32" r="3.2" fill="#d4a843" />
+      <circle cx="32" cy="5"  r="3.2" fill="#d4a843" />
+      {/* Corner circle + centre dot */}
+      <circle cx="5" cy="5" r="5"   stroke="#d4a843" strokeWidth="2" />
+      <circle cx="5" cy="5" r="2"   fill="#d4a843" />
+      {/* Small mid-dot on each arm */}
+      <circle cx="5"  cy="18" r="1.5" fill="#d4a843" opacity=".45" />
+      <circle cx="18" cy="5"  r="1.5" fill="#d4a843" opacity=".45" />
+    </svg>
+  );
+}
+
 // ── Canvas fallback component (Swati/Oyster myth animation) ───────
 const CYCLE = 720; // frames — ≈ 12 s at 60 fps
 
@@ -615,32 +652,45 @@ export function KalyanBanner({
 
   const wash = intensity === "wash";
   return (
-    <div
-      className={`lotus-lake${wash ? " is-wash" : " is-hero"}`}
-      aria-hidden
-      style={wash ? { opacity: 0.25, filter: "saturate(0.6)" } : undefined}
-    >
-      {/* Canvas fallback — plays until video is ready */}
-      <OysterCanvas hidden={videoPlaying} />
+    <>
+      {/* ── Video frame ── */}
+      <div
+        className={`lotus-lake${wash ? " is-wash" : " is-hero"}`}
+        aria-hidden
+        style={wash ? { opacity: 0.25, filter: "saturate(0.6)" } : undefined}
+      >
+        {/* Canvas fallback — plays until video is ready */}
+        <OysterCanvas hidden={videoPlaying} />
 
-      {/* Video — primary, fades in once playing */}
-      <video
-        ref={videoRef}
-        src="/banner.mp4"
-        autoPlay
-        loop
-        muted
-        playsInline
-        preload="auto"
-        style={{
-          position: "absolute", inset: 0,
-          width: "100%", height: "100%",
-          objectFit: "cover",
-          objectPosition: "center",
-          transition: "opacity 0.8s ease",
-          opacity: videoPlaying ? 1 : 0,
-        }}
-      />
-    </div>
+        {/* Video — primary, fades in once playing */}
+        <video
+          ref={videoRef}
+          src="/banner.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          style={{
+            position: "absolute", inset: 0,
+            width: "100%", height: "100%",
+            objectFit: "cover",
+            objectPosition: "center",
+            transition: "opacity 0.8s ease",
+            opacity: videoPlaying ? 1 : 0,
+          }}
+        />
+      </div>
+
+      {/* ── Decorative corner ornaments (sit in the mat gap, above the frame) ── */}
+      {!wash && (
+        <>
+          <CornerOrnament pos="tl" />
+          <CornerOrnament pos="tr" />
+          <CornerOrnament pos="bl" />
+          <CornerOrnament pos="br" />
+        </>
+      )}
+    </>
   );
 }
