@@ -1003,7 +1003,6 @@ export function ProfileForm({
           <HopePicker
             label="Father's profession"
             name="father_occupation"
-            alphabetize={false}
             options={PARENT_PROFESSION_OPTIONS}
             selected={parseParentTags(values?.father_occupation)}
             help="Tick several if needed — for example Passed away and Business, or Dont Know if you are not sure."
@@ -1011,7 +1010,6 @@ export function ProfileForm({
           <HopePicker
             label="Mother's profession"
             name="mother_occupation"
-            alphabetize={false}
             options={PARENT_PROFESSION_OPTIONS}
             selected={parseParentTags(values?.mother_occupation)}
             help="Tick several if needed — for example Passed away and Homemaker, or Dont Know if you are not sure."

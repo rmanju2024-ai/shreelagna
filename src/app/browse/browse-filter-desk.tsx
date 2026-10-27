@@ -2,11 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { EMPTY_BROWSE_FILTERS, type BrowseFilters } from "@/lib/match/browse-filters";
-import { listsFromSeed } from "@/lib/profile/form-lists-seed";
+import { enrichFormLists, listsFromSeed } from "@/lib/profile/form-lists-seed";
 import { Select3d } from "@/components/select3d";
 import { btnGhost, btnPrimary, inputClass } from "@/lib/ui/classes";
 
-const SEED = listsFromSeed();
+const SEED = enrichFormLists(listsFromSeed());
 
 function sorted(values: string[]): string[] {
   return [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));

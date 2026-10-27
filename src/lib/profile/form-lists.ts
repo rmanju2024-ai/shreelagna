@@ -38,6 +38,14 @@ export function sortLabels(values: readonly string[]): string[] {
   return [...values].sort(compareLabel);
 }
 
+/** Keep named pins at the front, then the rest A to Z. */
+export function pinThenAlpha(values: readonly string[], pins: readonly string[] = []): string[] {
+  const pinSet = new Set(pins);
+  const rest = sortLabels(values.filter((value) => !pinSet.has(value)));
+  const head = pins.filter((pin) => values.includes(pin));
+  return [...head, ...rest];
+}
+
 export function citiesForState(lists: FormLists, state: string | null | undefined): string[] {
   if (!state) return [];
   return sortLabels(lists.cities.filter((c) => c.state === state).map((c) => c.name));

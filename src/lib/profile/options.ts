@@ -230,20 +230,20 @@ export const MANGLIK_OPTIONS = ["Yes", "No", "Partial (Anshik)", "Don't know"] a
 export const GANAS = ["Dev", "Manushya", "Rakshas"] as const;
 
 export const YONI_ANIMALS = [
-  "Horse (Ashwa)",
-  "Elephant (Gaja)",
-  "Sheep (Mesha)",
-  "Serpent (Sarpa)",
-  "Dog (Shwan)",
-  "Cat (Marjara)",
-  "Rat (Mushaka)",
-  "Cow (Go)",
   "Buffalo (Mahisha)",
-  "Tiger (Vyaghra)",
+  "Cat (Marjara)",
+  "Cow (Go)",
   "Deer (Mriga)",
-  "Monkey (Vanara)",
-  "Mongoose (Nakula)",
+  "Dog (Shwan)",
+  "Elephant (Gaja)",
+  "Horse (Ashwa)",
   "Lion (Simha)",
+  "Mongoose (Nakula)",
+  "Monkey (Vanara)",
+  "Rat (Mushaka)",
+  "Serpent (Sarpa)",
+  "Sheep (Mesha)",
+  "Tiger (Vyaghra)",
 ] as const;
 
 export const HOPE_COUNTRIES = [
@@ -447,20 +447,20 @@ export const SETTLE_ABROAD = ["Yes", "No", "Open", "Don't know"] as const;
 
 /** Status and work tags. Families can pick more than one, e.g. Passed away + Business. */
 export const PARENT_PROFESSIONS = [
-  "Passed away",
-  "Retired",
-  "Homemaker",
-  "Employed",
   "Business",
+  "Doctor",
+  "Employed",
+  "Engineer",
   "Farmer",
   "Government employee",
+  "Homemaker",
+  "Passed away",
+  "Retired",
   "Teacher",
-  "Doctor",
-  "Engineer",
   "Don't know",
 ] as const;
 
-export const LIVING_ARRANGEMENTS = ["Own house", "Parents' house", "Rented", "Leased"] as const;
+export const LIVING_ARRANGEMENTS = ["Leased", "Own house", "Parents' house", "Rented"] as const;
 
 export const PHYSICAL_STATUSES = [
   "No disability",

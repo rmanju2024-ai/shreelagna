@@ -183,21 +183,21 @@ export const HOPE_INCOME_BANDS = [
 ] as const;
 
 export const EMPLOYED_IN = [
-  "Student",
-  "Private company",
-  "Government",
-  "Defence",
-  "Public sector",
   "Business / self-employed",
-  "Startup",
+  "Defence",
   "Family business",
-  "Non-profit / NGO",
   "Freelance / contract",
-  "Work from home",
-  "Overseas employer",
-  "Professional practice",
-  "Retired",
+  "Government",
+  "Non-profit / NGO",
   "Not working",
+  "Overseas employer",
+  "Private company",
+  "Professional practice",
+  "Public sector",
+  "Retired",
+  "Startup",
+  "Student",
+  "Work from home",
 ] as const;
 
 export const FAMILY_TYPES = ["Nuclear", "Joint", "Other"] as const;

@@ -10,6 +10,23 @@ describe("form lists", () => {
     expect(lists.occupations).toEqual(sorted);
   });
 
+  it("lists other named catalogs A to Z", () => {
+    const lists = enrichFormLists(listsFromSeed());
+    const alpha = (values: string[]) =>
+      [...values].sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));
+    expect(lists.employedIn).toEqual(alpha(lists.employedIn));
+    expect(lists.tongues).toEqual(alpha(lists.tongues));
+    expect(lists.diets).toEqual(alpha(lists.diets));
+    expect(lists.hobbies).toEqual(alpha(lists.hobbies));
+    expect(lists.residency).toEqual(alpha(lists.residency));
+    expect(lists.countries[0]).toBe("India");
+    expect(lists.countries.slice(1)).toEqual(alpha(lists.countries.slice(1)));
+    expect(lists.yoniAnimals[0]).toBe("Don't know");
+    expect(lists.yoniAnimals.slice(1)).toEqual(alpha(lists.yoniAnimals.slice(1)));
+    expect(lists.gotras[0]).toBe("Don't know");
+    expect(lists.gotras.slice(1)).toEqual(alpha(lists.gotras.slice(1)));
+  });
+
   it("keeps seed catalogs for every registration list", () => {
     const seed = listsFromSeed();
     expect(seed.countries).toContain("India");

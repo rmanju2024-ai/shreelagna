@@ -30,7 +30,7 @@ describe("parentSentence", () => {
 
 describe("parseParentTags", () => {
   it("splits combined choices and old free text", () => {
-    expect(parseParentTags("Passed away · Business")).toEqual(["Passed away", "Business"]);
-    expect(parseParentTags("Retired businessman")).toEqual(["Retired", "Business"]);
+    expect(parseParentTags("Passed away · Business")).toEqual(["Business", "Passed away"]);
+    expect(parseParentTags("Retired businessman")).toEqual(["Business", "Retired"]);
   });
 });

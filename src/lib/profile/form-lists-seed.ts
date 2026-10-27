@@ -23,7 +23,7 @@ import {
   YONI_ANIMALS,
   withDontKnow,
 } from "@/lib/profile/options";
-import { compareLabel, emptyFormLists, sortLabels, type FormLists } from "@/lib/profile/form-lists";
+import { compareLabel, emptyFormLists, pinThenAlpha, sortLabels, type FormLists } from "@/lib/profile/form-lists";
 
 function take(loaded: string[] | undefined, seed: readonly string[], sort: "alpha" | "keep" = "keep"): string[] {
   const src = loaded?.length ? loaded : [...seed];
@@ -86,16 +86,16 @@ export function enrichFormLists(loaded: FormLists): FormLists {
     marital: loaded.marital.length ? loaded.marital : seed.marital,
     incomes: take(loaded.incomes, seed.incomes),
     hopeIncomes: take(loaded.hopeIncomes, seed.hopeIncomes),
-    employedIn: take(loaded.employedIn, seed.employedIn),
-    families: take(loaded.families, seed.families),
+    employedIn: take(loaded.employedIn, seed.employedIn, "alpha"),
+    families: take(loaded.families, seed.families, "alpha"),
     familyStatuses: take(loaded.familyStatuses, seed.familyStatuses),
-    physicalStatuses: withDontKnow(take(loaded.physicalStatuses, seed.physicalStatuses)),
+    physicalStatuses: withDontKnow(take(loaded.physicalStatuses, seed.physicalStatuses, "alpha")),
     bloodGroups: withDontKnow(take(loaded.bloodGroups, seed.bloodGroups)),
     hobbies: take(loaded.hobbies, seed.hobbies, "alpha"),
-    countries: take(loaded.countries, seed.countries),
-    hopeCountries: take(loaded.hopeCountries, seed.hopeCountries),
-    residency: take(loaded.residency, seed.residency),
-    gotras: withDontKnow(take(loaded.gotras, seed.gotras)),
+    countries: pinThenAlpha(take(loaded.countries, seed.countries), ["India"]),
+    hopeCountries: pinThenAlpha(take(loaded.hopeCountries, seed.hopeCountries), ["Any country", "India"]),
+    residency: take(loaded.residency, seed.residency, "alpha"),
+    gotras: withDontKnow(take(loaded.gotras, seed.gotras, "alpha")),
     prefManaged: take(loaded.prefManaged, seed.prefManaged),
     horoscopePref: take(loaded.horoscopePref, seed.horoscopePref),
     creatorRoles: loaded.creatorRoles.length ? loaded.creatorRoles : seed.creatorRoles,
@@ -103,7 +103,7 @@ export function enrichFormLists(loaded: FormLists): FormLists {
     nakshatras: withDontKnow(take(loaded.nakshatras, seed.nakshatras)),
     nakshatraPadas: withDontKnow(take(loaded.nakshatraPadas, seed.nakshatraPadas)),
     ganas: withDontKnow(take(loaded.ganas, seed.ganas)),
-    yoniAnimals: withDontKnow(take(loaded.yoniAnimals, seed.yoniAnimals)),
+    yoniAnimals: withDontKnow(take(loaded.yoniAnimals, seed.yoniAnimals, "alpha")),
     manglik: withDontKnow(take(loaded.manglik, seed.manglik)),
   };
 }
