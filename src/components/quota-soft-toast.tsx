@@ -39,15 +39,7 @@ export function QuotaSoftHost() {
     return () => window.removeEventListener(EVENT, onNotice);
   }, []);
 
-  useEffect(() => {
-    if (!visible || !notice) return;
-    const hide = window.setTimeout(() => setVisible(false), notice.holdMs);
-    const clear = window.setTimeout(() => setNotice(null), notice.holdMs + 420);
-    return () => {
-      window.clearTimeout(hide);
-      window.clearTimeout(clear);
-    };
-  }, [visible, notice]);
+  // No auto-dismiss — popup stays until the visitor clicks ✕
 
   if (!notice || typeof document === "undefined") return null;
 

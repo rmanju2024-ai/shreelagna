@@ -222,8 +222,7 @@ export function HeaderNav({
     };
   }, []);
   const more: NavItem[] = [
-    { href: "/about",          label: "About",  icon: "about" },
-    { href: "/about?tab=help", label: "Help",   icon: "help"  },
+    { href: "/about", label: "About & Help", icon: "about" },
   ];
   const desk: NavItem = { href: "/desk", label: "Desk", icon: "staff" };
   const registerHere = pathMatches(pathname, "/login", tab);
