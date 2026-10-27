@@ -24,21 +24,25 @@ export function vapidSubject(): string {
   return process.env.VAPID_SUBJECT?.trim() || "mailto:house@marriageconnect.app";
 }
 
-export async function sendWebPushesToUser(userId: string, notice: PushNoticeInput): Promise<void> {
-  if (!vapidConfigured()) return;
+export async function sendWebPushesToUser(userId: string, notice: PushNoticeInput): Promise<number> {
+  if (!vapidConfigured()) return 0;
   const db = createServiceClient();
-  if (!db) return;
+  if (!db) return 0;
   const payload = buildPushPayload(notice);
   const { data: rows } = await db
     .from("push_subscriptions")
     .select("id, endpoint, p256dh, auth")
     .eq("user_id", userId);
+  let sent = 0;
   for (const row of (rows ?? []) as PushRow[]) {
     const status = await sendOnePush(row, payload);
     if (status != null && isGonePushStatus(status)) {
       await db.from("push_subscriptions").delete().eq("id", row.id);
+      continue;
     }
+    if (status === 201) sent += 1;
   }
+  return sent;
 }
 
 export async function sendOnePush(row: PushRow, payload: WebPushPayload): Promise<number | null> {

@@ -18,7 +18,7 @@ import {
 import { complimentaryPaidProfileAccess, pairPlanLive } from "@/lib/membership/access";
 import { loadInterestQuota, loadMembership } from "@/lib/membership/load";
 import { canViewProfile, isPublicProfileStatus, type ProfileType } from "@/lib/profile/visibility";
-import { deliverHouseNotice } from "@/lib/notify/deliver";
+import { recordAndDeliverNotice } from "@/lib/notify/house-notice";
 import { createServiceClient } from "@/lib/supabase/server";
 import { after } from "next/server";
 import { redirect } from "next/navigation";
@@ -422,7 +422,8 @@ export async function BrowseProfileView({
 
     const mode = typeof profile.contact_release_mode === "string" ? profile.contact_release_mode : "";
     const viewed = viewedRes.data;
-    const revealed = (Boolean(viewed) || isStaff) && (complete || isStaff);
+    const liveViewer = live || isStaff;
+    const revealed = (Boolean(viewed) || isStaff) && (complete || isStaff) && liveViewer;
     contact = {
       revealed,
       mobile: revealed && typeof profile.subject_mobile === "string" ? profile.subject_mobile.trim() : "",
@@ -431,9 +432,11 @@ export async function BrowseProfileView({
       accepted,
       needPlan,
       needComplete: !complete && !isStaff,
+      awaitingReview: complete && !live && !isStaff,
       counted: sentByMe || Boolean(viewed),
       canReveal:
         complete &&
+        liveViewer &&
         !revealed &&
         mode !== "never" &&
         !needPlan &&
@@ -524,37 +527,13 @@ export async function BrowseProfileView({
       if (ownerId && canAlertProfileView(profile)) {
         const viewerName = displayFirstName(typeof mine.subject_full_name === "string" ? mine.subject_full_name : "Someone");
         const copy = profileViewedCopy(viewerName);
-        const now = new Date().toISOString();
-        const { data: existing } = await db
-          .from("notices")
-          .select("id")
-          .eq("user_id", ownerId)
-          .eq("kind", "profile_view")
-          .eq("match_profile_id", String(mine.id))
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        if (existing) {
-          await db
-            .from("notices")
-            .update({ created_at: now, read_at: null, title: copy.title, body: copy.body, href: `/browse/${mine.id}` })
-            .eq("id", existing.id);
-        } else {
-          await db.from("notices").insert({
-            user_id: ownerId,
-            kind: copy.kind,
-            title: copy.title,
-            body: copy.body,
-            href: `/browse/${mine.id}`,
-            match_profile_id: String(mine.id),
-          });
-        }
-        await deliverHouseNotice({
+        await recordAndDeliverNotice(db, {
           userId: ownerId,
           kind: copy.kind,
           title: copy.title,
           body: copy.body,
           href: `/browse/${mine.id}`,
+          matchProfileId: String(mine.id),
         });
       }
     });

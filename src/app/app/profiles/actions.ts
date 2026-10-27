@@ -11,7 +11,6 @@ import { formList } from "@/lib/profile/multi-values";
 import { loadFormLists } from "@/lib/profile/load-form-lists";
 import { ABOUT_MAX, ABOUT_MIN, FAMILY_NOTE_MAX, aboutPlainText } from "@/lib/profile/about-html";
 import { contactViewedCopy, interestReceivedCopy } from "@/lib/match/alert-copy";
-import { upsertShortlistNotice } from "@/lib/match/shortlist-notice";
 import { canAlertInterest } from "@/lib/match/profile-settings";
 import { loadBlockedProfileIds } from "@/lib/safety/blocked";
 import { canSendInterest, effectiveInterestStatus, openInterestBlocksSend } from "@/lib/match/interest-status";
@@ -23,7 +22,7 @@ import { canEditMemberProfile, isStaffRole } from "@/lib/desk/access";
 import { hasDeleteConfirmation } from "@/lib/profile/delete-confirmation";
 import { contentFlags, MEMBER_CONTACT_WARNING } from "@/lib/moderation/content-flags";
 import { writeAudit } from "@/lib/desk/audit";
-import { deliverHouseNotice } from "@/lib/notify/deliver";
+import { recordAndDeliverNotice } from "@/lib/notify/house-notice";
 import { digitsOnly } from "@/lib/notify/phone";
 import { complimentaryPaidProfileAccess, pairPlanLive } from "@/lib/membership/access";
 import { loadInterestQuota, loadMembership } from "@/lib/membership/load";
@@ -538,17 +537,13 @@ export async function saveShortlist(profileId: string, want: boolean): Promise<{
       const viewerName = displayFirstName(
         typeof mine?.subject_full_name === "string" ? mine.subject_full_name : "A member",
       );
-      await upsertShortlistNotice(db, {
-        ownerUserId: ownerId,
-        viewerProfileId: viewerId,
-        viewerName,
-      });
-      await deliverHouseNotice({
+      await recordAndDeliverNotice(db, {
         userId: ownerId,
         kind: "shortlist",
         title: viewerName,
         body: `${viewerName} shortlisted your profile.`,
         href: `/browse/${viewerId}`,
+        matchProfileId: viewerId,
       });
       revalidatePath("/app/alerts");
     });
@@ -655,20 +650,13 @@ export async function sendInterest(formData: FormData): Promise<{
     const ownerId = target.created_by;
     const mobile = typeof target.subject_mobile === "string" ? target.subject_mobile : null;
     after(async () => {
-      await supabase.from("notices").insert({
-        user_id: ownerId,
-        kind: copy.kind,
-        title: copy.title,
-        body: copy.body,
-        href: "/app/interests",
-        match_profile_id: mine.id,
-      });
-      await deliverHouseNotice({
+      await recordAndDeliverNotice(supabase, {
         userId: ownerId,
         kind: copy.kind,
         title: copy.title,
         body: copy.body,
         href: "/app/interests",
+        matchProfileId: mine.id,
         mobileHint: mobile,
       });
       revalidatePath("/app/alerts");
@@ -747,7 +735,8 @@ export async function revealContact(toId: string): Promise<{
     db.from("profiles").select("id, status, subject_mobile, created_by, contact_release_mode").eq("id", toId).maybeSingle(),
   ]);
   const target = targetRes.data;
-  if (!mine?.ready || mine.status !== "active") return { ok: false, error: "incomplete" };
+  if (!mine?.ready) return { ok: false, error: "incomplete" };
+  if (mine.status !== "active") return { ok: false, error: "review" };
   if (mine.id === toId) return { ok: false, error: "own" };
   if (!target || target.status !== "active") return { ok: false, error: "unavailable" };
   if (target.contact_release_mode === "never") return { ok: false, error: "contact_private" };
@@ -818,43 +807,13 @@ export async function revealContact(toId: string): Promise<{
     after(async () => {
       revalidatePath("/app/plans");
       revalidatePath("/app/alerts");
-      const now = new Date().toISOString();
-      const { data: existing } = await db
-        .from("notices")
-        .select("id")
-        .eq("user_id", ownerUserId)
-        .eq("kind", "contact_view")
-        .eq("match_profile_id", mine.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (existing?.id) {
-        await db
-          .from("notices")
-          .update({
-            created_at: now,
-            read_at: null,
-            title: copy.title,
-            body: copy.body,
-            href: `/browse/${mine.id}`,
-          })
-          .eq("id", existing.id);
-      } else {
-        await db.from("notices").insert({
-          user_id: ownerUserId,
-          kind: copy.kind,
-          title: copy.title,
-          body: copy.body,
-          href: `/browse/${mine.id}`,
-          match_profile_id: mine.id,
-        });
-      }
-      await deliverHouseNotice({
+      await recordAndDeliverNotice(db, {
         userId: ownerUserId,
         kind: copy.kind,
         title: copy.title,
         body: copy.body,
         href: `/browse/${mine.id}`,
+        matchProfileId: mine.id,
       });
     });
   } else {
@@ -873,6 +832,7 @@ export async function viewContact(formData: FormData) {
   if (!result.ok) {
     if (result.error === "need_profile") redirect("/browse?error=need_profile");
     if (result.error === "incomplete") redirect(`/browse/${toId}?error=incomplete`);
+    if (result.error === "review") redirect(`/browse/${toId}?error=review`);
     if (result.error === "plan") redirect(`/browse/${toId}?error=plan`);
     if (result.error === "quota") redirect(`/browse/${toId}?error=quota`);
     if (result.error === "contact_private") redirect(`/browse/${toId}?error=contact_private`);

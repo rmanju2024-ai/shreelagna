@@ -10,6 +10,7 @@ describe("web push payload", () => {
       body: "Rohan viewed your profile.",
       url: "/browse/abc",
       kind: "profile_view",
+      tag: "profile_view:/browse/abc",
     });
   });
 

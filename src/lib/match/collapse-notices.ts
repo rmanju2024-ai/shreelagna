@@ -7,7 +7,8 @@ export function noticeCollapseKey(note: {
     (note.kind === "profile_view" ||
       note.kind === "contact_view" ||
       note.kind === "shortlist" ||
-      note.kind === "match") &&
+      note.kind === "match" ||
+      note.kind === "interest_received") &&
     note.match_profile_id
   ) {
     return `${note.kind}:${note.match_profile_id}`;

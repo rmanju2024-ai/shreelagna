@@ -38,7 +38,8 @@ export async function deliverHouseNotice(notice: HouseNotice): Promise<void> {
     href: notice.href,
     kind: notice.kind,
   };
-  await sendWebPushesToUser(notice.userId, payload).catch(() => undefined);
+  const pushed = await sendWebPushesToUser(notice.userId, payload).catch(() => 0);
+  if (typeof pushed === "number" && pushed > 0) return;
   if (!arattaiConfigured()) return;
   const mobile = await loadAlertMobile(notice.userId, notice.mobileHint);
   if (!mobile) return;

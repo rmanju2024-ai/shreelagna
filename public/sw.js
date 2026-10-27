@@ -11,7 +11,7 @@ self.addEventListener("fetch", () => {
 });
 
 self.addEventListener("push", (event) => {
-  let data = { title: "MarriageConnect", body: "You have a new update.", url: "/app/alerts" };
+  let data = { title: "MarriageConnect", body: "You have a new update.", url: "/app/alerts", tag: "house" };
   try {
     const parsed = event.data ? event.data.json() : null;
     if (parsed && typeof parsed === "object") {
@@ -19,6 +19,7 @@ self.addEventListener("push", (event) => {
         title: String(parsed.title || data.title),
         body: String(parsed.body || data.body),
         url: String(parsed.url || data.url),
+        tag: String(parsed.tag || parsed.kind || ""),
       };
     }
   } catch {
@@ -31,6 +32,8 @@ self.addEventListener("push", (event) => {
       data: { url: data.url },
       icon: "/pwa/192",
       badge: "/pwa/192",
+      tag: data.tag || "house",
+      renotify: false,
     }),
   );
 });

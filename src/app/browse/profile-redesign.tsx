@@ -114,6 +114,7 @@ export type ProfileData = {
     left: number | null;
     limit: number | null;
     needComplete?: boolean;
+    awaitingReview?: boolean;
   };
   chat?: {
     myProfileId: string | null;
@@ -206,6 +207,8 @@ function ContactPanel({
               ? "Five new families a day. Tomorrow IST midnight opens five more."
               : res.error === "quota"
                 ? "This cover’s family limit is used. Request Five more on Plans."
+                : res.error === "review"
+                  ? "House review is still open on your profile. Contact waits until it is live."
                 : "Could not show contact just now. Try again.",
         );
         return;
@@ -260,6 +263,10 @@ function ContactPanel({
         <p className="pv-contact-note">
           Complete your biodata first. Then this family's mobile and email can be shown.{" "}
           <Link href="/app/account">Complete my profile</Link>
+        </p>
+      ) : contact.awaitingReview ? (
+        <p className="pv-contact-note">
+          House review is still open on your profile. Contact, interest and chat wait until it is live.
         </p>
       ) : contact.canReveal ? (
         ask ? (

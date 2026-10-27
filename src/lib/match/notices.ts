@@ -1,4 +1,4 @@
-import { deliverHouseNotice } from "@/lib/notify/deliver";
+import { recordAndDeliverNotice } from "@/lib/notify/house-notice";
 import { matchFoundCopy } from "@/lib/match/alert-copy";
 import { matchSelfFromProfile, preferenceFits } from "@/lib/profile/match-compare";
 import { displayFirstName } from "@/lib/profile/options";
@@ -56,20 +56,13 @@ export async function recordMatchNotices(
     });
     if (!preferenceFits(mine, candidate)) continue;
     const copy = matchFoundCopy(displayFirstName(mine.subject_full_name ?? "there"));
-    await client.from("notices").insert({
-      user_id: userId,
-      kind: copy.kind,
-      title: copy.title,
-      body: copy.body,
-      href: `/browse/${other.id}`,
-      match_profile_id: other.id,
-    });
-    await deliverHouseNotice({
+    await recordAndDeliverNotice(client, {
       userId,
       kind: copy.kind,
       title: copy.title,
       body: copy.body,
       href: `/browse/${other.id}`,
+      matchProfileId: other.id,
     });
   }
 }

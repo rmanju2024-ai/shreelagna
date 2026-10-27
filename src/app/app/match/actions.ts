@@ -2,7 +2,7 @@
 
 import { ensureAppUser } from "@/lib/auth/session";
 import { writeAudit } from "@/lib/desk/audit";
-import { deliverHouseNotice } from "@/lib/notify/deliver";
+import { recordAndDeliverNotice } from "@/lib/notify/house-notice";
 import { missingPayloadColumn, isMissingColumnError } from "@/lib/profile/db-errors";
 import { chatReceivedCopy, interestAcceptedCopy, interestDeclinedCopy } from "@/lib/match/alert-copy";
 import { canAlertInterest } from "@/lib/match/profile-settings";
@@ -143,20 +143,13 @@ export async function respondInterest(formData: FormData) {
       displayFirstName(mine.subject_full_name ?? "A member"),
     );
     if (canAlertInterest(other)) {
-      await supabase.from("notices").insert({
-        user_id: other.created_by,
-        kind: copy.kind,
-        title: copy.title,
-        body: copy.body,
-        href: thread?.id ? `/app/chat/${thread.id}` : "/app/chat",
-        match_profile_id: mine.id,
-      });
-      await deliverHouseNotice({
+      await recordAndDeliverNotice(supabase, {
         userId: other.created_by,
         kind: copy.kind,
         title: copy.title,
         body: copy.body,
         href: thread?.id ? `/app/chat/${thread.id}` : "/app/chat",
+        matchProfileId: mine.id,
       });
     }
   }
@@ -168,20 +161,13 @@ export async function respondInterest(formData: FormData) {
       reason,
     );
     if (canAlertInterest(other)) {
-      await supabase.from("notices").insert({
-        user_id: other.created_by,
-        kind: copy.kind,
-        title: copy.title,
-        body: copy.body,
-        href: "/app/interests",
-        match_profile_id: mine.id,
-      });
-      await deliverHouseNotice({
+      await recordAndDeliverNotice(supabase, {
         userId: other.created_by,
         kind: copy.kind,
         title: copy.title,
         body: copy.body,
         href: "/app/interests",
+        matchProfileId: mine.id,
       });
     }
   }
