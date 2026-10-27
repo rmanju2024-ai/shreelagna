@@ -2210,16 +2210,16 @@ html[data-scene="dusk"] .app-main {
 
 /* ─────────────────────────────────────────────────────────── */
 .home-split {
-  display: grid; grid-template-columns: 1fr 1fr; align-items: stretch;
+  display: grid; grid-template-columns: 1.05fr 0.95fr; align-items: stretch;
   min-height: 0;
-  max-height: 22rem;
+  max-height: none;
   background:
     radial-gradient(ellipse at 88% 12%, rgb(255 214 140 / 42%), transparent 42%),
     radial-gradient(ellipse at 70% 78%, rgb(184 80 70 / 10%), transparent 46%),
     linear-gradient(165deg, #fffaf1 0%, #f6e7cf 52%, #efe0c4 100%);
 }
 .home-split-art {
-  position: relative; width: 100%; min-height: 18rem; height: auto; max-height: 22rem; justify-self: stretch;
+  position: relative; width: 100%; min-height: 20rem; height: auto; max-height: 28rem; aspect-ratio: 4 / 3; justify-self: stretch;
   display: flex; align-items: stretch;
   /* ── Creative border: sweeping-shimmer gold mat ── */
   background: linear-gradient(
@@ -2236,30 +2236,37 @@ html[data-scene="dusk"] .app-main {
    ══════════════════════════════════════════════════════════ */
 .lotus-lake {
   position: absolute;
-  inset: 0.88rem;
-  border-radius: 1.12rem;
+  inset: 0.7rem;
+  border-radius: 1.05rem;
   overflow: hidden;
   pointer-events: none;
-  background: #05101a;
+  background: #120c08;
   z-index: 1;
-
-  /* Pulsing glow border — animates in sync with the mat shimmer */
-  border: 1.6px solid rgba(222, 182, 88, 0.80);
+  border: 1.5px solid rgba(222, 182, 88, 0.85);
   box-shadow:
-    0 0 0 2.4px rgba(253, 232, 100, 0.22),
-    0 0 14px 2px rgba(212, 168, 60, 0.35),
-    0 14px 44px -10px rgba(0, 0, 0, 0.55),
+    0 0 0 2px rgba(253, 232, 100, 0.18),
+    0 12px 28px -12px rgba(0, 0, 0, 0.45),
     inset 0 1px 0 rgba(255, 248, 200, 0.22);
-  animation: pearl-border-pulse 4s ease-in-out infinite;
+}
+.lotus-lake::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgb(20 10 4 / 18%) 0%, transparent 28%, transparent 68%, rgb(20 10 4 / 32%) 100%);
 }
 .lotus-lake-video {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  object-position: center;
-  background: #05101a;
+  object-fit: cover;
+  object-position: center 40%;
+  transform: scale(1.14);
+  transform-origin: center center;
+  background: #120c08;
   transition: opacity 0.8s ease;
 }
 /* wash mode: the component applies opacity/filter inline */
@@ -2281,7 +2288,7 @@ html[data-scene="dusk"] .app-main {
 /* Mobile: smaller corners */
 @media (max-width: 860px) {
   .pearl-corner { width: 1.6rem; height: 1.6rem; }
-  .home-split-art .lotus-lake { inset: 0.44rem; border-radius: 0.72rem; }
+  .home-split-art .lotus-lake { inset: 0.42rem; border-radius: 0.85rem; }
   .pearl-corner.tl { top: 0; left: 0; }
   .pearl-corner.tr { top: 0; right: 0; }
   .pearl-corner.bl { bottom: 0; left: 0; }
@@ -2607,8 +2614,8 @@ html[data-scene="dusk"] .app-main {
     width: 100%;
     height: auto;
     min-height: 0;
-    aspect-ratio: 16 / 9;
-    max-height: none;
+    aspect-ratio: 4 / 3;
+    max-height: 40svh;
   }
   .home-split-copy {
     padding: 0.55rem 0.75rem 5.4rem;
@@ -2890,8 +2897,8 @@ html[data-scene="dusk"] .app-main {
 
   .home-split-tiles { grid-template-columns: minmax(0, 1fr); }
   .home-split-copy { padding: 0.55rem 0.75rem 5.4rem; }
-  .home-split-art { aspect-ratio: 16 / 9; max-height: none; min-height: 0; }
-  .home-split-art .lotus-lake { inset: 0.44rem; border-radius: 0.72rem; }
+  .home-split-art { aspect-ratio: 4 / 3; max-height: 40svh; min-height: 0; }
+  .home-split-art .lotus-lake { inset: 0.42rem; border-radius: 0.85rem; }
   .home-value-row { grid-template-columns: minmax(0, 1fr); padding-bottom: 2rem; }
   .home-steps { padding: 1.6rem 0 2rem; }
   .home-final { padding: 2.4rem 0.85rem 5.5rem; }
