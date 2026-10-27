@@ -150,6 +150,27 @@ export async function BrowsePage({
       const db = supabase as unknown as {
         from: (table: string) => {
           select: (cols: string) => {
+            in: (
+              col: string,
+              values: string[],
+            ) => {
+              neq: (col: string, value: string) => {
+                order: (
+                  col: string,
+                  opts: { ascending: boolean },
+                ) => {
+                  limit: (n: number) => Promise<{
+                    data: Record<string, unknown>[] | null;
+                    error: { message?: string } | null;
+                  }> & {
+                    eq: (
+                      col: string,
+                      value: string,
+                    ) => Promise<{ data: Record<string, unknown>[] | null; error: { message?: string } | null }>;
+                  };
+                };
+              };
+            };
             eq: (col: string, value: string) => {
               maybeSingle: () => Promise<{ data: Record<string, unknown> | null; error: { message?: string } | null }>;
               neq: (col: string, value: string) => {
