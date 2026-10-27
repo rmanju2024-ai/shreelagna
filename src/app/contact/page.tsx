@@ -1,54 +1,9 @@
-import { BackToAccount } from "@/components/back-to-account";
-import { InnerShell as PageShell } from "@/components/chrome-layout";
-import { ContactForm } from "./contact-form";
-import { cardClass } from "@/lib/ui/classes";
-import { getAuth } from "@/lib/auth/session";
-import type { Metadata } from "next";
-import Link from "next/link";
-import { PageHero } from "@/components/page-hero";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Contact",
-  description: "Write to MarriageConnect.",
-};
-
-export default async function ContactPage() {
-  const { user } = await getAuth();
-  return (
-    <PageShell>{user ? <BackToAccount /> : null}
-      <div className="sx-stage public-stage">
-        <PageHero
-          kicker="Help centre"
-          title="We’re here for you."
-          sub="Questions about a profile, account, or match? Write in your own words. A person from our team will reply."
-          motto={false}
-        />
-        <div className="help-genz-grid">
-          <aside className="help-genz-side">
-            <div className="help-genz-note">
-              <span aria-hidden>💌</span>
-              <h2>We’ve got you</h2>
-              <p>No bots, no confusing ticket numbers. Tell us what happened in your own words.</p>
-              <Link href={user ? "/app" : "/login"} className="help-genz-link">
-                {user ? "Go to my profile →" : "Sign in first →"}
-              </Link>
-            </div>
-            <ul className="help-genz-topics" aria-label="Popular help topics">
-              <li><span aria-hidden>🪄</span><div><b>Profile setup</b><small>Make a strong first impression</small></div></li>
-              <li><span aria-hidden>🔒</span><div><b>Safety & privacy</b><small>Keep your details in your control</small></div></li>
-              <li><span aria-hidden>💬</span><div><b>Matches & chats</b><small>Help with introductions</small></div></li>
-            </ul>
-            <p className="help-genz-legal">Need policy details? Read our <Link href="/privacy">Privacy Policy</Link>, <Link href="/terms">Terms</Link>, or <Link href="/community-rules">Community Rules</Link>.</p>
-          </aside>
-          <div className={`${cardClass} help-genz-form-card`}>
-            <div className="help-genz-form-head">
-              <span aria-hidden>✦</span>
-              <div><p>Send a note</p><h2>How can we help?</h2></div>
-            </div>
-            <ContactForm />
-          </div>
-        </div>
-      </div>
-    </PageShell>
-  );
+/**
+ * /contact is now part of the combined About & Help page.
+ * Redirect permanently so old links, bookmarks, and nav entries still work.
+ */
+export default function ContactPage() {
+  redirect("/about?tab=help");
 }

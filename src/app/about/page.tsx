@@ -1,64 +1,35 @@
-import Link from "next/link";
 import type { Metadata } from "next";
-import { GoogleSignIn } from "@/app/login/google-button";
+import { Suspense } from "react";
 import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { PageHero } from "@/components/page-hero";
 import { getAuth } from "@/lib/auth/session";
-import { btnPrimary, cardClass } from "@/lib/ui/classes";
+import { AboutHelpTabs } from "./tabs";
 
 export const metadata: Metadata = {
-  title: "About us",
-  description: "The house behind MarriageConnect — family-operated, Indian, private.",
+  title: "About & Help",
+  description: "The house behind MarriageConnect — and how to reach us.",
 };
 
-export default async function AboutPage() {
-  const { user } = await getAuth();
+export default async function AboutPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
+  const [{ user }] = await Promise.all([getAuth(), searchParams]);
 
   return (
     <PageShell>
       <div className="sx-stage public-stage">
         <PageHero
-          kicker="Our story"
-          title="The house."
-          sub="Proudly Indian, and built for introductions that feel human—not transactional."
+          kicker="MarriageConnect"
+          title="About &amp; Help"
+          sub="Learn who we are — or reach out if you need a hand."
           motto={false}
         />
-
-      <div className="public-card-grid">
-        {[
-          [
-            "Who we serve",
-            "Indian families, with care and respect.",
-          ],
-          [
-            "How you begin",
-            "A Gmail sign-in. Members return to their profile. Family may write on behalf of the bride or groom.",
-          ],
-          [
-            "How we keep faith",
-            "For adults only. Private details stay private. Community, if shared, is treated with care.",
-          ],
-        ].map(([t, d]) => (
-          <article key={t} className={cardClass}>
-            <h2 className="font-[family-name:var(--font-display)] text-2xl">{t}</h2>
-            <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">{d}</p>
-          </article>
-        ))}
-      </div>
-
-      <blockquote className="public-quote">
-        Search with ease. Speak when both families are ready.
-      </blockquote>
-
-      <div className="public-cta">
-        {user ? (
-          <Link href="/app" className={btnPrimary}>
-            My profile
-          </Link>
-        ) : (
-            <GoogleSignIn label="Continue with Gmail" tone="ivory" />
-        )}
-      </div>
+        {/* Suspense required because AboutHelpTabs uses useSearchParams() */}
+        <Suspense>
+          <AboutHelpTabs user={!!user} />
+        </Suspense>
       </div>
     </PageShell>
   );

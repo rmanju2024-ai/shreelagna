@@ -2107,6 +2107,50 @@ html[data-scene="dusk"] .app-main {
 }
 
 /* Home: 50/50 split hero */
+/* ── About & Help combined tabs ─────────────────────────────── */
+.about-tabs-bar {
+  display: flex;
+  gap: 0;
+  margin-bottom: 2.2rem;
+  border-bottom: 2px solid rgba(138, 80, 30, 0.14);
+}
+.about-tab-btn {
+  position: relative;
+  padding: 0.7rem 1.8rem;
+  border: none; background: none; cursor: pointer;
+  font-family: var(--font-display), ui-serif, serif;
+  font-size: clamp(0.95rem, 1.6vw, 1.08rem);
+  font-weight: 600;
+  color: var(--muted, #7a5040);
+  letter-spacing: 0.01em;
+  transition: color 0.2s;
+  /* Underline indicator */
+  border-bottom: 2.5px solid transparent;
+  margin-bottom: -2px; /* sit on top of the bar border */
+}
+.about-tab-btn:hover { color: #6f1d1b; }
+.about-tab-btn[aria-selected="true"] {
+  color: #6f1d1b;
+  border-bottom-color: #d4a843;
+}
+/* Small animated dot on the active tab */
+.about-tab-btn[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  bottom: -6px; left: 50%;
+  transform: translateX(-50%);
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: #d4a843;
+}
+
+.about-tab-panel { animation: tab-fade-in 0.22s ease; }
+@keyframes tab-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─────────────────────────────────────────────────────────── */
 .home-split {
   display: grid; grid-template-columns: 1fr 1fr; align-items: stretch;
   min-height: calc(100svh - 5rem);
