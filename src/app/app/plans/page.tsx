@@ -10,8 +10,6 @@ import {
   planByCode,
   planThemeClass,
 } from "@/lib/membership/catalog";
-import { QuotaSoftBeacon } from "@/components/quota-soft-toast";
-import { buildQuotaSoftNotice } from "@/lib/membership/quota-notice";
 import { fetchPendingPlanCode, fetchPlans, loadInterestQuota, loadMembership } from "@/lib/membership/load";
 import { formatIstDate } from "@/lib/time/ist";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -53,10 +51,6 @@ export default async function PlansPage({
 
   return (
     <PageShell><BackToAccount />
-      <QuotaSoftBeacon
-        onceKey="mc-quota-visit"
-        notice={buildQuotaSoftNotice(access, quota, "visit")}
-      />
       <section className="plans-stage">
         <div className="plans-header">
           <p className="browse-kicker">Membership</p>

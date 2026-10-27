@@ -9,11 +9,12 @@ import { BirdDock, type PeekChatNote } from "@/app/browse/bird-dock";
 import { CompletenessMeter } from "@/app/app/profiles/completeness-meter";
 import { KindMark } from "@/components/kind-mark";
 import { EVIDENCE_RETENTION_NOTICE } from "@/lib/verification/copy";
+import { visibleVerificationMarks } from "@/lib/verification/marks";
 import { otherProfileLocked } from "@/lib/profile/view-gate";
 import { BackLink } from "@/components/back-link";
 import type { CompletenessItem } from "@/lib/profile/completeness";
 import type { InterestThread } from "@/lib/match/interest-status";
-import { emitQuotaSoft, QuotaSoftBeacon } from "@/components/quota-soft-toast";
+import { emitQuotaSoft } from "@/components/quota-soft-toast";
 import { buildQuotaSoftNotice } from "@/lib/membership/quota-notice";
 import { DAILY_NEW_FAMILY_CAP } from "@/lib/membership/quota";
 
@@ -512,25 +513,6 @@ export function ProfileRedesign(props: ProfileData) {
 
   return (
     <div className="pv-shell">
-      {!props.own && props.user ? (
-        <QuotaSoftBeacon
-          onceKey="mc-quota-visit"
-          notice={buildQuotaSoftNotice(
-            { kind: props.accessKind ?? "welcome", live: !props.needPlan, daysLeft: props.daysLeft ?? 0 },
-            {
-              limit: props.quotaLimit ?? null,
-              used: props.quotaUsed ?? 0,
-              left: props.quotaLeft,
-              canSend: props.canSend,
-              touchedIds: [],
-              dailyLimit: DAILY_NEW_FAMILY_CAP,
-              dailyUsed: 0,
-              dailyLeft: props.dailyLeft ?? null,
-            },
-            props.needDaily ? "daily" : props.needQuota ? "quota" : "visit",
-          )}
-        />
-      ) : null}
       {shortlistMsg ? <div className="pv-toast">{shortlistMsg}</div> : null}
       {!props.own ? (
         <nav className="pv-close-bar" aria-label="Leave profile">
@@ -580,20 +562,28 @@ export function ProfileRedesign(props: ProfileData) {
               ) : null}
             </p>
           ) : null}
-          {props.verify?.length ? (
+          {(() => {
+            const shown = visibleVerificationMarks(props.verify ?? [], Boolean(props.own));
+            if (!shown.length) return null;
+            return (
             <div className="pv-verify-block">
             <ul className="pv-verify" aria-label="Verification">
-              {props.verify.map((item) => (
-                <li key={item.id} className={item.on ? "is-on" : "is-off"} aria-label={`${item.label} ${item.on ? "verified" : "unverified"}`}>
-                  <span aria-hidden>{item.on ? "✓" : "✕"}</span>
+              {shown.map((item) => {
+                const optionalOff = Boolean(item.optional && !item.on);
+                const state = item.on ? "verified" : optionalOff ? "optional" : "unverified";
+                return (
+                <li key={item.id} className={item.on ? "is-on" : optionalOff ? "is-optional" : "is-off"} aria-label={`${item.label} ${state}`}>
+                  <span aria-hidden>{item.on ? "✓" : optionalOff ? "·" : "✕"}</span>
                   {item.label}
-                  <em>{item.on ? "verified" : "unverified"}</em>
+                  <em>{state}</em>
                 </li>
-              ))}
+                );
+              })}
             </ul>
             {props.own ? <p className="pv-verify-note">{EVIDENCE_RETENTION_NOTICE}</p> : null}
             </div>
-          ) : null}
+            );
+          })()}
         </div>
         {!props.own && props.user ? (
           <div className="pv-top-actions">

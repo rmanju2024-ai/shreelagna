@@ -8,9 +8,12 @@ import { EVIDENCE_BUCKET, EVIDENCE_MAX_FILES, EVIDENCE_RETENTION_NOTICE, evidenc
 import { btnPrimary, cardClass } from "@/lib/ui/classes";
 
 const KINDS = [
-  { id: "identity", title: "Identity check", accepts: "Any one government photo ID (Aadhaar masked, passport, driving licence). Hide the number except the last 4 digits." },
-  { id: "education", title: "Education check", accepts: "Degree certificate or final marks card." },
-  { id: "employment", title: "Employment check", accepts: "Recent offer letter or company ID card (no salary figures needed)." },
+  {
+    id: "identity",
+    title: "Identity check",
+    accepts:
+      "One government photo ID to confirm name, age and date of birth (Aadhaar with number masked, passport, or driving licence). Keep only the last 4 digits visible.",
+  },
 ] as const;
 
 const STEPS = ["Request", "Upload", "Review", "Decision"];
@@ -52,7 +55,7 @@ export default async function MemberVerificationPage({ searchParams }: { searchP
           <p className="browse-kicker">Optional trust checks</p>
           <h1>Verification</h1>
           <ol className="verify-how">
-            <li><b>1 · Request</b><span>Pick a check below.</span></li>
+            <li><b>1 · Request</b><span>Start the identity check below.</span></li>
             <li><b>2 · Upload</b><span>Add your document on the request.</span></li>
             <li><b>3 · Review</b><span>An admin checks it privately within 3 working days.</span></li>
             <li><b>4 · Decision</b><span>You get a badge, or a reason and a way to appeal.</span></li>
@@ -60,7 +63,7 @@ export default async function MemberVerificationPage({ searchParams }: { searchP
           <p className="verify-safe">{EVIDENCE_RETENTION_NOTICE} Never share ID, bank details, passwords or OTPs in chat.</p>
           {upload && NOTES[upload] ? <p className={`verify-note${upload === "ok" ? " is-ok" : ""}`}>{NOTES[upload]}</p> : null}
 
-          <h2>Start a check</h2>
+          <h2>Identity check</h2>
           <div className="public-card-grid">
             {KINDS.map((kind) => (
               <form key={kind.id} action={requestVerification} className={cardClass}>

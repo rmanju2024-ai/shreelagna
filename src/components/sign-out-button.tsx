@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { NavGlyph } from "@/components/nav-icons";
 import { createClient } from "@/lib/supabase/client";
+import { clearQuotaLoginReminder } from "@/components/quota-soft-toast";
 import { btnGhost } from "@/lib/ui/classes";
 
 export function SignOutButton({
@@ -20,6 +21,7 @@ export function SignOutButton({
     setBusy(true);
     const supabase = createClient();
     await supabase.auth.signOut();
+    clearQuotaLoginReminder();
     router.push("/");
     router.refresh();
   }

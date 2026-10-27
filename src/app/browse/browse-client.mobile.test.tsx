@@ -120,6 +120,7 @@ describe("Discover feed", () => {
     expect(screen.queryByRole("button", { name: /^apply$/i })).toBeNull();
     expect(screen.queryByRole("heading", { name: "Advanced filter" })).toBeNull();
     expect(screen.getByRole("link", { name: /open advanced filter/i }).getAttribute("href")).toBe("/browse/filter");
+    expect(screen.getByRole("link", { name: /looking for someone specific/i }).getAttribute("href")).toBe("/browse/filter");
   });
 
   it("filter page lists nothing until Apply", () => {

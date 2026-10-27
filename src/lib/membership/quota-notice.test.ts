@@ -16,7 +16,8 @@ describe("quota soft notice", () => {
       "visit",
     );
     expect(note?.kind).toBe("warn");
-    expect(note?.body).toContain("5 families remaining");
+    expect(note?.title).toBe("Few profiles left");
+    expect(note?.body).toContain("5 of 20 profiles left");
     expect(note?.body).toContain("40 days left");
   });
 
@@ -27,6 +28,6 @@ describe("quota soft notice", () => {
       "daily",
     );
     expect(note?.kind).toBe("daily");
-    expect(note?.title.toLowerCase()).toContain("five");
+    expect(note?.title.toLowerCase()).toContain("limit");
   });
 });

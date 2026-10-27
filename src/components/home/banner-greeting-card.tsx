@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { HouseRoleSeal } from "@/components/house-role-seal";
 
 interface Greeting { text: string; emoji: string }
 
@@ -13,7 +12,8 @@ function getGreeting(): Greeting {
   return                         { text: "Good Night",     emoji: "🌙" };
 }
 
-export function BannerGreetingCard({
+/** Tagline-style greeting — replaces BrandMotto in the home panel for logged-in users */
+export function BannerGreetingTagline({
   name,
   mark,
 }: {
@@ -21,29 +21,24 @@ export function BannerGreetingCard({
   mark: "admin" | "staff" | "member";
 }) {
   const [g, setG] = useState<Greeting | null>(null);
-
   useEffect(() => { setG(getGreeting()); }, []);
 
-  const label = mark === "admin" ? "Admin" : mark === "staff" ? "Staff" : "Member";
+  const roleLabel = mark === "admin" ? "Admin" : mark === "staff" ? "Staff" : "Member";
 
   return (
-    <div className="banner-greeting" aria-label={g ? `${g.text}, ${name}` : `Welcome, ${name}`}>
-      {/* Membership seal */}
-      <span className="banner-greeting-seal">
-        <HouseRoleSeal mark={mark} />
-        <span className="banner-greeting-badge">{label}</span>
+    <p
+      className="brand-motto home-greeting-motto"
+      aria-label={g ? `${g.text}, ${name}` : `Welcome back, ${name}`}
+    >
+      {/* Time greeting line */}
+      <span className="home-greeting-salute">
+        {g ? `${g.text} ${g.emoji}` : "Welcome back"}
       </span>
-
-      {/* Divider */}
-      <span className="banner-greeting-divider" aria-hidden />
-
-      {/* Text block */}
-      <span className="banner-greeting-body">
-        <span className="banner-greeting-salute">
-          {g ? `${g.text} ${g.emoji}` : "Welcome"}
-        </span>
-        <strong className="banner-greeting-name">{name}</strong>
-      </span>
-    </div>
+      {/* Name + badge */}
+      <strong className="home-greeting-name">{name}</strong>
+      <span className="home-greeting-role">{roleLabel}</span>
+      {/* Decorative rule — same as BrandMotto */}
+      <i className="brand-motto-rule" aria-hidden />
+    </p>
   );
 }

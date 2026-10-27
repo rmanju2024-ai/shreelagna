@@ -967,6 +967,26 @@ table { max-width: 100%; }
 .site-head-brand .brand-crest { width: 4.4rem; height: 4.4rem; }
 .site-footer-brand .brand-crest { width: 3.6rem; height: 3.6rem; }
 
+/* ── Tagline in header (below site name) ── */
+.brand-header-tagline {
+  font-size: 0.68rem;
+  font-style: italic;
+  font-weight: 500;
+  color: #7a4a28;
+  white-space: nowrap;
+  line-height: 1.3;
+  opacity: 0.88;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 22ch;
+}
+.brand-header-tagline.is-light {
+  color: rgba(255, 235, 185, 0.90);
+}
+@media (max-width: 480px) {
+  .brand-header-tagline { display: none; }
+}
+
 .brand-tagline {
   margin-top: 0.2rem;
   font-size: 0.82rem;
@@ -2412,6 +2432,46 @@ html[data-scene="dusk"] .app-main {
 .sx-hero .brand-motto > span {
   font-size: clamp(1.02rem, 2vw, 1.28rem);
 }
+
+/* ── Personalised greeting — replaces BrandMotto for logged-in users ── */
+.home-greeting-motto {
+  display: grid;
+  justify-items: start;
+  gap: 0.12rem;
+  margin: 0;
+  width: 100%;
+}
+.home-greeting-salute {
+  font-family: var(--font-display), ui-serif, serif;
+  font-size: clamp(0.75rem, 1.6vw, 0.9rem);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #a05c28;
+  line-height: 1.3;
+}
+.home-greeting-name {
+  font-family: var(--font-british), var(--font-display), Palatino, serif;
+  font-size: clamp(1.55rem, 3.8vw, 2.6rem);
+  font-weight: 700;
+  color: #6f1d1b;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+.home-greeting-role {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #a87030;
+  opacity: 0.9;
+  margin-top: 0.1rem;
+}
+@media (max-width: 860px) {
+  .home-greeting-motto { justify-items: center; text-align: center; }
+  .home-greeting-name { font-size: clamp(1.6rem, 9vw, 2.2rem); }
+}
+
 .home-invite-discover {
   color: #6f1d1b;
   font-size: 0.92rem;

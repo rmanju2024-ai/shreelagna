@@ -39,7 +39,7 @@ export default async function DeskVerificationPage() {
   return (
     <section className="desk-panel">
       <header className="desk-panel-head"><div><p className="browse-kicker">Restricted review</p><h2>Verification cases</h2></div><p>{cases?.length ?? 0} waiting</p></header>
-      <p className="desk-profile-queue-note">Only administrators can approve document-based checks. Documents are deleted as soon as review is complete; the profile keeps only the result.</p>
+      <p className="desk-profile-queue-note">Only administrators can approve identity checks (name, age, date of birth). Documents are deleted as soon as review is complete; the profile keeps only the result.</p>
       {cases?.length ? <ul className="desk-ticket-list">{cases.map((item) => (
         <li key={item.id} className={`${cardClass} card-3d desk-ticket-row desk-profile-row`}>
           <div className="desk-profile-summary">

@@ -5,7 +5,8 @@ import { NavigationFeedback } from "@/components/navigation-feedback";
 import { SceneLayer } from "@/components/scene-layer";
 import { HeaderSkeleton, SiteFooter, SiteHeader, pageFull, pageInner, readScene } from "@/components/site-chrome";
 import { ThemeQuickPicker } from "@/components/theme-quick-picker";
-import { QuotaSoftHost } from "@/components/quota-soft-toast";
+import { QuotaLoginReminder, QuotaSoftHost } from "@/components/quota-soft-toast";
+import { getAuth } from "@/lib/auth/session";
 
 /**
  * Persistent page frame for /app and /browse. It lives in a layout, so the header, clock and menu
@@ -13,11 +14,13 @@ import { QuotaSoftHost } from "@/components/quota-soft-toast";
  */
 export async function ChromeLayout({ children }: { children: React.ReactNode }) {
   const scene = await readScene();
+  const { user } = await getAuth();
   return (
     <InstallAppRoot>
       <div className={`relative flex min-h-dvh w-full flex-col page-scene is-${scene}`}>
         <NavigationFeedback />
         <QuotaSoftHost />
+        {user ? <QuotaLoginReminder userId={user.id} /> : null}
         <SceneLayer initial={scene} />
         <Suspense fallback={<HeaderSkeleton overlay={false} />}>
           <SiteHeader overlay={false} glass />

@@ -15,7 +15,7 @@ import { redirect } from "next/navigation";
 
 export async function requestVerification(formData: FormData) {
   const type = String(formData.get("document_type") ?? "");
-  if (!["identity", "education", "employment"].includes(type)) return;
+  if (type !== "identity") return;
   const { supabase, user } = await getAuth();
   if (!supabase || !user) return;
   const me = await ensureAppUser(supabase, user);

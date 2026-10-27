@@ -637,30 +637,14 @@ export function KalyanBanner({
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
-
-    // Always reset to frame 0 before revealing — prevents "previous snippet" flash
-    v.currentTime = 0;
-
     const onPlaying = () => setVideoPlaying(true);
-    const onError   = () => setVideoPlaying(false); // stay on canvas fallback
-
-    // On canplay: seek to 0 again so first visible frame is always the opening frame
-    const onCanPlay = () => { v.currentTime = 0; };
-
-    v.addEventListener("canplay",  onCanPlay);
-    v.addEventListener("playing",  onPlaying);
-    v.addEventListener("error",    onError);
-
-    // If somehow already playing (e.g. browser cache hot-started it), mark it
-    if (!v.paused && v.readyState >= 3) {
-      v.currentTime = 0;
-      setVideoPlaying(true);
-    }
-
+    const onError   = () => setVideoPlaying(false);
+    v.addEventListener("playing", onPlaying);
+    v.addEventListener("error",   onError);
+    if (!v.paused && v.readyState >= 3) setVideoPlaying(true);
     return () => {
-      v.removeEventListener("canplay",  onCanPlay);
-      v.removeEventListener("playing",  onPlaying);
-      v.removeEventListener("error",    onError);
+      v.removeEventListener("playing", onPlaying);
+      v.removeEventListener("error",   onError);
     };
   }, []);
 
@@ -694,9 +678,6 @@ export function KalyanBanner({
             objectPosition: "center",
             transition: "opacity 0.8s ease",
             opacity: videoPlaying ? 1 : 0,
-            // Keep it fully invisible (not just transparent) until playing,
-            // so the poster or any buffered frame never bleeds through
-            visibility: videoPlaying ? "visible" : "hidden",
           }}
         />
       </div>
