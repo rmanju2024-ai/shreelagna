@@ -27,7 +27,7 @@ export default async function NewProfilePage({
       <div className="profile-create-shell atelier grid items-start gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)]">
         <aside className="profile-create-intro relative overflow-hidden rounded-[1.8rem] border border-[var(--gold)]/35 shadow-[0_28px_50px_rgba(47,22,14,0.18)] lg:sticky lg:top-32">
           <h1 className="visually-hidden">Register a profile</h1>
-          <div className="relative min-h-[280px] lg:min-h-[520px]">
+          <div className="profile-create-stage">
             <KalyanBanner intensity="hero" />
           </div>
         </aside>

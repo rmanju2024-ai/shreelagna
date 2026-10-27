@@ -1920,6 +1920,13 @@ html[data-scene="dusk"] .app-main {
 }
 .login-genz-chip { margin: 0.75rem 0 1rem; }
 .profile-create-intro { isolation: isolate; }
+.profile-create-stage {
+  position: relative;
+  width: 100%;
+  min-height: 0;
+  aspect-ratio: 3 / 4;
+  max-height: min(38rem, 72vh);
+}
 .profile-create-tip {
   margin: 1rem 0 0; background: rgb(255 255 255 / 17%); color: #fff;
   backdrop-filter: blur(10px);
@@ -2029,7 +2036,13 @@ html[data-scene="dusk"] .app-main {
   .login-genz-card { padding: 1.25rem; }
   .profile-create-shell { gap: 0.8rem; }
   .profile-create-intro { position: relative; top: auto; }
-  .profile-create-intro > div, .profile-create-intro > div > div { min-height: 15rem !important; }
+  .profile-create-stage {
+    width: min(100%, 22rem);
+    margin-inline: auto;
+    aspect-ratio: 3 / 4;
+    max-height: 58svh;
+    min-height: 0;
+  }
   .home-hero-copy { padding: 1.05rem; }
   .home-hero-title { font-size: clamp(2.15rem, 12vw, 3.25rem); }
   .home-language-track { animation-duration: 32s; }
@@ -2219,7 +2232,7 @@ html[data-scene="dusk"] .app-main {
 
 /* ─────────────────────────────────────────────────────────── */
 .home-split {
-  display: grid; grid-template-columns: 1.05fr 0.95fr; align-items: stretch;
+  display: grid; grid-template-columns: minmax(16rem, 0.78fr) minmax(0, 1.22fr); align-items: stretch;
   min-height: 0;
   max-height: none;
   background:
@@ -2228,7 +2241,7 @@ html[data-scene="dusk"] .app-main {
     linear-gradient(165deg, #fffaf1 0%, #f6e7cf 52%, #efe0c4 100%);
 }
 .home-split-art {
-  position: relative; width: 100%; min-height: 20rem; height: auto; max-height: 28rem; aspect-ratio: 4 / 3; justify-self: stretch;
+  position: relative; width: 100%; min-height: 22rem; height: auto; max-height: 36rem; aspect-ratio: 3 / 4; justify-self: stretch;
   display: flex; align-items: stretch;
   /* ── Creative border: sweeping-shimmer gold mat ── */
   background: linear-gradient(
@@ -2272,9 +2285,7 @@ html[data-scene="dusk"] .app-main {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 82%;
-  transform: scale(1.04);
-  transform-origin: center 88%;
+  object-position: center center;
   background: #120c08;
   transition: opacity 0.8s ease;
 }
@@ -2628,11 +2639,12 @@ html[data-scene="dusk"] .app-main {
 @media (max-width: 860px) {
   .home-split { grid-template-columns: 1fr; min-height: 0; max-height: none; }
   .home-split-art {
-    width: 100%;
+    width: min(100%, 26rem);
+    margin-inline: auto;
     height: auto;
     min-height: 0;
-    aspect-ratio: 4 / 3;
-    max-height: 40svh;
+    aspect-ratio: 3 / 4;
+    max-height: 58svh;
   }
   .home-split-copy {
     padding: 0.55rem 0.75rem 5.4rem;
@@ -2910,7 +2922,7 @@ html[data-scene="dusk"] .app-main {
 
   .home-split-tiles { grid-template-columns: minmax(0, 1fr); }
   .home-split-copy { padding: 0.55rem 0.75rem 5.4rem; }
-  .home-split-art { aspect-ratio: 4 / 3; max-height: 40svh; min-height: 0; }
+  .home-split-art { aspect-ratio: 3 / 4; max-height: 58svh; min-height: 0; }
   .home-split-art .lotus-lake { inset: 0.42rem; border-radius: 0.85rem; }
   .home-value-row { grid-template-columns: minmax(0, 1fr); padding-bottom: 2rem; }
   .home-steps { padding: 1.6rem 0 2rem; }
