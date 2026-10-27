@@ -964,7 +964,7 @@ table { max-width: 100%; }
   display: block;
   object-fit: contain;
 }
-.site-head-brand .brand-crest { width: 5.1rem; height: 5.1rem; }
+.site-head-brand .brand-crest { width: 4.4rem; height: 4.4rem; }
 .site-footer-brand .brand-crest { width: 3.6rem; height: 3.6rem; }
 
 .brand-tagline {
@@ -1144,13 +1144,11 @@ body > .nav-menu {
   }
   .site-head-brand {
     display: flex !important;
-    flex: 1 1 100% !important;
-    flex-wrap: wrap !important;
+    flex: 0 0 auto !important;
+    flex-wrap: nowrap !important;
     min-width: 0 !important;
-    max-width: 100% !important;
-    width: 100% !important;
     align-items: center;
-    gap: 0.35rem 0.55rem !important;
+    gap: 0.45rem !important;
   }
   .site-head-brand .brand-mark {
     display: flex !important;
@@ -1170,9 +1168,9 @@ body > .nav-menu {
   .site-head-brand .brand-tagline {
     display: none !important;
   }
-  .site-head-brand .brand-crest { width: 4.6rem !important; height: 4.6rem !important; }
+  .site-head-brand .brand-crest { width: 3.6rem !important; height: 3.6rem !important; }
   .site-head-brand .site-name {
-    font-size: clamp(1.18rem, 5.4vw, 1.5rem);
+    font-size: clamp(1.1rem, 5vw, 1.38rem);
   }
   .site-head-brand .live-clock {
     display: none !important;
@@ -2218,6 +2216,89 @@ html[data-scene="dusk"] .app-main {
   .pearl-corner.tr { top: 0; right: 0; }
   .pearl-corner.bl { bottom: 0; left: 0; }
   .pearl-corner.br { bottom: 0; right: 0; }
+}
+
+/* ── Banner greeting overlay ──────────────────────────────────── */
+.banner-greeting {
+  position: absolute;
+  bottom: 1.4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 1.25rem 0.55rem 0.6rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(8,4,2,0.78) 0%, rgba(28,12,6,0.72) 100%);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(212,168,60,0.52);
+  box-shadow:
+    0 8px 28px -8px rgba(0,0,0,0.55),
+    inset 0 1px 0 rgba(255,230,140,0.14);
+  white-space: nowrap;
+  pointer-events: auto;
+  text-decoration: none;
+  user-select: none;
+}
+.banner-greeting-seal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.18rem;
+  flex-shrink: 0;
+}
+.banner-greeting-seal .house-role-seal {
+  width: 2.2rem;
+  height: 2.2rem;
+}
+.banner-greeting-badge {
+  font-size: 0.5rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(253,220,100,0.88);
+  line-height: 1;
+}
+.banner-greeting-divider {
+  width: 1px;
+  height: 2.2rem;
+  background: linear-gradient(to bottom, transparent, rgba(212,168,60,0.40), transparent);
+  flex-shrink: 0;
+}
+.banner-greeting-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+.banner-greeting-salute {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(253,226,130,0.92);
+  line-height: 1.3;
+}
+.banner-greeting-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.15;
+  font-family: var(--font-display), var(--font-british), Palatino, serif;
+  letter-spacing: 0.01em;
+}
+/* Slightly smaller on tiny screens */
+@media (max-width: 480px) {
+  .banner-greeting {
+    bottom: 0.9rem;
+    gap: 0.55rem;
+    padding: 0.45rem 0.95rem 0.45rem 0.5rem;
+  }
+  .banner-greeting-seal .house-role-seal { width: 1.85rem; height: 1.85rem; }
+  .banner-greeting-name { font-size: 0.92rem; }
+  .banner-greeting-salute { font-size: 0.6rem; }
 }
 
 /* ── Keyframes ── */

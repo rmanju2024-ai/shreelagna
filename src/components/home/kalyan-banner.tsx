@@ -637,16 +637,30 @@ export function KalyanBanner({
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
-    // Some browsers fire 'playing' immediately; others need a nudge
+
+    // Always reset to frame 0 before revealing — prevents "previous snippet" flash
+    v.currentTime = 0;
+
     const onPlaying = () => setVideoPlaying(true);
     const onError   = () => setVideoPlaying(false); // stay on canvas fallback
-    v.addEventListener("playing", onPlaying);
-    v.addEventListener("error",   onError);
-    // If the video is already playing (cached), mark it now
-    if (!v.paused && v.readyState >= 3) setVideoPlaying(true);
+
+    // On canplay: seek to 0 again so first visible frame is always the opening frame
+    const onCanPlay = () => { v.currentTime = 0; };
+
+    v.addEventListener("canplay",  onCanPlay);
+    v.addEventListener("playing",  onPlaying);
+    v.addEventListener("error",    onError);
+
+    // If somehow already playing (e.g. browser cache hot-started it), mark it
+    if (!v.paused && v.readyState >= 3) {
+      v.currentTime = 0;
+      setVideoPlaying(true);
+    }
+
     return () => {
-      v.removeEventListener("playing", onPlaying);
-      v.removeEventListener("error",   onError);
+      v.removeEventListener("canplay",  onCanPlay);
+      v.removeEventListener("playing",  onPlaying);
+      v.removeEventListener("error",    onError);
     };
   }, []);
 
@@ -662,7 +676,8 @@ export function KalyanBanner({
         {/* Canvas fallback — plays until video is ready */}
         <OysterCanvas hidden={videoPlaying} />
 
-        {/* Video — primary, fades in once playing */}
+        {/* Video — primary, fades in once playing.
+            poster: solid-black 1×1 prevents any cached-frame flash before play. */}
         <video
           ref={videoRef}
           src="/banner.mp4"
@@ -671,6 +686,7 @@ export function KalyanBanner({
           muted
           playsInline
           preload="auto"
+          poster="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
           style={{
             position: "absolute", inset: 0,
             width: "100%", height: "100%",
@@ -678,6 +694,9 @@ export function KalyanBanner({
             objectPosition: "center",
             transition: "opacity 0.8s ease",
             opacity: videoPlaying ? 1 : 0,
+            // Keep it fully invisible (not just transparent) until playing,
+            // so the poster or any buffered frame never bleeds through
+            visibility: videoPlaying ? "visible" : "hidden",
           }}
         />
       </div>

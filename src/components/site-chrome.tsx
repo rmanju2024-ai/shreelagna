@@ -11,9 +11,6 @@ import { LiveClock } from "@/components/live-clock";
 import { getAuth, ensureAppUser } from "@/lib/auth/session";
 import { KalyanBanner } from "@/components/home/kalyan-banner";
 import { HeaderNav } from "@/components/site-nav";
-import { HeaderProfileChip } from "@/components/header-profile-chip";
-import { bannerProfileChip } from "@/lib/account/hub";
-import { houseRoleMark } from "@/lib/desk/access";
 import { SceneLayer } from "@/components/scene-layer";
 import { ThemeQuickPicker } from "@/components/theme-quick-picker";
 import { NavigationFeedback } from "@/components/navigation-feedback";
@@ -34,17 +31,14 @@ export async function readScene() {
 export async function SiteHeader({ overlay = false, glass = false }: { overlay?: boolean; glass?: boolean }) {
   const { user, supabase } = await getAuth();
   let staff = false;
-  let houseStar: "admin" | "staff" | "member" | null = null;
-  let profileChip: { label: string; pending: boolean } | null = null;
   let chatUnread = 0;
   let alertUnread = 0;
   let likesPending = 0;
   if (user && supabase) {
     const me = await ensureAppUser(supabase, user);
     staff = me?.role === "service" || me?.role === "admin";
-    houseStar = houseRoleMark(me?.role);
     if (me) {
-      const [badge, waitingResult, ownProfile] = await Promise.all([
+      const [badge, waitingResult] = await Promise.all([
         unreadNoticeBadge(me.id).catch(async () => {
           const { data: unread } = await supabase
             .from("notices")
@@ -73,23 +67,10 @@ export async function SiteHeader({ overlay = false, glass = false }: { overlay?:
               .eq("status", "pending")
               .limit(100)
           : Promise.resolve({ data: [] }),
-        me.active_profile_id
-          ? supabase.from("profiles").select("subject_full_name").eq("id", me.active_profile_id).maybeSingle()
-          : supabase
-              .from("profiles")
-              .select("subject_full_name")
-              .eq("created_by", me.id)
-              .order("updated_at", { ascending: false })
-              .limit(1)
-              .maybeSingle(),
       ]);
-      profileChip = bannerProfileChip(
-        typeof ownProfile.data?.subject_full_name === "string" ? ownProfile.data.subject_full_name : null,
-      );
       chatUnread = badge.chatUnread;
       alertUnread = badge.alertUnread;
       if (me.active_profile_id) {
-        // Likes badge = pending interests actually waiting in Likes > Received (same rules as that page).
         const waiting = waitingResult.data ?? [];
         const senderIds = [...new Set((waiting ?? []).map((row) => row.from_profile_id))];
         const { data: senders } = senderIds.length
@@ -97,7 +78,6 @@ export async function SiteHeader({ overlay = false, glass = false }: { overlay?:
           : { data: [] as { id: string; status: string }[] };
         const blocked = await loadBlockedProfileIds(createServiceClient() ?? supabase, [me.active_profile_id]);
         const live = new Set((senders ?? []).filter((p) => isPublicProfileStatus(p.status) && !blocked.has(p.id)).map((p) => p.id));
-        // Only interests that arrived after the member last opened Likes count as new.
         const seenRaw = (await cookies()).get("sl_likes_seen")?.value;
         const seenAt = seenRaw ? Date.parse(seenRaw) : 0;
         likesPending = (waiting ?? []).filter(
@@ -121,17 +101,9 @@ export async function SiteHeader({ overlay = false, glass = false }: { overlay?:
       }
     >
       <div className={`${pageInner} site-head-inner flex min-h-24 items-center justify-between gap-4 py-3 sm:min-h-[6.5rem]`}>
-        <div className="site-head-brand flex min-w-0 items-center gap-5 sm:gap-8">
+        <div className="site-head-brand flex min-w-0 items-center gap-3 sm:gap-6">
           <BrandMark light={overlay} />
           <LiveClock light={overlay} />
-          {profileChip ? (
-            <HeaderProfileChip
-              name={profileChip.label}
-              pending={profileChip.pending}
-              mark={houseStar ?? "member"}
-              overlay={overlay}
-            />
-          ) : null}
         </div>
         <SyncSession guest={!user} />
         <Suspense fallback={null}>

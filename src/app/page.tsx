@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { GoogleSignIn } from "@/app/login/google-button";
 import { KalyanBanner } from "@/components/home/kalyan-banner";
+import { BannerGreeting } from "@/components/home/banner-greeting";
 import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { pageInner } from "@/components/site-chrome";
 import { getAuth } from "@/lib/auth/session";
@@ -16,7 +18,11 @@ export default async function HomePage() {
     <PageShell bleed>
       <section className="home-split">
         <div className="home-split-art">
-          <KalyanBanner intensity="hero" presentation="complete" veil={false} />
+          <KalyanBanner intensity="hero" />
+          {/* Time-based greeting shown at the bottom of the banner */}
+          <Suspense fallback={null}>
+            <BannerGreeting />
+          </Suspense>
         </div>
         <div className="home-split-copy">
           <div className="home-invite">
