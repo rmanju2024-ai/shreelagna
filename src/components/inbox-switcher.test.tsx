@@ -6,9 +6,9 @@ import { InboxSwitcherNav } from "./inbox-switcher";
 afterEach(cleanup);
 
 describe("InboxSwitcher", () => {
-  it("keeps a way back to Account hub above Chat, Interests and Alerts", () => {
+  it("opens Chat, Interests and Alerts without a Back to Account link", () => {
     render(<InboxSwitcherNav active="chats" />);
-    expect(screen.getByRole("link", { name: /back to account/i }).getAttribute("href")).toBe("/app/account");
+    expect(screen.queryByRole("link", { name: /back to account/i })).toBeNull();
     expect(screen.getByRole("link", { name: /chats/i }).getAttribute("href")).toBe("/app/chat");
     expect(screen.getByRole("link", { name: /interests/i }).getAttribute("href")).toBe("/app/interests");
     expect(screen.getByRole("link", { name: /alerts/i }).getAttribute("href")).toBe("/app/alerts");

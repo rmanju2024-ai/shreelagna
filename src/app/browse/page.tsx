@@ -142,7 +142,7 @@ export async function BrowsePage({
     notice = "Sign in and create a profile to search families.";
   } else {
     const me = await timed("ensureAppUser", ensureAppUser(supabase, user));
-    const own = me ? await findOwnProfile(supabase, me.id) : null;
+    const own = me && !me.active_profile_id ? await findOwnProfile(supabase, me.id) : null;
     const mineId = me?.active_profile_id || own?.id || null;
     if (!me || !mineId) {
       notice = "Create a profile first, then search.";
@@ -341,10 +341,16 @@ export async function BrowsePage({
                 mediaClient,
                 listed.map((row) => String(row.id)),
               );
-          const photoLists = await loadBrowsePhotoLists(
-            mediaClient,
-            listed.map((row) => String(row.id)),
-          );
+          const photoLists = bundle
+            ? new Map(
+                listed
+                  .filter((row) => typeof row.photo_path === "string" && row.photo_path)
+                  .map((row) => [String(row.id), [String(row.photo_path)]] as [string, string[]]),
+              )
+            : await loadBrowsePhotoLists(
+                mediaClient,
+                listed.map((row) => String(row.id)),
+              );
           for (const [id, path] of photoMap) {
             const current = photoLists.get(id) ?? [];
             if (path && !current.includes(path)) photoLists.set(id, [path, ...current].slice(0, 3));

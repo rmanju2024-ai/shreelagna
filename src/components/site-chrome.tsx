@@ -1,5 +1,3 @@
-import { createServiceClient } from "@/lib/supabase/server";
-import { loadBlockedProfileIds } from "@/lib/safety/blocked";
 import { Suspense } from "react";
 import { cookies } from "next/headers";
 import Link from "next/link";
@@ -14,10 +12,7 @@ import { HeaderNav } from "@/components/site-nav";
 import { SceneLayer } from "@/components/scene-layer";
 import { ThemeQuickPicker } from "@/components/theme-quick-picker";
 import { NavigationFeedback } from "@/components/navigation-feedback";
-import { collapseNotices, noticesForActiveProfiles } from "@/lib/match/collapse-notices";
 import { unreadNoticeBadge } from "@/lib/notices/unread-badge";
-import { effectiveInterestStatus } from "@/lib/match/interest-status";
-import { isListedProfileStatus, isPublicProfileStatus } from "@/lib/profile/visibility";
 import { SyncSession } from "@/components/sync-session";
 import { parseScene, SCENE_COOKIE } from "@/lib/ui/scenes";
 
@@ -28,74 +23,46 @@ export async function readScene() {
   return parseScene((await cookies()).get(SCENE_COOKIE)?.value);
 }
 
+async function HeaderNavWithBadges({
+  overlay,
+  user,
+  staff,
+  userId,
+}: {
+  overlay: boolean;
+  user: boolean;
+  staff: boolean;
+  userId: string;
+}) {
+  const badge = await unreadNoticeBadge(userId).catch(() => ({
+    chatUnread: 0,
+    alertUnread: 0,
+    likesPending: 0,
+  }));
+  return (
+    <HeaderNav
+      overlay={overlay}
+      user={user}
+      staff={staff}
+      chatUnread={badge.chatUnread}
+      alertUnread={badge.alertUnread}
+      likesPending={badge.likesPending}
+    />
+  );
+}
+
 export async function SiteHeader({ overlay = false, glass = false }: { overlay?: boolean; glass?: boolean }) {
   const { user, supabase } = await getAuth();
   let staff = false;
-  let chatUnread = 0;
-  let alertUnread = 0;
-  let likesPending = 0;
+  let userId: string | null = null;
   if (user && supabase) {
     const me = await ensureAppUser(supabase, user);
     staff = me?.role === "service" || me?.role === "admin";
-    if (me) {
-      const [badge, waitingResult] = await Promise.all([
-        unreadNoticeBadge(me.id).catch(async () => {
-          const { data: unread } = await supabase
-            .from("notices")
-            .select("id, kind, match_profile_id, created_at")
-            .eq("user_id", me.id)
-            .is("read_at", null)
-            .order("created_at", { ascending: false })
-            .limit(80);
-          const collapsed = collapseNotices(unread ?? []);
-          const profileIds = [...new Set(collapsed.map((row) => row.match_profile_id).filter(Boolean))] as string[];
-          const { data: profiles } = profileIds.length
-            ? await supabase.from("profiles").select("id, status").in("id", profileIds)
-            : { data: [] as { id: string }[] };
-          const open = noticesForActiveProfiles(
-            collapsed,
-            new Set(
-              (profiles ?? [])
-                .filter((profile) => isListedProfileStatus((profile as { status?: string }).status))
-                .map((profile) => profile.id),
-            ),
-          );
-          return {
-            chatUnread: open.filter((row) => row.kind === "chat").length,
-            alertUnread: open.filter((row) => row.kind !== "chat").length,
-            likesPending: 0,
-          };
-        }),
-        me.active_profile_id
-          ? supabase
-              .from("interests")
-              .select("from_profile_id, status, created_at")
-              .eq("to_profile_id", me.active_profile_id)
-              .eq("status", "pending")
-              .limit(100)
-          : Promise.resolve({ data: [] }),
-      ]);
-      chatUnread = badge.chatUnread;
-      alertUnread = badge.alertUnread;
-      if (me.active_profile_id) {
-        const waiting = waitingResult.data ?? [];
-        const senderIds = [...new Set((waiting ?? []).map((row) => row.from_profile_id))];
-        const { data: senders } = senderIds.length
-          ? await supabase.from("profiles").select("id, status").in("id", senderIds)
-          : { data: [] as { id: string; status: string }[] };
-        const blocked = await loadBlockedProfileIds(createServiceClient() ?? supabase, [me.active_profile_id]);
-        const live = new Set((senders ?? []).filter((p) => isPublicProfileStatus(p.status) && !blocked.has(p.id)).map((p) => p.id));
-        const seenRaw = (await cookies()).get("sl_likes_seen")?.value;
-        const seenAt = seenRaw ? Date.parse(seenRaw) : 0;
-        likesPending = (waiting ?? []).filter(
-          (row) =>
-            live.has(row.from_profile_id) &&
-            effectiveInterestStatus(row.status, row.created_at) === "pending" &&
-            (!seenAt || Number.isNaN(seenAt) || Date.parse(row.created_at) > seenAt),
-        ).length;
-      }
-    }
+    userId = me?.id ?? null;
   }
+  const nav = (
+    <HeaderNav overlay={overlay} user={Boolean(user)} staff={staff} chatUnread={0} alertUnread={0} likesPending={0} />
+  );
 
   return (
     <header
@@ -103,7 +70,7 @@ export async function SiteHeader({ overlay = false, glass = false }: { overlay?:
         overlay
           ? "absolute inset-x-0 top-0 z-50 w-full border-b border-white/15 bg-gradient-to-b from-black/70 via-black/35 to-transparent"
           : glass
-            ? "sticky top-0 z-40 w-full border-b border-[var(--gold)]/25 bg-[var(--paper)]/50 backdrop-blur-xl"
+            ? "sticky top-0 z-40 w-full border-b border-[var(--gold)]/25 bg-[var(--paper)]/92"
             : "sticky top-0 z-40 w-full border-b border-[var(--stroke)]/80 bg-[var(--paper)]"
       }
     >
@@ -113,16 +80,13 @@ export async function SiteHeader({ overlay = false, glass = false }: { overlay?:
           <LiveClock light={overlay} />
         </div>
         <SyncSession guest={!user} />
-        <Suspense fallback={null}>
-          <HeaderNav
-            overlay={overlay}
-            user={Boolean(user)}
-            staff={staff}
-            chatUnread={chatUnread}
-            alertUnread={alertUnread}
-            likesPending={likesPending}
-          />
-        </Suspense>
+        {userId ? (
+          <Suspense fallback={nav}>
+            <HeaderNavWithBadges overlay={overlay} user staff={staff} userId={userId} />
+          </Suspense>
+        ) : (
+          nav
+        )}
       </div>
     </header>
   );
@@ -134,7 +98,7 @@ export function HeaderSkeleton({ overlay }: { overlay: boolean }) {
       className={
         overlay
           ? "absolute inset-x-0 top-0 z-50 w-full border-b border-white/15"
-          : "sticky top-0 z-40 w-full border-b border-[var(--gold)]/25 bg-[var(--paper)]/50 backdrop-blur-xl"
+          : "sticky top-0 z-40 w-full border-b border-[var(--gold)]/25 bg-[var(--paper)]/92"
       }
     >
       <div className={`${pageInner} site-head-inner flex min-h-24 items-center gap-4 py-3 sm:min-h-[6.5rem]`}>

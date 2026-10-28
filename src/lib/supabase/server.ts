@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { createClient as createJsClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
+import { cache } from "react";
 import { trustSystemCa } from "@/lib/node/trust-system-ca";
 
 export async function createClient() {
@@ -31,8 +32,8 @@ export async function createClient() {
   });
 }
 
-/** Server-only house key. Never import this into a client component. */
-export function createServiceClient() {
+/** Server-only house key. Never import this into a client component. One client per request. */
+export const createServiceClient = cache(function createServiceClient() {
   trustSystemCa();
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -44,4 +45,4 @@ export function createServiceClient() {
       detectSessionInUrl: false,
     },
   });
-}
+});

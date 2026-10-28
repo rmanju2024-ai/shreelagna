@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { loadBlockedProfileIds } from "@/lib/safety/blocked";
 import { isListedProfileStatus } from "@/lib/profile/visibility";
 import { collapseNotices, noticesForActiveProfiles } from "@/lib/match/collapse-notices";
@@ -7,8 +8,8 @@ import { createServiceClient } from "@/lib/supabase/server";
 type Thread = { id: string; profile_a: string; profile_b: string };
 type Pair = { from_profile_id: string; to_profile_id: string; status: string; created_at: string };
 
-/** Header badge counts. Queries run in three parallel stages instead of six sequential ones. */
-export async function unreadNoticeBadge(userId: string) {
+/** Header badge counts. Deduped per request so Inbox and the dock share one fetch. */
+export const unreadNoticeBadge = cache(async function unreadNoticeBadge(userId: string) {
   const db = createServiceClient();
   if (!db) return { chatUnread: 0, alertUnread: 0, likesPending: 0 };
 
@@ -30,8 +31,8 @@ export async function unreadNoticeBadge(userId: string) {
   const ownIds = (ownResult.data ?? []).map((profile) => profile.id);
   const ownList = ownIds.join(",");
 
-  // Stage 2: everything that depends only on stage 1.
-  const [activeResult, threadResult, pairResult] = await Promise.all([
+  // Stage 2: everything that depends only on stage 1, including blocks.
+  const [activeResult, threadResult, pairResult, blocked] = await Promise.all([
     profileIds.length
       ? db.from("profiles").select("id, status").in("id", profileIds)
       : Promise.resolve({ data: [] as { id: string }[], error: null }),
@@ -44,11 +45,11 @@ export async function unreadNoticeBadge(userId: string) {
           .select("from_profile_id, to_profile_id, status, created_at")
           .or(`from_profile_id.in.(${ownList}),to_profile_id.in.(${ownList})`)
       : Promise.resolve({ data: [] as Pair[], error: null }),
+    loadBlockedProfileIds(db, ownIds),
   ]);
   if (activeResult.error) throw activeResult.error;
   if (threadResult.error) throw threadResult.error;
   if (pairResult.error) throw pairResult.error;
-  const blocked = await loadBlockedProfileIds(db, ownIds);
   const open = noticesForActiveProfiles(
     collapsed,
     new Set(
@@ -85,4 +86,4 @@ export async function unreadNoticeBadge(userId: string) {
     alertUnread: open.filter((row) => row.kind !== "chat").length,
     likesPending,
   };
-}
+});

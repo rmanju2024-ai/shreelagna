@@ -7658,11 +7658,6 @@ a.browse-view {
   margin: 0 auto;
   padding: 0.7rem 0 0;
 }
-.inbox-switcher-wrap .back-to-account {
-  max-width: none;
-  margin: 0;
-  padding: 0;
-}
 .inbox-switcher {
   display: inline-flex;
   gap: 0.35rem;

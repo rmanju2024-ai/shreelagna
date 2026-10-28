@@ -12,15 +12,22 @@ import { getAuth } from "@/lib/auth/session";
  * Persistent page frame for /app and /browse. It lives in a layout, so the header, clock and menu
  * stay mounted (no blink) while only the page underneath changes.
  */
+async function SignedInQuota() {
+  const { user } = await getAuth();
+  if (!user) return null;
+  return <QuotaLoginReminder userId={user.id} />;
+}
+
 export async function ChromeLayout({ children }: { children: React.ReactNode }) {
   const scene = await readScene();
-  const { user } = await getAuth();
   return (
     <InstallAppRoot>
       <div className={`relative flex min-h-dvh w-full flex-col page-scene is-${scene}`}>
         <NavigationFeedback />
         <QuotaSoftHost />
-        {user ? <QuotaLoginReminder userId={user.id} /> : null}
+        <Suspense fallback={null}>
+          <SignedInQuota />
+        </Suspense>
         <SceneLayer initial={scene} />
         <Suspense fallback={<HeaderSkeleton overlay={false} />}>
           <SiteHeader overlay={false} glass />

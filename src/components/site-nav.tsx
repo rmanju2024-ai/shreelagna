@@ -39,6 +39,7 @@ function NavChip({
   return (
     <Link
       href={item.href}
+      prefetch
       aria-current={current ? "page" : undefined}
       className={`nav-3d${overlay ? " is-overlay" : ""}${current ? " is-on" : ""}`}
     >

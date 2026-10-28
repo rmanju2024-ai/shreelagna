@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { BackToAccount } from "@/components/back-to-account";
 import { getAuth, ensureAppUser } from "@/lib/auth/session";
 import { unreadLabel } from "@/lib/match/chat-ui";
 import { unreadNoticeBadge } from "@/lib/notices/unread-badge";
@@ -21,7 +20,6 @@ export function InboxSwitcherNav({
 }) {
   return (
     <div className="inbox-switcher-wrap">
-      <BackToAccount />
       <nav className="inbox-switcher" aria-label="Inbox sections">
         {TABS.map((tab) => {
           const mark = unreadLabel(counts[tab.countKey]);

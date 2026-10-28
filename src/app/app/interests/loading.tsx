@@ -7,7 +7,6 @@ export default function Loading() {
     <PageShell>
       <div className="sx-stage">
         <div className="inbox-unified"><InboxSwitcherNav active="likes" /></div>
-        <p className="alerts-genz-hint" aria-live="polite">Loading…</p>
         <div className="app-route-loading-card" />
         <div className="app-route-loading-card" />
       </div>
