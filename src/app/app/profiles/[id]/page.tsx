@@ -41,7 +41,7 @@ export default async function ProfilePage({
       const { BrowseProfileView } = await import("@/app/browse/browse-profile-view");
       return (
         <PageShell full>
-          <BrowseProfileView>
+          <BrowseProfileView
             params={Promise.resolve({ id: String(peek.id) })}
             searchParams={Promise.resolve({})}
             editHref={`/app/profiles/${peek.id}?edit=1`}
@@ -113,7 +113,7 @@ export default async function ProfilePage({
 
   return (
     <PageShell full>
-      <ProfilePortrait>
+      <ProfilePortrait
         profile={profile}
         memberCode={memberCode}
         religionName={religionName}
