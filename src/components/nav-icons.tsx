@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
 
-/** Site icons: solid filled shapes, large enough to read at a glance. */
+/** Chunky filled glyphs (Material-style). Easy to read on the phone dock. */
 function Icon({ children }: { children: ReactNode }) {
   return (
     <svg
       viewBox="0 0 24 24"
       fill="currentColor"
+      stroke="none"
       aria-hidden
       focusable={false}
     >
@@ -19,52 +20,56 @@ export function NavGlyph({ name }: { name: string }) {
     case "home":
       return (
         <Icon>
-          <path d="M12 3.2 2.8 11.2h2.4V20.5h5.2v-5.6h3.2v5.6h5.2v-9.3h2.4L12 3.2Z" />
+          <path d="M12 3 2 12h3v8h6v-6h2v6h6v-8h3L12 3z" />
         </Icon>
       );
     case "browse":
+    case "look":
       return (
         <Icon>
-          <path d="M10.2 3.6a6.6 6.6 0 1 0 4.1 11.8l4.7 4.7 1.6-1.6-4.7-4.7A6.6 6.6 0 0 0 10.2 3.6Zm0 2.4a4.2 4.2 0 1 1 0 8.4 4.2 4.2 0 0 1 0-8.4Z" />
+          <path
+            fillRule="evenodd"
+            d="M10 3a7 7 0 1 0 4.2 12.5l4.15 4.16 1.42-1.42-4.16-4.15A7 7 0 0 0 10 3Zm0 2.2a4.8 4.8 0 1 1 0 9.6 4.8 4.8 0 0 1 0-9.6Z"
+          />
         </Icon>
       );
     case "inbox":
       return (
         <Icon>
-          <path d="M12 20.8 10.4 19.4C5.3 14.8 2 11.9 2 8.5A4.4 4.4 0 0 1 6.5 4 4.8 4.8 0 0 1 12 6.7 4.8 4.8 0 0 1 17.5 4 4.4 4.4 0 0 1 22 8.5c0 3.4-3.3 6.3-8.4 10.9L12 20.8Z" />
+          <path d="M20 4H4C2.9 4 2 4.9 2 6v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2Zm0 4-8 5-8-5V6l8 5 8-5v2Z" />
         </Icon>
       );
     case "chat":
       return (
         <Icon>
-          <path d="M4 3.5h16A2.5 2.5 0 0 1 22.5 6v9.2A2.5 2.5 0 0 1 20 17.7h-6.2L6.2 22v-4.3H4A2.5 2.5 0 0 1 1.5 15.2V6A2.5 2.5 0 0 1 4 3.5Z" />
+          <path d="M20 2H4C2.9 2 2 2.9 2 4v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2Z" />
         </Icon>
       );
     case "alerts":
       return (
         <Icon>
-          <path d="M12 22a2.4 2.4 0 0 0 2.4-2.3H9.6A2.4 2.4 0 0 0 12 22Zm8-4.2-1.7-1.7V11a6.2 6.2 0 0 0-4.6-6V4.2a1.7 1.7 0 1 0-3.4 0V5A6.2 6.2 0 0 0 5.7 11v5.1L4 17.8V19h16v-1.2Z" />
+          <path d="M12 22a2.5 2.5 0 0 0 2.5-2.5h-5A2.5 2.5 0 0 0 12 22Zm8-5.5-1.8-1.8V10a6.2 6.2 0 0 0-4.7-6V3.2a2.5 2.5 0 1 0-5 0V4A6.2 6.2 0 0 0 3.8 10v4.7L2 16.5V18h20v-1.5Z" />
         </Icon>
       );
     case "profile":
     case "account":
       return (
         <Icon>
-          <circle cx="12" cy="8" r="4.1" />
-          <path d="M4.2 20.4c.6-3.8 3.6-6 7.8-6s7.2 2.2 7.8 6H4.2Z" />
+          <path d="M12 12a4.2 4.2 0 1 0-4.2-4.2A4.2 4.2 0 0 0 12 12Zm0 2.2c-3.2 0-9.2 1.6-9.2 4.8V21h18.4v-2c0-3.2-6-4.8-9.2-4.8Z" />
         </Icon>
       );
     case "plans":
       return (
         <Icon>
-          <path d="M5.2 4.2h13.6A1.6 1.6 0 0 1 20.4 5.8v12.8a1.6 1.6 0 0 1-1.6 1.6H5.2a1.6 1.6 0 0 1-1.6-1.6V5.8a1.6 1.6 0 0 1 1.6-1.6Zm2 3.2v1.7h9.6V7.4H7.2Zm0 3.6v1.7h9.6v-1.7H7.2Zm0 3.6v1.7h6.4v-1.7H7.2Z" />
+          <path d="M4 4h16v16H4V4Zm3 3.2h10V9H7V7.2Zm0 3.6h10v1.8H7v-1.8Zm0 3.6h7V16H7v-1.6Z" />
         </Icon>
       );
     case "staff":
     case "safety":
+    case "verify":
       return (
         <Icon>
-          <path d="M12 2.8 20 6.2v5.6c0 4.8-3.2 8.2-8 10-4.8-1.8-8-5.2-8-10V6.2L12 2.8Zm-1.1 11.6 5-5 1.4 1.4-6.4 6.4-3.4-3.4 1.4-1.4 2 2Z" />
+          <path d="M12 2 4 5.2v6.2c0 5 3.3 8.7 8 10.6 4.7-1.9 8-5.6 8-10.6V5.2L12 2Zm-1.2 13.2-3.4-3.4 1.4-1.4 2 2 4.8-4.8 1.4 1.4-6.2 6.2Z" />
         </Icon>
       );
     case "settings":
@@ -76,73 +81,61 @@ export function NavGlyph({ name }: { name: string }) {
     case "about":
       return (
         <Icon>
-          <path d="M12 2.4A9.6 9.6 0 1 0 21.6 12 9.6 9.6 0 0 0 12 2.4Zm1 14.4h-2v-6h2v6Zm0-7.6h-2V7.2h2v1.6Z" />
+          <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm1 15h-2v-6h2v6Zm0-8h-2V7h2v2Z" />
         </Icon>
       );
     case "help":
       return (
         <Icon>
-          <path d="M12 2.4A9.6 9.6 0 1 0 21.6 12 9.6 9.6 0 0 0 12 2.4Zm.2 15.4h-1.8v-1.9h1.8v1.9Zm2.3-6.1c-.4.4-.8.8-1 1.2-.2.3-.3.7-.3 1.1h-2c0-.7.2-1.3.5-1.8.3-.5.8-1 1.3-1.4.4-.4.6-.8.6-1.3A1.6 1.6 0 0 0 12 8a1.6 1.6 0 0 0-1.6 1.5H8.4A3.6 3.6 0 0 1 12 6.2a3.6 3.6 0 0 1 3.6 3.5c0 .9-.3 1.6-.9 2Z" />
+          <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm.2 16h-2v-2h2v2Zm2.4-6.4c-.4.4-.9.8-1.1 1.2-.3.4-.3.8-.3 1.2h-2c0-.8.2-1.4.5-2 .4-.5.9-1 1.4-1.4.4-.4.6-.8.6-1.4A1.7 1.7 0 0 0 12 7.6 1.7 1.7 0 0 0 10.3 9H8.3A3.7 3.7 0 0 1 12 5.6 3.7 3.7 0 0 1 15.7 9.2c0 1-.3 1.8-1.1 2.4Z" />
         </Icon>
       );
     case "more":
       return (
         <Icon>
-          <path d="M4 6.2h16v2.4H4V6.2Zm0 4.6h16v2.4H4v-2.4Zm0 4.6h16v2.4H4v-2.4Z" />
+          <path d="M3 6.5h18v2.4H3V6.5Zm0 4.3h18v2.4H3v-2.4Zm0 4.3h18v2.4H3v-2.4Z" />
         </Icon>
       );
     case "out":
       return (
         <Icon>
-          <path d="M4 4.2h8.2v2.2H6.2v11.2h6V19.8H4V4.2Zm10.2 3.4 5.4 4.4-5.4 4.4v-3.2H8.8v-2.4h5.4V7.6Z" />
+          <path d="M5 3h8v2.2H7.2v13.6H13V21H5V3Zm9.2 4.2 5.6 4.6-5.6 4.6v-3.3H9.2v-2.6h5v-3.3Z" />
         </Icon>
       );
     case "install":
       return (
         <Icon>
-          <path d="M6.4 3.4h11.2A1.8 1.8 0 0 1 19.4 5.2v13.6a1.8 1.8 0 0 1-1.8 1.8H6.4a1.8 1.8 0 0 1-1.8-1.8V5.2A1.8 1.8 0 0 1 6.4 3.4Zm5.6 3.4v6.2H9.4L12 16l2.6-3h-2.6V6.8H12Z" />
+          <path d="M5 2h14v20H5V2Zm7 4.2v7.2H9.6L12 17l2.4-3.6H12V6.2Z" />
         </Icon>
       );
     case "tickets":
       return (
         <Icon>
-          <path d="M3.6 7.2h16.8v3.1c-1.5.3-2.5 1.4-2.5 2.7s1 2.4 2.5 2.7v3.1H3.6v-3.1c1.5-.3 2.5-1.4 2.5-2.7s-1-2.4-2.5-2.7V7.2Zm5.2 1.6v8.4h1.8V8.8H8.8Z" />
+          <path d="M3 6h18v3.2a2.6 2.6 0 0 0 0 5.2V18H3v-3.6a2.6 2.6 0 0 0 0-5.2V6Zm6 2.2v7.6h2V8.2H9Z" />
         </Icon>
       );
     case "analytics":
       return (
         <Icon>
-          <path d="M4 19.4h16v1.8H4v-1.8Zm1.8-1.6V12h3.4v5.8H5.8Zm4.6 0V7.2h3.4v10.6h-3.4Zm4.6 0V9.6H18v8.2h-3.4Z" />
+          <path d="M4 20h16v2H4v-2ZM6 18V11h4v7H6Zm5 0V6h4v12h-4Zm5 0V9h4v9h-4Z" />
         </Icon>
       );
     case "audit":
       return (
         <Icon>
-          <path d="M6.4 3.4h8.2L19.6 8.4v12.2H6.4V3.4Zm8 1.8v3.8h3.8L14.4 5.2ZM8.6 12h6.8v1.7H8.6V12Zm0 3.2h4.8v1.7H8.6v-1.7Z" />
-        </Icon>
-      );
-    case "look":
-      return (
-        <Icon>
-          <path d="M10.4 3.6a6.8 6.8 0 1 0 4.3 12.1l4.8 4.8 1.6-1.6-4.8-4.8A6.8 6.8 0 0 0 10.4 3.6Zm0 2.5a4.3 4.3 0 1 1 0 8.6 4.3 4.3 0 0 1 0-8.6Z" />
+          <path d="M6 2h9l5 5v15H6V2Zm9 1.8V8h4.2L15 3.8ZM8.5 12h7v1.8h-7V12Zm0 3.2h5v1.8h-5v-1.8Z" />
         </Icon>
       );
     case "block":
       return (
         <Icon>
-          <path d="M12 2.4A9.6 9.6 0 1 0 21.6 12 9.6 9.6 0 0 0 12 2.4Zm7.2 9.6a7.1 7.1 0 0 1-1.5 4.4L7.6 6.3A7.2 7.2 0 0 1 19.2 12ZM6.3 7.6 16.4 17.7A7.2 7.2 0 0 1 6.3 7.6Z" />
-        </Icon>
-      );
-    case "verify":
-      return (
-        <Icon>
-          <path d="M12 2.4A9.6 9.6 0 1 0 21.6 12 9.6 9.6 0 0 0 12 2.4Zm-1.1 13.5-3.6-3.6 1.4-1.4 2.2 2.2 5.2-5.2 1.4 1.4-6.6 6.6Z" />
+          <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm7.5 10a7.4 7.4 0 0 1-1.6 4.6L7.4 6.1A7.5 7.5 0 0 1 19.5 12ZM4.5 12a7.5 7.5 0 0 1 12.1-5.9L6.1 16.6A7.4 7.4 0 0 1 4.5 12Z" />
         </Icon>
       );
     default:
       return (
         <Icon>
-          <circle cx="12" cy="12" r="8.2" />
+          <circle cx="12" cy="12" r="8" />
         </Icon>
       );
   }

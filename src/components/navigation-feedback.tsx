@@ -6,6 +6,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 export function NavigationFeedback() {
   const pathname = usePathname();
   const search = useSearchParams();
+  const query = search.toString();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -14,12 +15,12 @@ export function NavigationFeedback() {
     window.scrollTo(0, 0);
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
-  }, [pathname, search]);
+  }, [pathname, query]);
 
   useEffect(() => {
     function onClick(event: MouseEvent) {
       const target = event.target instanceof Element ? event.target.closest("a[href]") : null;
-      if (!target || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      if (!target || event.defaultPrevented || (event.button !== 0 && event.button != null) || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       const href = target.getAttribute("href");
       if (!href || href.startsWith("#") || target.getAttribute("target") === "_blank" || !href.startsWith("/")) return;
       setLoading(true);
@@ -29,9 +30,11 @@ export function NavigationFeedback() {
   }, []);
 
   return (
-    <>
-      <div className={`nav-progress${loading ? " is-loading" : ""}`} aria-hidden />
-      {loading ? <p className="nav-loading-word" role="status">Loading</p> : null}
-    </>
+    <div
+      className={`nav-progress${loading ? " is-loading" : ""}`}
+      role={loading ? "status" : undefined}
+      aria-label={loading ? "Loading" : undefined}
+      aria-hidden={loading ? undefined : true}
+    />
   );
 }

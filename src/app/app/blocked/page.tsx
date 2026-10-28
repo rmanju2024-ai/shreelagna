@@ -1,6 +1,5 @@
 import { unblockProfile } from "@/app/app/safety/actions";
 import { SafetyFlash } from "@/app/browse/safety-flash";
-import { BackToAccount } from "@/components/back-to-account";
 import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { publicMediaUrl } from "@/lib/match/inbox-card";
@@ -40,7 +39,6 @@ export default async function BlockedProfilesPage({ searchParams }: { searchPara
 
   return (
     <PageShell>
-      <BackToAccount />
       <main className="sx-stage">
         <header className="page-head-panel">
           <p className="browse-kicker">Trust &amp; safety</p>

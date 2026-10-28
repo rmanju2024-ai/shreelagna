@@ -5910,22 +5910,6 @@ a.browse-view {
 }
 
 .nav-progress.is-loading { width: 74%; opacity: 1; }
-.nav-loading-word {
-  position: fixed;
-  z-index: 299;
-  top: max(0.6rem, env(safe-area-inset-top));
-  left: 50%;
-  margin: 0;
-  transform: translateX(-50%);
-  padding: 0.32rem 0.7rem;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--paper) 92%, transparent);
-  color: var(--muted);
-  font-size: 0.72rem;
-  font-weight: 750;
-  pointer-events: none;
-}
 
 .app-route-loading {
   width: min(100%, 76rem);
