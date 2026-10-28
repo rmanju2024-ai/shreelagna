@@ -21,6 +21,7 @@ describe("ThemeQuickPicker", () => {
     for (const option of SCENE_OPTIONS) {
       expect(screen.getByRole("menuitemradio", { name: new RegExp(option.label) })).toBeTruthy();
     }
+    expect(screen.queryByRole("menuitemradio", { name: /Midnight jewel/i })).toBeNull();
 
     fireEvent.click(screen.getByRole("menuitemradio", { name: /Ivory marble 3D/i }));
 

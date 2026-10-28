@@ -20,7 +20,11 @@ function setReferrer(value: string, length = 3) {
 }
 
 describe("profile safety and close behaviour", () => {
-  afterEach(() => cleanup());
+  afterEach(() => {
+    cleanup();
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
   beforeEach(() => {
     push.mockClear();
     back.mockClear();

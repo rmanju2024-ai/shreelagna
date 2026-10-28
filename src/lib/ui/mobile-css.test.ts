@@ -49,7 +49,7 @@ describe("shared mobile CSS contract", () => {
     expect(css).toContain("padding-bottom: calc(4.65rem + env(safe-area-inset-bottom))");
     expect(css).toContain(".page-scene > .site-footer {");
     expect(css).toContain(".page-scene { padding-bottom: 0; }");
-    expect(css).toContain(".site-footer {\n    display: none !important;");
+    expect(css).toMatch(/\.site-footer \{\s+display: none !important;/);
     expect(css).not.toContain("footer { padding-bottom: 5.5rem; }");
   });
 
@@ -81,14 +81,14 @@ describe("shared mobile CSS contract", () => {
   });
 
   it("keeps headings and explanations readable over every scene", () => {
-    expect(css).toContain(".sx-hero h1 { color: var(--theme-ink)");
+    expect(css).toContain(".sx-hero h1 { color: #6f1d1b");
     expect(css).toContain(".sx-hero-sub { color: color-mix");
     expect(css).toContain("background-color: var(--theme-surface)");
     expect(css).toContain(".plans-welcome-banner");
     expect(css).toContain(".plans-header");
     expect(css).toContain('html[data-scene="ivory"] .app-main');
-    expect(css).toContain('html[data-scene="jewel"] .app-main');
     expect(css).toContain('html[data-scene="dusk"] .app-main');
+    expect(css).toContain('html[data-scene="rain"] .app-main');
     expect(css).toContain(".app-main .settings-page > .sx-hero");
   });
 

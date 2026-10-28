@@ -3,11 +3,11 @@ import { ACCOUNT_GROUPS, accountInboxCounts, accountOwnerName, bannerProfileChip
 
 describe("account hub", () => {
   it("keeps every section reachable from the board", () => {
-    expect(ACCOUNT_GROUPS.map((group) => group.id)).toEqual(["journey", "inbox", "privacy", "membership"]);
-    expect(ACCOUNT_GROUPS.reduce((count, group) => count + group.items.length, 0)).toBe(11);
+    expect(ACCOUNT_GROUPS.map((group) => group.id)).toEqual(["journey", "privacy", "membership"]);
+    expect(ACCOUNT_GROUPS.reduce((count, group) => count + group.items.length, 0)).toBe(8);
     const hrefs = ACCOUNT_GROUPS.flatMap((group) => group.items.map((item) => item.href));
     expect(hrefs).toContain("/app");
-    expect(hrefs).toContain("/app/chat");
+    expect(hrefs).not.toContain("/app/chat");
     expect(hrefs).toContain("/app/settings");
     expect(hrefs).toContain("/app/plans");
   });

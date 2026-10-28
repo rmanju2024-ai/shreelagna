@@ -1,4 +1,4 @@
-export const SCENE_IDS = ["wedding", "ivory", "jewel", "dusk"] as const;
+export const SCENE_IDS = ["wedding", "ivory", "dusk", "rain"] as const;
 
 export type SceneId = (typeof SCENE_IDS)[number];
 
@@ -16,16 +16,16 @@ export const SCENE_OPTIONS: { id: SceneId; label: string; hint: string; wash: st
     wash: "linear-gradient(145deg, #fffef8 0%, #e8dcc4 42%, #c4b08a 78%, #8a7a5c 100%)",
   },
   {
-    id: "jewel",
-    label: "Midnight jewel 3D",
-    hint: "Faceted gems and hard sparkle",
-    wash: "linear-gradient(145deg, #2a0e18 0%, #6f1d1b 40%, #c47a22 78%, #f3c56a 100%)",
-  },
-  {
     id: "dusk",
     label: "Silk dusk 3D",
     hint: "Soft silk pillows and rose glow",
     wash: "linear-gradient(145deg, #3f1a28 0%, #a43f72 38%, #e08a6a 70%, #f3c56a 100%)",
+  },
+  {
+    id: "rain",
+    label: "Monsoon grove",
+    hint: "Green hills and a gentle rain",
+    wash: "linear-gradient(145deg, #d7f0dc 0%, #6fbf84 38%, #2f7a4a 72%, #163c28 100%)",
   },
 ];
 

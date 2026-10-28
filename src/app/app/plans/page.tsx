@@ -132,8 +132,10 @@ export default async function PlansPage({
 
         <ul className="plans-grid">
           <li className="plans-card is-welcome">
-            <span className="plans-mark">{access.kind === "welcome" ? "Active" : "Automatic"}</span>
-            <p className="plans-months">2 months</p>
+            <div className="plans-card-head">
+              <p className="plans-months">2 months</p>
+              <span className="plans-mark is-live">{access.kind === "welcome" ? "Active" : "Automatic"}</span>
+            </div>
             <h2>{WELCOME_PLAN_NAME}</h2>
             <p className="plans-price">Free <small>from joining</small></p>
             <p className="plans-desc">Applied automatically.</p>
@@ -150,8 +152,13 @@ export default async function PlansPage({
             const asked = pending?.code === plan.code;
             return (
               <li key={plan.code} className={`plans-card ${planThemeClass(plan.code)}${plan.featured ? " is-featured" : ""}${on ? " is-active" : ""}`}>
-                {plan.featured ? <span className="plans-mark">Recommended</span> : null}
-                <p className="plans-months">{plan.months} months</p>
+                <div className="plans-card-head">
+                  <p className="plans-months">{plan.months} months</p>
+                  <span className="plans-marks">
+                    {on ? <span className="plans-mark is-live">Active</span> : null}
+                    {plan.featured ? <span className="plans-mark">Recommended</span> : null}
+                  </span>
+                </div>
                 <h2>{plan.name}</h2>
                 <p className="plans-price">{formatInr(plan.priceInr)} <small>indicative</small></p>
                 <p className="plans-desc">{plan.tagline}</p>

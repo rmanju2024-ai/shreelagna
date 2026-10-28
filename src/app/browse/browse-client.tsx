@@ -8,6 +8,7 @@ import { EMPTY_BROWSE_FILTERS, profileFitsBrowse, type BrowseFilters } from "@/l
 import { type BrowseScoreRow, type BrowseView } from "@/lib/match/browse-match";
 import { pageCount, pageItems } from "@/lib/match/inbox-card";
 import { btnGhost, btnPrimary, cardClass } from "@/lib/ui/classes";
+import { NavGlyph } from "@/components/nav-icons";
 
 type ViewItem = {
   id: BrowseView;
@@ -84,6 +85,34 @@ export function discoverResultsHref(view: BrowseView, filters: BrowseFilters = E
     });
   }
   return `/browse/results?${params}`;
+}
+
+const JOURNEY_LINKS = [
+  {
+    href: "/app/shortlist",
+    icon: "inbox",
+    label: "Shortlist",
+    tip: "Shortlist — families you saved to revisit later",
+  },
+  {
+    href: "/app/blocked",
+    icon: "block",
+    label: "Blocked",
+    tip: "Blocked — families you chose not to see again",
+  },
+] as const;
+
+function DiscoverJourney() {
+  return (
+    <nav className="sx-journey" aria-label="Your Discover journey">
+      {JOURNEY_LINKS.map((item) => (
+        <Link key={item.href} href={item.href} className="sx-journey-ico" aria-label={item.tip}>
+          <NavGlyph name={item.icon} />
+          <span className="sx-journey-tip">{item.tip}</span>
+        </Link>
+      ))}
+    </nav>
+  );
 }
 
 function RowArrow({
@@ -275,6 +304,7 @@ export function BrowseClient({
           <p className="sx-eyebrow">Search</p>
           <h1>{listMode ? currentView.label : lookingFor ? `Find your ${lookingFor}` : "Find your match"}</h1>
           {listMode ? <Link href={discoverHref} className="sx-back-to-discover">← Back to Discover</Link> : null}
+          {user && !notice ? <DiscoverJourney /> : null}
         </div>
         {!notice && !listMode ? (
           <a className="sx-filter-link" href={ADVANCED_FILTER_HREF} aria-label="Open advanced filter">

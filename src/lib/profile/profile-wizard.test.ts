@@ -41,7 +41,7 @@ describe("guided profile creation contract", () => {
 
   it("lets people progress one optional step at a time without hiding the last field", () => {
     expect(form).toContain("disabled={item.id > wizardStep}");
-    expect(css).toContain("padding-bottom: calc(8.5rem + env(safe-area-inset-bottom))");
+    expect(css).toContain("padding-bottom: calc(5.5rem + env(safe-area-inset-bottom))");
   });
 
   it("accepts birth date parts in any order before forming the final ISO date", () => {

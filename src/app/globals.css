@@ -9759,8 +9759,11 @@ a.inbox-name.inbox-open:focus-visible {
 @keyframes foil-float {
   50% { transform: translateY(-12px) scale(1.06); opacity: 0.85; }
 }
-.foil-stage-silk {
+.foil-stage-silk,
+.foil-stage-hills,
+.foil-stage-rain {
   display: none;
+  pointer-events: none;
 }
 .foil-stage.is-ivory {
   background:
@@ -9837,6 +9840,58 @@ a.inbox-name.inbox-open:focus-visible {
 }
 .foil-stage.is-dusk .foil-lotus em {
   background: radial-gradient(circle at 35% 30%, #fff, #ffd0d8 30%, #c45c7a);
+}
+.foil-stage.is-rain {
+  background:
+    radial-gradient(ellipse at 70% 8%, rgb(210 235 255 / 55%), transparent 36%),
+    linear-gradient(180deg, #8eb8c8 0%, #b7d4c0 38%, #6fbf84 72%, #2f7a4a 100%);
+}
+.foil-stage.is-rain .foil-stage-sky {
+  background:
+    radial-gradient(circle at 78% 12%, rgb(255 255 255 / 45%), transparent 30%),
+    linear-gradient(180deg, #c5dce6, transparent);
+}
+.foil-stage.is-rain .foil-stage-hills {
+  display: block;
+  position: absolute;
+  inset: auto 0 0;
+  height: 52%;
+  background:
+    radial-gradient(90% 80% at 12% 110%, #245c38 0 46%, transparent 47%),
+    radial-gradient(100% 90% at 78% 120%, #163c28 0 50%, transparent 51%),
+    radial-gradient(120% 70% at 48% 130%, #3d8f58 0 42%, transparent 43%);
+}
+.foil-stage.is-rain .foil-stage-rain {
+  display: block;
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(168deg, transparent 0 16px, rgb(255 255 255 / 34%) 17px, transparent 19px),
+    repeating-linear-gradient(174deg, transparent 0 22px, rgb(210 235 220 / 22%) 23px, transparent 26px);
+  background-size: 160% 220%, 140% 200%;
+  animation: foil-rain 0.9s linear infinite;
+  opacity: 0.55;
+}
+.foil-stage.is-rain .foil-ring {
+  border-top-color: #e8fff0;
+  border-right-color: #6fbf84;
+  border-bottom-color: #2f7a4a;
+  border-left-color: #163c28;
+}
+.foil-stage.is-rain .foil-lotus b {
+  background: linear-gradient(180deg, #e8fff0, #6fbf84 52%, #245c38);
+}
+.foil-stage.is-rain .foil-lotus em {
+  background: radial-gradient(circle at 35% 30%, #fff, #cfe8d4 30%, #2f7a4a);
+}
+.foil-stage.is-rain .foil-orb {
+  background: radial-gradient(circle at 32% 28%, #fff, #d7f0dc 40%, rgb(47 122 74 / 0%) 78%);
+}
+@keyframes foil-rain {
+  to { background-position: 10% 130%, -12% 150%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .foil-stage.is-rain .foil-stage-rain { animation: none; opacity: 0.28; }
 }
 
 .scene-nature {
@@ -10019,6 +10074,10 @@ a.inbox-name.inbox-open:focus-visible {
 
 .scene-theme-card.is-dusk .scene-pick-swatch {
   background: linear-gradient(135deg, #5c1838, #e08a6a);
+}
+
+.scene-theme-card.is-rain .scene-pick-swatch {
+  background: linear-gradient(135deg, #d7f0dc, #2f7a4a 55%, #163c28);
 }
 
 .nav-star {

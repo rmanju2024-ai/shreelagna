@@ -79,6 +79,12 @@ describe("discoverResultsHref", () => {
 });
 
 describe("Discover feed", () => {
+  it("keeps shortlist and blocked as explained icons", () => {
+    show();
+    expect(screen.getByRole("link", { name: /shortlist — families you saved/i }).getAttribute("href")).toBe("/app/shortlist");
+    expect(screen.getByRole("link", { name: /blocked — families you chose not to see/i }).getAttribute("href")).toBe("/app/blocked");
+  });
+
   it("shows every category as its own row", () => {
     show();
     for (const label of ["Smart picks", "Kundali match", "Nearby", "Same community"]) {

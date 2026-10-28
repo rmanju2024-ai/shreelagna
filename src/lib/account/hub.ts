@@ -11,18 +11,6 @@ export const ACCOUNT_GROUPS = [
     ],
   },
   {
-    id: "inbox",
-    title: "Inbox",
-    kicker: "Messages",
-    mark: "Inbox",
-    columns: 3,
-    items: [
-      { href: "/app/chat", title: "Chat", mark: "Inbox", text: "Write when you send a request." },
-      { href: "/app/interests", title: "Interests", mark: "Partner", text: "Requests you sent, received and accepted." },
-      { href: "/app/alerts", title: "Alerts", mark: "Hope", text: "Notices when families view, request or reply." },
-    ],
-  },
-  {
     id: "privacy",
     title: "Privacy & safety",
     kicker: "Kept private",

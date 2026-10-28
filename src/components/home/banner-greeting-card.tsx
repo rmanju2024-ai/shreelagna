@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 
 interface Greeting { text: string; emoji: string }
 
-function getGreeting(): Greeting {
-  const h = new Date().getHours();
+export function getGreeting(now = new Date()): Greeting {
+  const h = now.getHours();
   if (h >= 5  && h < 12) return { text: "Good Morning",   emoji: "🌅" };
   if (h >= 12 && h < 17) return { text: "Good Afternoon", emoji: "☀️" };
   if (h >= 17 && h < 21) return { text: "Good Evening",   emoji: "🌆" };
-  return                         { text: "Good Night",     emoji: "🌙" };
+  return                         { text: "Welcome tonight", emoji: "✨" };
 }
 
 /** Tagline-style greeting — replaces BrandMotto in the home panel for logged-in users */

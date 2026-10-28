@@ -11,6 +11,19 @@ vi.mock("@/app/app/match/actions", () => ({
   markPeekRead: vi.fn(async () => ({})),
   sendPeekChat: vi.fn(async () => ({})),
 }));
+vi.mock("@/lib/supabase/client", () => ({
+  createClient: () => ({
+    channel: () => ({
+      on() {
+        return this;
+      },
+      subscribe() {
+        return "subscribed";
+      },
+    }),
+    removeChannel: vi.fn(),
+  }),
+}));
 
 const props = {
   profileId: "them",
