@@ -368,13 +368,32 @@ a.inbox-photo { color: inherit; text-decoration: none; display: block; }
 
 /* Footer sits at the true page bottom. Mobile reserves only the navigation
    height instead of stacking the old page padding and footer spacing. */
-.page-scene { padding-bottom: 0; }
-.page-scene > .app-main { flex: 0 0 auto; width: 100%; }
+.page-scene {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding-bottom: 0;
+}
+.page-scene-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+}
+.page-scene-body > .app-main,
+.page-scene-body > main,
+.page-scene > .app-main {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+}
 .page-scene > .site-footer {
   position: relative;
   z-index: 2;
   flex: 0 0 auto;
-  margin-top: 0;
+  margin-top: auto;
+  width: 100%;
   inset: auto;
   bottom: auto;
   transform: none;

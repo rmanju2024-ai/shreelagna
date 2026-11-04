@@ -34,7 +34,7 @@ export async function ChromeLayout({ children }: { children: React.ReactNode }) 
         </Suspense>
         <ThemeQuickPicker initial={scene} />
         <ChromeSync />
-        {children}
+        <div className="page-scene-body">{children}</div>
         <SiteFooter glass />
       </div>
     </InstallAppRoot>

@@ -48,7 +48,8 @@ describe("shared mobile CSS contract", () => {
     expect(css).toContain("min-height: 3.25rem");
     expect(css).toContain("padding-bottom: calc(4.65rem + env(safe-area-inset-bottom))");
     expect(css).toContain(".page-scene > .site-footer {");
-    expect(css).toContain(".page-scene { padding-bottom: 0; }");
+    expect(css).toContain("padding-bottom: 0");
+    expect(css).toContain(".page-scene-body");
     expect(css).toMatch(/\.site-footer \{\s+display: none !important;/);
     expect(css).not.toContain("footer { padding-bottom: 5.5rem; }");
   });

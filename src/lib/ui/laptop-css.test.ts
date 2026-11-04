@@ -20,6 +20,13 @@ describe("laptop website browsing layout", () => {
     expect(search).toContain("grid-template-columns: 2.4rem minmax(0, 1fr) 2.4rem");
   });
 
+  it("pins the footer to the bottom of short laptop pages", () => {
+    expect(genz).toContain(".page-scene-body");
+    expect(genz).toContain("min-height: 100dvh");
+    expect(genz).toContain(".page-scene > .site-footer {");
+    expect(genz).toContain("margin-top: auto");
+  });
+
   it("pins laptop navigation in the header instead of a phone dock", () => {
     expect(genz).toContain(".site-head-inner > .site-nav {");
     expect(genz).toContain("position: static");
