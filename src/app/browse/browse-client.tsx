@@ -403,20 +403,15 @@ export function BrowseClient({
           </section>
         ) : (
           <div className="sx-feed is-board">
-            {PREVIEW_VIEWS.map((item) => {
-              const notes = homeByView[item.id] ?? [];
-              const full = rankedByView[item.id] ?? [];
-              if (!notes.length && full.length) return null;
-              return (
-                <CategoryRow
-                  key={item.id}
-                  item={item}
-                  notes={notes}
-                  count={notes.length}
-                  gate={viewNotes?.[item.id]}
-                />
-              );
-            })}
+            {PREVIEW_VIEWS.map((item) => (
+              <CategoryRow
+                key={item.id}
+                item={item}
+                notes={homeByView[item.id] ?? []}
+                count={(homeByView[item.id] ?? []).length}
+                gate={viewNotes?.[item.id]}
+              />
+            ))}
           </div>
         )}
       </div>

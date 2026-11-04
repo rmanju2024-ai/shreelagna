@@ -96,9 +96,12 @@ describe("laptop Discover browsing", () => {
     });
     expect(screen.getAllByRole("link", { name: /name 0/i })).toHaveLength(1);
     expect(screen.getByRole("heading", { name: "Smart picks" })).toBeTruthy();
-    expect(screen.queryByRole("heading", { name: "Kundali match" })).toBeNull();
-    expect(screen.queryByRole("heading", { name: "Nearby" })).toBeNull();
-    expect(screen.queryByRole("heading", { name: "Same community" })).toBeNull();
+    expect(screen.getByRole("heading", { name: "Kundali match" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Nearby" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Same community" })).toBeTruthy();
+    expect(screen.getByText("No kundali matches here yet")).toBeTruthy();
+    expect(screen.getByText("No families within 100 km yet")).toBeTruthy();
+    expect(screen.getByText("No one from your community yet")).toBeTruthy();
   });
 
   it("opens a tall results list with paging on a laptop", () => {
