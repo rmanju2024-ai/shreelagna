@@ -82,6 +82,25 @@ describe("laptop Discover browsing", () => {
     );
   });
 
+  it("shows a profile in one home category instead of repeating it", () => {
+    const { catalog, rows } = makeProfiles(1);
+    show({
+      catalog,
+      lists: {
+        ...emptyLists(),
+        smart: rows,
+        kundali: rows,
+        nearby: rows,
+        community: rows,
+      },
+    });
+    expect(screen.getAllByRole("link", { name: /name 0/i })).toHaveLength(1);
+    expect(screen.getByRole("heading", { name: "Smart picks" })).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: "Kundali match" })).toBeNull();
+    expect(screen.queryByRole("heading", { name: "Nearby" })).toBeNull();
+    expect(screen.queryByRole("heading", { name: "Same community" })).toBeNull();
+  });
+
   it("opens a tall results list with paging on a laptop", () => {
     const { catalog, rows } = makeProfiles(11);
     show({ catalog, lists: { ...emptyLists(), smart: rows }, fullResults: true });

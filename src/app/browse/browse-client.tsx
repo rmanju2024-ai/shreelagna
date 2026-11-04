@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { BrowseCard, type BrowseCardNote } from "@/app/browse/browse-card";
 import { BrowseFilterDesk } from "@/app/browse/browse-filter-desk";
 import { EMPTY_BROWSE_FILTERS, profileFitsBrowse, type BrowseFilters } from "@/lib/match/browse-filters";
-import { type BrowseScoreRow, type BrowseView } from "@/lib/match/browse-match";
+import { exclusiveDiscoverHome, type BrowseScoreRow, type BrowseView } from "@/lib/match/browse-match";
 import { pageCount, pageItems } from "@/lib/match/inbox-card";
 import { btnGhost, btnPrimary, cardClass } from "@/lib/ui/classes";
 import { NavGlyph } from "@/components/nav-icons";
@@ -287,6 +287,15 @@ export function BrowseClient({
     return next;
   }, [catalog, lists, filters, customApplied]);
 
+  const homeByView = useMemo(() => {
+    const home = exclusiveDiscoverHome(lists);
+    const next = {} as Record<BrowseView, BrowseCardNote[]>;
+    (Object.keys(home) as BrowseView[]).forEach((key) => {
+      next[key] = notesFor(catalog, home[key]);
+    });
+    return next;
+  }, [catalog, lists]);
+
   const listMode = fullResults || filterPage;
   const currentView = ALL_VIEWS.find((item) => item.id === initialView) ?? DEFAULT_VIEWS[0];
   const ranked = currentView.id === "custom" && !customApplied ? [] : rankedByView[currentView.id] ?? [];
@@ -394,15 +403,20 @@ export function BrowseClient({
           </section>
         ) : (
           <div className="sx-feed is-board">
-            {PREVIEW_VIEWS.map((item) => (
-              <CategoryRow
-                key={item.id}
-                item={item}
-                notes={rankedByView[item.id] ?? []}
-                count={rankedByView[item.id]?.length ?? 0}
-                gate={viewNotes?.[item.id]}
-              />
-            ))}
+            {PREVIEW_VIEWS.map((item) => {
+              const notes = homeByView[item.id] ?? [];
+              const full = rankedByView[item.id] ?? [];
+              if (!notes.length && full.length) return null;
+              return (
+                <CategoryRow
+                  key={item.id}
+                  item={item}
+                  notes={notes}
+                  count={notes.length}
+                  gate={viewNotes?.[item.id]}
+                />
+              );
+            })}
           </div>
         )}
       </div>

@@ -41,6 +41,27 @@ export function parseBrowseView(raw?: string | null): BrowseView {
   return "smart";
 }
 
+const HOME_ROW_ORDER: BrowseView[] = ["smart", "kundali", "nearby", "community"];
+
+/** One Discover home card per person, kept in the strongest row they qualify for. */
+export function exclusiveDiscoverHome(
+  lists: Record<BrowseView, BrowseScoreRow[]>,
+): Record<BrowseView, BrowseScoreRow[]> {
+  const seen = new Set<string>();
+  const out = emptyBrowseBuckets<BrowseScoreRow>();
+  out.fits = lists.fits;
+  out.prefers = lists.prefers;
+  out.custom = lists.custom;
+  for (const key of HOME_ROW_ORDER) {
+    out[key] = lists[key].filter((row) => {
+      if (seen.has(row.id)) return false;
+      seen.add(row.id);
+      return true;
+    });
+  }
+  return out;
+}
+
 /** One Discover row from “Today’s picks” + “They like you”. */
 export function mergeSmartPicks(fits: BrowseScoreRow[], prefers: BrowseScoreRow[]): BrowseScoreRow[] {
   const map = new Map<string, BrowseScoreRow>();
