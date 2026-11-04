@@ -20,9 +20,10 @@ describe("plan status popup", () => {
     expect(dialog.className).toContain("quota-soft");
     expect(dialog.parentElement?.className).toContain("quota-soft-layer");
     expect(dialog.parentElement?.className).toContain("is-on");
-    expect(dialog.textContent).toContain("Marriage");
-    expect(dialog.textContent).toContain("Connect");
+    expect(dialog.querySelector(".quota-soft-brand .site-name")).toBeTruthy();
+    expect(dialog.querySelector(".quota-soft-brand .site-name-word.is-connect")?.textContent).toBe("Connect");
     expect(dialog.textContent).toContain("Your plan");
+    expect(screen.getByText("You are on the Welcome gift plan.").className).toContain("quota-soft-body");
     expect(screen.getByRole("link", { name: "View plan" }).getAttribute("href")).toBe("/app/plans");
   });
 

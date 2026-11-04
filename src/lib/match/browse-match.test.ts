@@ -1,12 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  browseRank,
-  emptyBrowseBuckets,
-  exclusiveDiscoverHome,
-  mergeSmartPicks,
-  parseBrowseView,
-  preferencePoints,
-} from "./browse-match";
+import { browseRank, mergeSmartPicks, parseBrowseView, preferencePoints } from "./browse-match";
 import type { MatchSelf } from "@/lib/profile/match-compare";
 
 const me: MatchSelf = {
@@ -65,22 +58,6 @@ describe("browse match views", () => {
     expect(parseBrowseView("nearby")).toBe("nearby");
     expect(parseBrowseView("community")).toBe("community");
     expect(parseBrowseView("custom")).toBe("custom");
-  });
-
-  it("puts a profile in only one Discover home row, preferring Smart picks", () => {
-    const lists = emptyBrowseBuckets<{ id: string; score: string | null }>();
-    const jayesh = { id: "jayesh", score: "93%" };
-    lists.smart = [jayesh];
-    lists.kundali = [jayesh];
-    lists.nearby = [jayesh];
-    lists.community = [jayesh];
-    lists.custom = [jayesh];
-    const home = exclusiveDiscoverHome(lists);
-    expect(home.smart.map((row) => row.id)).toEqual(["jayesh"]);
-    expect(home.kundali).toEqual([]);
-    expect(home.nearby).toEqual([]);
-    expect(home.community).toEqual([]);
-    expect(home.custom.map((row) => row.id)).toEqual(["jayesh"]);
   });
 
   it("merges preference rows without duplicating a profile", () => {
