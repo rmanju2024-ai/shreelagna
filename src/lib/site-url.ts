@@ -18,8 +18,9 @@ export function liveSiteHost(host: string | null | undefined): boolean {
 }
 
 export function requestSiteOrigin(request: { nextUrl: { protocol: string; host: string } }): string {
-  if (liveSiteHost(request.nextUrl.host)) {
-    return `${request.nextUrl.protocol}//${request.nextUrl.host.split(":")[0]}`;
+  const host = request.nextUrl.host.split(":")[0].toLowerCase();
+  if (liveSiteHost(host) || isVercelPreviewHost(host) || host === "localhost" || host.startsWith("127.")) {
+    return `${request.nextUrl.protocol}//${host}`;
   }
   return publicSiteOrigin();
 }

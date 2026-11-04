@@ -1,5 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { canonicalSiteUrl, fixOAuthStartUrl, isVercelPreviewHost, publicSiteOrigin, supabaseAuthUrl } from "./site-url";
+import {
+  canonicalSiteUrl,
+  fixOAuthStartUrl,
+  isVercelPreviewHost,
+  publicSiteOrigin,
+  requestSiteOrigin,
+  supabaseAuthUrl,
+} from "./site-url";
 
 describe("site url", () => {
   afterEach(() => {
@@ -16,6 +23,15 @@ describe("site url", () => {
     expect(canonicalSiteUrl("/browse", "shreelagna-manju-cbbd.vercel.app")).toBeNull();
     expect(canonicalSiteUrl("/browse", "www.marriageconnect.in")).toBeNull();
     expect(canonicalSiteUrl("/browse", "marriageconnect.in")).toBe("https://www.marriageconnect.in/browse");
+  });
+
+  it("keeps Google sign-in on the vercel host that was opened", () => {
+    expect(
+      requestSiteOrigin({ nextUrl: { protocol: "https:", host: "shreelagna.vercel.app" } }),
+    ).toBe("https://shreelagna.vercel.app");
+    expect(
+      requestSiteOrigin({ nextUrl: { protocol: "https:", host: "www.marriageconnect.in" } }),
+    ).toBe("https://www.marriageconnect.in");
   });
 
   it("honours NEXT_PUBLIC_SITE_URL", () => {
