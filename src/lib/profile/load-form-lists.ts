@@ -99,7 +99,7 @@ const cachedLookups = unstable_cache(
     if (!service) return {} as Partial<FormLists>;
     return loadLookups(service);
   },
-  ["shreelagna-form-lookups"],
+  ["marriageconnect-form-lookups"],
   { revalidate: 3600 },
 );
 
@@ -116,7 +116,7 @@ const cachedFaith = unstable_cache(
       communities: uniqueCommunities(communities.data ?? []),
     };
   },
-  ["shreelagna-faith-catalog"],
+  ["marriageconnect-faith-catalog"],
   { revalidate: 3600 },
 );
 

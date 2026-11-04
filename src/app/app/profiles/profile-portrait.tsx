@@ -141,7 +141,7 @@ export function ProfilePortrait({
                   v: contact.revealed ? contact.mobile : "Hidden",
                   extra:
                     contact.revealed && profile.phone_otp_verified_at ? (
-                      <VerifyFlag on tone="whatsapp" label="Arattai verified" />
+                      <VerifyFlag on tone="whatsapp" label="WhatsApp verified" />
                     ) : null,
                 },
                 {
@@ -161,7 +161,7 @@ export function ProfilePortrait({
                   <VerifyFlag
                     on={Boolean(profile.phone_otp_verified_at)}
                     tone="whatsapp"
-                    label="Arattai verified"
+                    label="WhatsApp verified"
                   />
                 ) : (
                   <MobileOtpField

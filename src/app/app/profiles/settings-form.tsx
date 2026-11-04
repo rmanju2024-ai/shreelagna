@@ -104,8 +104,8 @@ export function SettingsForm({
         />
         <Toggle
           name="notify_whatsapp"
-          title="Arattai alerts"
-          hint="Interest, views and plan notes on Arattai. WhatsApp is not used. Confirm mobile on your profile first."
+          title="WhatsApp alerts"
+          hint="Interest, views and plan notes on WhatsApp. Confirm mobile on your profile first."
           checked={values.notifyWhatsapp}
         />
         <Toggle

@@ -1,7 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { BrandCrest } from "@/components/brand-crest";
+import { SiteName } from "@/components/site-name";
 import { fetchQuotaSoftNotice } from "@/lib/membership/quota-notice-action";
 import type { QuotaSoftNotice } from "@/lib/membership/quota-notice";
 
@@ -69,20 +72,42 @@ export function QuotaSoftHost() {
 
   // No auto-dismiss — popup stays until the visitor clicks ✕
 
-  if (!notice || typeof document === "undefined") return null;
+  if (!notice || !visible || typeof document === "undefined") return null;
+
+  function close() {
+    setVisible(false);
+  }
 
   return createPortal(
-    <aside
-      className={`quota-soft${visible ? " is-on" : ""}${notice.kind === "capped" || notice.kind === "daily" ? " is-alert" : notice.kind === "warn" ? " is-warn" : ""}`}
-      role="status"
-      aria-live="polite"
-    >
-      <button type="button" className="quota-soft-dismiss" aria-label="Dismiss" onClick={() => setVisible(false)}>
-        ✕
-      </button>
-      <p>{notice.title}</p>
-      <span>{notice.body}</span>
-    </aside>,
+    <div className="quota-soft-layer is-on" role="presentation" onClick={close}>
+      <aside
+        className={`quota-soft${notice.kind === "capped" || notice.kind === "daily" ? " is-alert" : notice.kind === "warn" ? " is-warn" : ""}`}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="quota-soft-title"
+        aria-describedby="quota-soft-body"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button type="button" className="quota-soft-dismiss" aria-label="Dismiss" onClick={close}>
+          ✕
+        </button>
+        <div className="quota-soft-brand">
+          <BrandCrest />
+          <SiteName />
+        </div>
+        <p className="quota-soft-kicker">Your plan</p>
+        <p id="quota-soft-title">{notice.title}</p>
+        <span id="quota-soft-body">{notice.body}</span>
+        <div className="quota-soft-actions">
+          <Link href="/app/plans" className="quota-soft-primary" onClick={close}>
+            View plan
+          </Link>
+          <button type="button" className="quota-soft-ghost" onClick={close}>
+            Close
+          </button>
+        </div>
+      </aside>
+    </div>,
     document.body,
   );
 }

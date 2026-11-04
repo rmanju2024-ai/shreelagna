@@ -10,7 +10,7 @@ describe("WhatsApp payload", () => {
   it("builds an auth template with copy-code button", () => {
     const payload = buildWhatsAppPayload({
       to: "919876543210",
-      name: "shreelagna_otp",
+      name: "marriageconnect_otp",
       language: "en_US",
       bodyParams: ["123456"],
       copyCode: "123456",
@@ -20,7 +20,7 @@ describe("WhatsApp payload", () => {
       to: "919876543210",
       type: "template",
       template: {
-        name: "shreelagna_otp",
+        name: "marriageconnect_otp",
         language: { code: "en_US" },
         components: [
           { type: "body", parameters: [{ type: "text", text: "123456" }] },
@@ -38,7 +38,7 @@ describe("WhatsApp payload", () => {
   it("builds a utility template with one name", () => {
     const payload = buildWhatsAppPayload({
       to: "919876543210",
-      name: "shreelagna_interest",
+      name: "marriageconnect_interest",
       language: "en",
       bodyParams: ["Rohan"],
     });
@@ -67,9 +67,9 @@ describe("WhatsApp payload", () => {
   it("uses hello_world for alerts outside production unless overridden", () => {
     const previous = process.env.WHATSAPP_ALERT_TEMPLATE;
     delete process.env.WHATSAPP_ALERT_TEMPLATE;
-    expect(resolveAlertTemplate("shreelagna_interest")).toBe("hello_world");
-    process.env.WHATSAPP_ALERT_TEMPLATE = "shreelagna_interest";
-    expect(resolveAlertTemplate("shreelagna_interest")).toBe("shreelagna_interest");
+    expect(resolveAlertTemplate("marriageconnect_interest")).toBe("hello_world");
+    process.env.WHATSAPP_ALERT_TEMPLATE = "marriageconnect_interest";
+    expect(resolveAlertTemplate("marriageconnect_interest")).toBe("marriageconnect_interest");
     if (previous) process.env.WHATSAPP_ALERT_TEMPLATE = previous;
     else delete process.env.WHATSAPP_ALERT_TEMPLATE;
   });

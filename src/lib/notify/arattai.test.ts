@@ -10,7 +10,7 @@ describe("Arattai payloads", () => {
     vi.stubEnv("ARATTAI_CLIENT_ID", "");
     expect(arattaiConfigured()).toBe(false);
     expect(arattaiOperatorHint()).toMatch(/ARATTAI_CLIENT_ID/);
-    expect(arattaiOperatorHint()).toMatch(/WhatsApp is not used/);
+    expect(arattaiOperatorHint()).not.toMatch(/WhatsApp/);
   });
 
   it("prefers refresh-token OAuth when a refresh token is present", () => {

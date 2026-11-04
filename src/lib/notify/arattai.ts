@@ -17,7 +17,7 @@ const DEFAULT_SCOPE = "ArattaiBusiness.messages.CREATE,ArattaiBusiness.authentic
 let cachedToken: { value: string; expiresAt: number } | null = null;
 
 export function arattaiOperatorHint(): string {
-  return "Arattai Business is not configured. Set ARATTAI_CLIENT_ID, ARATTAI_CLIENT_SECRET, ARATTAI_COMPANY_ID, ARATTAI_BUSINESS_NUMBER_ID, and the OTP/alert template IDs. WhatsApp is not used.";
+  return "Arattai Business is not configured. Set ARATTAI_CLIENT_ID, ARATTAI_CLIENT_SECRET, ARATTAI_COMPANY_ID, ARATTAI_BUSINESS_NUMBER_ID, and the OTP/alert template IDs.";
 }
 
 export function arattaiConfigured(): boolean {

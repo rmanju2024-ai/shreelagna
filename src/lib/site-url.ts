@@ -55,8 +55,10 @@ export function isVercelPreviewHost(host: string | null | undefined): boolean {
   return name.endsWith(".vercel.app");
 }
 
+/** Stay on the host the visitor opened. Only fold the bare domain onto www. */
 export function canonicalSiteUrl(pathAndQuery: string, host?: string | null): string | null {
-  if (!isVercelPreviewHost(host)) return null;
+  const name = String(host ?? "").split(":")[0].toLowerCase();
+  if (name !== "marriageconnect.in") return null;
   const path = pathAndQuery.startsWith("/") ? pathAndQuery : `/${pathAndQuery}`;
-  return `${publicSiteOrigin()}${path}`;
+  return `https://www.marriageconnect.in${path}`;
 }

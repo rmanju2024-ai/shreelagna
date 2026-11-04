@@ -2,7 +2,8 @@
 
 import { ensureAppUser } from "@/lib/auth/session";
 import { digitsCode, hashOtp, makeOtpCode, OTP_RESEND_MS, OTP_TTL_MS, otpExpired, otpMatches } from "@/lib/notify/otp";
-import { arattaiConfigured, arattaiOperatorHint, sendArattaiOtp, toArattaiMobile } from "@/lib/notify/arattai";
+import { toArattaiMobile } from "@/lib/notify/arattai";
+import { channelOperatorHint, notifyConfigured, sendChannelOtp } from "@/lib/notify/channel";
 import { isUniqueViolation, missingPayloadColumn } from "@/lib/profile/db-errors";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { readSessionFromCookies } from "@/lib/supabase/user-rest";
@@ -60,14 +61,14 @@ export async function sendMobileOtp(profileId: string, mobileRaw: string): Promi
   });
   if (insertError) return { ok: false, error: "Ask house to run SQL 053, then try again." };
 
-  if (!arattaiConfigured()) {
-    if (process.env.NODE_ENV === "production") return { ok: false, error: arattaiOperatorHint() };
+  if (!notifyConfigured()) {
+    if (process.env.NODE_ENV === "production") return { ok: false, error: channelOperatorHint() };
     return { ok: true, preview: code };
   }
 
-  const sent = await sendArattaiOtp(mobile, code);
+  const sent = await sendChannelOtp(mobile, code);
   if (!sent.ok) {
-    if (process.env.NODE_ENV === "production") return { ok: false, error: sent.error ?? arattaiOperatorHint() };
+    if (process.env.NODE_ENV === "production") return { ok: false, error: sent.error ?? channelOperatorHint() };
     return { ok: true, preview: code };
   }
   return { ok: true };
@@ -90,7 +91,7 @@ export async function verifyMobileOtp(
   if (!profile) return { ok: false, error: "Save the profile first, then confirm mobile." };
   const mobile = toArattaiMobile(mobileRaw);
   const code = digitsCode(codeRaw);
-  if (!mobile || code.length !== 6) return { ok: false, error: "Enter the 6-digit Arattai code." };
+  if (!mobile || code.length !== 6) return { ok: false, error: "Enter the 6-digit WhatsApp code." };
 
   const { data: row } = await db
     .from("whatsapp_otps")

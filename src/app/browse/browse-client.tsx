@@ -90,7 +90,7 @@ export function discoverResultsHref(view: BrowseView, filters: BrowseFilters = E
 const JOURNEY_LINKS = [
   {
     href: "/app/shortlist",
-    icon: "inbox",
+    icon: "shortlist",
     label: "Shortlist",
     tip: "Shortlist — families you saved to revisit later",
   },

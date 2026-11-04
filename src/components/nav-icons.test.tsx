@@ -30,4 +30,12 @@ describe("solid nav icons", () => {
     expect(account).not.toContain("h4v4");
     expect(more).not.toMatch(/circle cx="6"|circle cx="12".*circle cx="18"/);
   });
+
+  it("keeps shortlist as a heart and Inbox as an envelope", () => {
+    const shortlist = pathOf("shortlist");
+    const inbox = pathOf("inbox");
+    expect(shortlist).toContain("L12 21.4");
+    expect(inbox).toContain("l8 5");
+    expect(shortlist).not.toBe(inbox);
+  });
 });

@@ -32,19 +32,19 @@ export function whatsappConfigured(): boolean {
 }
 
 export function otpTemplateName(): string {
-  return process.env.WHATSAPP_OTP_TEMPLATE?.trim() || "shreelagna_otp";
+  return process.env.WHATSAPP_OTP_TEMPLATE?.trim() || "marriageconnect_otp";
 }
 
 export function interestTemplateName(): string {
-  return process.env.WHATSAPP_INTEREST_TEMPLATE?.trim() || "shreelagna_interest";
+  return process.env.WHATSAPP_INTEREST_TEMPLATE?.trim() || "marriageconnect_interest";
 }
 
 export function acceptedTemplateName(): string {
-  return process.env.WHATSAPP_ACCEPTED_TEMPLATE?.trim() || "shreelagna_interest_accepted";
+  return process.env.WHATSAPP_ACCEPTED_TEMPLATE?.trim() || "marriageconnect_interest_accepted";
 }
 
 export function planTemplateName(): string {
-  return process.env.WHATSAPP_PLAN_TEMPLATE?.trim() || "shreelagna_plan";
+  return process.env.WHATSAPP_PLAN_TEMPLATE?.trim() || "marriageconnect_plan";
 }
 
 export function isHelloWorldTemplate(name: string): boolean {

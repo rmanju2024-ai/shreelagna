@@ -39,6 +39,12 @@ export function NavGlyph({ name }: { name: string }) {
           <path d="M20 4H4C2.9 4 2 4.9 2 6v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2Zm0 4-8 5-8-5V6l8 5 8-5v2Z" />
         </Icon>
       );
+    case "shortlist":
+      return (
+        <Icon>
+          <path d="M12 21.4 10.4 20C5.4 15.5 2 12.4 2 8.8A4.7 4.7 0 0 1 6.8 4 5.2 5.2 0 0 1 12 7.1 5.2 5.2 0 0 1 17.2 4 4.7 4.7 0 0 1 22 8.8c0 3.6-3.4 6.7-8.4 11.2L12 21.4Z" />
+        </Icon>
+      );
     case "chat":
       return (
         <Icon>

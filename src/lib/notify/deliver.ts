@@ -1,5 +1,6 @@
 import { SITE_NAME } from "@/lib/brand";
-import { arattaiConfigured, sendArattaiAlert, toArattaiMobile } from "@/lib/notify/arattai";
+import { toArattaiMobile } from "@/lib/notify/arattai";
+import { notifyConfigured, sendChannelAlert, type AlertKind } from "@/lib/notify/channel";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sendWebPushesToUser } from "@/lib/notify/web-push";
 import { shouldDeliverHouseChannels, type PushNoticeInput } from "@/lib/notify/push-payload";
@@ -29,7 +30,14 @@ async function loadAlertMobile(userId: string, mobileHint?: string | null): Prom
   );
 }
 
-/** Web Push + Arattai for house notices. Never used for in-app family chat. */
+function alertKindForNotice(kind?: string): AlertKind {
+  if (kind === "interest_accepted" || kind === "accepted") return "accepted";
+  if (kind === "plan" || kind?.startsWith("plan")) return "plan";
+  if (kind === "interest" || kind === "interest_received") return "interest";
+  return "notice";
+}
+
+/** Web Push + WhatsApp for house notices. Never used for in-app family chat. */
 export async function deliverHouseNotice(notice: HouseNotice): Promise<void> {
   if (!shouldDeliverHouseChannels(notice.kind)) return;
   const payload: PushNoticeInput = {
@@ -40,9 +48,12 @@ export async function deliverHouseNotice(notice: HouseNotice): Promise<void> {
   };
   const pushed = await sendWebPushesToUser(notice.userId, payload).catch(() => 0);
   if (typeof pushed === "number" && pushed > 0) return;
-  if (!arattaiConfigured()) return;
+  if (!notifyConfigured()) return;
   const mobile = await loadAlertMobile(notice.userId, notice.mobileHint);
   if (!mobile) return;
   const line = (notice.body || notice.title).slice(0, 120);
-  await sendArattaiAlert(mobile, [notice.title.slice(0, 60) || SITE_NAME, line]).catch(() => undefined);
+  await sendChannelAlert(alertKindForNotice(notice.kind), mobile, [
+    notice.title.slice(0, 60) || SITE_NAME,
+    line,
+  ]).catch(() => undefined);
 }

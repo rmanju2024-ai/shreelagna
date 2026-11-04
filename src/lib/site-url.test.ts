@@ -11,11 +11,11 @@ describe("site url", () => {
     expect(isVercelPreviewHost("shreelagna-manju-cbbd.vercel.app")).toBe(true);
   });
 
-  it("sends vercel hosts to the live domain", () => {
-    expect(canonicalSiteUrl("/browse", "shreelagna-manju-cbbd.vercel.app")).toBe(
-      "https://www.marriageconnect.in/browse",
-    );
+  it("keeps vercel.app on itself and only folds the bare live domain onto www", () => {
+    expect(canonicalSiteUrl("/browse", "shreelagna.vercel.app")).toBeNull();
+    expect(canonicalSiteUrl("/browse", "shreelagna-manju-cbbd.vercel.app")).toBeNull();
     expect(canonicalSiteUrl("/browse", "www.marriageconnect.in")).toBeNull();
+    expect(canonicalSiteUrl("/browse", "marriageconnect.in")).toBe("https://www.marriageconnect.in/browse");
   });
 
   it("honours NEXT_PUBLIC_SITE_URL", () => {

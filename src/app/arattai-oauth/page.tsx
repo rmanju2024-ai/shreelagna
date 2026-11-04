@@ -25,7 +25,7 @@ export default async function ArattaiOauthPage({
         ) : (
           <p className="mt-4">
             No code yet. Open the Zoho login URL with redirect{" "}
-            <code>https://shreelagna.vercel.app/arattai-oauth</code>.
+            <code>https://www.marriageconnect.in/arattai-oauth</code>.
           </p>
         )}
       </div>
