@@ -31,6 +31,12 @@ export function whatsappConfigured(): boolean {
   return Boolean(process.env.WHATSAPP_TOKEN?.trim() && process.env.WHATSAPP_PHONE_NUMBER_ID?.trim());
 }
 
+/** Interest / plan WhatsApp (and channel) alerts. OTP is separate. Off unless explicitly true. */
+export function whatsappSendAlerts(): boolean {
+  const raw = process.env.WHATSAPP_SEND_ALERTS?.trim().toLowerCase();
+  return raw === "true" || raw === "1" || raw === "yes";
+}
+
 export function otpTemplateName(): string {
   return process.env.WHATSAPP_OTP_TEMPLATE?.trim() || "marriageconnect_otp";
 }

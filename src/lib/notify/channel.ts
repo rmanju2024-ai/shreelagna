@@ -8,6 +8,7 @@ import {
   resolveAlertTemplate,
   sendWhatsAppTemplate,
   whatsappConfigured,
+  whatsappSendAlerts,
 } from "@/lib/notify/whatsapp";
 
 export type ChannelResult = { ok: boolean; error?: string };
@@ -74,6 +75,7 @@ export async function sendChannelOtp(to: string, code: string): Promise<ChannelR
 }
 
 export async function sendChannelAlert(kind: AlertKind, to: string, params: string[]): Promise<ChannelResult> {
+  if (!whatsappSendAlerts()) return { ok: true };
   const provider = notifyProvider();
   if (provider === "whatsapp") {
     const sent = await sendWhatsAppAlert(kind, to, params);
