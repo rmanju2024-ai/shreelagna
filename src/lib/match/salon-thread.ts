@@ -1,22 +1,6 @@
-import { formatIstTime, istDayKey, parseInstant } from "@/lib/time/ist";
+import { formatIstDate, formatIstTime, istDayKey, parseInstant } from "@/lib/time/ist";
 
 export const CHAT_GROUP_MS = 5 * 60 * 1000;
-
-const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const MONTHS = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
 
 export type SalonMsg = {
   id: string;
@@ -46,13 +30,10 @@ export type SalonRow =
 export function chatDayLabel(iso: string, now = Date.now()): string {
   const at = parseInstant(iso);
   if (!at) return "";
-  const ist = new Date(at.getTime() + (5 * 60 + 30) * 60 * 1000);
-  const weekday = WEEKDAYS[ist.getUTCDay()];
-  const day = ist.getUTCDate();
-  const month = MONTHS[ist.getUTCMonth()];
-  const year = ist.getUTCFullYear();
-  const thisYear = new Date(now + (5 * 60 + 30) * 60 * 1000).getUTCFullYear();
-  return year === thisYear ? `${weekday}, ${day} ${month}` : `${weekday}, ${day} ${month} ${year}`;
+  const day = istDayKey(at);
+  if (day === istDayKey(new Date(now))) return "Today";
+  if (day === istDayKey(new Date(now - 24 * 60 * 60 * 1000))) return "Yesterday";
+  return formatIstDate(at, true);
 }
 
 export function chatPresenceLine(online: boolean, lastSeen: string | null, now = Date.now()): string {
@@ -78,7 +59,6 @@ export function buildSalonRows(
 ): SalonRow[] {
   const rows: SalonRow[] = [];
   const unreadAt = firstUnreadIndex(messages, myProfileId);
-  const todayKey = istDayKey(new Date(now));
   let lastMineId: string | null = null;
   let lastDayKey = "";
   for (const msg of messages) {
@@ -87,15 +67,11 @@ export function buildSalonRows(
 
   messages.forEach((msg, index) => {
     const prev = messages[index - 1];
-    const next = messages[index + 1];
     const at = parseInstant(msg.created_at)?.getTime() ?? 0;
     const prevAt = parseInstant(prev?.created_at)?.getTime() ?? 0;
-    const nextAt = parseInstant(next?.created_at)?.getTime() ?? 0;
     const day = at ? istDayKey(new Date(at)) : "";
-    if (day && day !== lastDayKey && day !== todayKey) {
+    if (day && day !== lastDayKey) {
       rows.push({ kind: "day", key: `day-${day}`, label: chatDayLabel(msg.created_at, now) });
-      lastDayKey = day;
-    } else if (day) {
       lastDayKey = day;
     }
     if (index === unreadAt && unreadAt >= 0) {
@@ -104,14 +80,13 @@ export function buildSalonRows(
     const mine = msg.sender_profile_id === myProfileId;
     const sameSender = prev && prev.sender_profile_id === msg.sender_profile_id;
     const close = Boolean(sameSender && at - prevAt <= CHAT_GROUP_MS);
-    const nextSame = next && next.sender_profile_id === msg.sender_profile_id && nextAt - at <= CHAT_GROUP_MS;
     rows.push({
       kind: "msg",
       msg,
       mine,
       showName: !close,
       tight: close,
-      showTime: !nextSame,
+      showTime: true,
       showSeen: Boolean(mine && msg.id === lastMineId && msg.read_at),
       label: mine ? "You" : peerName,
     });

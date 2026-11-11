@@ -36,8 +36,9 @@ describe("laptop website browsing layout", () => {
 
   it("styles family chat as a salon note, not a green messenger", () => {
     expect(genz).toContain("Salon notes: family chat, not a messenger clone");
-    expect(salon).toContain(".salon-note.is-mine");
-    expect(salon).toContain("border-right: 2px solid var(--chat-maroon)");
+    expect(salon).toContain(".salon-slip");
+    expect(salon).toContain("border-right: 3px solid var(--chat-maroon)");
+    expect(salon).toContain(".salon-plan-go");
     expect(salon).not.toContain("border-radius: 999px");
     expect(salon).not.toContain("#25d366");
     expect(salon).not.toContain("#d9fdd3");

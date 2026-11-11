@@ -20,6 +20,9 @@ export function ThreadView({
   peerHref,
   presence,
   online,
+  myName = "You",
+  myPhoto,
+  needPlan = false,
   closedNote,
 }: {
   threadId: string;
@@ -31,6 +34,9 @@ export function ThreadView({
   peerHref?: string | null;
   presence: string;
   online: boolean;
+  myName?: string;
+  myPhoto?: string | null;
+  needPlan?: boolean;
   closedNote?: ReactNode;
 }) {
   const [pending, setPending] = useState<Msg[]>([]);
@@ -69,7 +75,7 @@ export function ThreadView({
     if (!menuId && !headMenu) return;
     function close(event: PointerEvent) {
       const node = event.target;
-      if (node instanceof Element && node.closest(".salon-note.is-open, .salon-tools")) return;
+      if (node instanceof Element && node.closest(".salon-row.is-open, .salon-tools")) return;
       setMenuId(null);
       setHeadMenu(false);
     }
@@ -182,8 +188,8 @@ export function ThreadView({
         <div className="salon-tools">
           <button
             type="button"
-            className="salon-icon"
-            aria-label="Search in chat"
+            className="salon-search-toggle"
+            aria-label="Search in this chat"
             aria-expanded={searchOpen}
             onClick={() => setSearchOpen((open) => !open)}
           >
@@ -191,6 +197,7 @@ export function ThreadView({
               <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="1.6" />
               <path d="M16 16.5 20 20.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
             </svg>
+            <span>Search in this chat</span>
           </button>
           <button
             type="button"
@@ -220,6 +227,14 @@ export function ThreadView({
           ) : null}
         </div>
       </header>
+      {needPlan ? (
+        <div className="salon-plan">
+          <p>Keep a live plan to continue this conversation</p>
+          <Link href="/app/plans" className="salon-plan-go">
+            See plans
+          </Link>
+        </div>
+      ) : null}
       <div className="salon-stage wa-stage" ref={stageRef}>
         <ul className="salon-stream">
           {rows.map((row, index) => {
@@ -242,11 +257,22 @@ export function ThreadView({
             const hit = q && !gone && messageMatchesQuery(msg.body, q);
             const dim = q && !hit;
             const at = parseInstant(msg.created_at);
+            const face = row.showName ? (
+              <span className="salon-face">
+                <ChatAvatar
+                  name={row.mine ? myName : peerName}
+                  src={row.mine ? myPhoto : peerPhoto}
+                  size="xs"
+                />
+              </span>
+            ) : (
+              <span className="salon-face is-gap" aria-hidden />
+            );
             return (
               <li
                 key={msg.id}
                 ref={index === rows.length - 1 ? endRef : undefined}
-                className={`salon-note ${row.mine ? "is-mine" : "is-theirs"}${row.tight ? " is-tight" : ""}${gone ? " is-deleted" : ""}${menuId === msg.id ? " is-open" : ""}${hit ? " is-hit" : ""}`}
+                className={`salon-row ${row.mine ? "is-mine" : "is-theirs"}${row.tight ? " is-tight" : ""}${gone ? " is-deleted" : ""}${menuId === msg.id ? " is-open" : ""}${hit ? " is-hit" : ""}`}
                 style={dim ? { opacity: 0.35 } : undefined}
                 onPointerDown={() => startHold(msg, row.mine, gone)}
                 onPointerUp={clearHold}
@@ -258,54 +284,54 @@ export function ThreadView({
                   setMenuId(msg.id);
                 }}
               >
-                {row.mine && !msg.pending && !gone ? (
-                  <div className="salon-msg-tools">
-                    <button
-                      type="button"
-                      className="salon-msg-more"
-                      aria-label="Message options"
-                      aria-expanded={menuId === msg.id}
-                      onClick={() => setMenuId((current) => (current === msg.id ? null : msg.id))}
-                    >
-                      ⋯
-                    </button>
-                    {menuId === msg.id ? (
-                      <div className="salon-msg-menu" role="menu">
-                        <button type="button" role="menuitem" className="salon-menu-item" onClick={() => beginEdit(msg)}>
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          role="menuitem"
-                          className="salon-menu-item is-danger"
-                          onClick={() => remove(msg)}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    ) : null}
-                  </div>
-                ) : null}
-                {row.showName ? <span className="salon-who">{row.label}</span> : null}
-                <p>{chatBodyLine(msg.body, gone)}</p>
-                {row.showTime || msg.pending || row.showSeen || (msg.edited_at && !gone) ? (
+                {row.mine ? null : face}
+                <div className="salon-slip">
+                  {row.mine && !msg.pending && !gone ? (
+                    <div className="salon-msg-tools">
+                      <button
+                        type="button"
+                        className="salon-msg-more"
+                        aria-label="Message options"
+                        aria-expanded={menuId === msg.id}
+                        onClick={() => setMenuId((current) => (current === msg.id ? null : msg.id))}
+                      >
+                        ⋯
+                      </button>
+                      {menuId === msg.id ? (
+                        <div className="salon-msg-menu" role="menu">
+                          <button type="button" role="menuitem" className="salon-menu-item" onClick={() => beginEdit(msg)}>
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            role="menuitem"
+                            className="salon-menu-item is-danger"
+                            onClick={() => remove(msg)}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
+                  <p>{chatBodyLine(msg.body, gone)}</p>
                   <time>
                     {msg.pending ? "Sending" : at ? formatIstTime(at) : ""}
                     {msg.edited_at && !gone ? " · edited" : ""}
                     {row.showSeen ? " · Seen" : ""}
                   </time>
-                ) : null}
+                </div>
+                {row.mine ? face : null}
               </li>
             );
           })}
         </ul>
       </div>
-      {canSend ? (
-        <form
+      <form
           className="salon-composer"
           onSubmit={(event) => {
             event.preventDefault();
-            send();
+            if (canSend) send();
           }}
         >
           {editingId ? (
@@ -342,22 +368,30 @@ export function ThreadView({
               }
               if (event.key === "Enter" && !event.shiftKey) {
                 event.preventDefault();
-                send();
+                if (canSend) send();
               }
             }}
             maxLength={4000}
             rows={1}
-            placeholder={editingId ? "Edit your note" : failed ? "Not sent — try again" : "Write a message…"}
+            disabled={!canSend}
+            placeholder={
+              !canSend
+                ? "A live plan is needed to write"
+                : editingId
+                  ? "Edit your note"
+                  : failed
+                    ? "Not sent — try again"
+                    : "Write a message…"
+            }
             aria-label={editingId ? "Edit your note" : "Write a message…"}
           />
-          <button type="submit" className="salon-send" aria-label={editingId ? "Save edit" : "Send"} disabled={!draft.trim()}>
+          <button type="submit" className="salon-send" aria-label={editingId ? "Save edit" : "Send"} disabled={!canSend || !draft.trim()}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
               <path d="M4 12h14M12 5l8 7-8 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
         </form>
-      ) : null}
-      {closedNote}
+      {closedNote && !needPlan ? closedNote : null}
     </article>
   );
 }

@@ -79,8 +79,8 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
       ),
     db
       .from("media")
-      .select("storage_path, is_primary")
-      .eq("profile_id", otherId)
+      .select("profile_id, storage_path, is_primary")
+      .in("profile_id", [otherId, mine.id])
       .eq("kind", "photo")
       .eq("status", "approved")
       .order("created_at"),
@@ -90,9 +90,15 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
   const otherOpen = Boolean(other && other.status === "active");
   // Hidden/deleted profiles do not retain a reachable chat route or inbox presence.
   if (!otherOpen) notFound();
-  const name = otherOpen ? displayFirstName(other?.subject_full_name ?? "Match") : "Profile unavailable";
-  const cover = (photos ?? []).find((row) => row.is_primary) ?? photos?.[0];
+  const name = otherOpen
+    ? (other?.subject_full_name ?? "").replace(/\s+/g, " ").trim() || displayFirstName(other?.subject_full_name ?? "Match")
+    : "Profile unavailable";
+  const theirs = (photos ?? []).filter((row) => row.profile_id === otherId);
+  const minePhotos = (photos ?? []).filter((row) => row.profile_id === mine.id);
+  const cover = theirs.find((row) => row.is_primary) ?? theirs[0];
+  const mineCover = minePhotos.find((row) => row.is_primary) ?? minePhotos[0];
   const photo = otherOpen ? publicMediaUrl(cover?.storage_path) : null;
+  const myPhoto = publicMediaUrl(mineCover?.storage_path);
   const online = otherOpen && !other?.hide_last_seen ? isOnlineNow(other?.last_seen_at) : false;
   const presence =
     otherOpen && !other?.hide_last_seen ? chatPresenceLine(online, other?.last_seen_at ?? null) : otherOpen ? "" : "This chat is closed";
@@ -117,9 +123,11 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
           myProfileId={mine.id}
           peerName={name}
           peerPhoto={photo}
+          myPhoto={myPhoto}
           peerHref={otherOpen ? profileOpenHref(otherId, "chat") : null}
           presence={presence}
           online={online}
+          needPlan={!thread.frozen && otherOpen && !chatLive}
           messages={[...(messages ?? [])].reverse().map((msg) => {
             const row = msg as typeof msg & { edited_at?: string | null; deleted_at?: string | null };
             return {

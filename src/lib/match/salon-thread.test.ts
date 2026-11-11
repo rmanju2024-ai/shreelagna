@@ -28,12 +28,11 @@ describe("salon thread layout", () => {
     expect(notes[1]?.tight).toBe(true);
     expect(notes[1]?.showName).toBe(false);
     expect(notes[2]?.showName).toBe(true);
-    expect(notes[0]?.showTime).toBe(false);
-    expect(notes[1]?.showTime).toBe(true);
+    expect(notes.every((row) => row.kind === "msg" && row.showTime)).toBe(true);
     expect(rows.filter((row) => row.kind === "day")).toHaveLength(1);
   });
 
-  it("does not repeat a day heading, and skips Today", () => {
+  it("prints one compact day heading per calendar day", () => {
     const now = Date.parse("2026-11-11T12:00:00.000Z");
     const today = buildSalonRows(
       [
@@ -44,7 +43,7 @@ describe("salon thread layout", () => {
       "Priya",
       now,
     );
-    expect(today.filter((row) => row.kind === "day")).toHaveLength(0);
+    expect(today.filter((row) => row.kind === "day").map((row) => (row.kind === "day" ? row.label : ""))).toEqual(["Today"]);
 
     const older = buildSalonRows(
       [
@@ -57,8 +56,8 @@ describe("salon thread layout", () => {
       now,
     );
     expect(older.filter((row) => row.kind === "day").map((row) => (row.kind === "day" ? row.label : ""))).toEqual([
-      chatDayLabel("2026-11-09T10:00:00.000Z", now),
-      chatDayLabel("2026-11-10T10:00:00.000Z", now),
+      "9 Nov 2026",
+      "Yesterday",
     ]);
   });
 
@@ -92,6 +91,6 @@ describe("salon thread layout", () => {
     expect(chatPresenceLine(false, "2026-11-11T16:10:00+05:30", Date.parse("2026-11-11T18:00:00+05:30"))).toMatch(
       /Last seen today,/,
     );
-    expect(chatDayLabel("2026-11-09T10:00:00.000Z", Date.parse("2026-11-11T00:00:00Z"))).toMatch(/November/);
+    expect(chatDayLabel("2026-11-09T10:00:00.000Z", Date.parse("2026-11-11T00:00:00Z"))).toBe("9 Nov 2026");
   });
 });
