@@ -914,7 +914,8 @@ table { max-width: 100%; }
   border-top-left-radius: 1.15rem;
   margin-right: 0;
 }
-.wc-pane .wa-bubble.is-mine::before, .wc-pane .wa-bubble.is-theirs::before { content: none; }
+.wc-pane .wa-bubble.is-mine::before, .wc-pane .wa-bubble.is-theirs::before,
+.salon-note::before { content: none; }
 .wa-tick { display: inline; float: none; margin: 0 0 0 0.4rem; font-size: 0.66rem; letter-spacing: 0.04em; color: #9a6b28; font-weight: 700; }
 .wa-tick.is-read { color: #f5c84c; }
 .wa-tick.is-wait { color: rgb(255 232 176 / 70%); }

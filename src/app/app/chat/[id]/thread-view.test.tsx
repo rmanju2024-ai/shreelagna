@@ -19,6 +19,9 @@ describe("ThreadView message options", () => {
         threadId="t1"
         myProfileId="me"
         canSend
+        peerName="Priya"
+        presence="Online now"
+        online
         messages={[
           {
             id: "1",
@@ -36,24 +39,28 @@ describe("ThreadView message options", () => {
     expect((screen.getByLabelText("Edit your note") as HTMLTextAreaElement).value).toBe("iji");
   });
 
-  it("keeps send off until there is a note, and prints Sent not ticks", () => {
+  it("keeps send off until there is a note, and marks Seen on the last read send", () => {
     render(
       <ThreadView
         threadId="t1"
         myProfileId="me"
         canSend
+        peerName="Priya"
+        presence="Last seen today, 9:40 pm"
+        online={false}
         messages={[
           {
             id: "1",
             sender_profile_id: "me",
             body: "Namaskara",
             created_at: "2026-09-28T10:00:00Z",
+            read_at: "2026-09-28T10:01:00Z",
           },
         ]}
       />,
     );
-    expect(screen.getByLabelText("Write to the family…")).toBeTruthy();
-    expect(screen.getByLabelText("Sent")).toBeTruthy();
+    expect(screen.getByLabelText("Write a message…")).toBeTruthy();
+    expect(screen.getByText(/Seen/)).toBeTruthy();
     expect((screen.getByRole("button", { name: "Send" }) as HTMLButtonElement).disabled).toBe(true);
   });
 });

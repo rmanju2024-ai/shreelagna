@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 const genz = readFileSync(resolve(process.cwd(), "src/app/theme-genz.css"), "utf8");
 const search = readFileSync(resolve(process.cwd(), "src/app/search-modern.css"), "utf8");
+const salon = readFileSync(resolve(process.cwd(), "src/app/app/chat/salon-chat.css"), "utf8");
 
 describe("laptop website browsing layout", () => {
   it("keeps Discover hero as a two-column header with a side filter", () => {
@@ -35,11 +36,12 @@ describe("laptop website browsing layout", () => {
 
   it("styles family chat as a salon note, not a green messenger", () => {
     expect(genz).toContain("Salon notes: family chat, not a messenger clone");
-    expect(genz).toContain(".wc-pane .wa-bubble.is-mine::before, .wc-pane .wa-bubble.is-theirs::before { content: none; }");
-    const chatBlock = genz.slice(genz.indexOf("Salon notes"));
-    expect(chatBlock).not.toContain("#25d366");
-    expect(chatBlock).not.toContain("#d9fdd3");
-    expect(chatBlock).not.toContain("#00a884");
+    expect(salon).toContain(".salon-note.is-mine");
+    expect(salon).toContain("border-right: 2px solid var(--chat-maroon)");
+    expect(salon).not.toContain("border-radius: 999px");
+    expect(salon).not.toContain("#25d366");
+    expect(salon).not.toContain("#d9fdd3");
+    expect(salon).not.toContain("#00a884");
   });
 
   it("does not force laptop pages into a single column outside the phone breakpoint", () => {
