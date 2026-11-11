@@ -38,6 +38,7 @@ export type SalonRow =
       mine: boolean;
       showName: boolean;
       tight: boolean;
+      showTime: boolean;
       showSeen: boolean;
       label: string;
     };
@@ -73,34 +74,44 @@ export function buildSalonRows(
   messages: SalonMsg[],
   myProfileId: string,
   peerName: string,
+  now = Date.now(),
 ): SalonRow[] {
   const rows: SalonRow[] = [];
   const unreadAt = firstUnreadIndex(messages, myProfileId);
+  const todayKey = istDayKey(new Date(now));
   let lastMineId: string | null = null;
+  let lastDayKey = "";
   for (const msg of messages) {
     if (msg.sender_profile_id === myProfileId && !msg.pending) lastMineId = msg.id;
   }
 
   messages.forEach((msg, index) => {
     const prev = messages[index - 1];
+    const next = messages[index + 1];
     const at = parseInstant(msg.created_at)?.getTime() ?? 0;
     const prevAt = parseInstant(prev?.created_at)?.getTime() ?? 0;
-    const newDay = !prev || istDayKey(new Date(at)) !== istDayKey(new Date(prevAt));
-    if (newDay) {
-      rows.push({ kind: "day", key: `day-${msg.id}`, label: chatDayLabel(msg.created_at) });
+    const nextAt = parseInstant(next?.created_at)?.getTime() ?? 0;
+    const day = at ? istDayKey(new Date(at)) : "";
+    if (day && day !== lastDayKey && day !== todayKey) {
+      rows.push({ kind: "day", key: `day-${day}`, label: chatDayLabel(msg.created_at, now) });
+      lastDayKey = day;
+    } else if (day) {
+      lastDayKey = day;
     }
     if (index === unreadAt && unreadAt >= 0) {
       rows.push({ kind: "unread" });
     }
     const mine = msg.sender_profile_id === myProfileId;
     const sameSender = prev && prev.sender_profile_id === msg.sender_profile_id;
-    const close = sameSender && at - prevAt <= CHAT_GROUP_MS;
+    const close = Boolean(sameSender && at - prevAt <= CHAT_GROUP_MS);
+    const nextSame = next && next.sender_profile_id === msg.sender_profile_id && nextAt - at <= CHAT_GROUP_MS;
     rows.push({
       kind: "msg",
       msg,
       mine,
       showName: !close,
-      tight: Boolean(close),
+      tight: close,
+      showTime: !nextSame,
       showSeen: Boolean(mine && msg.id === lastMineId && msg.read_at),
       label: mine ? "You" : peerName,
     });

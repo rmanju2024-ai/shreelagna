@@ -28,7 +28,38 @@ describe("salon thread layout", () => {
     expect(notes[1]?.tight).toBe(true);
     expect(notes[1]?.showName).toBe(false);
     expect(notes[2]?.showName).toBe(true);
-    expect(rows.some((row) => row.kind === "day")).toBe(true);
+    expect(notes[0]?.showTime).toBe(false);
+    expect(notes[1]?.showTime).toBe(true);
+    expect(rows.filter((row) => row.kind === "day")).toHaveLength(1);
+  });
+
+  it("does not repeat a day heading, and skips Today", () => {
+    const now = Date.parse("2026-11-11T12:00:00.000Z");
+    const today = buildSalonRows(
+      [
+        { id: "1", sender_profile_id: "me", body: "A", created_at: "2026-11-11T08:00:00.000Z" },
+        { id: "2", sender_profile_id: "me", body: "B", created_at: "2026-11-11T08:01:00.000Z" },
+      ],
+      "me",
+      "Priya",
+      now,
+    );
+    expect(today.filter((row) => row.kind === "day")).toHaveLength(0);
+
+    const older = buildSalonRows(
+      [
+        { id: "1", sender_profile_id: "me", body: "A", created_at: "2026-11-09T10:00:00.000Z" },
+        { id: "2", sender_profile_id: "them", body: "B", created_at: "2026-11-09T12:00:00.000Z" },
+        { id: "3", sender_profile_id: "me", body: "C", created_at: "2026-11-10T10:00:00.000Z" },
+      ],
+      "me",
+      "Priya",
+      now,
+    );
+    expect(older.filter((row) => row.kind === "day").map((row) => (row.kind === "day" ? row.label : ""))).toEqual([
+      chatDayLabel("2026-11-09T10:00:00.000Z", now),
+      chatDayLabel("2026-11-10T10:00:00.000Z", now),
+    ]);
   });
 
   it("marks Seen only on the last sent note that was read", () => {

@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, useTransition, type ReactNode } from "react";
 import { deleteChatMessage, editChatMessage, sendPeekChat } from "@/app/app/match/actions";
 import { ChatAvatar } from "@/app/app/chat/chat-avatar";
-import { chatBodyLine, chatStamp } from "@/lib/match/chat-ui";
+import { chatBodyLine } from "@/lib/match/chat-ui";
+import { formatIstTime, parseInstant } from "@/lib/time/ist";
 import { buildSalonRows, messageMatchesQuery, type SalonMsg } from "@/lib/match/salon-thread";
 
 type Msg = SalonMsg;
@@ -240,6 +241,7 @@ export function ThreadView({
             const gone = Boolean(msg.deleted_at) || goneIds.includes(msg.id);
             const hit = q && !gone && messageMatchesQuery(msg.body, q);
             const dim = q && !hit;
+            const at = parseInstant(msg.created_at);
             return (
               <li
                 key={msg.id}
@@ -286,11 +288,13 @@ export function ThreadView({
                 ) : null}
                 {row.showName ? <span className="salon-who">{row.label}</span> : null}
                 <p>{chatBodyLine(msg.body, gone)}</p>
-                <time>
-                  {msg.pending ? "Sending" : chatStamp(msg.created_at)}
-                  {msg.edited_at && !gone ? " · edited" : ""}
-                  {row.showSeen ? " · Seen" : ""}
-                </time>
+                {row.showTime || msg.pending || row.showSeen || (msg.edited_at && !gone) ? (
+                  <time>
+                    {msg.pending ? "Sending" : at ? formatIstTime(at) : ""}
+                    {msg.edited_at && !gone ? " · edited" : ""}
+                    {row.showSeen ? " · Seen" : ""}
+                  </time>
+                ) : null}
               </li>
             );
           })}
