@@ -193,9 +193,9 @@ export function ThreadView({
                   {mine ? (
                     <span
                       className={`wa-tick${msg.pending ? " is-wait" : msg.read_at ? " is-read" : ""}`}
-                      aria-label={msg.pending ? "Sending" : msg.read_at ? "Read" : "Delivered"}
+                      aria-label={msg.pending ? "Sending" : msg.read_at ? "Seen" : "Sent"}
                     >
-                      {msg.pending ? "🕓" : "✓✓"}
+                      {msg.pending ? "Sending" : msg.read_at ? "Seen" : "Sent"}
                     </span>
                   ) : null}
                 </time>
@@ -242,8 +242,8 @@ export function ThreadView({
             maxLength={4000}
             rows={1}
             className={inputClass}
-            placeholder={editingId ? "Edit message" : failed ? "Not sent — try again" : "Message"}
-            aria-label={editingId ? "Edit message" : "Message"}
+            placeholder={editingId ? "Edit your note" : failed ? "Not sent — try again" : "Write to the family…"}
+            aria-label={editingId ? "Edit your note" : "Write to the family…"}
           />
           <button type="submit" className={`${btnPrimary} wa-send`} aria-label={editingId ? "Save edit" : "Send"} disabled={!draft.trim()}>
             ➤

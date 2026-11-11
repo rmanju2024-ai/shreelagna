@@ -32,7 +32,11 @@ export default async function DeskLayout({ children }: { children: React.ReactNo
         <header className="desk-mast">
           <p className="browse-kicker">{desk.admin ? "Admin" : "Staff"}</p>
           <h1>House desk</h1>
-          <p>Tickets, safety, profiles and plans. Pick a tab.</p>
+          <p>
+            {desk.admin
+              ? "Open tickets first, then safety. Verification and staff sit with admin only."
+              : "Open tickets first, then safety and Look. Verification is admin-only."}
+          </p>
         </header>
         <div className="browse-board desk-board is-menu">
           <DeskNav admin={desk.admin} />

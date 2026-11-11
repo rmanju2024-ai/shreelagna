@@ -4,6 +4,7 @@ import {
   isHelloWorldTemplate,
   resolveAlertTemplate,
   whatsappFailFlag,
+  whatsappSendAlerts,
 } from "./whatsapp";
 
 describe("WhatsApp payload", () => {
@@ -62,6 +63,16 @@ describe("WhatsApp payload", () => {
     expect(whatsappFailFlag("(#131030) Recipient phone number not in allowed list")).toBe("allowlist");
     expect(whatsappFailFlag("(#131005) Access denied — token or permissions")).toBe("denied");
     expect(whatsappFailFlag("WhatsApp could not be reached.")).toBe("net");
+  });
+
+  it("does not send house alerts unless WHATSAPP_SEND_ALERTS is on", () => {
+    const previous = process.env.WHATSAPP_SEND_ALERTS;
+    delete process.env.WHATSAPP_SEND_ALERTS;
+    expect(whatsappSendAlerts()).toBe(false);
+    process.env.WHATSAPP_SEND_ALERTS = "yes";
+    expect(whatsappSendAlerts()).toBe(true);
+    if (previous) process.env.WHATSAPP_SEND_ALERTS = previous;
+    else delete process.env.WHATSAPP_SEND_ALERTS;
   });
 
   it("uses hello_world for alerts outside production unless overridden", () => {

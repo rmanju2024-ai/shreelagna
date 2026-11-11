@@ -16,6 +16,10 @@ export const DESK_ITEMS = [
   { href: "/desk/plans", id: "plans", icon: "plans", label: "Plans", hint: "Confirm membership" },
 ] as const;
 
+export function deskItemsFor(admin: boolean) {
+  return DESK_ITEMS.filter((item) => !("adminOnly" in item && item.adminOnly) || admin);
+}
+
 function isOn(path: string, href: string) {
   return path === href || path.startsWith(`${href}/`);
 }
@@ -23,7 +27,7 @@ function isOn(path: string, href: string) {
 export function DeskNav({ admin }: { admin: boolean }) {
   const path = usePathname();
   const hub = path === "/desk";
-  const items = DESK_ITEMS.filter((item) => !("adminOnly" in item && item.adminOnly) || admin);
+  const items = deskItemsFor(admin);
   return (
     <nav className={`desk-menu${hub ? " is-hub" : " is-rail"}`} aria-label="House desk">
       {hub ? <p className="browse-kicker">{admin ? "Admin desks" : "Staff desks"}</p> : null}

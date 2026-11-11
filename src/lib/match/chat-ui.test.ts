@@ -13,7 +13,7 @@ describe("chat list helpers", () => {
   });
 
   it("builds a short preview", () => {
-    expect(previewText("")).toBe("Tap to chat");
+    expect(previewText("")).toBe("Open this conversation");
     expect(previewText("  hello   world ")).toBe("hello world");
     expect(previewText("x".repeat(60)).endsWith("…")).toBe(true);
     expect(previewText("x".repeat(60)).length).toBe(42);

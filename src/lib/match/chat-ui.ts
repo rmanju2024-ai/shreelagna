@@ -17,7 +17,7 @@ export const DELETED_CHAT_LINE = "This message was deleted";
 
 export function previewText(body: string | null | undefined, max = 42): string {
   const text = (body ?? "").replace(/\s+/g, " ").trim();
-  if (!text) return "Tap to chat";
+  if (!text) return "Open this conversation";
   return text.length > max ? `${text.slice(0, max - 1)}…` : text;
 }
 

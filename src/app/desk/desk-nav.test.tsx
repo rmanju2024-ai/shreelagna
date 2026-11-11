@@ -16,6 +16,13 @@ afterEach(() => {
 });
 
 describe("Desk menu", () => {
+  it("hides Verification from staff and shows it to admin", () => {
+    const { rerender } = render(<DeskNav admin={false} />);
+    expect(screen.queryByRole("link", { name: /Verification/i })).toBeNull();
+    rerender(<DeskNav admin />);
+    expect(screen.getByRole("link", { name: /Verification/i }).getAttribute("href")).toBe("/desk/verification");
+  });
+
   it("opens as a decorative hub on /desk", () => {
     render(<DeskNav admin={false} />);
     expect(screen.getByRole("navigation", { name: "House desk" }).className).toContain("is-hub");

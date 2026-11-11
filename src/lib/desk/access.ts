@@ -25,7 +25,7 @@ export function canEditMemberProfile(
 ): boolean {
   if (owner?.id && actor.id === owner.id) return true;
   if (actor.role === "admin") return true;
-  if (actor.role === "service" && owner?.role !== "admin") return true;
+  if (actor.role === "service" && owner?.id && owner.role !== "admin") return true;
   return false;
 }
 

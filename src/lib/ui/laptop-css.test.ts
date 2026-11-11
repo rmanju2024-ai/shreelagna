@@ -33,6 +33,15 @@ describe("laptop website browsing layout", () => {
     expect(genz).toContain("max-width: min(100%, 48rem)");
   });
 
+  it("styles family chat as a salon note, not a green messenger", () => {
+    expect(genz).toContain("Salon notes: family chat, not a messenger clone");
+    expect(genz).toContain(".wc-pane .wa-bubble.is-mine::before, .wc-pane .wa-bubble.is-theirs::before { content: none; }");
+    const chatBlock = genz.slice(genz.indexOf("Salon notes"));
+    expect(chatBlock).not.toContain("#25d366");
+    expect(chatBlock).not.toContain("#d9fdd3");
+    expect(chatBlock).not.toContain("#00a884");
+  });
+
   it("does not force laptop pages into a single column outside the phone breakpoint", () => {
     const beforePhone = genz.slice(0, genz.indexOf("@media (max-width: 820px)"));
     expect(beforePhone).not.toContain("grid-template-columns: 1fr !important");
