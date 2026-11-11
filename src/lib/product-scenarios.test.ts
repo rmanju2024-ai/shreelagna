@@ -14,7 +14,25 @@ import { sendChannelAlert, sendChannelOtp } from "@/lib/notify/channel";
 import { digitsCode, hashOtp, otpExpired, otpMatches } from "@/lib/notify/otp";
 import { isIndiaMobile, toWhatsAppNumber } from "@/lib/notify/phone";
 import { whatsappFailFlag, whatsappSendAlerts } from "@/lib/notify/whatsapp";
+import type { MatchSelf } from "@/lib/profile/match-compare";
 import { otherProfileLocked } from "@/lib/profile/view-gate";
+
+const blankSelf: MatchSelf = {
+  ageYears: null,
+  heightCm: null,
+  maritalStatus: null,
+  diet: null,
+  motherTongue: null,
+  religionName: null,
+  communityName: null,
+  currentCountry: null,
+  currentState: null,
+  currentCity: null,
+  qualification: null,
+  occupation: null,
+  employedIn: null,
+  incomeBand: null,
+};
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -121,7 +139,7 @@ describe("Discover filters and buckets", () => {
   });
 
   it("fails kundali when charts are empty", () => {
-    const rank = browseRank("kundali", {}, {}, { ageYears: 30 }, { ageYears: 28 });
+    const rank = browseRank("kundali", {}, {}, blankSelf, blankSelf);
     expect(rank.pass).toBe(false);
   });
 });
