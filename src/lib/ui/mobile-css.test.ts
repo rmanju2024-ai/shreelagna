@@ -127,5 +127,8 @@ describe("shared mobile CSS contract", () => {
     expect(css).toContain(".sx-filter-actions");
     expect(css).toContain(".public-card-grid");
     expect(css).toContain(".inbox-board { grid-template-columns: minmax(0, 1fr) !important; }");
+    expect(css).toContain("font-size: 16px !important");
+    expect(css).toContain(".gz-state-card { width: 100%; max-width: 100%; }");
+    expect(css).toContain("overflow-x: clip");
   });
 });

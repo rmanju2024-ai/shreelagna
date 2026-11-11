@@ -13,10 +13,17 @@ export function ChromeSync() {
   const router = useRouter();
 
   useEffect(() => {
-    const tick = window.setInterval(() => {
-      if (document.visibilityState === "visible") router.refresh();
-    }, CHROME_BADGE_REFRESH_MS);
-    return () => window.clearInterval(tick);
+    const refresh = () => {
+      if (document.visibilityState === "visible" && navigator.onLine) router.refresh();
+    };
+    const tick = window.setInterval(refresh, CHROME_BADGE_REFRESH_MS);
+    window.addEventListener("online", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      window.clearInterval(tick);
+      window.removeEventListener("online", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+    };
   }, [router]);
 
   return null;

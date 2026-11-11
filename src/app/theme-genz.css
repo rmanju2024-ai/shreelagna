@@ -3026,6 +3026,33 @@ button.field-help-btn,
   .account-hub-rail a { min-height: 44px; }
   .sx-staff-complete { flex-wrap: wrap; }
   .login-genz-action { width: 100%; }
+
+  /* Phone: no sideways scroll, no iOS zoom on inputs, dock-safe empty/error pages. */
+  input, select, textarea, .input-premium {
+    font-size: 16px !important;
+    max-width: 100%;
+  }
+  img, video, canvas, svg { max-width: 100%; }
+  .app-main img, .app-main video { height: auto; }
+  .app-main, .sx-stage, .desk-stage, .settings-page, .plans-stage, .portrait-page {
+    overflow-x: clip;
+  }
+  .app-main :where(h1, h2, h3, p, li, td, th, label) {
+    overflow-wrap: anywhere;
+  }
+  .sx-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  .sx-grid.is-results-list .sx-card-link {
+    grid-template-columns: minmax(0, 1fr) !important;
+    min-height: 0;
+  }
+  .gz-state { padding: 1.2rem 0.85rem calc(6.2rem + env(safe-area-inset-bottom)); }
+  .gz-state-card { width: 100%; max-width: 100%; }
+  .gz-state-card .btn-3d, .gz-state-card a.btn-3d {
+    width: 100%;
+    min-height: 44px;
+    justify-content: center;
+  }
+  .quota-soft { width: min(26.5rem, calc(100vw - 1.5rem)); }
 }
 
 /* ═══════════════════════════════════════════════════════════

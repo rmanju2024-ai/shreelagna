@@ -3,15 +3,15 @@
 export default function GlobalError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
     <html lang="en">
-      <body style={{ margin: 0, minHeight: "100dvh", display: "grid", placeItems: "center", background: "#fbf5ec", fontFamily: "system-ui, sans-serif", color: "#1a100c", textAlign: "center", padding: "2rem" }}>
-        <div>
+      <body style={{ margin: 0, minHeight: "100dvh", display: "grid", placeItems: "center", background: "#fbf5ec", fontFamily: "system-ui, sans-serif", color: "#1a100c", textAlign: "center", padding: "1.25rem 1rem calc(1.25rem + env(safe-area-inset-bottom, 0px))" }}>
+        <div style={{ width: "min(22rem, 100%)" }}>
           <div style={{ fontSize: "3.5rem" }} aria-hidden>🦋</div>
           <h1>MarriageConnect.in will be right back</h1>
           <p style={{ color: "#6a574c" }}>Something went wrong. Please try again.</p>
           <button
             type="button"
             onClick={reset}
-            style={{ border: 0, borderRadius: 999, padding: "0.8rem 1.6rem", color: "#fff", background: "linear-gradient(135deg,#8c2a27,#ff5d8f)", fontWeight: 700, cursor: "pointer" }}
+            style={{ border: 0, borderRadius: 999, minHeight: 44, width: "100%", padding: "0.8rem 1.6rem", color: "#fff", background: "linear-gradient(135deg,#8c2a27,#ff5d8f)", fontWeight: 700, cursor: "pointer" }}
           >
             Try again
           </button>
