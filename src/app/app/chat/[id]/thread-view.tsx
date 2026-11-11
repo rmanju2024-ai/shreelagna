@@ -20,8 +20,6 @@ export function ThreadView({
   peerHref,
   presence,
   online,
-  myName = "You",
-  myPhoto,
   needPlan = false,
   closedNote,
 }: {
@@ -34,8 +32,6 @@ export function ThreadView({
   peerHref?: string | null;
   presence: string;
   online: boolean;
-  myName?: string;
-  myPhoto?: string | null;
   needPlan?: boolean;
   closedNote?: ReactNode;
 }) {
@@ -257,17 +253,6 @@ export function ThreadView({
             const hit = q && !gone && messageMatchesQuery(msg.body, q);
             const dim = q && !hit;
             const at = parseInstant(msg.created_at);
-            const face = row.showName ? (
-              <span className="salon-face">
-                <ChatAvatar
-                  name={row.mine ? myName : peerName}
-                  src={row.mine ? myPhoto : peerPhoto}
-                  size="xs"
-                />
-              </span>
-            ) : (
-              <span className="salon-face is-gap" aria-hidden />
-            );
             return (
               <li
                 key={msg.id}
@@ -284,7 +269,6 @@ export function ThreadView({
                   setMenuId(msg.id);
                 }}
               >
-                {row.mine ? null : face}
                 <div className="salon-slip">
                   {row.mine && !msg.pending && !gone ? (
                     <div className="salon-msg-tools">
@@ -321,7 +305,6 @@ export function ThreadView({
                     {row.showSeen ? " · Seen" : ""}
                   </time>
                 </div>
-                {row.mine ? face : null}
               </li>
             );
           })}

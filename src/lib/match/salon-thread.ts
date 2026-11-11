@@ -1,7 +1,5 @@
 import { formatIstDate, formatIstTime, istDayKey, parseInstant } from "@/lib/time/ist";
 
-export const CHAT_GROUP_MS = 5 * 60 * 1000;
-
 export type SalonMsg = {
   id: string;
   sender_profile_id: string;
@@ -79,7 +77,8 @@ export function buildSalonRows(
     }
     const mine = msg.sender_profile_id === myProfileId;
     const sameSender = prev && prev.sender_profile_id === msg.sender_profile_id;
-    const close = Boolean(sameSender && at - prevAt <= CHAT_GROUP_MS);
+    const sameDay = Boolean(day && prevAt && istDayKey(new Date(prevAt)) === day);
+    const close = Boolean(sameSender && sameDay);
     rows.push({
       kind: "msg",
       msg,
