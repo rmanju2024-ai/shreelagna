@@ -30,7 +30,7 @@ export function whatsappFailFlag(error: string): string {
 
 export function explainWhatsAppError(code: number | undefined, raw: string): string {
   if (code === 133010 || /account not registered/i.test(raw)) {
-    return "WhatsApp does not have this number. Use the 10-digit mobile as saved in WhatsApp (6–9 then 9 more digits). Do not type extra 91. This cannot be the Cloud sender SIM.";
+    return "WhatsApp Cloud could not reach this mobile (#133010). Use a phone that already opens WhatsApp. Keep Vercel WHATSAPP_PHONE_NUMBER_ID as 1317222201476313 (97386 Cloud), not the new 84317 ID until that number is Cloud-registered.";
   }
   if (code === 190 || /application has been deleted|validating access token/i.test(raw)) {
     return "WhatsApp API token is invalid. Set a new WHATSAPP_TOKEN from a live Meta app.";
@@ -40,8 +40,18 @@ export function explainWhatsAppError(code: number | undefined, raw: string): str
   return raw.replace(/^\(#\d+\)\s*/, "") || "WhatsApp could not send just now.";
 }
 
+export function whatsappPhoneNumberIds(): string[] {
+  const raw = [
+    process.env.WHATSAPP_PHONE_NUMBER_ID,
+    process.env.WHATSAPP_PHONE_NUMBER_ID_FALLBACK,
+  ]
+    .filter(Boolean)
+    .join(",");
+  return [...new Set(raw.split(/[,\s]+/).map((id) => id.trim()).filter(Boolean))];
+}
+
 export function whatsappConfigured(): boolean {
-  return Boolean(process.env.WHATSAPP_TOKEN?.trim() && process.env.WHATSAPP_PHONE_NUMBER_ID?.trim());
+  return Boolean(process.env.WHATSAPP_TOKEN?.trim() && whatsappPhoneNumberIds().length);
 }
 
 /** Interest / plan WhatsApp (and channel) alerts. OTP is separate. Off unless explicitly true. */
@@ -112,34 +122,38 @@ export function otpLanguageCandidates(preferred?: string): string[] {
 
 export async function sendWhatsAppTemplate(input: WhatsAppTemplateInput): Promise<WhatsAppResult> {
   const token = process.env.WHATSAPP_TOKEN?.trim();
-  const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID?.trim();
-  if (!token || !phoneId) {
+  const phoneIds = whatsappPhoneNumberIds();
+  if (!token || !phoneIds.length) {
     return { ok: false, error: "WhatsApp is not configured yet." };
   }
   const version = process.env.WHATSAPP_API_VERSION?.trim() || "v25.0";
-  const url = `https://graph.facebook.com/${version}/${phoneId}/messages`;
   const languages = otpLanguageCandidates(input.language);
   try {
     let last: WhatsAppResult = { ok: false, error: "WhatsApp could not send just now." };
-    for (const language of languages) {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(buildWhatsAppPayload({ ...input, language })),
-      });
-      if (res.ok) return { ok: true };
-      const body = (await res.json().catch(() => null)) as GraphMessageError | null;
-      const title = body?.error?.error_user_msg || body?.error?.message || `WhatsApp ${res.status}`;
-      const details = body?.error?.error_data?.details;
-      const code = body?.error?.code;
-      const raw = [code ? `(#${code}) ${title.replace(/^\(#\d+\)\s*/, "")}` : title, details]
-        .filter(Boolean)
-        .join(" — ");
-      last = { ok: false, error: explainWhatsAppError(code, raw) };
-      if (code !== 132000 && code !== 132001 && !/template.*language|translation/i.test(raw)) {
+    for (const phoneId of phoneIds) {
+      const url = `https://graph.facebook.com/${version}/${phoneId}/messages`;
+      for (const language of languages) {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(buildWhatsAppPayload({ ...input, language })),
+        });
+        if (res.ok) return { ok: true };
+        const body = (await res.json().catch(() => null)) as GraphMessageError | null;
+        const title = body?.error?.error_user_msg || body?.error?.message || `WhatsApp ${res.status}`;
+        const details = body?.error?.error_data?.details;
+        const code = body?.error?.code;
+        const raw = [code ? `(#${code}) ${title.replace(/^\(#\d+\)\s*/, "")}` : title, details]
+          .filter(Boolean)
+          .join(" — ");
+        last = { ok: false, error: explainWhatsAppError(code, raw) };
+        const tryNextLanguage = code === 132000 || code === 132001 || /template.*language|translation/i.test(raw);
+        const tryNextSender = code === 133010 || /account not registered/i.test(raw);
+        if (tryNextLanguage) continue;
+        if (tryNextSender) break;
         return last;
       }
     }

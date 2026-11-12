@@ -1,10 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   buildWhatsAppPayload,
   isHelloWorldTemplate,
   resolveAlertTemplate,
   explainWhatsAppError,
   otpLanguageCandidates,
+  whatsappPhoneNumberIds,
   whatsappFailFlag,
   whatsappSendAlerts,
 } from "./whatsapp";
@@ -66,8 +67,11 @@ describe("WhatsApp payload", () => {
     expect(whatsappFailFlag("(#131005) Access denied — token or permissions")).toBe("denied");
     expect(whatsappFailFlag("(#133010) Account not registered")).toBe("mobile");
     expect(whatsappFailFlag("WhatsApp could not be reached.")).toBe("net");
-    expect(explainWhatsAppError(133010, "(#133010) Account not registered")).toMatch(/10-digit/);
+    expect(explainWhatsAppError(133010, "(#133010) Account not registered")).toMatch(/133010/);
     expect(otpLanguageCandidates("en")).toEqual(["en", "en_US"]);
+    vi.stubEnv("WHATSAPP_PHONE_NUMBER_ID", "111, 222");
+    vi.stubEnv("WHATSAPP_PHONE_NUMBER_ID_FALLBACK", "111");
+    expect(whatsappPhoneNumberIds()).toEqual(["111", "222"]);
   });
 
   it("does not send house alerts unless WHATSAPP_SEND_ALERTS is on", () => {
