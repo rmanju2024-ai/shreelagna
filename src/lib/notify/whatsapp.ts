@@ -30,7 +30,10 @@ export function whatsappFailFlag(error: string): string {
 
 export function explainWhatsAppError(code: number | undefined, raw: string): string {
   if (code === 133010 || /account not registered/i.test(raw)) {
-    return "This mobile is not on WhatsApp, or it is not a 10-digit India number. Enter it as on WhatsApp (example 9876543210) and send the code again.";
+    return "WhatsApp does not have this number. Use the 10-digit mobile as saved in WhatsApp (6–9 then 9 more digits). Do not type extra 91. This cannot be the Cloud sender SIM.";
+  }
+  if (code === 190 || /application has been deleted|validating access token/i.test(raw)) {
+    return "WhatsApp API token is invalid. Set a new WHATSAPP_TOKEN from a live Meta app.";
   }
   if (code === 131026) return "WhatsApp could not deliver to this mobile. Confirm the number is on WhatsApp.";
   if (code === 131030) return "This test number is not on the WhatsApp allow list yet.";
@@ -102,6 +105,11 @@ export function buildWhatsAppPayload(input: WhatsAppTemplateInput): Record<strin
   };
 }
 
+export function otpLanguageCandidates(preferred?: string): string[] {
+  const first = preferred?.trim() || process.env.WHATSAPP_OTP_LANGUAGE?.trim() || "en";
+  return [...new Set([first, "en", "en_US"].filter(Boolean))];
+}
+
 export async function sendWhatsAppTemplate(input: WhatsAppTemplateInput): Promise<WhatsAppResult> {
   const token = process.env.WHATSAPP_TOKEN?.trim();
   const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID?.trim();
@@ -110,24 +118,32 @@ export async function sendWhatsAppTemplate(input: WhatsAppTemplateInput): Promis
   }
   const version = process.env.WHATSAPP_API_VERSION?.trim() || "v25.0";
   const url = `https://graph.facebook.com/${version}/${phoneId}/messages`;
+  const languages = otpLanguageCandidates(input.language);
   try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(buildWhatsAppPayload(input)),
-    });
-    if (res.ok) return { ok: true };
-    const body = (await res.json().catch(() => null)) as GraphMessageError | null;
-    const title = body?.error?.error_user_msg || body?.error?.message || `WhatsApp ${res.status}`;
-    const details = body?.error?.error_data?.details;
-    const code = body?.error?.code;
-    const raw = [code ? `(#${code}) ${title.replace(/^\(#\d+\)\s*/, "")}` : title, details]
-      .filter(Boolean)
-      .join(" — ");
-    return { ok: false, error: explainWhatsAppError(code, raw) };
+    let last: WhatsAppResult = { ok: false, error: "WhatsApp could not send just now." };
+    for (const language of languages) {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(buildWhatsAppPayload({ ...input, language })),
+      });
+      if (res.ok) return { ok: true };
+      const body = (await res.json().catch(() => null)) as GraphMessageError | null;
+      const title = body?.error?.error_user_msg || body?.error?.message || `WhatsApp ${res.status}`;
+      const details = body?.error?.error_data?.details;
+      const code = body?.error?.code;
+      const raw = [code ? `(#${code}) ${title.replace(/^\(#\d+\)\s*/, "")}` : title, details]
+        .filter(Boolean)
+        .join(" — ");
+      last = { ok: false, error: explainWhatsAppError(code, raw) };
+      if (code !== 132000 && code !== 132001 && !/template.*language|translation/i.test(raw)) {
+        return last;
+      }
+    }
+    return last;
   } catch {
     return { ok: false, error: "WhatsApp could not be reached." };
   }

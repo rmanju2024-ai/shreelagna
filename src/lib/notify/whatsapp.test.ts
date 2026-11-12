@@ -4,6 +4,7 @@ import {
   isHelloWorldTemplate,
   resolveAlertTemplate,
   explainWhatsAppError,
+  otpLanguageCandidates,
   whatsappFailFlag,
   whatsappSendAlerts,
 } from "./whatsapp";
@@ -66,6 +67,7 @@ describe("WhatsApp payload", () => {
     expect(whatsappFailFlag("(#133010) Account not registered")).toBe("mobile");
     expect(whatsappFailFlag("WhatsApp could not be reached.")).toBe("net");
     expect(explainWhatsAppError(133010, "(#133010) Account not registered")).toMatch(/10-digit/);
+    expect(otpLanguageCandidates("en")).toEqual(["en", "en_US"]);
   });
 
   it("does not send house alerts unless WHATSAPP_SEND_ALERTS is on", () => {

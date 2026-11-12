@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { sendMobileOtp, verifyMobileOtp } from "@/app/app/profiles/otp-actions";
+import { indiaMobileInput } from "@/lib/notify/phone";
 import { btnGhost, inputClass } from "@/lib/ui/classes";
 
 export function VerifyFlag({
@@ -36,7 +37,7 @@ export function MobileOtpField({
   staffView?: boolean;
   embed?: boolean;
 }) {
-  const [mobile, setMobile] = useState(defaultMobile);
+  const [mobile, setMobile] = useState(indiaMobileInput(defaultMobile));
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState<"send" | "verify" | null>(null);
   const [note, setNote] = useState("");
@@ -91,12 +92,14 @@ export function MobileOtpField({
           required
           inputMode="numeric"
           minLength={10}
-          maxLength={15}
-          pattern="[0-9]{10,15}"
+          maxLength={12}
+          pattern="[0-9]{10,12}"
+          placeholder="10-digit mobile as on WhatsApp"
           value={mobile}
           onChange={(e) => {
-            setMobile(e.target.value);
+            setMobile(indiaMobileInput(e.target.value));
             setOk(false);
+            setSent(false);
           }}
           className={inputClass}
         />

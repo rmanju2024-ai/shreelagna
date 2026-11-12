@@ -68,8 +68,14 @@ export async function sendMobileOtp(profileId: string, mobileRaw: string): Promi
 
   const sent = await sendChannelOtp(mobile, code);
   if (!sent.ok) {
-    if (process.env.NODE_ENV === "production") return { ok: false, error: sent.error ?? channelOperatorHint() };
-    return { ok: true, preview: code };
+    await db
+      .from("whatsapp_otps")
+      .delete()
+      .eq("user_id", me.id)
+      .eq("profile_id", profile.id)
+      .eq("mobile", mobile)
+      .eq("purpose", "verify_mobile");
+    return { ok: false, error: sent.error ?? channelOperatorHint() };
   }
   return { ok: true };
 }
@@ -124,8 +130,25 @@ export async function verifyMobileOtp(
     error = retry.error;
   }
   if (error) {
-    if (isUniqueViolation(error)) return { ok: false, error: "This mobile is already confirmed on another profile." };
-    return { ok: false, error: "Could not save the confirmed mobile." };
+    if (isUniqueViolation(error)) {
+      const { data: holder } = await db
+        .from("profiles")
+        .select("id")
+        .eq("subject_mobile", display)
+        .not("phone_otp_verified_at", "is", null)
+        .maybeSingle();
+      if (holder?.id === profile.id) {
+        await db
+          .from("profiles")
+          .update({ phone_otp_verified_at: new Date().toISOString() })
+          .eq("id", profile.id)
+          .eq("created_by", me.id);
+      } else {
+        return { ok: false, error: "This mobile is already confirmed on another profile." };
+      }
+    } else {
+      return { ok: false, error: "Could not save the confirmed mobile." };
+    }
   }
 
   await db.from("whatsapp_otps").delete().eq("user_id", me.id).eq("purpose", "verify_mobile");
