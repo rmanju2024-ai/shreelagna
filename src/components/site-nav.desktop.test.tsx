@@ -75,7 +75,8 @@ describe("laptop primary navigation", () => {
     const menu = screen.getByRole("menu");
     expect(menu.className).not.toContain("is-mobile-sheet");
     expect(screen.getByRole("menuitem", { name: "About & Help" }).getAttribute("href")).toBe("/about");
-    expect(screen.getByRole("link", { name: "Desk" }).getAttribute("href")).toBe("/desk");
+    expect(screen.getByRole("menuitem", { name: "Desk" }).getAttribute("href")).toBe("/desk");
     expect(screen.getByText("Sign out")).toBeTruthy();
+    expect(screen.queryByRole("link", { name: "Desk" })).toBeNull();
   });
 });

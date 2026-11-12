@@ -50,7 +50,7 @@ describe("mobile primary navigation", () => {
     expect(menu.parentElement).toBe(document.body);
     expect(menu.className).toContain("is-mobile-sheet");
     expect(menu.style.position).toBe("fixed");
-    for (const label of ["About & Help", "Install app", "Turn on alerts", "Sign out"]) {
+    for (const label of ["Desk", "About & Help", "Install app", "Turn on alerts", "Sign out"]) {
       expect(screen.getByText(label)).toBeTruthy();
     }
     expect(menu.textContent).not.toContain("AccountHub");
@@ -77,9 +77,10 @@ describe("mobile primary navigation", () => {
     expect(nav.className).toContain("is-mobile-dock");
     expect(nav.style.position).toBe("fixed");
     expect(nav.style.bottom).toBe("var(--mobile-dock-shift, 0px)");
-    for (const label of ["Home", "Discover", "Inbox", "Account", "Desk", "More"]) {
+    for (const label of ["Home", "Discover", "Inbox", "Account", "More"]) {
       expect(nav.textContent).toContain(label);
     }
+    expect(nav.textContent).not.toContain("Desk");
   });
 });
 

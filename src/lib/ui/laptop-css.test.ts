@@ -31,7 +31,7 @@ describe("laptop website browsing layout", () => {
   it("pins laptop navigation in the header instead of a phone dock", () => {
     expect(genz).toContain(".site-head-inner > .site-nav {");
     expect(genz).toContain("position: static");
-    expect(genz).toContain("max-width: min(100%, 48rem)");
+    expect(genz).toContain("max-width: min(100%, 36rem)");
   });
 
   it("styles family chat as a salon note, not a green messenger", () => {

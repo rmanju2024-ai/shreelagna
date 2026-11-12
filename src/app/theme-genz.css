@@ -329,10 +329,26 @@ a.inbox-photo { color: inherit; text-decoration: none; display: block; }
 .site-head-inner > .site-nav {
   position: static;
   inset: auto;
-  width: auto;
-  max-width: min(100%, 48rem);
+  width: 100%;
+  max-width: min(100%, 36rem);
   padding: 0;
   transform: none;
+}
+.site-nav-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 0.2rem;
+  width: 100%;
+}
+.site-nav-row > .nav-3d,
+.site-nav-row > .nav-group {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.site-nav-row > .nav-group > .nav-3d {
+  width: 100%;
 }
 .site-nav-row > .nav-3d, .site-nav-row > .nav-group > .nav-3d {
   flex-direction: column; justify-content: center; align-items: center; gap: 0.2rem;
@@ -344,8 +360,27 @@ a.inbox-photo { color: inherit; text-decoration: none; display: block; }
   color: inherit; border-radius: 0; display: grid; place-items: center;
 }
 .site-nav-row .nav-3d > .nav-3d-ico svg { width: 1.9rem; height: 1.9rem; animation: none !important; }
-.site-nav-row .nav-3d > .nav-3d-label { font-size: 0.64rem; line-height: 1; }
+.site-nav-row .nav-3d > .nav-3d-label {
+  font-size: 0.72rem;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .site-nav-row .nav-3d > .nav-3d-caret { display: none; }
+@media (min-width: 821px) {
+  .site-head-inner > .site-nav { margin-inline: auto; }
+  .site-nav-row > .nav-3d,
+  .site-nav-row > .nav-group > .nav-3d {
+    height: 3.85rem;
+    min-height: 3.85rem;
+    border-radius: 1rem;
+  }
+  .site-nav-row .nav-3d > .nav-3d-label { font-size: 0.78rem; }
+}
 .site-nav-row .nav-3d.is-overlay { color: var(--ink-soft); background: transparent; box-shadow: none; }
 .site-nav-row .nav-3d.is-overlay.is-on,
 .site-nav-row .nav-3d.is-on {
@@ -1398,7 +1433,7 @@ body > .nav-menu {
     bottom: auto;
   }
 
-  /* Keep the seven primary destinations evenly spaced and easy to recognize. */
+  /* Five primary tabs stay even and readable on a phone. */
   .site-nav-row .nav-3d > .nav-3d-ico {
     width: 1.9rem; height: 1.9rem;
   }
@@ -1412,7 +1447,7 @@ body > .nav-menu {
     width: 1.65rem; height: 1.65rem;
   }
   .site-nav-row .nav-3d > .nav-3d-label {
-    font-size: clamp(0.5rem, 2.2vw, 0.62rem) !important;
+    font-size: 0.62rem !important;
   }
 
   /* Chat uses the screen efficiently without hiding the composer. */
