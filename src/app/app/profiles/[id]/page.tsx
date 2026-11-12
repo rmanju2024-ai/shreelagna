@@ -34,7 +34,7 @@ export default async function ProfilePage({
 
   if (!showForm) {
     let peek = (await db.from("profiles").select("id, created_by").eq("id", id).maybeSingle()).data;
-    if (!peek && /^SL\d{6,}$/i.test(id)) {
+    if (!peek && /^(SL\d{6,}|MC-[A-Z]{2}-[FMX]-\d{6,8})$/i.test(id)) {
       peek = (await db.from("profiles").select("id, created_by").eq("member_code", id.toUpperCase()).maybeSingle()).data;
     }
     if (peek && peek.created_by === me.id) {
@@ -64,7 +64,7 @@ export default async function ProfilePage({
     const plain = await db.from("profiles").select("*").eq("id", id).maybeSingle();
     profile = plain.data;
   }
-  if (!profile && /^SL\d{6,}$/i.test(id)) {
+  if (!profile && /^(SL\d{6,}|MC-[A-Z]{2}-[FMX]-\d{6,8})$/i.test(id)) {
     const byCode = await db
       .from("profiles")
       .select("*, religions(name), communities(name)")

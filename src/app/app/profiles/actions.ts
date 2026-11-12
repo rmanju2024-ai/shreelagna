@@ -139,6 +139,16 @@ async function writeCompleteness(
   }
 }
 
+function memberCodeMeta(row: Record<string, unknown>) {
+  return {
+    profileType: typeof row.profile_type === "string" ? row.profile_type : null,
+    nativeState: typeof row.native_state === "string" ? row.native_state : null,
+    currentState: typeof row.current_state === "string" ? row.current_state : null,
+    nativeCountry: typeof row.native_country === "string" ? row.native_country : null,
+    currentCountry: typeof row.current_country === "string" ? row.current_country : null,
+  };
+}
+
 async function insertOwnProfile(
   supabase: Awaited<ReturnType<typeof createClient>>,
   payload: Record<string, unknown>,
@@ -177,7 +187,12 @@ async function insertOwnProfile(
     const hay = `${error.code ?? ""} ${error.message ?? ""} ${error.details ?? ""}`.toLowerCase();
     if (hay.includes("member_code") && (hay.includes("null") || hay.includes("not-null") || hay.includes("not null"))) {
       const { allocateMemberCode } = await import("@/lib/profile/member-code");
-      current = { ...current, member_code: allocateMemberCode() };
+      current = { ...current, member_code: allocateMemberCode(memberCodeMeta(current)) };
+      continue;
+    }
+    if (isUniqueViolation(error) && hay.includes("member_code")) {
+      const { allocateMemberCode } = await import("@/lib/profile/member-code");
+      current = { ...current, member_code: allocateMemberCode(memberCodeMeta(current)) };
       continue;
     }
     if (isUniqueViolation(error) || error.code === "PGRST116" || hay.includes("0 rows")) {
@@ -397,9 +412,10 @@ export async function saveProfile(formData: FormData) {
       );
     }
   } else {
+    const { allocateMemberCode } = await import("@/lib/profile/member-code");
     const inserted = await insertOwnProfile(
       supabase,
-      payload,
+      { ...payload, member_code: allocateMemberCode(memberCodeMeta(payload)) },
       me.id,
       usingService ? undefined : accessToken,
     );
