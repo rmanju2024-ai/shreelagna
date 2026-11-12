@@ -1,4 +1,4 @@
-import { addPlan, confirmPlan, declinePlan, grantPlan, savePlan } from "@/app/desk/plans/actions";
+import { addPlan, confirmPlan, declinePlan, extendPlan, grantPlan, notePlanInvoice, refundPlan, savePlan } from "@/app/desk/plans/actions";
 import { PlanCatalogForm } from "@/app/desk/plans/plan-catalog-form";
 import { DeskPager } from "@/app/desk/desk-pager";
 import { requireDesk } from "@/lib/desk/access";
@@ -104,6 +104,8 @@ type Row = {
   status: string;
   created_at: string;
   ends_at: string | null;
+  note?: string | null;
+  activated_by?: string | null;
 };
 
 export default async function DeskPlansPage({
@@ -121,7 +123,7 @@ export default async function DeskPlansPage({
     fetchPlans(db),
     db
       .from("memberships")
-      .select("id, user_id, plan_code, source, status, created_at, ends_at", { count: "exact" })
+      .select("id, user_id, plan_code, source, status, created_at, ends_at, note, activated_by", { count: "exact" })
       .order("created_at", { ascending: false })
       .range(from, to),
     db.from("memberships").select("id", { count: "exact", head: true }).eq("status", "pending"),
@@ -134,6 +136,11 @@ export default async function DeskPlansPage({
     ? await db.from("app_users").select("id, email, display_name").in("id", userIds)
     : { data: [] as { id: string; email: string; display_name: string | null }[] };
   const names = new Map((people ?? []).map((row) => [row.id, row]));
+  const { data: liveRows } = userIds.length
+    ? await db.from("memberships").select("user_id").eq("status", "active").in("user_id", userIds)
+    : { data: [] as { user_id: string }[] };
+  const liveOwners = new Set((liveRows ?? []).map((row) => row.user_id));
+  const grants = list.filter((row) => row.source === "grant");
   const pending = pendingCount.count ?? 0;
   const live = liveCount.count ?? 0;
 
@@ -241,7 +248,16 @@ export default async function DeskPlansPage({
                       <dd>{formatIstDateTime(row.ends_at)}</dd>
                     </div>
                   ) : null}
+                  {row.note ? (
+                    <div>
+                      <dt>Invoice / note</dt>
+                      <dd>{row.note}</dd>
+                    </div>
+                  ) : null}
                 </dl>
+                {row.status === "pending" && liveOwners.has(row.user_id) ? (
+                  <p className="desk-profile-nudge">Already has live cover — Confirm replaces it.</p>
+                ) : null}
                 {row.status === "pending" ? (
                   <span className="plans-desk-actions">
                     <form action={confirmPlan}>
@@ -258,6 +274,34 @@ export default async function DeskPlansPage({
                     </form>
                   </span>
                 ) : null}
+                {row.status === "active" ? (
+                  <div className="plans-desk-money">
+                    <form action={extendPlan} className="desk-assign-bar">
+                      <input type="hidden" name="id" value={row.id} />
+                      <label className="desk-ticket-note-label">
+                        Extra months
+                        <input name="months" type="number" min={1} max={24} defaultValue={1} className={inputClass} />
+                      </label>
+                      <button type="submit" className={btnGhost}>
+                        Extend
+                      </button>
+                    </form>
+                    <form action={notePlanInvoice} className="desk-assign-bar">
+                      <input type="hidden" name="id" value={row.id} />
+                      <input name="note" className={inputClass} placeholder="UPI ref / invoice note" defaultValue={row.note ?? ""} />
+                      <button type="submit" className={btnGhost}>
+                        Save note
+                      </button>
+                    </form>
+                    <form action={refundPlan} className="desk-assign-bar">
+                      <input type="hidden" name="id" value={row.id} />
+                      <input name="note" className={inputClass} placeholder="Refund reason" />
+                      <button type="submit" className={btnGhost}>
+                        Refund / cancel
+                      </button>
+                    </form>
+                  </div>
+                ) : null}
               </li>
             );
           })
@@ -265,6 +309,18 @@ export default async function DeskPlansPage({
           <li className="desk-empty">No plan requests yet. Welcome gifts do not appear here.</li>
         )}
       </ul>
+      {grants.length ? (
+        <>
+          <h3 className="desk-section-title">Granted by staff (this page)</h3>
+          <ul className="desk-staff-list">
+            {grants.map((row) => (
+              <li key={`g-${row.id}`} className="desk-ticket-meta">
+                {names.get(row.user_id)?.email || row.user_id} · {row.plan_code} · {coverLabel(row.status)} · {formatIstDateTime(row.created_at)}
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
       <DeskPager path="/desk/plans" page={page} count={total} />
     </section>
   );

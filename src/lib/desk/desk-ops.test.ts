@@ -14,6 +14,8 @@ describe("staff vs admin desk", () => {
   it("lets staff onto every desk except Verification", () => {
     const staff = deskItemsFor(false).map((item) => item.id);
     expect(staff).toContain("tickets");
+    expect(staff).toContain("media");
+    expect(staff).toContain("people");
     expect(staff).toContain("safety");
     expect(staff).toContain("look");
     expect(staff).toContain("plans");

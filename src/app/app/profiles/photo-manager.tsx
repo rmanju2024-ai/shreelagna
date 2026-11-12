@@ -62,7 +62,7 @@ export function PhotoManager({
         const ins = await supabase.from("media").insert({
           profile_id: profileId,
           kind: "photo",
-          status: "approved",
+          status: "pending",
           storage_path: path,
           is_primary: photos.length === 0,
           byte_size: stamped.size,
@@ -103,7 +103,7 @@ export function PhotoManager({
       const ins = await supabase.from("media").insert({
         profile_id: profileId,
         kind: "photo",
-        status: "approved",
+        status: "pending",
         storage_path: path,
         is_primary: photos[0]?.id === photo.id,
         byte_size: stamped.size,

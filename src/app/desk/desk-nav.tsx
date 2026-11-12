@@ -6,6 +6,8 @@ import { NavGlyph } from "@/components/nav-icons";
 
 export const DESK_ITEMS = [
   { href: "/desk/tickets", id: "tickets", icon: "tickets", label: "Ticketing", hint: "Contact from families" },
+  { href: "/desk/media", id: "media", icon: "look", label: "Media", hint: "Photos and intros" },
+  { href: "/desk/people", id: "people", icon: "profile", label: "People", hint: "One member file" },
   { href: "/desk/safety", id: "safety", icon: "safety", label: "Safety", hint: "Reports and blocks" },
   { href: "/desk/analytics", id: "analytics", icon: "analytics", label: "Analytics", hint: "Pulse, place, people" },
   { href: "/desk/audit", id: "audit", icon: "audit", label: "Audit", hint: "Staff and admin log" },

@@ -8,9 +8,17 @@ import { TICKET_STATUSES, ticketEnquiryLabel, ticketStatusClass, ticketStatusLab
 import type { DeskTicketRow } from "@/lib/desk/ticket-rows";
 import { formatIstDateTime } from "@/lib/time/ist";
 import { btnGhost, btnPrimary, cardClass, inputClass } from "@/lib/ui/classes";
+import { AssignBar, SlaMark } from "@/app/desk/queue-tools";
 import { saveTicketWork } from "./actions";
 
-function TicketWorkForm({ ticket, notes }: { ticket: DeskTicketRow; notes: TicketNote[] }) {
+function TicketWorkForm({
+  ticket,
+  notes,
+}: {
+  ticket: DeskTicketRow;
+  notes: TicketNote[];
+  staff?: { id: string; label: string }[];
+}) {
   const [status, setStatus] = useState(String(ticket.status ?? "new"));
 
   return (
@@ -50,6 +58,10 @@ function TicketWorkForm({ ticket, notes }: { ticket: DeskTicketRow; notes: Ticke
           placeholder={`Note while ticket is ${ticketStatusLabel(status).toLowerCase()}…`}
         />
       </label>
+      <label className="desk-check-row">
+        <input type="checkbox" name="reply_family" />
+        Also send this note to the family (in-app)
+      </label>
       <button type="submit" className={btnPrimary}>
         Save
       </button>
@@ -61,11 +73,13 @@ export function TicketBoard({
   tickets,
   extra,
   notes,
+  staff = [],
   children,
 }: {
   tickets: DeskTicketRow[];
   extra?: DeskTicketRow | null;
   notes: TicketNote[];
+  staff?: { id: string; label: string }[];
   children: React.ReactNode;
 }) {
   const router = useRouter();
@@ -191,6 +205,7 @@ export function TicketBoard({
                   ticket={ticket}
                   notes={trail}
                 />
+                <AssignBar kind="ticket" id={String(ticket.id)} assignedTo={ticket.assigned_to} staff={staff} />
               </div>
             </div>
           </div>,
@@ -213,6 +228,12 @@ export function TicketBoard({
                 <span className={`desk-pill ${ticketStatusClass(String(row.status ?? ""))}`}>
                   {ticketStatusLabel(String(row.status ?? ""))}
                 </span>
+                <SlaMark
+                  createdAt={row.created_at}
+                  dueAt={row.due_at}
+                  status={row.status}
+                  assignedTo={row.assigned_to}
+                />
                 <span className="desk-ticket-meta">
                   {ticketEnquiryLabel(String(row.enquiry_type ?? ""))}
                   {" · "}

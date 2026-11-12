@@ -103,7 +103,7 @@ export function AlbumViewer({
         const ins = await supabase.from("media").insert({
           profile_id: profileId,
           kind: "photo",
-          status: "approved",
+          status: "pending",
           storage_path: path,
           is_primary: photos.length === 0,
           byte_size: stamped.size,
@@ -144,7 +144,7 @@ export function AlbumViewer({
       const ins = await supabase.from("media").insert({
         profile_id: profileId,
         kind: "photo",
-        status: "approved",
+        status: "pending",
         storage_path: path,
         is_primary: photos.length === 1 || current === photos[0],
         byte_size: stamped.size,

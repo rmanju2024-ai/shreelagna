@@ -1,8 +1,8 @@
 import { readNoteBody, readNoteStatus, type TicketNote } from "@/lib/desk/tickets";
 
-const LIST = "id, name, city, status, created_at, message, email, mobile, enquiry_type, resolution";
+const LIST = "id, name, city, status, created_at, message, email, mobile, enquiry_type, resolution, assigned_to, due_at";
 const FULL =
-  "id, name, city, status, created_at, message, email, mobile, enquiry_type, resolution";
+  "id, name, city, status, created_at, message, email, mobile, enquiry_type, resolution, assigned_to, due_at";
 const BASIC = "id, name, city, status, created_at, message, email, mobile, enquiry_type";
 
 type Db = { from: (table: string) => any };
@@ -18,6 +18,9 @@ export type DeskTicketRow = {
   mobile?: string | null;
   enquiry_type?: string | null;
   resolution?: string | null;
+  assigned_to?: string | null;
+  due_at?: string | null;
+  assigned_name?: string | null;
 };
 
 export async function fetchDeskTickets(

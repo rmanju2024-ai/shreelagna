@@ -278,7 +278,7 @@ export function IntroStudio({
         .insert({
           profile_id: profileId,
           kind,
-          status: "approved",
+          status: "pending",
           storage_path: path,
           is_primary: false,
           byte_size: file.size,

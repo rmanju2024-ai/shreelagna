@@ -200,6 +200,76 @@ function planPayload(plan: {
   };
 }
 
+export async function refundPlan(formData: FormData) {
+  const desk = await requireDesk("/desk/plans");
+  if (!desk.allowed) return;
+  const id = String(formData.get("id") ?? "");
+  const reason = String(formData.get("note") ?? "").trim().slice(0, 500);
+  if (!id) return;
+  const db = asDb(createServiceClient() ?? desk.supabase);
+  const { data: row } = await db.from("memberships").select("id, user_id, plan_code, status").eq("id", id).maybeSingle();
+  if (!row || row.status !== "active") return;
+  await db.from("memberships").update({
+    status: "cancelled",
+    note: reason ? `Refunded: ${reason}` : "Refunded",
+  }).eq("id", id);
+  await writeAudit({
+    actorUserId: desk.me?.id,
+    actorRole: desk.me?.role,
+    action: "membership.refund",
+    entityType: "membership",
+    entityId: id,
+    metadata: { user: String(row.user_id ?? ""), plan: String(row.plan_code ?? "") },
+  });
+  refresh();
+}
+
+export async function extendPlan(formData: FormData) {
+  const desk = await requireDesk("/desk/plans");
+  if (!desk.allowed) return;
+  const id = String(formData.get("id") ?? "");
+  const months = Math.max(1, Math.min(24, Number(formData.get("months")) || 1));
+  if (!id) return;
+  const db = asDb(createServiceClient() ?? desk.supabase);
+  const { data: row } = await db
+    .from("memberships")
+    .select("id, user_id, plan_code, status, ends_at")
+    .eq("id", id)
+    .maybeSingle();
+  if (!row || row.status !== "active") return;
+  const from = row.ends_at ? new Date(String(row.ends_at)) : new Date();
+  const ends = addMonths(Number.isNaN(from.getTime()) ? new Date() : from, months);
+  await db.from("memberships").update({ ends_at: ends.toISOString() }).eq("id", id);
+  await writeAudit({
+    actorUserId: desk.me?.id,
+    actorRole: desk.me?.role,
+    action: "membership.extend",
+    entityType: "membership",
+    entityId: id,
+    metadata: { months, user: String(row.user_id ?? "") },
+  });
+  refresh();
+}
+
+export async function notePlanInvoice(formData: FormData) {
+  const desk = await requireDesk("/desk/plans");
+  if (!desk.allowed) return;
+  const id = String(formData.get("id") ?? "");
+  const note = String(formData.get("note") ?? "").trim().slice(0, 500);
+  if (!id || !note) return;
+  const db = asDb(createServiceClient() ?? desk.supabase);
+  await db.from("memberships").update({ note }).eq("id", id);
+  await writeAudit({
+    actorUserId: desk.me?.id,
+    actorRole: desk.me?.role,
+    action: "membership.invoice_note",
+    entityType: "membership",
+    entityId: id,
+    metadata: { note },
+  });
+  refresh();
+}
+
 export type PlanWriteState = { ok: true; name: string; code: string } | { ok: false; error: string };
 
 export async function savePlan(_prev: PlanWriteState | null, formData: FormData): Promise<PlanWriteState> {

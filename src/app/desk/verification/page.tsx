@@ -1,19 +1,53 @@
+import { AssignBar, QueueViewLinks, SlaMark } from "@/app/desk/queue-tools";
 import { requireDesk } from "@/lib/desk/access";
+import { cachedStaffRoster } from "@/lib/desk/cached";
+import { fitsQueue, parseQueueView } from "@/lib/desk/sla";
+import { staffOptionLabel } from "@/lib/desk/staff-options";
 import { createServiceClient } from "@/lib/supabase/server";
 import { reviewVerificationCase } from "@/app/desk/verification/actions";
 import { btnPrimary, cardClass } from "@/lib/ui/classes";
 import { EVIDENCE_BUCKET, evidenceFolder, evidenceStore, purgeExpiredEvidence } from "@/lib/verification/evidence";
 
-export default async function DeskVerificationPage() {
+export default async function DeskVerificationPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ view?: string }>;
+}) {
   const desk = await requireDesk("/desk/verification");
   if (!desk.allowed) return null;
+  const { view: rawView } = await searchParams;
+  const view = parseQueueView(rawView);
   const db = createServiceClient() ?? desk.supabase;
-  const { data: cases } = await db
+  const listed = await db
     .from("profile_verification_cases")
-    .select("id, profile_id, document_type, status, created_at, evidence_delete_after, review_note")
+    .select("id, profile_id, document_type, status, created_at, evidence_delete_after, review_note, assigned_to, due_at")
     .in("status", ["requested", "in_review", "appealed"])
     .order("created_at", { ascending: true })
     .limit(100);
+  const rawCases = listed.error
+    ? ((
+        await db
+          .from("profile_verification_cases")
+          .select("id, profile_id, document_type, status, created_at, evidence_delete_after, review_note")
+          .in("status", ["requested", "in_review", "appealed"])
+          .order("created_at", { ascending: true })
+          .limit(100)
+      ).data ?? [])
+    : (listed.data ?? []);
+  const cases = rawCases.filter((item) =>
+    fitsQueue(
+      {
+        assignedTo: "assigned_to" in item ? (item.assigned_to as string | null) : null,
+        createdAt: item.created_at,
+        dueAt: "due_at" in item ? (item.due_at as string | null) : null,
+        status: item.status,
+      },
+      view,
+      desk.me?.id ?? "",
+    ),
+  );
+  const roster = await cachedStaffRoster().catch(() => []);
+  const staff = roster.map((row) => ({ id: row.id, label: staffOptionLabel(row) }));
   // Short-lived signed links (10 min) are created only for admins reviewing a case.
   const store = desk.admin ? await evidenceStore() : null;
   if (store) await purgeExpiredEvidence(store);
@@ -40,11 +74,14 @@ export default async function DeskVerificationPage() {
     <section className="desk-panel">
       <header className="desk-panel-head"><div><p className="browse-kicker">Restricted review</p><h2>Verification cases</h2></div><p>{cases?.length ?? 0} waiting</p></header>
       <p className="desk-profile-queue-note">Only administrators can approve identity checks (name, age, date of birth). Documents are deleted as soon as review is complete; the profile keeps only the result.</p>
+      <QueueViewLinks path="/desk/verification" view={view} />
       {cases?.length ? <ul className="desk-ticket-list">{cases.map((item) => (
         <li key={item.id} className={`${cardClass} card-3d desk-ticket-row desk-profile-row`}>
           <div className="desk-profile-summary">
             <div className="desk-ticket-row-head"><b>{item.document_type} check</b><span className="desk-profile-chip">{item.status.replace(/_/g, " ")}</span></div>
             <span className="desk-ticket-meta">Profile {item.profile_id} · Requested {new Date(item.created_at).toLocaleDateString("en-IN")}</span>
+            <SlaMark createdAt={item.created_at} dueAt={"due_at" in item ? String(item.due_at ?? "") : null} status={item.status} assignedTo={"assigned_to" in item ? String(item.assigned_to ?? "") : null} />
+            {desk.admin ? <AssignBar kind="verification" id={item.id} assignedTo={"assigned_to" in item ? String(item.assigned_to ?? "") : null} staff={staff} /> : null}
             {(links.get(item.id) ?? []).length ? <span className="desk-ticket-meta">Evidence: {(links.get(item.id) ?? []).map((f, i) => <a key={f.name} href={f.url} target="_blank" rel="noreferrer">File {i + 1}</a>).reduce<React.ReactNode[]>((acc, el, i) => (i ? [...acc, " · ", el] : [el]), [])}</span> : <span className="desk-ticket-meta">No document uploaded yet</span>}
           </div>
           {desk.admin ? <form action={reviewVerificationCase} className="desk-profile-actions">

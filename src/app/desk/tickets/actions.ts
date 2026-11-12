@@ -3,6 +3,7 @@
 import { requireDesk } from "@/lib/desk/access";
 import { writeAudit } from "@/lib/desk/audit";
 import { parseTicketStatus, stampNoteBody, trimTicketResolution } from "@/lib/desk/tickets";
+import { recordAndDeliverNotice } from "@/lib/notify/house-notice";
 import { missingPayloadColumn } from "@/lib/profile/db-errors";
 import { createServiceClient } from "@/lib/supabase/server";
 import { formatIstDateTime } from "@/lib/time/ist";
@@ -125,6 +126,24 @@ export async function saveTicketWork(formData: FormData) {
     await insertNote(db, id, body, desk.me?.id ?? null, status);
   }
 
+  const reply = String(formData.get("reply_family") ?? "") === "on";
+  if (reply && body) {
+    const { data: ticket } = await db.from("tickets").select("email, name").eq("id", id).maybeSingle();
+    const email = String(ticket?.email ?? "").trim().toLowerCase();
+    if (email) {
+      const { data: member } = await db.from("app_users").select("id").eq("email", email).maybeSingle();
+      if (member?.id) {
+        await recordAndDeliverNotice(db, {
+          userId: String(member.id),
+          kind: "house_desk",
+          title: "A note from the house",
+          body,
+          href: "/app/alerts",
+        });
+      }
+    }
+  }
+
   if (status || body) {
     await writeAudit({
       actorUserId: desk.me?.id,
@@ -132,7 +151,7 @@ export async function saveTicketWork(formData: FormData) {
       action: status ? "ticket.status" : "ticket.note",
       entityType: "ticket",
       entityId: id,
-      metadata: { status: status || undefined, note: Boolean(body) },
+      metadata: { status: status || undefined, note: Boolean(body), reply },
     });
   }
 

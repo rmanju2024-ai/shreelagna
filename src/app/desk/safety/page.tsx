@@ -1,31 +1,66 @@
 import { requireDesk } from "@/lib/desk/access";
+import { cachedStaffRoster } from "@/lib/desk/cached";
 import { createServiceClient } from "@/lib/supabase/server";
 import { updateSafetyCase } from "@/app/desk/safety/actions";
+import { SafetyThreadPeek } from "@/app/desk/safety/thread-peek";
+import { AssignBar, QueueViewLinks, SlaMark } from "@/app/desk/queue-tools";
 import {
   loadSafetyParties,
   safetyCategoryLabel,
   safetyPartyLabel,
   safetyStatusLabel,
 } from "@/lib/desk/safety-cases";
+import { fitsQueue, parseQueueView } from "@/lib/desk/sla";
+import { staffOptionLabel } from "@/lib/desk/staff-options";
 import { formatIstDateTime } from "@/lib/time/ist";
 import { btnPrimary } from "@/lib/ui/classes";
 import Link from "next/link";
 import { profileOpenHref } from "@/lib/ui/dismiss";
 
-export default async function DeskSafetyPage() {
+export default async function DeskSafetyPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ view?: string }>;
+}) {
   const desk = await requireDesk("/desk/safety");
   if (!desk.allowed) return null;
+  const { view: rawView } = await searchParams;
+  const view = parseQueueView(rawView);
   const db = createServiceClient() ?? desk.supabase;
-  const { data: cases } = await db
+  const listed = await db
     .from("safety_reports")
-    .select("id, category, details, status, staff_note, created_at, reporter_profile_id, reported_profile_id")
+    .select("id, category, details, status, staff_note, created_at, reporter_profile_id, reported_profile_id, assigned_to, due_at")
     .order("created_at", { ascending: false })
     .limit(40);
+  const rawCases = listed.error
+    ? ((
+        await db
+          .from("safety_reports")
+          .select("id, category, details, status, staff_note, created_at, reporter_profile_id, reported_profile_id")
+          .order("created_at", { ascending: false })
+          .limit(40)
+      ).data ?? [])
+    : (listed.data ?? []);
+  const staffId = desk.me?.id ?? "";
+  const cases = rawCases.filter((item) =>
+    fitsQueue(
+      {
+        assignedTo: "assigned_to" in item ? (item.assigned_to as string | null) : null,
+        createdAt: item.created_at,
+        dueAt: "due_at" in item ? (item.due_at as string | null) : null,
+        status: item.status,
+      },
+      view,
+      staffId,
+    ),
+  );
+  const roster = await cachedStaffRoster().catch(() => []);
+  const staff = roster.map((row) => ({ id: row.id, label: staffOptionLabel(row) }));
   const people = await loadSafetyParties(
     db as never,
-    (cases ?? []).flatMap((item) => [item.reporter_profile_id, item.reported_profile_id]),
+    cases.flatMap((item) => [item.reporter_profile_id, item.reported_profile_id]),
   );
-  const openCount = cases?.filter((item) => item.status !== "resolved" && item.status !== "dismissed").length ?? 0;
+  const openCount = cases.filter((item) => item.status !== "resolved" && item.status !== "dismissed").length;
 
   return (
     <section className="desk-panel">
@@ -36,7 +71,8 @@ export default async function DeskSafetyPage() {
         </div>
         <p>{openCount} still open</p>
       </header>
-      {cases?.length ? (
+      <QueueViewLinks path="/desk/safety" view={view} />
+      {cases.length ? (
         <ul className="desk-safety-list">
           {cases.map((item) => {
             const reporter = people.get(item.reporter_profile_id);
@@ -85,6 +121,23 @@ export default async function DeskSafetyPage() {
                   <span>What they wrote</span>
                   {item.details?.trim() || "No extra details."}
                 </p>
+                <SlaMark
+                  createdAt={item.created_at}
+                  dueAt={"due_at" in item ? String(item.due_at ?? "") : null}
+                  status={item.status}
+                  assignedTo={"assigned_to" in item ? String(item.assigned_to ?? "") : null}
+                />
+                <SafetyThreadPeek
+                  db={db}
+                  reporterId={item.reporter_profile_id}
+                  reportedId={item.reported_profile_id}
+                />
+                <AssignBar
+                  kind="safety"
+                  id={item.id}
+                  assignedTo={"assigned_to" in item ? String(item.assigned_to ?? "") : null}
+                  staff={staff}
+                />
                 <form action={updateSafetyCase} className="desk-safety-tools">
                   <input type="hidden" name="id" value={item.id} />
                   <select name="status" defaultValue={item.status} aria-label="Case status">
@@ -94,6 +147,18 @@ export default async function DeskSafetyPage() {
                     <option value="dismissed">Dismissed</option>
                   </select>
                   <input name="staff_note" defaultValue={item.staff_note ?? ""} placeholder="Staff note" />
+                  <label className="desk-check-row">
+                    <input type="checkbox" name="hide_profile" />
+                    Hide reported profile
+                  </label>
+                  <label className="desk-check-row">
+                    <input type="checkbox" name="block_both" />
+                    Block both sides
+                  </label>
+                  <label className="desk-check-row">
+                    <input type="checkbox" name="freeze_chat" />
+                    Freeze their chat
+                  </label>
                   <button className={btnPrimary}>Save</button>
                 </form>
               </li>
