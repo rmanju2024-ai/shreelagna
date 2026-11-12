@@ -105,31 +105,36 @@ export function MobileOtpField({
         <p className="otp-hint">The member confirms this number on WhatsApp after they sign in.</p>
       ) : !profileId ? (
         <p className="otp-hint">Save the profile, then confirm this number on WhatsApp.</p>
-      ) : showVerified ? (
-        <VerifyFlag on tone="whatsapp" label="WhatsApp verified" />
       ) : (
-        <div className="otp-row">
-          <button type="button" className={btnGhost} disabled={busy !== null || mobile.replace(/\D/g, "").length < 10} onClick={send}>
-            {busy === "send" ? "Sending…" : "Send WhatsApp code"}
-          </button>
-          {sent ? (
-            <>
-              <input
-                inputMode="numeric"
-                maxLength={6}
-                pattern="[0-9]{6}"
-                placeholder="6-digit code"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                className={inputClass}
-                autoComplete="one-time-code"
-              />
-              <button type="button" className={btnGhost} disabled={busy !== null || code.replace(/\D/g, "").length !== 6} onClick={verify}>
-                {busy === "verify" ? "Checking…" : "Confirm"}
-              </button>
-            </>
-          ) : null}
-        </div>
+        <>
+          {showVerified ? <VerifyFlag on tone="whatsapp" label="WhatsApp verified" /> : null}
+          <div className="otp-row">
+            <button type="button" className={btnGhost} disabled={busy !== null || mobile.replace(/\D/g, "").length < 10} onClick={send}>
+              {busy === "send"
+                ? "Sending…"
+                : showVerified
+                  ? "Send WhatsApp code again"
+                  : "Send WhatsApp code"}
+            </button>
+            {sent ? (
+              <>
+                <input
+                  inputMode="numeric"
+                  maxLength={6}
+                  pattern="[0-9]{6}"
+                  placeholder="6-digit code"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  className={inputClass}
+                  autoComplete="one-time-code"
+                />
+                <button type="button" className={btnGhost} disabled={busy !== null || code.replace(/\D/g, "").length !== 6} onClick={verify}>
+                  {busy === "verify" ? "Checking…" : "Confirm"}
+                </button>
+              </>
+            ) : null}
+          </div>
+        </>
       )}
       {preview ? <p className="otp-hint">Code {preview}</p> : null}
       {note ? <p className={showVerified || note.includes("confirmed") ? "otp-ok" : "otp-hint"}>{note}</p> : null}

@@ -3,6 +3,7 @@ import {
   buildWhatsAppPayload,
   isHelloWorldTemplate,
   resolveAlertTemplate,
+  explainWhatsAppError,
   whatsappFailFlag,
   whatsappSendAlerts,
 } from "./whatsapp";
@@ -62,7 +63,9 @@ describe("WhatsApp payload", () => {
   it("maps Meta allow-list failures for the browse note", () => {
     expect(whatsappFailFlag("(#131030) Recipient phone number not in allowed list")).toBe("allowlist");
     expect(whatsappFailFlag("(#131005) Access denied — token or permissions")).toBe("denied");
+    expect(whatsappFailFlag("(#133010) Account not registered")).toBe("mobile");
     expect(whatsappFailFlag("WhatsApp could not be reached.")).toBe("net");
+    expect(explainWhatsAppError(133010, "(#133010) Account not registered")).toMatch(/10-digit/);
   });
 
   it("does not send house alerts unless WHATSAPP_SEND_ALERTS is on", () => {

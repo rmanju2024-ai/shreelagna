@@ -21,10 +21,20 @@ export function whatsappFailFlag(error: string): string {
   const e = error.toLowerCase();
   if (e.includes("allowed list") || e.includes("131030")) return "allowlist";
   if (e.includes("131005") || e.includes("access denied")) return "denied";
+  if (e.includes("133010") || e.includes("account not registered")) return "mobile";
   if (e.includes("could not be reached")) return "net";
   if (e.includes("not configured")) return "config";
   if (e.includes("no whatsapp mobile")) return "mobile";
   return "0";
+}
+
+export function explainWhatsAppError(code: number | undefined, raw: string): string {
+  if (code === 133010 || /account not registered/i.test(raw)) {
+    return "This mobile is not on WhatsApp, or it is not a 10-digit India number. Enter it as on WhatsApp (example 9876543210) and send the code again.";
+  }
+  if (code === 131026) return "WhatsApp could not deliver to this mobile. Confirm the number is on WhatsApp.";
+  if (code === 131030) return "This test number is not on the WhatsApp allow list yet.";
+  return raw.replace(/^\(#\d+\)\s*/, "") || "WhatsApp could not send just now.";
 }
 
 export function whatsappConfigured(): boolean {
@@ -114,10 +124,10 @@ export async function sendWhatsAppTemplate(input: WhatsAppTemplateInput): Promis
     const title = body?.error?.error_user_msg || body?.error?.message || `WhatsApp ${res.status}`;
     const details = body?.error?.error_data?.details;
     const code = body?.error?.code;
-    const message = [code ? `(#${code}) ${title.replace(/^\(#\d+\)\s*/, "")}` : title, details]
+    const raw = [code ? `(#${code}) ${title.replace(/^\(#\d+\)\s*/, "")}` : title, details]
       .filter(Boolean)
       .join(" — ");
-    return { ok: false, error: message };
+    return { ok: false, error: explainWhatsAppError(code, raw) };
   } catch {
     return { ok: false, error: "WhatsApp could not be reached." };
   }

@@ -12,6 +12,7 @@ describe("WhatsApp numbers", () => {
   it("rejects short or empty values", () => {
     expect(toWhatsAppNumber("12345")).toBeNull();
     expect(toWhatsAppNumber("")).toBeNull();
+    expect(toWhatsAppNumber("91104933661")).toBeNull();
     expect(isIndiaMobile("123")).toBe(false);
   });
 });
