@@ -2224,7 +2224,17 @@ button.field-help-btn,
 }
 .desk-panel > * { min-width: 0; max-width: 100%; }
 .desk-panel :where(p, h2, h3, li, td, th, label) { overflow-wrap: anywhere; }
+.desk-panel :where(.plan-check, .plan-check span) { overflow-wrap: normal; word-break: normal; }
 .desk-panel :where(input, select, textarea) { width: 100%; min-width: 0; max-width: 100%; }
+.desk-panel :where(input[type="checkbox"], input[type="radio"]) {
+  width: 1.25rem;
+  min-width: 1.25rem;
+  max-width: 1.25rem;
+  height: 1.25rem;
+  flex: none;
+  margin: 0;
+  accent-color: #6b1a28;
+}
 
 @media (min-width: 900px) {
   .desk-board {
@@ -3024,6 +3034,7 @@ button.field-help-btn,
   .plan-edit-form,
   .plan-edit-hero {
     grid-template-columns: minmax(0, 1fr) !important;
+    align-items: stretch;
   }
   .plan-edit-form .plan-save-btn,
   .plans-grant button,
@@ -3031,7 +3042,13 @@ button.field-help-btn,
     width: 100%;
     justify-self: stretch;
   }
-  .plan-check { min-height: 44px; }
+  .plan-check-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .plan-check {
+    min-height: 44px;
+    width: 100%;
+  }
 
   .browse-filter-scrim {
     align-items: end;

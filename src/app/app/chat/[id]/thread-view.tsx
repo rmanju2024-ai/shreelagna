@@ -68,6 +68,13 @@ export function ThreadView({
   }, [shown.length]);
 
   useEffect(() => {
+    const el = boxRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 192)}px`;
+  }, [draft]);
+
+  useEffect(() => {
     if (!menuId && !headMenu) return;
     function close(event: PointerEvent) {
       const node = event.target;

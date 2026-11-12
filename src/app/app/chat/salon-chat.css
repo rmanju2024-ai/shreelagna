@@ -249,10 +249,12 @@
 
 .salon-stage {
   flex: 1;
+  min-width: 0;
   min-height: 0;
+  overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 1rem 1.15rem 1.2rem;
+  padding: 1rem 1.15rem 1.4rem;
   background:
     linear-gradient(180deg, rgb(255 252 247 / 70%), transparent 8rem),
     var(--chat-ivory);
@@ -287,6 +289,8 @@
 
 .salon-row {
   display: flex;
+  width: 100%;
+  min-width: 0;
   max-width: 100%;
 }
 
@@ -304,8 +308,12 @@
 
 .salon-slip {
   position: relative;
-  max-width: min(68%, 34rem);
+  box-sizing: border-box;
+  width: fit-content;
+  max-width: min(78%, 36rem);
+  min-width: 0;
   padding: 0.7rem 0.85rem 0.5rem;
+  overflow: visible;
   background: var(--chat-paper);
   border: 1px solid rgb(217 199 155 / 70%);
   box-shadow: 0 8px 18px -16px rgb(46 26 30 / 35%);
@@ -329,6 +337,7 @@
   line-height: 1.5;
   color: var(--chat-ink);
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
   word-break: break-word;
 }
 
@@ -435,9 +444,12 @@
 
 .salon-composer textarea {
   width: 100%;
+  min-width: 0;
   min-height: 44px;
-  max-height: 8rem;
+  max-height: 12rem;
   resize: none;
+  overflow-y: auto;
+  field-sizing: content;
   padding: 0.65rem 0.85rem;
   border: 1px solid #ddd2bf;
   border-radius: 8px;
@@ -500,7 +512,7 @@
     display: none;
   }
   .salon-slip {
-    max-width: min(82%, 34rem);
+    max-width: min(90%, 36rem);
   }
   .salon-plan {
     flex-direction: column;

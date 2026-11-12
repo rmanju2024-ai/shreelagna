@@ -68,14 +68,16 @@ function PlanFields({ plan }: { plan?: PlanCard }) {
         Perks (one per line)
         <textarea name="perks" rows={4} className={inputClass} defaultValue={plan ? perkText(plan.perks) : ""} />
       </label>
-      <label className="plan-check">
-        <input type="checkbox" name="featured" defaultChecked={plan?.featured} />
-        Recommended
-      </label>
-      <label className="plan-check">
-        <input type="checkbox" name="for_sale" defaultChecked={plan ? plan.forSale : true} />
-        On sale
-      </label>
+      <div className="plan-check-row">
+        <label className="plan-check">
+          <input type="checkbox" name="featured" defaultChecked={plan?.featured} />
+          <span>Recommended</span>
+        </label>
+        <label className="plan-check">
+          <input type="checkbox" name="for_sale" defaultChecked={plan ? plan.forSale : true} />
+          <span>On sale</span>
+        </label>
+      </div>
     </>
   );
 }
