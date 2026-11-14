@@ -70,7 +70,7 @@ export default async function AccountHubPage() {
   const mineIds = (mineRows.data ?? []).map((row) => String(row.id));
   const ownerName = accountOwnerName(mineRows.data ?? [], me.active_profile_id, me.display_name);
   const quota = await loadInterestQuota(db, me, access, mineIds);
-  const inboxCounts = {
+  const inboxCounts: Record<string, number> = {
     ...accountInboxCounts(inbox),
     "/about?tab=requests": requests.filter((row) => isOpenTicket(row.status)).length,
   };
