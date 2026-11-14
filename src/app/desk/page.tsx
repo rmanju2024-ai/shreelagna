@@ -19,7 +19,7 @@ export default function DeskPage() {
           <b>Plans</b> — confirm UPI, refund, extend, or note the invoice.
         </li>
       </ol>
-      <p>Use the tabs above. The rail stays put so you can jump desks without going back to Search.</p>
+      <p>Use the tabs above to jump desks without going back to Search.</p>
     </section>
   );
 }

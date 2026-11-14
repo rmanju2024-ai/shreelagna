@@ -35,7 +35,7 @@ describe("Desk menu", () => {
     render(<DeskNav admin />);
     const nav = screen.getByRole("navigation", { name: "House desk" });
     expect(nav.className).toContain("is-rail");
-    expect(screen.getByRole("link", { name: "All desks" }).getAttribute("href")).toBe("/desk");
+    expect(screen.queryByRole("link", { name: "All desks" })).toBeNull();
     expect(screen.getByRole("link", { name: "Look" }).getAttribute("aria-current")).toBe("page");
   });
 });

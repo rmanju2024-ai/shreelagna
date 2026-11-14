@@ -33,14 +33,6 @@ export function DeskNav({ admin }: { admin: boolean }) {
   return (
     <nav className={`desk-menu${hub ? " is-hub" : " is-rail"}`} aria-label="House desk">
       {hub ? <p className="browse-kicker">{admin ? "Admin desks" : "Staff desks"}</p> : null}
-      {!hub ? (
-        <Link href="/desk" className="desk-menu-chip is-home" prefetch>
-          <span className="desk-menu-ico" aria-hidden>
-            <NavGlyph name="staff" />
-          </span>
-          <b>All desks</b>
-        </Link>
-      ) : null}
       {items.map((item) => {
         const on = isOn(path, item.href);
         const hint = item.id === "analytics" && admin ? "House and staff" : item.hint;
