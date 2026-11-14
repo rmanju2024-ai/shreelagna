@@ -12,9 +12,10 @@ export const getAuth = cache(async () => {
     const { data } = await supabase.auth.getClaims();
     const claims = data?.claims;
     if (!claims?.sub) return { supabase, user: null };
+    const meta = (claims.user_metadata ?? {}) as { email?: string };
     const user = {
       id: claims.sub,
-      email: claims.email,
+      email: (typeof claims.email === "string" && claims.email) || meta.email,
       email_confirmed_at: undefined,
       user_metadata: claims.user_metadata ?? {},
       app_metadata: claims.app_metadata ?? {},

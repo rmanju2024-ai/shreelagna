@@ -4,13 +4,14 @@ import { ACCOUNT_GROUPS, accountInboxCounts, accountOwnerName, bannerProfileChip
 describe("account hub", () => {
   it("keeps every section reachable from the board", () => {
     expect(ACCOUNT_GROUPS.map((group) => group.id)).toEqual(["journey", "privacy", "membership"]);
-    expect(ACCOUNT_GROUPS.reduce((count, group) => count + group.items.length, 0)).toBe(8);
+    expect(ACCOUNT_GROUPS.reduce((count, group) => count + group.items.length, 0)).toBe(9);
     const hrefs = ACCOUNT_GROUPS.flatMap((group) => group.items.map((item) => item.href));
     expect(hrefs).toContain("/app");
     expect(hrefs).not.toContain("/app/chat");
     expect(hrefs).toContain("/app/settings");
     expect(hrefs).toContain("/app/plans");
     expect(hrefs).toContain("/contact");
+    expect(hrefs).toContain("/about?tab=help");
   });
 
   it("maps unread counts onto inbox cards", () => {

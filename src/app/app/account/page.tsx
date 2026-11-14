@@ -2,7 +2,7 @@ import Link from "next/link";
 import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { HouseCrest } from "@/components/house-crest";
 import { FieldMark } from "@/app/app/profiles/field-mark";
-import { SupportRequests } from "@/app/about/support-requests";
+import { SupportRequestRow } from "@/app/about/support-requests";
 import { ACCOUNT_GROUPS, accountInboxCounts, accountOwnerName } from "@/lib/account/hub";
 import { loadMemberSupportRequests } from "@/lib/desk/member-requests";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
@@ -65,7 +65,7 @@ export default async function AccountHubPage() {
     fetchPendingPlanCode(db, me.id),
     fetchPlans(db),
     unreadNoticeBadge(me.id).catch(() => ({ chatUnread: 0, alertUnread: 0, likesPending: 0 })),
-    loadMemberSupportRequests(db, { id: user.id, email: user.email ?? me.email }).catch(() => []),
+    loadMemberSupportRequests(db, { id: me.id || user.id, email: me.email ?? user.email }).catch(() => []),
   ]);
   const mineIds = (mineRows.data ?? []).map((row) => String(row.id));
   const ownerName = accountOwnerName(mineRows.data ?? [], me.active_profile_id, me.display_name);
@@ -114,7 +114,13 @@ export default async function AccountHubPage() {
                     </li>
                   );
                 })}
-                {group.id === "membership" ? <SupportRequests compact requests={requests} /> : null}
+                {group.id === "membership"
+                  ? requests.map((row) => (
+                      <li key={row.id}>
+                        <SupportRequestRow request={row} />
+                      </li>
+                    ))
+                  : null}
               </ul>
             </section>
           ))}

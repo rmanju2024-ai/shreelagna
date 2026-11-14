@@ -91,50 +91,47 @@ function RequestDialog({
   );
 }
 
+export function SupportRequestRow({ request }: { request: MemberSupportRequest }) {
+  const [open, setOpen] = useState(false);
+  const status = memberRequestStatus(request.status);
+  return (
+    <>
+      <button type="button" className="account-hub-row" onClick={() => setOpen(true)}>
+        <em className="account-hub-ico" aria-hidden>
+          <FieldMark label="Contact" />
+        </em>
+        <span className="account-hub-row-copy">
+          <strong>{ticketEnquiryLabel(request.enquiry_type)}</strong>
+          <small>{status.label}</small>
+        </span>
+        <span className="account-hub-go" aria-hidden>
+          →
+        </span>
+      </button>
+      <RequestDialog open={open ? request : null} onClose={() => setOpen(false)} />
+    </>
+  );
+}
+
 export function SupportRequests({
   requests,
-  compact = false,
 }: {
   requests: MemberSupportRequest[];
-  compact?: boolean;
 }) {
-  const [openId, setOpenId] = useState<string | null>(null);
-  const open = requests.find((row) => row.id === openId) ?? null;
-  const rows = requests.map((row) => {
-    const status = memberRequestStatus(row.status);
-    return (
-      <li key={row.id}>
-        <button type="button" className="account-hub-row" onClick={() => setOpenId(row.id)}>
-          <em className="account-hub-ico" aria-hidden>
-            <FieldMark label="Contact" />
-          </em>
-          <span className="account-hub-row-copy">
-            <strong>{ticketEnquiryLabel(row.enquiry_type)}</strong>
-            <small>{status.label}</small>
-          </span>
-          <span className="account-hub-go" aria-hidden>
-            →
-          </span>
-        </button>
-      </li>
-    );
-  });
-  const dialog = <RequestDialog open={open} onClose={() => setOpenId(null)} />;
-
-  if (compact) {
-    return (
-      <>
-        {rows}
-        {dialog}
-      </>
-    );
-  }
-
   return (
     <section className="help-requests" aria-label="Your requests">
       <h2>Your requests</h2>
-      {requests.length ? <ul className="account-hub-list">{rows}</ul> : <p>When you write to the house, each request will list here with its status.</p>}
-      {dialog}
+      {requests.length ? (
+        <ul className="account-hub-list">
+          {requests.map((row) => (
+            <li key={row.id}>
+              <SupportRequestRow request={row} />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>When you write to the house, each request will list here with its status.</p>
+      )}
     </section>
   );
 }
