@@ -12,7 +12,7 @@ import { btnPrimary, cardClass } from "@/lib/ui/classes";
 type Tab = "about" | "help" | "requests";
 
 const TABS: { id: Tab; full: string; short: string }[] = [
-  { id: "about", full: "Our story", short: "Story" },
+  { id: "about", full: "About us", short: "About" },
   { id: "help", full: "Help & contact", short: "Help" },
   { id: "requests", full: "Your requests", short: "Requests" },
 ];
@@ -56,7 +56,7 @@ function TabBar({
 /* ── About content ───────────────────────────────────────── */
 function AboutContent({ user }: { user: boolean }) {
   return (
-    <div className="about-tab-panel" role="tabpanel" aria-label="Our story">
+    <div className="about-tab-panel" role="tabpanel" aria-label="About us">
       <div className="public-card-grid">
         {[
           ["Who we serve",   "Indian families, with care and respect."],

@@ -28,7 +28,6 @@ export default async function AboutPage({
         <PageHero
           kicker="MarriageConnect"
           title="About &amp; Help"
-          sub="Learn who we are — or reach out if you need a hand."
           motto={false}
         />
         {/* Suspense required because AboutHelpTabs uses useSearchParams() */}

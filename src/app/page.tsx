@@ -86,7 +86,7 @@ export default async function HomePage() {
           <h2 className="font-[family-name:var(--font-display)]">Begin when you are ready</h2>
           <p>A simple, careful start.</p>
           <div className="home-welcome-buttons">
-            <Link href="/about" className={btnHeroGhost}>Our story</Link>
+            <Link href="/about" className={btnHeroGhost}>About us</Link>
           </div>
         </div>
       </section>
