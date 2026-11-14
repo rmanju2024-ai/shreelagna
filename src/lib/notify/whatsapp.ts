@@ -30,7 +30,7 @@ export function whatsappFailFlag(error: string): string {
 
 export function explainWhatsAppError(code: number | undefined, raw: string): string {
   if (code === 133010 || /account not registered/i.test(raw)) {
-    return "WhatsApp Cloud could not reach this mobile (#133010). Use a phone that already opens WhatsApp. Keep Vercel WHATSAPP_PHONE_NUMBER_ID as 1317222201476313 (97386 Cloud), not the new 84317 ID until that number is Cloud-registered.";
+    return "WhatsApp Cloud (#133010): either the member mobile is not on WhatsApp, or this sender is not Cloud-registered yet. If you just added 84317, set WHATSAPP_REGISTER_PIN (the 6-digit two-step PIN) and put 84317’s API Setup Phone number ID first in WHATSAPP_PHONE_NUMBER_ID. Keep 1317222201476313 (97386) in WHATSAPP_PHONE_NUMBER_ID_FALLBACK.";
   }
   if (code === 190 || /application has been deleted|validating access token/i.test(raw)) {
     return "WhatsApp API token is invalid. Set a new WHATSAPP_TOKEN from a live Meta app.";
@@ -52,6 +52,50 @@ export function whatsappPhoneNumberIds(): string[] {
 
 export function whatsappConfigured(): boolean {
   return Boolean(process.env.WHATSAPP_TOKEN?.trim() && whatsappPhoneNumberIds().length);
+}
+
+export function whatsappRegisterPin(): string {
+  return process.env.WHATSAPP_REGISTER_PIN?.replace(/\D/g, "").slice(0, 6) ?? "";
+}
+
+export function graphMessagesUrl(phoneId: string, version?: string): string {
+  const v = version || process.env.WHATSAPP_API_VERSION?.trim() || "v25.0";
+  return `https://graph.facebook.com/${v}/${phoneId}/messages`;
+}
+
+export function graphRegisterUrl(phoneId: string, version?: string): string {
+  const v = version || process.env.WHATSAPP_API_VERSION?.trim() || "v25.0";
+  return `https://graph.facebook.com/${v}/${phoneId}/register`;
+}
+
+export function buildRegisterPayload(pin: string): Record<string, string> {
+  return { messaging_product: "whatsapp", pin };
+}
+
+/** Cloud numbers stay Pending in Manager until they are registered, then a template is sent. */
+export async function registerWhatsAppCloudNumber(phoneId: string): Promise<WhatsAppResult> {
+  const token = process.env.WHATSAPP_TOKEN?.trim();
+  const pin = whatsappRegisterPin();
+  if (!token || pin.length !== 6) {
+    return { ok: false, error: "Set WHATSAPP_TOKEN and a 6-digit WHATSAPP_REGISTER_PIN to register the Cloud sender." };
+  }
+  try {
+    const res = await fetch(graphRegisterUrl(phoneId), {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(buildRegisterPayload(pin)),
+    });
+    if (res.ok) return { ok: true };
+    const body = (await res.json().catch(() => null)) as GraphMessageError | null;
+    const title = body?.error?.error_user_msg || body?.error?.message || `WhatsApp ${res.status}`;
+    const code = body?.error?.code;
+    return { ok: false, error: explainWhatsAppError(code, title) };
+  } catch {
+    return { ok: false, error: "WhatsApp could not be reached." };
+  }
 }
 
 /** Interest / plan WhatsApp (and channel) alerts. OTP is separate. Off unless explicitly true. */
@@ -130,31 +174,43 @@ export async function sendWhatsAppTemplate(input: WhatsAppTemplateInput): Promis
   const languages = otpLanguageCandidates(input.language);
   try {
     let last: WhatsAppResult = { ok: false, error: "WhatsApp could not send just now." };
+    const registered = new Set<string>();
     for (const phoneId of phoneIds) {
-      const url = `https://graph.facebook.com/${version}/${phoneId}/messages`;
-      for (const language of languages) {
-        const res = await fetch(url, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(buildWhatsAppPayload({ ...input, language })),
-        });
-        if (res.ok) return { ok: true };
-        const body = (await res.json().catch(() => null)) as GraphMessageError | null;
-        const title = body?.error?.error_user_msg || body?.error?.message || `WhatsApp ${res.status}`;
-        const details = body?.error?.error_data?.details;
-        const code = body?.error?.code;
-        const raw = [code ? `(#${code}) ${title.replace(/^\(#\d+\)\s*/, "")}` : title, details]
-          .filter(Boolean)
-          .join(" — ");
-        last = { ok: false, error: explainWhatsAppError(code, raw) };
-        const tryNextLanguage = code === 132000 || code === 132001 || /template.*language|translation/i.test(raw);
-        const tryNextSender = code === 133010 || /account not registered/i.test(raw);
-        if (tryNextLanguage) continue;
-        if (tryNextSender) break;
-        return last;
+      const url = graphMessagesUrl(phoneId, version);
+      sender: for (let pass = 0; pass < 2; pass++) {
+        for (const language of languages) {
+          const res = await fetch(url, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(buildWhatsAppPayload({ ...input, language })),
+          });
+          if (res.ok) return { ok: true };
+          const body = (await res.json().catch(() => null)) as GraphMessageError | null;
+          const title = body?.error?.error_user_msg || body?.error?.message || `WhatsApp ${res.status}`;
+          const details = body?.error?.error_data?.details;
+          const code = body?.error?.code;
+          const raw = [code ? `(#${code}) ${title.replace(/^\(#\d+\)\s*/, "")}` : title, details]
+            .filter(Boolean)
+            .join(" — ");
+          last = { ok: false, error: explainWhatsAppError(code, raw) };
+          const tryNextLanguage = code === 132000 || code === 132001 || /template.*language|translation/i.test(raw);
+          const senderNotReady =
+            code === 133010 ||
+            code === 133016 ||
+            /account not registered|phone number.*not registered|not registered/i.test(raw);
+          if (tryNextLanguage) continue;
+          if (senderNotReady && pass === 0 && !registered.has(phoneId) && whatsappRegisterPin().length === 6) {
+            registered.add(phoneId);
+            await registerWhatsAppCloudNumber(phoneId);
+            continue sender;
+          }
+          if (senderNotReady) break sender;
+          return last;
+        }
+        break;
       }
     }
     return last;

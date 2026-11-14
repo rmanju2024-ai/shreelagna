@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import {
+  buildRegisterPayload,
   buildWhatsAppPayload,
   isHelloWorldTemplate,
   resolveAlertTemplate,
@@ -67,7 +68,8 @@ describe("WhatsApp payload", () => {
     expect(whatsappFailFlag("(#131005) Access denied — token or permissions")).toBe("denied");
     expect(whatsappFailFlag("(#133010) Account not registered")).toBe("mobile");
     expect(whatsappFailFlag("WhatsApp could not be reached.")).toBe("net");
-    expect(explainWhatsAppError(133010, "(#133010) Account not registered")).toMatch(/133010/);
+    expect(explainWhatsAppError(133010, "(#133010) Account not registered")).toMatch(/REGISTER_PIN/);
+    expect(buildRegisterPayload("847291")).toEqual({ messaging_product: "whatsapp", pin: "847291" });
     expect(otpLanguageCandidates("en")).toEqual(["en", "en_US"]);
     vi.stubEnv("WHATSAPP_PHONE_NUMBER_ID", "111, 222");
     vi.stubEnv("WHATSAPP_PHONE_NUMBER_ID_FALLBACK", "111");
