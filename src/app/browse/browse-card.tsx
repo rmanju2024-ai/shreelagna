@@ -113,10 +113,11 @@ function CardPhoto({
               src={src}
               alt=""
               fill
-              sizes="(max-width: 640px) 50vw, (max-width: 1100px) 33vw, 264px"
+              sizes="(max-width: 640px) 100vw, (max-width: 1100px) 33vw, 264px"
               quality={70}
               priority={priority && i === 0}
               className={src === shown ? "is-on" : undefined}
+              style={{ objectFit: "cover", objectPosition: "center 18%" }}
             />
           ))}
         </span>

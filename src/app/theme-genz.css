@@ -3301,11 +3301,29 @@ button.field-help-btn,
   }
   img, video, canvas, svg { max-width: 100%; }
   .app-main img, .app-main video { height: auto; }
+  .app-main .sx-photo img,
+  .app-main .sx-photo-album img,
+  .app-main .portrait-photo-frame img,
+  .app-main .browse-card-photo img {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    object-fit: cover !important;
+    object-position: center 18% !important;
+  }
   .app-main .lotus-lake-video {
     height: 100% !important;
     width: 100% !important;
     max-width: none;
     object-fit: cover;
+  }
+  .sx-grid.is-results-list .sx-photo {
+    aspect-ratio: 4 / 5;
+    width: 100%;
+    min-height: 0;
+    height: auto;
   }
   .app-main, .sx-stage, .desk-stage, .settings-page, .plans-stage, .portrait-page {
     overflow-x: clip;

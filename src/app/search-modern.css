@@ -54,7 +54,10 @@
 .sx-view-all-slot { display: block; justify-self: end; width: 10.5rem; height: 1px; }
 .sx-feed { display: grid; gap: 1.15rem; }
 .sx-photo-album { position: absolute; inset: 0; }
-.sx-photo-album img { opacity: 0; transition: opacity 0.7s ease; }
+.sx-photo-album img {
+  position: absolute; inset: 0; opacity: 0; transition: opacity 0.7s ease;
+  width: 100%; height: 100%; max-width: none; object-fit: cover; object-position: center 18%;
+}
 .sx-photo-album img.is-on { opacity: 1; }
 .sx-photo-dots {
   position: absolute; z-index: 3; left: 50%; top: 0.55rem; transform: translateX(-50%);
@@ -162,8 +165,11 @@
 }
 .sx-card-link:hover { transform: translateY(-4px); box-shadow: 0 2px 4px rgb(63 14 13 / 8%), 0 26px 40px -20px rgb(63 14 13 / 45%); }
 .sx-photo { position: relative; aspect-ratio: 4 / 5; overflow: hidden; background: linear-gradient(160deg, #e9d3a8, #c79a55); }
-.sx-photo img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s ease; }
-.sx-card-link:hover .sx-photo img { transform: scale(1.05); }
+.sx-photo img {
+  position: absolute; inset: 0; width: 100%; height: 100%; max-width: none;
+  object-fit: cover; object-position: center 18%; display: block; transition: transform 0.5s ease;
+}
+.sx-card-link:hover .sx-photo img { transform: scale(1.04); }
 .sx-initial { display: grid; place-items: center; height: 100%; font-size: 4rem; font-weight: 800; color: rgb(255 248 231 / 85%); font-family: var(--font-display), ui-serif, serif; }
 .sx-photo::after { content: ""; position: absolute; inset: 45% 0 0; background: linear-gradient(to top, rgb(20 6 5 / 85%), transparent); pointer-events: none; }
 .sx-badge {

@@ -364,12 +364,13 @@ export async function BrowsePage({
             if (current.length > 1) photoLists.set(id, current.slice(0, 1));
           }
           const now = Date.now();
-          const mySelf = matchSelfFromProfile(mine, {
-            religion: nestedName(mine.religions),
+          const self = mine as Record<string, unknown>;
+          const mySelf = matchSelfFromProfile(self, {
+            religion: nestedName(self.religions),
             community: myCommunity,
           });
           const priority = new Map<string, BrowsePriority>();
-          const myAge = yearsFromDob(String(mine.date_of_birth ?? ""));
+          const myAge = yearsFromDob(String(self.date_of_birth ?? ""));
           for (const row of listed) {
             const community = nestedName(row.communities);
             const theirSelf = matchSelfFromProfile(row, {
@@ -385,7 +386,7 @@ export async function BrowsePage({
             );
             // One overall match % per profile (both directions), identical in every category.
             const mutual =
-              preferencePoints(mine, theirSelf) + preferencePoints(row, mySelf);
+              preferencePoints(self, theirSelf) + preferencePoints(row, mySelf);
             card.matchPercent = Math.max(1, Math.min(100, Math.round((mutual / (2 * PREFERENCE_POINTS)) * 100)));
             catalog[card.id] = card;
             const theirAge = yearsFromDob(String(row.date_of_birth ?? ""));
@@ -404,7 +405,7 @@ export async function BrowsePage({
               lists.community.push({ id: card.id, score: community ?? "Same community" });
             }
             (["fits", "prefers", "kundali"] as const).forEach((key) => {
-              const rank = browseRank(key, mine, row, mySelf, theirSelf);
+              const rank = browseRank(key, self, row, mySelf, theirSelf);
               if (!rank.pass) return;
               lists[key].push({ id: card.id, score: rank.label });
             });

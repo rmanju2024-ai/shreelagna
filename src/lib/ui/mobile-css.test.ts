@@ -89,6 +89,8 @@ describe("shared mobile CSS contract", () => {
     expect(css).toContain(".plans-header");
     expect(css).toContain('html[data-scene="wedding"] .app-main');
     expect(css).toContain(".help-requests");
+    expect(css).toContain(".app-main .sx-photo img");
+    expect(css).toContain("object-position: center 18%");
     expect(css).toContain('html[data-scene="dusk"] .app-main');
     expect(css).toContain('html[data-scene="rain"] .app-main');
     expect(css).toContain(".app-main .settings-page > .sx-hero");

@@ -1,37 +1,18 @@
 import type { MemberSupportRequest } from "@/lib/desk/tickets";
 
-type Db = {
-  from: (table: string) => {
-    select: (cols: string) => {
-      eq: (col: string, value: string) => {
-        order: (
-          col: string,
-          opts: { ascending: boolean },
-        ) => Promise<{ data: MemberSupportRequest[] | null; error: { message?: string } | null }>;
-      };
-      ilike: (
-        col: string,
-        value: string,
-      ) => {
-        order: (
-          col: string,
-          opts: { ascending: boolean },
-        ) => Promise<{ data: MemberSupportRequest[] | null; error: { message?: string } | null }>;
-      };
-    };
-  };
-};
+type TicketClient = { from: (table: string) => any };
 
 const COLS = "id, created_at, enquiry_type, message, status, resolution";
 
 export async function loadMemberSupportRequests(
-  db: Db,
+  db: TicketClient | null | undefined,
   user: { id: string; email?: string | null },
 ): Promise<MemberSupportRequest[]> {
+  if (!db) return [];
   const owned = await db.from("tickets").select(COLS).eq("created_by", user.id).order("created_at", {
     ascending: false,
   });
-  let rows = owned.error ? [] : owned.data ?? [];
+  let rows: MemberSupportRequest[] = owned.error ? [] : owned.data ?? [];
   if ((!rows.length || owned.error) && user.email) {
     const byMail = await db.from("tickets").select(COLS).ilike("email", user.email).order("created_at", {
       ascending: false,
