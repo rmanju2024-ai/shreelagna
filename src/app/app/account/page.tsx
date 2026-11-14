@@ -2,7 +2,9 @@ import Link from "next/link";
 import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { HouseCrest } from "@/components/house-crest";
 import { FieldMark } from "@/app/app/profiles/field-mark";
+import { SupportRequests } from "@/app/about/support-requests";
 import { ACCOUNT_GROUPS, accountInboxCounts, accountOwnerName } from "@/lib/account/hub";
+import { loadMemberSupportRequests } from "@/lib/desk/member-requests";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { planByCode } from "@/lib/membership/catalog";
 import { planHeaderMarks, type PlanMark } from "@/lib/membership/account-plan";
@@ -57,12 +59,13 @@ export default async function AccountHubPage() {
   const me = await ensureAppUser(supabase, user);
   if (!me) redirect("/login?error=account");
   const db = createServiceClient() ?? supabase;
-  const [access, mineRows, pendingCode, plans, inbox] = await Promise.all([
+  const [access, mineRows, pendingCode, plans, inbox, requests] = await Promise.all([
     loadMembership(db, me),
     db.from("profiles").select("id, subject_full_name").eq("created_by", me.id),
     fetchPendingPlanCode(db, me.id),
     fetchPlans(db),
     unreadNoticeBadge(me.id).catch(() => ({ chatUnread: 0, alertUnread: 0, likesPending: 0 })),
+    loadMemberSupportRequests(db, me).catch(() => []),
   ]);
   const mineIds = (mineRows.data ?? []).map((row) => String(row.id));
   const ownerName = accountOwnerName(mineRows.data ?? [], me.active_profile_id, me.display_name);
@@ -112,6 +115,7 @@ export default async function AccountHubPage() {
                   );
                 })}
               </ul>
+              {group.id === "membership" ? <SupportRequests compact requests={requests} /> : null}
             </section>
           ))}
         </div>

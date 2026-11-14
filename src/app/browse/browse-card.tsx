@@ -105,21 +105,19 @@ function CardPhoto({
   const facts = [note.age, note.height].filter(Boolean).join(" · ");
   return (
     <div className="sx-photo">
-      {album.length ? (
+      {shown ? (
         <span className="sx-photo-album">
-          {album.map((src, i) => (
-            <Image
-              key={src}
-              src={src}
-              alt=""
-              fill
-              sizes="(max-width: 640px) 100vw, (max-width: 1100px) 33vw, 264px"
-              quality={70}
-              priority={priority && i === 0}
-              className={src === shown ? "is-on" : undefined}
-              style={{ objectFit: "cover", objectPosition: "center 18%" }}
-            />
-          ))}
+          <Image
+            key={shown}
+            src={shown}
+            alt=""
+            fill
+            sizes="(max-width: 820px) 120px, 160px"
+            quality={45}
+            priority={priority}
+            className="is-on"
+            style={{ objectFit: "cover", objectPosition: "center 18%" }}
+          />
         </span>
       ) : (
         <span className="sx-initial">{note.name.slice(0, 1)}</span>
