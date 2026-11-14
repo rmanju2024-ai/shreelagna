@@ -7,7 +7,7 @@ import { GoogleSignIn } from "@/app/login/google-button";
 import { SupportRequests } from "@/app/about/support-requests";
 import { ContactForm } from "@/app/contact/contact-form";
 import type { MemberSupportRequest } from "@/lib/desk/tickets";
-import { btnPrimary, cardClass } from "@/lib/ui/classes";
+import { cardClass } from "@/lib/ui/classes";
 
 type Tab = "about" | "help" | "requests";
 
@@ -74,13 +74,11 @@ function AboutContent({ user }: { user: boolean }) {
         Search with ease. Speak when both families are ready.
       </blockquote>
 
-      <div className="public-cta">
-        {user ? (
-          <Link href="/app" className={btnPrimary}>My profile</Link>
-        ) : (
+      {user ? null : (
+        <div className="public-cta">
           <GoogleSignIn label="Continue with Gmail" tone="ivory" />
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
