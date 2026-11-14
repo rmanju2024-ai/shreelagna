@@ -2476,7 +2476,7 @@ button.field-help-btn,
   height: 100% !important;
   max-width: none;
   max-height: none;
-  object-fit: contain;
+  object-fit: cover;
   object-position: center center;
   background: #120c08;
   transition: opacity 0.8s ease;
@@ -3279,7 +3279,7 @@ button.field-help-btn,
     height: 100% !important;
     width: 100% !important;
     max-width: none;
-    object-fit: contain;
+    object-fit: cover;
   }
   .app-main, .sx-stage, .desk-stage, .settings-page, .plans-stage, .portrait-page {
     overflow-x: clip;
