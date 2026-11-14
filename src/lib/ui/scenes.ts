@@ -1,4 +1,4 @@
-export const SCENE_IDS = ["wedding", "ivory", "dusk", "rain"] as const;
+export const SCENE_IDS = ["wedding", "dusk", "rain"] as const;
 
 export type SceneId = (typeof SCENE_IDS)[number];
 
@@ -8,12 +8,6 @@ export const SCENE_OPTIONS: { id: SceneId; label: string; hint: string; wash: st
     label: "Royal foil 3D",
     hint: "Raised gold plates and maroon steps",
     wash: "linear-gradient(145deg, #fff6d6 0%, #d4a85a 38%, #8a5a18 72%, #6f1d1b 100%)",
-  },
-  {
-    id: "ivory",
-    label: "Ivory marble 3D",
-    hint: "Carved stone with cool gold inlay",
-    wash: "linear-gradient(145deg, #fffef8 0%, #e8dcc4 42%, #c4b08a 78%, #8a7a5c 100%)",
   },
   {
     id: "dusk",

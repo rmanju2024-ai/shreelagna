@@ -23,10 +23,10 @@ describe("ThemeQuickPicker", () => {
     }
     expect(screen.queryByRole("menuitemradio", { name: /Midnight jewel/i })).toBeNull();
 
-    fireEvent.click(screen.getByRole("menuitemradio", { name: /Ivory marble 3D/i }));
+    fireEvent.click(screen.getByRole("menuitemradio", { name: /Silk dusk 3D/i }));
 
-    expect(document.documentElement.dataset.scene).toBe("ivory");
-    expect(document.cookie).toContain("sl_scene=ivory");
+    expect(document.documentElement.dataset.scene).toBe("dusk");
+    expect(document.cookie).toContain("sl_scene=dusk");
     expect(changed).toHaveBeenCalledOnce();
     expect(screen.queryByRole("menu")).toBeNull();
   });

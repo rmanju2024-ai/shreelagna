@@ -1584,15 +1584,6 @@ html[data-scene="wedding"] .app-main {
   --theme-surface-alt: rgb(247 232 198 / 92%);
   --gz-shadow: 0 18px 46px -28px rgb(111 29 27 / 42%);
 }
-.page-scene.is-ivory .app-main,
-html[data-scene="ivory"] .app-main {
-  --theme-ink: #4a3b2a;
-  --theme-accent: #b8894c;
-  --theme-accent-soft: rgb(255 246 226 / 95%);
-  --theme-surface: rgb(255 252 246 / 95%);
-  --theme-surface-alt: rgb(244 236 220 / 92%);
-  --gz-shadow: 0 18px 46px -28px rgb(90 70 40 / 40%);
-}
 .page-scene.is-jewel .app-main,
 html[data-scene="jewel"] .app-main {
   --theme-ink: #4a1020;
@@ -3305,75 +3296,9 @@ button.field-help-btn,
 /* ═══════════════════════════════════════════════════════════
    Distinct 3D treatments per theme
    Wedding (default): raised gold plates — already defined above
-   Ivory: carved marble inlay
    Jewel: faceted gem cuts
    Dusk: soft silk pillows
    ═══════════════════════════════════════════════════════════ */
-
-html[data-scene="ivory"] body,
-.page-scene.is-ivory {
-  background:
-    radial-gradient(50rem 34rem at 12% -8%, rgb(255 255 255 / 70%), transparent 55%),
-    radial-gradient(40rem 30rem at 100% 8%, rgb(196 176 140 / 22%), transparent 50%),
-    linear-gradient(180deg, #fbf7ee, #efe6d4);
-}
-
-html[data-scene="ivory"] .btn-3d-maroon,
-.page-scene.is-ivory .btn-3d-maroon {
-  border-radius: 0.45rem !important;
-  background: linear-gradient(180deg, #d8c7a4, #9a8460 55%, #6e5a3c) !important;
-  box-shadow:
-    inset 0 10px 14px rgb(255 255 255 / 35%),
-    inset 0 -8px 12px rgb(70 50 24 / 28%),
-    0 1px 0 #efe4cc !important;
-  filter: none;
-}
-html[data-scene="ivory"] .btn-3d-ivory,
-.page-scene.is-ivory .btn-3d-ivory {
-  border-radius: 0.45rem !important;
-  background: linear-gradient(180deg, #fffef9, #efe6d4 60%, #e0d3b8) !important;
-  box-shadow:
-    inset 0 8px 12px #fff,
-    inset 0 -6px 10px rgb(140 120 90 / 18%),
-    0 0 0 1px rgb(184 164 120 / 45%) !important;
-}
-html[data-scene="ivory"] .card-premium,
-html[data-scene="ivory"] .home-invite,
-html[data-scene="ivory"] .sx-hero,
-html[data-scene="ivory"] .quota-soft,
-.page-scene.is-ivory .card-premium,
-.page-scene.is-ivory .home-invite {
-  border-radius: 0.55rem;
-  background: linear-gradient(180deg, #fffef9, #f3ead8);
-  box-shadow:
-    inset 0 1px 0 #fff,
-    inset 0 0 0 8px rgb(255 252 244 / 70%),
-    0 0 0 1px rgb(184 164 120 / 40%);
-}
-html[data-scene="ivory"] .site-nav-row {
-  border-radius: 0.85rem;
-  background: linear-gradient(180deg, #fffdf8, #ece2ce);
-  box-shadow: inset 0 2px 6px rgb(255 255 255 / 80%), 0 0 0 1px rgb(184 164 120 / 40%);
-}
-html[data-scene="ivory"] .site-nav .nav-3d,
-html[data-scene="ivory"] .about-tab-btn {
-  border-radius: 0.4rem;
-}
-html[data-scene="ivory"] .about-tabs-bar {
-  border-radius: 0.7rem;
-  background: linear-gradient(180deg, #e8dcc4, #d8cbb0);
-  box-shadow: inset 0 3px 6px rgb(90 70 40 / 16%);
-}
-html[data-scene="ivory"] .about-tab-btn[aria-selected="true"],
-html[data-scene="ivory"] .home-greeting-chip {
-  border-radius: 0.4rem;
-  background: linear-gradient(180deg, #cbb892, #8a734c);
-  box-shadow: inset 0 8px 10px rgb(255 255 255 / 28%), inset 0 -6px 8px rgb(60 40 16 / 30%);
-}
-html[data-scene="ivory"] .home-greeting-chip,
-html[data-scene="ivory"] .home-greeting-role {
-  border-radius: 0.4rem;
-}
 
 /* Jewel — faceted, hard offset, glossy cut */
 html[data-scene="jewel"] body,

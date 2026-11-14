@@ -9775,32 +9775,6 @@ a.inbox-name.inbox-open:focus-visible {
   display: none;
   pointer-events: none;
 }
-.foil-stage.is-ivory {
-  background:
-    radial-gradient(ellipse at 50% -8%, #fff 0%, transparent 40%),
-    linear-gradient(180deg, #fffdf8 0%, #efe6d4 48%, #d4c4a4 100%);
-}
-.foil-stage.is-ivory .foil-stage-floor {
-  background:
-    repeating-linear-gradient(90deg, rgb(180 160 120 / 22%) 0 1px, transparent 1px 4.5rem),
-    repeating-linear-gradient(0deg, rgb(160 140 100 / 14%) 0 1px, transparent 1px 4.5rem),
-    linear-gradient(180deg, rgb(255 255 255 / 50%), rgb(196 176 140 / 35%));
-}
-.foil-stage.is-ivory .foil-ring {
-  border-top-color: #fff;
-  border-right-color: #e8d7b0;
-  border-bottom-color: #b89a62;
-  border-left-color: #8a7a5c;
-}
-.foil-stage.is-ivory .foil-lotus b {
-  background: linear-gradient(180deg, #fff, #e8d7b0 55%, #b89a62);
-}
-.foil-stage.is-ivory .foil-lotus em {
-  background: radial-gradient(circle at 35% 30%, #fff, #f3e6c8 40%, #c4b08a);
-}
-.foil-stage.is-ivory .foil-orb {
-  background: radial-gradient(circle at 32% 28%, #fff, #f4ead6 40%, rgb(200 180 140 / 0%) 78%);
-}
 .foil-stage.is-jewel {
   background:
     radial-gradient(ellipse at 50% 0%, rgb(196 122 34 / 28%), transparent 42%),
@@ -10072,10 +10046,6 @@ a.inbox-name.inbox-open:focus-visible {
 
 .scene-theme-card.is-wedding .scene-pick-swatch {
   background: linear-gradient(135deg, #fff6d6, #d4a85a 45%, #6f1d1b);
-}
-
-.scene-theme-card.is-ivory .scene-pick-swatch {
-  background: linear-gradient(135deg, #fffef8, #c4b08a);
 }
 
 .scene-theme-card.is-jewel .scene-pick-swatch {
