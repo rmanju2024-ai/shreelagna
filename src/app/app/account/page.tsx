@@ -114,8 +114,8 @@ export default async function AccountHubPage() {
                     </li>
                   );
                 })}
+                {group.id === "membership" ? <SupportRequests compact requests={requests} /> : null}
               </ul>
-              {group.id === "membership" ? <SupportRequests compact requests={requests} /> : null}
             </section>
           ))}
         </div>
