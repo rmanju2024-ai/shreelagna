@@ -29,6 +29,9 @@ export function whatsappFailFlag(error: string): string {
 }
 
 export function explainWhatsAppError(code: number | undefined, raw: string): string {
+  if (code === 132001 || /does not exist in the translation|template.*does not exist/i.test(raw)) {
+    return "OTP template marriageconnect_otp is missing on this WhatsApp account (the new 84317 account). In WhatsApp Manager for 84317 open Message templates, create the same Authentication OTP template named marriageconnect_otp in English (en), wait until Approved, then send again. Templates do not copy from the old 97386 account.";
+  }
   if (code === 133010 || /account not registered/i.test(raw)) {
     return "WhatsApp Cloud (#133010): either the member mobile is not on WhatsApp, or this sender is not Cloud-registered yet. If you just added 84317, set WHATSAPP_REGISTER_PIN (the 6-digit two-step PIN) and put 84317’s API Setup Phone number ID first in WHATSAPP_PHONE_NUMBER_ID. Keep 1317222201476313 (97386) in WHATSAPP_PHONE_NUMBER_ID_FALLBACK.";
   }

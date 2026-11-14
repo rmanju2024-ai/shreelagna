@@ -68,6 +68,9 @@ describe("WhatsApp payload", () => {
     expect(whatsappFailFlag("(#131005) Access denied — token or permissions")).toBe("denied");
     expect(whatsappFailFlag("(#133010) Account not registered")).toBe("mobile");
     expect(whatsappFailFlag("WhatsApp could not be reached.")).toBe("net");
+    expect(explainWhatsAppError(132001, "template name (marriageconnect_otp) does not exist in en_US")).toMatch(
+      /marriageconnect_otp/,
+    );
     expect(explainWhatsAppError(133010, "(#133010) Account not registered")).toMatch(/REGISTER_PIN/);
     expect(buildRegisterPayload("847291")).toEqual({ messaging_product: "whatsapp", pin: "847291" });
     expect(otpLanguageCandidates("en")).toEqual(["en", "en_US"]);
