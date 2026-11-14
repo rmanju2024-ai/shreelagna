@@ -60,7 +60,7 @@ function AboutContent({ user }: { user: boolean }) {
       <div className="public-card-grid">
         {[
           ["Who we serve",   "Indian families, with care and respect."],
-          ["How you begin",  "A Gmail sign-in. Members return to their profile. Family may write on behalf of the bride or groom."],
+          ["How you begin",  "A Gmail sign-in. Family may write for the bride or groom. Conversation starts when both families are ready."],
           ["How we keep faith", "For adults only. Private details stay private. Community, if shared, is treated with care."],
         ].map(([t, d]) => (
           <article key={t} className={`${cardClass} public-story-card`}>
@@ -69,10 +69,6 @@ function AboutContent({ user }: { user: boolean }) {
           </article>
         ))}
       </div>
-
-      <blockquote className="public-quote">
-        Search with ease. Speak when both families are ready.
-      </blockquote>
 
       {user ? null : (
         <div className="public-cta">
