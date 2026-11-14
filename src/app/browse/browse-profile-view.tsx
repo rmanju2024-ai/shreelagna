@@ -1,5 +1,5 @@
 import { ProfileRedesign, type ProfileData } from "@/app/browse/profile-redesign";
-import { profileLeaveTarget } from "@/lib/ui/dismiss";
+import { isStaffProfilePreview, profileLeaveTarget } from "@/lib/ui/dismiss";
 import { profileViewedCopy } from "@/lib/match/alert-copy";
 import { canAlertProfileView } from "@/lib/match/profile-settings";
 import { displayFirstName } from "@/lib/profile/options";
@@ -279,11 +279,11 @@ export async function BrowseProfileView({
   editHref,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; sent?: string; contact?: string; wa?: string; safety?: string; from?: string }>;
+  searchParams: Promise<{ error?: string; sent?: string; contact?: string; wa?: string; safety?: string; from?: string; preview?: string }>;
   editHref?: string;
 }) {
   const { id } = await params;
-  const { sent, from } = await searchParams;
+  const { sent, from, preview } = await searchParams;
   const { supabase, user } = await getAuth();
   if (!supabase || !user) redirect(`/login?next=/browse/${id}`);
   const me = await ensureAppUser(supabase, user);
@@ -304,6 +304,7 @@ export async function BrowseProfileView({
   if (!profile) return <UnavailableBrowse />;
 
   const own = me.id === profile.created_by;
+  const staffPreview = Boolean(isStaff && !own && (preview === "1" || isStaffProfilePreview(from)));
   let viewerType: ProfileType | null = null;
   let viewerStatus: string | null = null;
   let canSend = false;
@@ -464,6 +465,25 @@ export async function BrowseProfileView({
     };
   } else if (!own && !isStaff) {
     needComplete = true;
+  }
+
+  if (staffPreview) {
+    needPlan = false;
+    needComplete = false;
+    canSend = false;
+    contact = {
+      revealed: true,
+      mobile: typeof profile.subject_mobile === "string" ? profile.subject_mobile.trim() : "",
+      email: typeof owner?.email === "string" ? owner.email.trim() : "",
+      locked: false,
+      accepted: true,
+      needPlan: false,
+      counted: true,
+      canReveal: false,
+      used: 0,
+      left: null,
+      limit: null,
+    };
   }
 
   const targetAccess = await targetAccessP;
@@ -819,14 +839,15 @@ export async function BrowseProfileView({
     memberCode,
     profileType: asProfileType(profile.profile_type),
     house: owner?.role === "admin" ? "admin" : owner?.role === "service" ? "staff" : undefined,
-    shortlisted,
+    shortlisted: staffPreview ? false : shortlisted,
     own,
-    editHref,
+    preview: staffPreview,
+    editHref: staffPreview ? undefined : editHref,
     user,
-    kundali,
-    interestId,
-    thread,
-    canSend,
+    kundali: staffPreview ? null : kundali,
+    interestId: staffPreview ? null : interestId,
+    thread: staffPreview ? "none" : thread,
+    canSend: staffPreview ? false : canSend,
     needPlan,
     needQuota,
     needDaily,
@@ -858,18 +879,20 @@ export async function BrowseProfileView({
       cases: verifyCasesRes.data ?? [],
     }),
     details,
-    matches: !own && mine ? matchBanner(mine, profile, kundali) : [],
+    matches: staffPreview || own || !mine ? [] : matchBanner(mine, profile, kundali),
     hope,
-    fitScore,
-    chat: {
-      myProfileId: myChatId,
-      threadId: chatThreadId,
-      notes: chatNotes,
-      live: pairLive,
-      name: displayFirstName(typeof profile.subject_full_name === "string" ? profile.subject_full_name : "Match"),
-      photo: photoUrls[0] ?? null,
-      seen: lastSeen,
-    },
+    fitScore: staffPreview ? null : fitScore,
+    chat: staffPreview
+      ? undefined
+      : {
+          myProfileId: myChatId,
+          threadId: chatThreadId,
+          notes: chatNotes,
+          live: pairLive,
+          name: displayFirstName(typeof profile.subject_full_name === "string" ? profile.subject_full_name : "Match"),
+          photo: photoUrls[0] ?? null,
+          seen: lastSeen,
+        },
   };
 
   return (

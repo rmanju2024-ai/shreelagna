@@ -82,6 +82,7 @@ export type ProfileData = {
   kundali?: { total?: number; max?: number; label?: string } | null;
   shortlisted: boolean;
   own: boolean;
+  preview?: boolean;
   editHref?: string;
   user: unknown;
   interestId: string | null;
@@ -437,12 +438,14 @@ export function ProfileRedesign(props: ProfileData) {
   const [hero, setHero] = useState(0);
   const [lightbox, setLightbox] = useState<number | null>(null);
   const photos = props.photoUrls?.length ? props.photoUrls : props.photoUrl ? [props.photoUrl] : [];
-  const gate = otherProfileLocked({
-    own: props.own,
-    needComplete: props.needComplete,
-    needPlan: props.needPlan,
-    targetAwaitingReview: props.targetAwaitingReview,
-  });
+  const gate = props.preview
+    ? false
+    : otherProfileLocked({
+        own: props.own,
+        needComplete: props.needComplete,
+        needPlan: props.needPlan,
+        targetAwaitingReview: props.targetAwaitingReview,
+      });
   const visiblePhotos = gate ? photos.slice(0, 1) : photos;
   const locked = gate;
   const lockHref = props.needComplete ? props.finishHref : props.targetAwaitingReview ? props.finishHref : "/app/plans";
@@ -456,7 +459,7 @@ export function ProfileRedesign(props: ProfileData) {
     : "A live plan unlocks the full profile, extra photos, video and voice.";
   const personalDetails = (props.details ?? []).filter((group) => group.title === "Personal");
   const closedDetails = (props.details ?? []).filter((group) => group.title !== "Personal");
-  const spark = !props.own && props.user ? (
+  const spark = !props.preview && !props.own && props.user ? (
     <BirdDock
       inline
       profileId={props.id}
@@ -543,6 +546,11 @@ export function ProfileRedesign(props: ProfileData) {
           </BackLink>
         </nav>
       ) : null}
+      {props.preview ? (
+        <p className="pv-staff-preview" role="status">
+          Staff preview · view only. This does not send a request, start a chat, or change their account.
+        </p>
+      ) : null}
 
       <header className="pv-hero">
         <KindMark type={props.profileType} className="pv-kind" />
@@ -607,7 +615,7 @@ export function ProfileRedesign(props: ProfileData) {
             );
           })()}
         </div>
-        {!props.own && props.user ? (
+        {!props.preview && !props.own && props.user ? (
           <div className="pv-top-actions">
             <button
               type="button"
@@ -621,7 +629,7 @@ export function ProfileRedesign(props: ProfileData) {
             </button>
             <SafetyProfileControl icons profileId={props.id} returnTo={`/browse/${props.id}`} name={props.name} />
           </div>
-        ) : props.editHref ? (
+        ) : !props.preview && props.editHref ? (
           <div className="pv-top-actions">
             <Link href={props.editHref} className="pv-edit">
               Edit profile
@@ -715,7 +723,7 @@ export function ProfileRedesign(props: ProfileData) {
             </PlanLock>
           ) : null}
 
-          {!props.own ? (
+          {!props.preview && !props.own ? (
           <PlanLock on={locked} href={lockHref} cta={lockCta} message={lockMessage}>
           <section className={`pv-chat${props.thread === "none" ? " is-locked" : " is-open"}`}>
             <div className="pv-chat-head">
@@ -765,7 +773,23 @@ export function ProfileRedesign(props: ProfileData) {
             <div className="pv-media-hero is-blank">{props.name.slice(0, 1)}</div>
           )}
           {lightbox === null && spark ? <div className="pv-spark-box">{spark}</div> : null}
-          {props.contact ? <ContactPanel profileId={props.id} contact={props.contact} /> : null}
+          {props.contact && !props.preview ? (
+            <ContactPanel profileId={props.id} contact={props.contact} />
+          ) : props.preview && props.contact ? (
+            <section className="pv-contact">
+              <p className="pv-contact-title">On file</p>
+              <ul>
+                <li>
+                  <span>Mobile</span>
+                  <strong>{props.contact.mobile || "Not on file"}</strong>
+                </li>
+                <li>
+                  <span>Email</span>
+                  <strong>{props.contact.email || "Not on file"}</strong>
+                </li>
+              </ul>
+            </section>
+          ) : null}
           {visiblePhotos.length > 1 ? (
             <div className="pv-thumbs">
               {visiblePhotos.map((src, i) => (

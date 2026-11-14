@@ -110,7 +110,7 @@ export default async function DeskSafetyPage({
                       {reported?.place ? <small>{reported.place}</small> : null}
                       {reported ? (
                         <span className="desk-safety-links">
-                          <Link href={profileOpenHref(reported.id, "safety")}>View profile</Link>
+                          <Link href={profileOpenHref(reported.id, "safety")}>Preview</Link>
                           <Link href={`/app/profiles/${reported.id}`}>Edit in desk</Link>
                         </span>
                       ) : null}

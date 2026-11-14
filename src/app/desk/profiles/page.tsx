@@ -72,7 +72,7 @@ function ProfileDeskRow({ row, queue }: { row: DeskProfile; queue: QueueView }) 
       </div>
       <div className="desk-ticket-ops desk-profile-actions">
         <Link href={profileOpenHref(row.id, "desk")} className={btnGhost}>
-          View
+          Preview
         </Link>
         <Link href={`/app/profiles/${row.id}`} className={btnGhost}>
           Edit

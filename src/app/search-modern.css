@@ -1247,6 +1247,17 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
   justify-content: flex-end;
   margin: 0 0 0.45rem;
 }
+.pv-shell .pv-staff-preview {
+  margin: 0 0 0.75rem;
+  padding: 0.55rem 0.8rem;
+  border-radius: 0.85rem;
+  border: 1px solid rgb(184 137 76 / 45%);
+  background: linear-gradient(180deg, #fffdf8, #f6ead4);
+  color: #6f1d1b;
+  font-size: 0.82rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
 .pv-shell .pv-close {
   display: inline-flex;
   align-items: center;

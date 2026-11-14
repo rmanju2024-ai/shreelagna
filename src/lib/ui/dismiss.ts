@@ -32,6 +32,12 @@ const PROFILE_LEAVE: Record<string, { href: string; label: string }> = {
   plans: { href: "/app/plans", label: "Back to membership" },
 };
 
+const STAFF_PREVIEW_FROM = new Set(["desk", "look", "safety"]);
+
+export function isStaffProfilePreview(from?: string | null) {
+  return Boolean(from && STAFF_PREVIEW_FROM.has(from));
+}
+
 export function profileLeaveTarget(from?: string | null) {
   if (from && PROFILE_LEAVE[from]) return PROFILE_LEAVE[from];
   return { href: "/browse", label: "Close" };

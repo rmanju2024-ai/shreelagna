@@ -106,7 +106,7 @@ export default async function DeskMemberFilePage({ params }: { params: Promise<{
       </dl>
       <p className="plans-desk-actions">
         <Link href={profileOpenHref(id, "desk")} className={btnGhost}>
-          View
+          Preview
         </Link>
         <Link href={`/app/profiles/${id}`} className={btnGhost}>
           Edit

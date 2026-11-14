@@ -6,7 +6,7 @@ export default async function BrowseProfilePage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; sent?: string; contact?: string; wa?: string; safety?: string; from?: string }>;
+  searchParams: Promise<{ error?: string; sent?: string; contact?: string; wa?: string; safety?: string; from?: string; preview?: string }>;
 }) {
   return (
     <PageShell full>

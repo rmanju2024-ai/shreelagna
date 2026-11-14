@@ -99,7 +99,7 @@ export default async function DeskMediaPage() {
                   </span>
                 </form>
                 <Link href={profileOpenHref(row.profile_id, "desk")} className={btnGhost}>
-                  View profile
+                  Preview
                 </Link>
               </li>
             );
