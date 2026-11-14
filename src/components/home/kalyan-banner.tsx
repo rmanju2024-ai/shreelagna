@@ -641,6 +641,7 @@ export function KalyanBanner({
     const onError   = () => setVideoPlaying(false);
     v.addEventListener("playing", onPlaying);
     v.addEventListener("error",   onError);
+    void v.play().then(() => setVideoPlaying(true)).catch(() => setVideoPlaying(false));
     if (!v.paused && v.readyState >= 3) setVideoPlaying(true);
     return () => {
       v.removeEventListener("playing", onPlaying);

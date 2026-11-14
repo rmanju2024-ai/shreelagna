@@ -19,16 +19,15 @@ export default async function HomePage() {
       <section className="home-split">
         <div className="home-split-art">
           <KalyanBanner intensity="hero" />
+          {user ? (
+            <Suspense fallback={null}>
+              <BannerGreeting />
+            </Suspense>
+          ) : null}
         </div>
         <div className="home-split-copy">
           <div className="home-invite">
-            {user ? (
-              <Suspense fallback={null}>
-                <BannerGreeting />
-              </Suspense>
-            ) : (
-              <BrandMotto as="h1" />
-            )}
+            <BrandMotto as="h1" />
             <div className="home-invite-actions">
               {user ? (
                 <Link href="/app" className={btnHero}>
