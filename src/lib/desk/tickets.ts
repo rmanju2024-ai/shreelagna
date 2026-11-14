@@ -92,6 +92,15 @@ export function memberRequestStatus(status: string | null | undefined): { label:
   return { label: "Received", hint: "The house has your note." };
 }
 
+export function requestOutcomeLines(value: string | null | undefined): string[] {
+  const text = String(value ?? "").replace(/\s+/g, " ").trim();
+  if (!text) return [];
+  return text
+    .split(/\s+[—–]\s+/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
 export type MemberSupportRequest = {
   id: string;
   created_at: string;

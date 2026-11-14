@@ -65,7 +65,7 @@ export default async function AccountHubPage() {
     fetchPendingPlanCode(db, me.id),
     fetchPlans(db),
     unreadNoticeBadge(me.id).catch(() => ({ chatUnread: 0, alertUnread: 0, likesPending: 0 })),
-    loadMemberSupportRequests(db, me).catch(() => []),
+    loadMemberSupportRequests(db, { id: user.id, email: user.email ?? me.email }).catch(() => []),
   ]);
   const mineIds = (mineRows.data ?? []).map((row) => String(row.id));
   const ownerName = accountOwnerName(mineRows.data ?? [], me.active_profile_id, me.display_name);

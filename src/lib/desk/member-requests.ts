@@ -13,11 +13,13 @@ export async function loadMemberSupportRequests(
     ascending: false,
   });
   let rows: MemberSupportRequest[] = owned.error ? [] : owned.data ?? [];
-  if ((!rows.length || owned.error) && user.email) {
+  if (user.email) {
     const byMail = await db.from("tickets").select(COLS).ilike("email", user.email).order("created_at", {
       ascending: false,
     });
-    if (!byMail.error) rows = byMail.data ?? [];
+    if (!byMail.error) {
+      rows = [...rows, ...(byMail.data ?? [])];
+    }
   }
   const seen = new Set<string>();
   return rows.filter((row) => {

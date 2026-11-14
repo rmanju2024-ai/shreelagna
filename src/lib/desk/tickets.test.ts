@@ -7,6 +7,7 @@ import {
   readNoteStatus,
   stampNoteBody,
   memberRequestStatus,
+  requestOutcomeLines,
   ticketEnquiryLabel,
   ticketStatusClass,
   ticketStatusLabel,
@@ -58,5 +59,15 @@ describe("desk tickets", () => {
       label: "Resolved",
       hint: "This request is closed.",
     });
+  });
+
+  it("splits a desk outcome into readable lines", () => {
+    expect(
+      requestOutcomeLines("Called family 25 Sep 2026 · 2:09 pm IST — Photo approved 25 Sep 2026 · 2:10 pm IST — solved"),
+    ).toEqual([
+      "Called family 25 Sep 2026 · 2:09 pm IST",
+      "Photo approved 25 Sep 2026 · 2:10 pm IST",
+      "solved",
+    ]);
   });
 });
