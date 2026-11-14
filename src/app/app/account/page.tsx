@@ -2,9 +2,9 @@ import Link from "next/link";
 import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { HouseCrest } from "@/components/house-crest";
 import { FieldMark } from "@/app/app/profiles/field-mark";
-import { SupportRequestRow } from "@/app/about/support-requests";
 import { ACCOUNT_GROUPS, accountInboxCounts, accountOwnerName } from "@/lib/account/hub";
 import { loadMemberSupportRequests } from "@/lib/desk/member-requests";
+import { isOpenTicket } from "@/lib/desk/tickets";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { planByCode } from "@/lib/membership/catalog";
 import { planHeaderMarks, type PlanMark } from "@/lib/membership/account-plan";
@@ -70,7 +70,10 @@ export default async function AccountHubPage() {
   const mineIds = (mineRows.data ?? []).map((row) => String(row.id));
   const ownerName = accountOwnerName(mineRows.data ?? [], me.active_profile_id, me.display_name);
   const quota = await loadInterestQuota(db, me, access, mineIds);
-  const inboxCounts = accountInboxCounts(inbox);
+  const inboxCounts = {
+    ...accountInboxCounts(inbox),
+    "/about?tab=requests": requests.filter((row) => isOpenTicket(row.status)).length,
+  };
   const pending = planByCode(pendingCode, plans.filter((plan) => plan.forSale));
   const planMarks = planHeaderMarks({
     access,
@@ -114,13 +117,6 @@ export default async function AccountHubPage() {
                     </li>
                   );
                 })}
-                {group.id === "membership"
-                  ? requests.map((row) => (
-                      <li key={row.id}>
-                        <SupportRequestRow request={row} />
-                      </li>
-                    ))
-                  : null}
               </ul>
             </section>
           ))}
