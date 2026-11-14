@@ -27,7 +27,7 @@ export function BannerGreetingTagline({
 
   return (
     <p
-      className="banner-greeting home-greeting"
+      className="home-greeting"
       aria-label={g ? `${g.text}, ${name}` : `Welcome back, ${name}`}
     >
       <span className="home-greeting-chip">

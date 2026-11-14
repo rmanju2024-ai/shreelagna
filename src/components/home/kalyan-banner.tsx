@@ -686,6 +686,7 @@ export function KalyanBanner({
           <CornerOrnament pos="tr" />
           <CornerOrnament pos="bl" />
           <CornerOrnament pos="br" />
+          <p className="home-banner-line">Love begins here...</p>
         </>
       )}
     </>

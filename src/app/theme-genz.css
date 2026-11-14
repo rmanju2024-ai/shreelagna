@@ -2492,6 +2492,42 @@ button.field-help-btn,
   filter: drop-shadow(0 0 5px rgba(220, 170, 60, 0.75));
   animation: pearl-corner-glow 4s ease-in-out infinite;
 }
+.home-banner-line {
+  position: absolute;
+  left: 50%;
+  bottom: 1.15rem;
+  transform: translateX(-50%);
+  z-index: 7;
+  margin: 0;
+  width: max-content;
+  max-width: calc(100% - 2.2rem);
+  padding: 0.42rem 1.15rem 0.48rem;
+  border-radius: 999px;
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-size: clamp(1.05rem, 2.6vw, 1.55rem);
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  color: #fff8f0;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(12, 6, 4, 0.72) 0%, rgba(63, 14, 13, 0.62) 100%);
+  border: 1px solid rgba(232, 198, 118, 0.55);
+  box-shadow:
+    0 10px 24px -12px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 236, 190, 0.22);
+  text-shadow: 0 1px 0 rgba(63, 14, 13, 0.45);
+}
+@media (max-width: 860px) {
+  .home-banner-line {
+    bottom: 0.75rem;
+    font-size: clamp(0.98rem, 4.2vw, 1.2rem);
+    padding: 0.36rem 0.9rem 0.4rem;
+    white-space: normal;
+  }
+}
 .pearl-corner.tl { top:    0.05rem; left:   0.05rem; }
 .pearl-corner.tr { top:    0.05rem; right:  0.05rem; }
 .pearl-corner.bl { bottom: 0.05rem; left:   0.05rem; }
