@@ -16,6 +16,7 @@ import {
   type SelectHTMLAttributes,
 } from "react";
 import { createPortal } from "react-dom";
+import { pinIndiaFirst } from "@/lib/profile/form-lists";
 import { placeFloat } from "@/lib/ui/place-float";
 
 type Item = { value: string; label: string; disabled?: boolean };
@@ -64,7 +65,10 @@ export function Select3d({
 }) {
   const options = useMemo(() => {
     const rows = items ? fromItems(items) : readOptions(children);
-    return multiple ? rows.filter((row) => row.value !== "") : rows;
+    const listed = multiple ? rows.filter((row) => row.value !== "") : rows;
+    if (!listed.some((row) => row.value === "India")) return listed;
+    const rank = new Map(listed.map((row) => [row.value, row]));
+    return pinIndiaFirst(listed.map((row) => row.value)).map((value) => rank.get(value)!);
   }, [items, children, multiple]);
   const reactId = useId();
   const listId = `${reactId}-list`;

@@ -222,11 +222,7 @@ export function HeaderNav({
       root.style.removeProperty("--mobile-dock-shift");
     };
   }, []);
-  const desk: NavItem = { href: "/desk", label: "Desk", icon: "staff" };
-  const more: NavItem[] = [
-    ...(staff ? [desk] : []),
-    { href: "/about", label: "About & Help", icon: "about" },
-  ];
+  const more: NavItem[] = [{ href: "/about", label: "About & Help", icon: "about" }];
   const registerHere = pathMatches(pathname, "/login", tab);
   const moreOn = more.some((item) => pathMatches(pathname, item.href, tab));
 
@@ -283,6 +279,13 @@ export function HeaderNav({
             <span className="nav-3d-label">Sign in</span>
           </Link>
         )}
+        {staff ? (
+          <NavChip
+            item={{ href: "/desk", label: "Desk", icon: "staff" }}
+            overlay={overlay}
+            current={pathMatches(pathname, "/desk", tab)}
+          />
+        ) : null}
         <NavGroup
           label="More"
           icon="more"

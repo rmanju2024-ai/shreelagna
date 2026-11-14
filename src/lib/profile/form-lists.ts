@@ -46,6 +46,13 @@ export function pinThenAlpha(values: readonly string[], pins: readonly string[] 
   return [...head, ...rest];
 }
 
+/** India stays at the top of country lists. Any-country stays above India when present. */
+export function pinIndiaFirst(values: readonly string[]): string[] {
+  if (!values.includes("India")) return [...values];
+  const anyPins = [...new Set(values.filter((value) => /^any\b/i.test(value)))];
+  return pinThenAlpha(values, [...anyPins, "India"]);
+}
+
 export function citiesForState(lists: FormLists, state: string | null | undefined): string[] {
   if (!state) return [];
   return sortLabels(lists.cities.filter((c) => c.state === state).map((c) => c.name));

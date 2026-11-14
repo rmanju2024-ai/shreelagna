@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { EMPTY_BROWSE_FILTERS, type BrowseFilters } from "@/lib/match/browse-filters";
 import { enrichFormLists, listsFromSeed } from "@/lib/profile/form-lists-seed";
+import { pinIndiaFirst } from "@/lib/profile/form-lists";
 import { Select3d } from "@/components/select3d";
 import { btnGhost, btnPrimary, inputClass } from "@/lib/ui/classes";
 
@@ -60,7 +61,7 @@ export function BrowseFilterDesk({
       ),
     [cities, draft.state],
   );
-  const countryOptions = useMemo(() => sorted(countries), [countries]);
+  const countryOptions = useMemo(() => pinIndiaFirst(sorted(countries)), [countries]);
   const stateOptions = useMemo(() => sorted(states), [states]);
   const religionOptions = useMemo(() => sorted(religions), [religions]);
   const communityOptions = useMemo(() => sorted(communities), [communities]);

@@ -1,5 +1,21 @@
 import { describe, expect, it } from "vitest";
+import { pinIndiaFirst } from "./form-lists";
 import { enrichFormLists, listsFromSeed } from "./form-lists-seed";
+
+describe("pin India first", () => {
+  it("puts India under Any country, then the rest A to Z", () => {
+    expect(pinIndiaFirst(["Zambia", "India", "Afghanistan", "Any country"])).toEqual([
+      "Any country",
+      "India",
+      "Afghanistan",
+      "Zambia",
+    ]);
+  });
+
+  it("leaves lists without India in their given order", () => {
+    expect(pinIndiaFirst(["Karnataka", "Goa"])).toEqual(["Karnataka", "Goa"]);
+  });
+});
 
 describe("form lists", () => {
   it("lists occupations A to Z", () => {
@@ -21,6 +37,7 @@ describe("form lists", () => {
     expect(lists.residency).toEqual(alpha(lists.residency));
     expect(lists.countries[0]).toBe("India");
     expect(lists.countries.slice(1)).toEqual(alpha(lists.countries.slice(1)));
+    expect(lists.hopeCountries.slice(0, 2)).toEqual(["Any country", "India"]);
     expect(lists.yoniAnimals[0]).toBe("Don't know");
     expect(lists.yoniAnimals.slice(1)).toEqual(alpha(lists.yoniAnimals.slice(1)));
     expect(lists.gotras[0]).toBe("Don't know");

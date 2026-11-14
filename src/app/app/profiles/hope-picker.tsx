@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 
 import { FieldHelp } from "@/app/app/profiles/field-help";
 import { FieldMark } from "@/app/app/profiles/field-mark";
-import { compareLabel } from "@/lib/profile/form-lists";
+import { compareLabel, pinIndiaFirst } from "@/lib/profile/form-lists";
 import { placeFloat } from "@/lib/ui/place-float";
 
 type Option = { value: string; label: string };
@@ -19,7 +19,10 @@ function toOptions(options: Option[] | string[], alphabetize = true): Option[] {
       seen.add(item.value);
       return true;
     });
-  return alphabetize ? items.sort((a, b) => compareLabel(a.label, b.label)) : items;
+  const ordered = alphabetize ? items.sort((a, b) => compareLabel(a.label, b.label)) : items;
+  if (!ordered.some((item) => item.value === "India")) return ordered;
+  const rank = new Map(ordered.map((item) => [item.value, item]));
+  return pinIndiaFirst(ordered.map((item) => item.value)).map((value) => rank.get(value)!);
 }
 
 export function HopePicker({

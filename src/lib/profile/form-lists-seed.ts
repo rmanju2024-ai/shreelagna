@@ -23,7 +23,7 @@ import {
   YONI_ANIMALS,
   withDontKnow,
 } from "@/lib/profile/options";
-import { compareLabel, emptyFormLists, pinThenAlpha, sortLabels, type FormLists } from "@/lib/profile/form-lists";
+import { compareLabel, emptyFormLists, pinIndiaFirst, sortLabels, type FormLists } from "@/lib/profile/form-lists";
 
 function take(loaded: string[] | undefined, seed: readonly string[], sort: "alpha" | "keep" = "keep"): string[] {
   const src = loaded?.length ? loaded : [...seed];
@@ -92,8 +92,8 @@ export function enrichFormLists(loaded: FormLists): FormLists {
     physicalStatuses: withDontKnow(take(loaded.physicalStatuses, seed.physicalStatuses, "alpha")),
     bloodGroups: withDontKnow(take(loaded.bloodGroups, seed.bloodGroups)),
     hobbies: take(loaded.hobbies, seed.hobbies, "alpha"),
-    countries: pinThenAlpha(take(loaded.countries, seed.countries), ["India"]),
-    hopeCountries: pinThenAlpha(take(loaded.hopeCountries, seed.hopeCountries), ["Any country", "India"]),
+    countries: pinIndiaFirst(take(loaded.countries, seed.countries)),
+    hopeCountries: pinIndiaFirst(take(loaded.hopeCountries, seed.hopeCountries)),
     residency: take(loaded.residency, seed.residency, "alpha"),
     gotras: withDontKnow(take(loaded.gotras, seed.gotras, "alpha")),
     prefManaged: take(loaded.prefManaged, seed.prefManaged),
