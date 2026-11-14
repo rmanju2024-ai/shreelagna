@@ -1984,6 +1984,7 @@ button.field-help-btn,
   font-family: var(--font-display), serif;
 }
 .help-requests > p { margin: 0; color: #6a574c; font-size: 0.84rem; line-height: 1.4; }
+.help-requests .public-cta { margin-top: 0.85rem; }
 .help-requests ul { display: grid; gap: 0.45rem; margin: 0; padding: 0; list-style: none; }
 .help-request-row {
   width: 100%;
@@ -2493,6 +2494,9 @@ button.field-help-btn,
 }
 .about-tab-btn {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 0.62rem 1.45rem;
   border-radius: 999px;
   cursor: pointer;
@@ -2532,16 +2536,43 @@ button.field-help-btn,
     0 4px 0 #2a0908,
     0 12px 22px rgba(80, 16, 12, 0.32);
 }
+.about-tab-short { display: none; }
+.about-tab-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  margin-left: 0.35rem;
+  padding: 0 0.28rem;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  background: #fff8f0;
+  color: #6f1d1b;
+}
+.about-tab-btn[aria-selected="true"] .about-tab-count {
+  background: rgb(255 248 240 / 92%);
+  color: #6f1d1b;
+}
 @media (max-width: 640px) {
   .about-tabs-bar {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
     width: 100%;
+    gap: 0.28rem;
+    padding: 0.28rem;
   }
   .about-tab-btn {
-    flex: 1;
-    text-align: center;
-    padding: 0.7rem 0.7rem;
+    min-height: 44px;
+    padding: 0.45rem 0.2rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.01em;
   }
+  .about-tab-full { display: none; }
+  .about-tab-short { display: inline; }
+  .about-tab-count { margin-left: 0.2rem; }
 }
 
 .about-tab-panel { animation: tab-fade-in 0.22s ease; }

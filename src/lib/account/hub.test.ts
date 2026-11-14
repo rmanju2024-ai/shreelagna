@@ -11,7 +11,7 @@ describe("account hub", () => {
     expect(hrefs).toContain("/app/settings");
     expect(hrefs).toContain("/app/plans");
     expect(hrefs).toContain("/contact");
-    expect(hrefs).toContain("/about?tab=help");
+    expect(hrefs).toContain("/about?tab=requests");
   });
 
   it("maps unread counts onto inbox cards", () => {

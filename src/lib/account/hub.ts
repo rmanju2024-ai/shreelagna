@@ -29,7 +29,7 @@ export const ACCOUNT_GROUPS = [
     items: [
       { href: "/app/plans", title: "Membership", mark: "Income", text: "Your plan, access and future upgrades." },
       { href: "/contact", title: "Help & support", mark: "Contact", text: "Write to the house team." },
-      { href: "/about?tab=help", title: "Your requests", mark: "Contact", text: "Status and outcome of notes you sent." },
+      { href: "/about?tab=requests", title: "Your requests", mark: "Contact", text: "Status and outcome of notes you sent." },
     ],
   },
 ] as const;

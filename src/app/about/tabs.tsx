@@ -9,21 +9,44 @@ import { ContactForm } from "@/app/contact/contact-form";
 import type { MemberSupportRequest } from "@/lib/desk/tickets";
 import { btnPrimary, cardClass } from "@/lib/ui/classes";
 
-type Tab = "about" | "help";
+type Tab = "about" | "help" | "requests";
+
+const TABS: { id: Tab; full: string; short: string }[] = [
+  { id: "about", full: "Our story", short: "Story" },
+  { id: "help", full: "Help & contact", short: "Help" },
+  { id: "requests", full: "Your requests", short: "Requests" },
+];
+
+function parseTab(raw: string | null): Tab {
+  if (raw === "help" || raw === "requests") return raw;
+  return "about";
+}
 
 /* ── Tab bar ─────────────────────────────────────────────── */
-function TabBar({ active, onChange }: { active: Tab; onChange(t: Tab): void }) {
+function TabBar({
+  active,
+  onChange,
+  requestCount,
+}: {
+  active: Tab;
+  onChange(t: Tab): void;
+  requestCount: number;
+}) {
   return (
     <div className="about-tabs-bar" role="tablist">
-      {(["about", "help"] as Tab[]).map((t) => (
+      {TABS.map((t) => (
         <button
-          key={t}
+          key={t.id}
           role="tab"
-          aria-selected={active === t}
-          onClick={() => onChange(t)}
+          aria-selected={active === t.id}
+          onClick={() => onChange(t.id)}
           className="about-tab-btn"
         >
-          {t === "about" ? "Our story" : "Help & contact"}
+          <span className="about-tab-full">{t.full}</span>
+          <span className="about-tab-short">{t.short}</span>
+          {t.id === "requests" && requestCount > 0 ? (
+            <b className="about-tab-count">{requestCount}</b>
+          ) : null}
         </button>
       ))}
     </div>
@@ -63,18 +86,35 @@ function AboutContent({ user }: { user: boolean }) {
 }
 
 /* ── Help content ────────────────────────────────────────── */
-function HelpContent({ user, requests }: { user: boolean; requests: MemberSupportRequest[] }) {
+function RequestsContent({ user, requests }: { user: boolean; requests: MemberSupportRequest[] }) {
+  return (
+    <div className="about-tab-panel" role="tabpanel" aria-label="Your requests">
+      {user ? (
+        <SupportRequests requests={requests} />
+      ) : (
+        <section className="help-requests">
+          <h2>Your requests</h2>
+          <p>Sign in to see notes you sent the house, and how each one is going.</p>
+          <div className="public-cta">
+            <GoogleSignIn label="Continue with Gmail" tone="ivory" />
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}
+
+function HelpContent({ user }: { user: boolean }) {
   return (
     <div className="about-tab-panel" role="tabpanel" aria-label="Help and contact">
-      {user ? <SupportRequests requests={requests} /> : null}
       <div className="help-genz-grid">
         <aside className="help-genz-side">
           <div className="help-genz-note">
             <span aria-hidden>💌</span>
             <h2>We&apos;ve got you</h2>
-            <p>Write in your own words. If you are signed in, you can follow how the house is handling it.</p>
-            <Link href={user ? "/app" : "/login"} className="help-genz-link">
-              {user ? "Go to my profile →" : "Sign in first →"}
+            <p>Write in your own words. Follow progress on Your requests.</p>
+            <Link href="/about?tab=requests" className="help-genz-link">
+              {user ? "See your requests →" : "Sign in to see requests →"}
             </Link>
           </div>
           <ul className="help-genz-topics" aria-label="Popular help topics">
@@ -104,12 +144,10 @@ function HelpContent({ user, requests }: { user: boolean; requests: MemberSuppor
 /* ── Combined page ───────────────────────────────────────── */
 export function AboutHelpTabs({ user, requests = [] }: { user: boolean; requests?: MemberSupportRequest[] }) {
   const params  = useSearchParams();
-  const initial: Tab = params.get("tab") === "help" ? "help" : "about";
-  const [tab, setTab] = useState<Tab>(initial);
+  const [tab, setTab] = useState<Tab>(() => parseTab(params.get("tab")));
 
-  // Keep in sync if someone navigates via the browser back/forward
   useEffect(() => {
-    setTab(params.get("tab") === "help" ? "help" : "about");
+    setTab(parseTab(params.get("tab")));
   }, [params]);
 
   const switchTab = (t: Tab) => {
@@ -121,10 +159,10 @@ export function AboutHelpTabs({ user, requests = [] }: { user: boolean; requests
 
   return (
     <>
-      <TabBar active={tab} onChange={switchTab} />
-      {tab === "about"
-        ? <AboutContent user={user} />
-        : <HelpContent user={user} requests={requests} />}
+      <TabBar active={tab} onChange={switchTab} requestCount={requests.length} />
+      {tab === "about" ? <AboutContent user={user} /> : null}
+      {tab === "help" ? <HelpContent user={user} /> : null}
+      {tab === "requests" ? <RequestsContent user={user} requests={requests} /> : null}
     </>
   );
 }
