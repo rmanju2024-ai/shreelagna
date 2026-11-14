@@ -2431,7 +2431,7 @@ button.field-help-btn,
     linear-gradient(165deg, #fffaf1 0%, #f6e7cf 52%, #efe0c4 100%);
 }
 .home-split-art {
-  position: relative; width: min(100%, 22.5rem); min-height: 22rem; height: auto; max-height: min(80vh, 42rem); aspect-ratio: 9 / 16; justify-self: center;
+  position: relative; width: min(100%, 22.5rem); min-height: 22rem; height: auto; max-height: min(80vh, 42rem); aspect-ratio: 9 / 14; justify-self: center;
   display: flex; align-items: stretch;
   /* ── Creative border: sweeping-shimmer gold mat ── */
   background: linear-gradient(
@@ -2887,7 +2887,7 @@ button.field-help-btn,
     margin-inline: auto;
     height: auto;
     min-height: 0;
-    aspect-ratio: 9 / 16;
+    aspect-ratio: 9 / 14;
     max-height: 78svh;
   }
   .home-split-copy {
@@ -3254,7 +3254,7 @@ button.field-help-btn,
 
   .home-split-tiles { grid-template-columns: minmax(0, 1fr); }
   .home-split-copy { padding: 0.55rem 0.75rem 5.4rem; }
-  .home-split-art { aspect-ratio: 9 / 16; max-height: 78svh; min-height: 0; width: min(100%, 22.5rem); }
+  .home-split-art { aspect-ratio: 9 / 14; max-height: 78svh; min-height: 0; width: min(100%, 22.5rem); }
   .home-split-art .lotus-lake { inset: 0.42rem; border-radius: 0.85rem; }
   .home-value-row { grid-template-columns: minmax(0, 1fr); padding-bottom: 2rem; }
   .home-steps { padding: 1.6rem 0 2rem; }
