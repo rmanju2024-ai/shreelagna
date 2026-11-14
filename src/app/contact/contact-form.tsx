@@ -71,7 +71,7 @@ export function ContactForm() {
         🔒 We use these details only to reply about MarriageConnect.
       </p>
       {state?.ok ? (
-        <p className="help-genz-success">✨ Sent! Someone from the team will read this.</p>
+        <p className="help-genz-success">Received. You can follow this request on this page when you are signed in.</p>
       ) : null}
       {state?.error ? <p className="help-genz-error">{state.error}</p> : null}
       <button

@@ -255,6 +255,7 @@ export function BrowseClient({
   communities,
   fullResults = false,
   filterPage = false,
+  fromProfile,
 }: {
   lookingFor: string | null;
   notice: string | null;
@@ -269,6 +270,16 @@ export function BrowseClient({
   communities: string[];
   fullResults?: boolean;
   filterPage?: boolean;
+  fromProfile?: {
+    country?: string[];
+    state?: string[];
+    city?: string[];
+    religion?: string[];
+    community?: string[];
+    lifestyle?: string[];
+    education?: string[];
+    income?: string[];
+  };
 }) {
   const [filters, setFilters] = useState<BrowseFilters>(
     initialView === "custom" ? initialFilters : EMPTY_BROWSE_FILTERS,
@@ -349,6 +360,7 @@ export function BrowseClient({
                 filters={filters}
                 religions={religions}
                 communities={communities}
+                fromProfile={fromProfile}
                 onApply={(next) => {
                   setFilters(next);
                   setPage(1);

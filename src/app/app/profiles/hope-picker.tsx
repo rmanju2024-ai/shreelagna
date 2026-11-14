@@ -5,12 +5,12 @@ import { createPortal } from "react-dom";
 
 import { FieldHelp } from "@/app/app/profiles/field-help";
 import { FieldMark } from "@/app/app/profiles/field-mark";
-import { compareLabel, pinIndiaFirst } from "@/lib/profile/form-lists";
+import { compareLabel, preferListedItems } from "@/lib/profile/form-lists";
 import { placeFloat } from "@/lib/ui/place-float";
 
 type Option = { value: string; label: string };
 
-function toOptions(options: Option[] | string[], alphabetize = true): Option[] {
+function toOptions(options: Option[] | string[], alphabetize = true, prefer: readonly string[] = []): Option[] {
   const seen = new Set<string>();
   const items = options
     .map((o) => (typeof o === "string" ? { value: o, label: o } : o))
@@ -19,10 +19,7 @@ function toOptions(options: Option[] | string[], alphabetize = true): Option[] {
       seen.add(item.value);
       return true;
     });
-  const ordered = alphabetize ? items.sort((a, b) => compareLabel(a.label, b.label)) : items;
-  if (!ordered.some((item) => item.value === "India")) return ordered;
-  const rank = new Map(ordered.map((item) => [item.value, item]));
-  return pinIndiaFirst(ordered.map((item) => item.value)).map((value) => rank.get(value)!);
+  return preferListedItems(alphabetize ? items.sort((a, b) => compareLabel(a.label, b.label)) : items, prefer, alphabetize);
 }
 
 export function HopePicker({
@@ -34,6 +31,7 @@ export function HopePicker({
   anyLabel,
   className = "",
   alphabetize = true,
+  prefer,
   help,
   disabled = false,
   disabledHint,
@@ -47,6 +45,7 @@ export function HopePicker({
   anyLabel?: string;
   className?: string;
   alphabetize?: boolean;
+  prefer?: string[];
   help?: string;
   disabled?: boolean;
   disabledHint?: string;
@@ -54,8 +53,8 @@ export function HopePicker({
 }) {
   const anyText = anyLabel ?? anyValue ?? "Any";
   const items = useMemo(
-    () => toOptions(options, alphabetize).filter((o) => !anyValue || o.value !== anyValue),
-    [options, anyValue, alphabetize],
+    () => toOptions(options, alphabetize, prefer).filter((o) => !anyValue || o.value !== anyValue),
+    [options, anyValue, alphabetize, prefer],
   );
   const start = selected?.length ? [...new Set(selected)] : anyValue ? [anyValue] : [];
   const [picked, setPicked] = useState<string[]>(start);

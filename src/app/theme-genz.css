@@ -1960,6 +1960,41 @@ button.field-help-btn,
 .public-contact-note > span { display: block; margin-bottom: 0.75rem; font-size: 2rem; }
 .public-contact-note h2 { margin: 0; font-size: 1.55rem; }
 .public-contact-note p { color: var(--muted); }
+.help-requests {
+  margin: 0 0 1.1rem;
+  padding: 1rem 1.1rem 1.15rem;
+  border-radius: 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--theme-accent) 22%, white);
+  background: linear-gradient(180deg, var(--theme-surface), var(--theme-accent-soft));
+}
+.help-requests h2 {
+  margin: 0.2rem 0 0.35rem;
+  color: var(--theme-ink);
+  font-size: 1.25rem;
+  font-family: var(--font-display), serif;
+}
+.help-requests > p { margin: 0; color: var(--muted); font-size: 0.88rem; line-height: 1.45; }
+.help-requests ul { display: grid; gap: 0.7rem; margin: 0.85rem 0 0; padding: 0; list-style: none; }
+.help-request-card {
+  padding: 0.8rem 0.9rem;
+  border-radius: 1rem;
+  border: 1px solid color-mix(in srgb, var(--theme-accent) 18%, white);
+  background: var(--theme-surface);
+}
+.help-request-card header { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; }
+.help-request-card header b { color: var(--theme-ink); font-size: 0.92rem; }
+.help-request-card small { display: block; margin-top: 0.2rem; color: var(--muted); font-size: 0.72rem; }
+.help-request-card > p { margin: 0.4rem 0 0; color: #5b4a43; font-size: 0.88rem; line-height: 1.45; }
+.help-request-hint { color: var(--muted) !important; font-size: 0.8rem !important; }
+.help-request-outcome {
+  margin-top: 0.55rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.75rem;
+  background: rgb(51 180 103 / 10%);
+  color: #18713f !important;
+  font-size: 0.84rem !important;
+}
+.help-request-outcome strong { display: block; margin-bottom: 0.2rem; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; }
 .help-genz-grid {
   display: grid; grid-template-columns: minmax(15rem, 0.75fr) minmax(0, 1.25fr);
   gap: clamp(1rem, 2vw, 1.5rem); align-items: start;

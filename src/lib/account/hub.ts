@@ -28,7 +28,7 @@ export const ACCOUNT_GROUPS = [
     mark: "Work",
     items: [
       { href: "/app/plans", title: "Membership", mark: "Income", text: "Your plan, access and future upgrades." },
-      { href: "/contact", title: "Help & support", mark: "Contact", text: "Reach the MarriageConnect house team." },
+      { href: "/contact", title: "Help & support", mark: "Contact", text: "Write to the house team and follow your requests." },
     ],
   },
 ] as const;

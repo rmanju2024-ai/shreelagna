@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { GoogleSignIn } from "@/app/login/google-button";
+import { SupportRequests } from "@/app/about/support-requests";
 import { ContactForm } from "@/app/contact/contact-form";
+import type { MemberSupportRequest } from "@/lib/desk/tickets";
 import { btnPrimary, cardClass } from "@/lib/ui/classes";
 
 type Tab = "about" | "help";
@@ -61,15 +63,16 @@ function AboutContent({ user }: { user: boolean }) {
 }
 
 /* ── Help content ────────────────────────────────────────── */
-function HelpContent({ user }: { user: boolean }) {
+function HelpContent({ user, requests }: { user: boolean; requests: MemberSupportRequest[] }) {
   return (
     <div className="about-tab-panel" role="tabpanel" aria-label="Help and contact">
+      {user ? <SupportRequests requests={requests} /> : null}
       <div className="help-genz-grid">
         <aside className="help-genz-side">
           <div className="help-genz-note">
             <span aria-hidden>💌</span>
             <h2>We&apos;ve got you</h2>
-            <p>No bots, no confusing ticket numbers. Tell us what happened in your own words.</p>
+            <p>Write in your own words. If you are signed in, you can follow how the house is handling it.</p>
             <Link href={user ? "/app" : "/login"} className="help-genz-link">
               {user ? "Go to my profile →" : "Sign in first →"}
             </Link>
@@ -99,7 +102,7 @@ function HelpContent({ user }: { user: boolean }) {
 }
 
 /* ── Combined page ───────────────────────────────────────── */
-export function AboutHelpTabs({ user }: { user: boolean }) {
+export function AboutHelpTabs({ user, requests = [] }: { user: boolean; requests?: MemberSupportRequest[] }) {
   const params  = useSearchParams();
   const initial: Tab = params.get("tab") === "help" ? "help" : "about";
   const [tab, setTab] = useState<Tab>(initial);
@@ -121,7 +124,7 @@ export function AboutHelpTabs({ user }: { user: boolean }) {
       <TabBar active={tab} onChange={switchTab} />
       {tab === "about"
         ? <AboutContent user={user} />
-        : <HelpContent  user={user} />}
+        : <HelpContent user={user} requests={requests} />}
     </>
   );
 }

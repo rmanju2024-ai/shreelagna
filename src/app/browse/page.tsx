@@ -134,6 +134,7 @@ export async function BrowsePage({
 
   let notice: string | null = null;
   let lookingFor: string | null = null;
+  let mine: Record<string, unknown> | null = null;
   const catalog: Record<string, BrowseCardNote> = {};
   const lists = emptyBrowseBuckets<BrowseScoreRow>();
   const viewNotes: Partial<Record<BrowseView, string>> = {};
@@ -206,7 +207,7 @@ export async function BrowsePage({
         };
       };
       const mineSlim = await db.from("profiles").select(BROWSE_PROFILE_SELECT).eq("id", mineId).maybeSingle();
-      let mine =
+      mine =
         mineSlim.data ??
         (await db.from("profiles").select(BROWSE_PROFILE_SELECT_STAR).eq("id", mineId).maybeSingle())
           .data;
@@ -445,6 +446,26 @@ export async function BrowsePage({
         communities={[...new Set(faith.communities.map((row) => row.name).filter(Boolean))]}
         fullResults={params.all === "1"}
         filterPage={params.filterPage === "1"}
+        fromProfile={
+          mine
+            ? {
+                country: ["India", asText(mine.current_country), asText(mine.native_country)].filter(
+                  (item): item is string => Boolean(item),
+                ),
+                state: [asText(mine.current_state), asText(mine.native_state)].filter(
+                  (item): item is string => Boolean(item),
+                ),
+                city: [asText(mine.current_city), asText(mine.native_city)].filter(
+                  (item): item is string => Boolean(item),
+                ),
+                religion: [nestedName(mine.religions)].filter((item): item is string => Boolean(item)),
+                community: [nestedName(mine.communities)].filter((item): item is string => Boolean(item)),
+                lifestyle: [asText(mine.diet)].filter((item): item is string => Boolean(item)),
+                education: [asText(mine.qualification)].filter((item): item is string => Boolean(item)),
+                income: [asText(mine.income_band)].filter((item): item is string => Boolean(item)),
+              }
+            : undefined
+        }
       />
     </PageShell>
   );

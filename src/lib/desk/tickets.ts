@@ -77,3 +77,26 @@ export function ticketEnquiryLabel(type: string | null | undefined): string {
   if (type === "vara") return "Groom profile";
   return "General help";
 }
+
+/** Family-facing status — never expose desk jargon. */
+export function memberRequestStatus(status: string | null | undefined): { label: string; hint: string } {
+  if (status === "in_progress") {
+    return { label: "In review", hint: "The house team is looking into this." };
+  }
+  if (status === "on_hold") {
+    return { label: "Paused", hint: "We may need a little more from you." };
+  }
+  if (status === "done") {
+    return { label: "Resolved", hint: "This request is closed." };
+  }
+  return { label: "Received", hint: "The house has your note." };
+}
+
+export type MemberSupportRequest = {
+  id: string;
+  created_at: string;
+  enquiry_type: string | null;
+  message: string;
+  status: string | null;
+  resolution: string | null;
+};

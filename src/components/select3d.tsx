@@ -16,7 +16,7 @@ import {
   type SelectHTMLAttributes,
 } from "react";
 import { createPortal } from "react-dom";
-import { pinIndiaFirst } from "@/lib/profile/form-lists";
+import { preferListedItems } from "@/lib/profile/form-lists";
 import { placeFloat } from "@/lib/ui/place-float";
 
 type Item = { value: string; label: string; disabled?: boolean };
@@ -55,6 +55,8 @@ export function Select3d({
   onValuesChange,
   anyLabel,
   items,
+  prefer,
+  keepOrder = false,
   "aria-label": ariaLabel,
 }: SelectHTMLAttributes<HTMLSelectElement> & {
   multiple?: boolean;
@@ -62,14 +64,14 @@ export function Select3d({
   onValuesChange?: (next: string[]) => void;
   anyLabel?: string;
   items?: string[];
+  prefer?: string[];
+  keepOrder?: boolean;
 }) {
   const options = useMemo(() => {
     const rows = items ? fromItems(items) : readOptions(children);
     const listed = multiple ? rows.filter((row) => row.value !== "") : rows;
-    if (!listed.some((row) => row.value === "India")) return listed;
-    const rank = new Map(listed.map((row) => [row.value, row]));
-    return pinIndiaFirst(listed.map((row) => row.value)).map((value) => rank.get(value)!);
-  }, [items, children, multiple]);
+    return preferListedItems(listed, prefer, !keepOrder);
+  }, [items, children, multiple, prefer, keepOrder]);
   const reactId = useId();
   const listId = `${reactId}-list`;
   const triggerRef = useRef<HTMLButtonElement>(null);

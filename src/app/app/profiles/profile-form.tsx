@@ -564,6 +564,7 @@ export function ProfileForm({
               name="qualification"
               required
               defaultValue={values?.qualification ?? ""}
+              prefer={values?.qualification ? [values.qualification] : []}
               className={inputClass}
             >
               <option value="">Select</option>
@@ -671,6 +672,7 @@ export function ProfileForm({
             <Select3d
               name="diet"
               defaultValue={pickListed(lists.diets, values?.diet ?? d.diet)}
+              prefer={[values?.diet ?? d.diet]}
               className={inputClass}
             >
               {lists.diets.map((item) => (
@@ -756,6 +758,7 @@ export function ProfileForm({
               name="religion_id"
               required
               value={religionId}
+              prefer={religionId ? [religionId] : []}
               onChange={(e) => setReligionId(e.target.value)}
               className={inputClass}
             >
@@ -775,6 +778,7 @@ export function ProfileForm({
               name="community_id"
               defaultValue={values?.community_id ?? ""}
               key={religionId || "religion"}
+              prefer={values?.community_id ? [values.community_id] : []}
               disabled={!religionId}
               className={inputClass}
             >
@@ -1117,6 +1121,7 @@ export function ProfileForm({
             name="pref_tongues"
             anyValue={HOPE_ANY.language}
             options={lists.tongues}
+            prefer={values?.mother_tongue ? [values.mother_tongue] : []}
             selected={hopeValues(values, "pref_tongues")}
           />
           <HopePicker
@@ -1124,6 +1129,7 @@ export function ProfileForm({
             name="pref_religions"
             anyValue={HOPE_ANY.religion}
             options={faiths.map((r) => r.name)}
+            prefer={faiths.filter((r) => r.id === religionId).map((r) => r.name)}
             selected={hopeValues(values, "pref_religions")}
           />
           <HopePicker
@@ -1131,6 +1137,7 @@ export function ProfileForm({
             name="pref_communities"
             anyValue={HOPE_ANY.community}
             options={casteNames}
+            prefer={communities.filter((c) => c.id === values?.community_id).map((c) => c.name)}
             selected={hopeValues(values, "pref_communities")}
           />
           <HopePicker
@@ -1138,6 +1145,7 @@ export function ProfileForm({
             name="pref_countries"
             anyValue={HOPE_ANY.country}
             options={lists.hopeCountries}
+            prefer={[currentCountry, nativeCountry]}
             selected={hopeValues(values, "pref_countries", "pref_country")}
           />
           <HopePicker
@@ -1145,6 +1153,7 @@ export function ProfileForm({
             name="pref_states"
             anyValue={HOPE_ANY.state}
             options={lists.states}
+            prefer={[currentState, nativeState]}
             selected={prefStates}
             onChange={setPrefStates}
           />
@@ -1154,6 +1163,7 @@ export function ProfileForm({
             name="pref_cities"
             anyValue={HOPE_ANY.city}
             options={prefCityOptions}
+            prefer={[currentCity, nativeCity]}
             selected={
               anyPrefState
                 ? [HOPE_ANY.city]
@@ -1183,6 +1193,7 @@ export function ProfileForm({
             name="pref_educations"
             anyValue={HOPE_ANY.education}
             options={lists.educations}
+            prefer={values?.qualification ? [values.qualification] : []}
             selected={hopeValues(values, "pref_educations", "pref_education")}
           />
           <HopePicker
@@ -1190,6 +1201,7 @@ export function ProfileForm({
             name="pref_occupations"
             anyValue={HOPE_ANY.occupation}
             options={lists.occupations}
+            prefer={values?.occupation ? [values.occupation] : []}
             selected={hopeValues(values, "pref_occupations", "pref_occupation")}
           />
           <HopePicker
@@ -1197,6 +1209,7 @@ export function ProfileForm({
             name="pref_employed"
             anyValue={HOPE_ANY.employed}
             options={lists.employedIn}
+            prefer={values?.employed_in ? [values.employed_in] : []}
             selected={hopeValues(values, "pref_employed")}
           />
           <HopePicker
@@ -1205,6 +1218,7 @@ export function ProfileForm({
             name="pref_incomes"
             anyValue={HOPE_ANY.income}
             options={lists.hopeIncomes}
+            prefer={values?.income_band ? [values.income_band] : []}
             selected={hopeValues(values, "pref_incomes")}
             alphabetize={false}
           />
@@ -1213,6 +1227,7 @@ export function ProfileForm({
             name="pref_diets"
             anyValue={HOPE_ANY.diet}
             options={lists.diets}
+            prefer={values?.diet ? [values.diet] : []}
             selected={hopeValues(values, "pref_diets")}
           />
         </div>

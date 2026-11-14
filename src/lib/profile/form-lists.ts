@@ -46,11 +46,50 @@ export function pinThenAlpha(values: readonly string[], pins: readonly string[] 
   return [...head, ...rest];
 }
 
+function sameListed(a: string, b: string): boolean {
+  return a.localeCompare(b, "en", { sensitivity: "base" }) === 0;
+}
+
+/** Profile values (and India on country lists) stay first; nothing is dropped. */
+export function preferListedItems<T extends { value: string; label: string }>(
+  rows: readonly T[],
+  prefer: readonly string[] = [],
+  sortRest = true,
+): T[] {
+  if (!rows.length) return [];
+  const used = new Set<string>();
+  const head: T[] = [];
+  function take(match: (row: T) => boolean) {
+    for (const row of rows) {
+      if (used.has(row.value)) continue;
+      if (!match(row)) continue;
+      used.add(row.value);
+      head.push(row);
+    }
+  }
+  take((row) => !row.value);
+  take((row) => /^any\b/i.test(row.label) || /^any\b/i.test(row.value));
+  take((row) => sameListed(row.value, "India") || sameListed(row.label, "India"));
+  for (const raw of prefer) {
+    if (!raw.trim()) continue;
+    take((row) => sameListed(row.value, raw) || sameListed(row.label, raw));
+  }
+  const rest = rows.filter((row) => !used.has(row.value));
+  if (sortRest) rest.sort((a, b) => compareLabel(a.label, b.label));
+  return [...head, ...rest];
+}
+
+export function preferThenList(values: readonly string[], prefer: readonly string[] = [], sortRest = true): string[] {
+  return preferListedItems(
+    values.map((value) => ({ value, label: value })),
+    prefer,
+    sortRest,
+  ).map((row) => row.value);
+}
+
 /** India stays at the top of country lists. Any-country stays above India when present. */
 export function pinIndiaFirst(values: readonly string[]): string[] {
-  if (!values.includes("India")) return [...values];
-  const anyPins = [...new Set(values.filter((value) => /^any\b/i.test(value)))];
-  return pinThenAlpha(values, [...anyPins, "India"]);
+  return preferThenList(values);
 }
 
 export function citiesForState(lists: FormLists, state: string | null | undefined): string[] {

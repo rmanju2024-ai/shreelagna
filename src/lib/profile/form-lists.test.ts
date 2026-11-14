@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { pinIndiaFirst } from "./form-lists";
+import { pinIndiaFirst, preferThenList } from "./form-lists";
 import { enrichFormLists, listsFromSeed } from "./form-lists-seed";
 
 describe("pin India first", () => {
@@ -12,8 +12,31 @@ describe("pin India first", () => {
     ]);
   });
 
-  it("leaves lists without India in their given order", () => {
-    expect(pinIndiaFirst(["Karnataka", "Goa"])).toEqual(["Karnataka", "Goa"]);
+  it("alphabetizes lists without India", () => {
+    expect(pinIndiaFirst(["Karnataka", "Goa"])).toEqual(["Goa", "Karnataka"]);
+  });
+});
+
+describe("profile values first", () => {
+  it("keeps India, then the profile country, then the rest", () => {
+    expect(preferThenList(["Zambia", "India", "Afghanistan", "United States"], ["United States"])).toEqual([
+      "India",
+      "United States",
+      "Afghanistan",
+      "Zambia",
+    ]);
+  });
+
+  it("pins the profile state and city without dropping others", () => {
+    expect(preferThenList(["Tamil Nadu", "Goa", "Karnataka"], ["Karnataka"])).toEqual([
+      "Karnataka",
+      "Goa",
+      "Tamil Nadu",
+    ]);
+    expect(preferThenList(["Mysuru", "Bengaluru", "Hubballi"], ["Bengaluru"]).slice(0, 2)).toEqual([
+      "Bengaluru",
+      "Hubballi",
+    ]);
   });
 });
 

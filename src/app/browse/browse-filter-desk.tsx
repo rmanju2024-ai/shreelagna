@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { EMPTY_BROWSE_FILTERS, type BrowseFilters } from "@/lib/match/browse-filters";
 import { enrichFormLists, listsFromSeed } from "@/lib/profile/form-lists-seed";
-import { pinIndiaFirst } from "@/lib/profile/form-lists";
+import { preferThenList } from "@/lib/profile/form-lists";
 import { Select3d } from "@/components/select3d";
 import { btnGhost, btnPrimary, inputClass } from "@/lib/ui/classes";
 
@@ -26,10 +26,21 @@ export function BrowseFilterDesk({
   onLoginChange,
   onApply,
   onClear,
+  fromProfile,
 }: {
   filters: BrowseFilters;
   religions: string[];
   communities: string[];
+  fromProfile?: {
+    country?: string[];
+    state?: string[];
+    city?: string[];
+    religion?: string[];
+    community?: string[];
+    lifestyle?: string[];
+    education?: string[];
+    income?: string[];
+  };
   includeKind?: boolean;
   sort?: string;
   onSortChange?: (next: string) => void;
@@ -54,17 +65,38 @@ export function BrowseFilterDesk({
 
   const cityOptions = useMemo(
     () =>
-      sorted(
-        cities
-          .filter((row) => (draft.state.length ? draft.state.includes(row.state) : false))
-          .map((row) => row.name),
+      preferThenList(
+        sorted(
+          cities
+            .filter((row) => (draft.state.length ? draft.state.includes(row.state) : false))
+            .map((row) => row.name),
+        ),
+        fromProfile?.city,
       ),
-    [cities, draft.state],
+    [cities, draft.state, fromProfile?.city],
   );
-  const countryOptions = useMemo(() => pinIndiaFirst(sorted(countries)), [countries]);
-  const stateOptions = useMemo(() => sorted(states), [states]);
-  const religionOptions = useMemo(() => sorted(religions), [religions]);
-  const communityOptions = useMemo(() => sorted(communities), [communities]);
+  const countryOptions = useMemo(() => preferThenList(countries, fromProfile?.country), [countries, fromProfile?.country]);
+  const stateOptions = useMemo(() => preferThenList(states, fromProfile?.state), [states, fromProfile?.state]);
+  const religionOptions = useMemo(
+    () => preferThenList(religions, fromProfile?.religion),
+    [religions, fromProfile?.religion],
+  );
+  const communityOptions = useMemo(
+    () => preferThenList(communities, fromProfile?.community),
+    [communities, fromProfile?.community],
+  );
+  const lifestyleOptions = useMemo(
+    () => preferThenList(lifestyles, fromProfile?.lifestyle),
+    [lifestyles, fromProfile?.lifestyle],
+  );
+  const educationOptions = useMemo(
+    () => preferThenList(educations, fromProfile?.education),
+    [educations, fromProfile?.education],
+  );
+  const incomeOptions = useMemo(
+    () => preferThenList(incomes, fromProfile?.income, false),
+    [incomes, fromProfile?.income],
+  );
 
   return (
     <form
@@ -158,6 +190,7 @@ export function BrowseFilterDesk({
             name="country"
             values={draft.country}
             items={countryOptions}
+            prefer={fromProfile?.country}
             anyLabel="Any country"
             className={inputClass}
             onValuesChange={(country) => setDraft((prev) => ({ ...prev, country }))}
@@ -170,6 +203,7 @@ export function BrowseFilterDesk({
             name="state"
             values={draft.state}
             items={stateOptions}
+            prefer={fromProfile?.state}
             anyLabel="Any state"
             className={inputClass}
             onValuesChange={(state) => {
@@ -189,6 +223,7 @@ export function BrowseFilterDesk({
             name="city"
             values={draft.city}
             items={cityOptions}
+            prefer={fromProfile?.city}
             disabled={!draft.state.length}
             anyLabel={draft.state.length ? "Any city" : "Choose a state first"}
             className={inputClass}
@@ -202,6 +237,7 @@ export function BrowseFilterDesk({
             name="religion"
             values={draft.religion}
             items={religionOptions}
+            prefer={fromProfile?.religion}
             anyLabel="Any religion"
             className={inputClass}
             onValuesChange={(religion) => setDraft((prev) => ({ ...prev, religion }))}
@@ -214,6 +250,7 @@ export function BrowseFilterDesk({
             name="community"
             values={draft.community}
             items={communityOptions}
+            prefer={fromProfile?.community}
             anyLabel="Any community"
             className={inputClass}
             onValuesChange={(community) => setDraft((prev) => ({ ...prev, community }))}
@@ -225,7 +262,8 @@ export function BrowseFilterDesk({
             multiple
             name="lifestyle"
             values={draft.lifestyle}
-            items={lifestyles}
+            items={lifestyleOptions}
+            prefer={fromProfile?.lifestyle}
             anyLabel="Any lifestyle"
             className={inputClass}
             onValuesChange={(lifestyle) => setDraft((prev) => ({ ...prev, lifestyle }))}
@@ -237,7 +275,8 @@ export function BrowseFilterDesk({
             multiple
             name="education"
             values={draft.education}
-            items={educations}
+            items={educationOptions}
+            prefer={fromProfile?.education}
             anyLabel="Any education"
             className={inputClass}
             onValuesChange={(education) => setDraft((prev) => ({ ...prev, education }))}
@@ -249,7 +288,9 @@ export function BrowseFilterDesk({
             multiple
             name="income"
             values={draft.income}
-            items={incomes}
+            items={incomeOptions}
+            prefer={fromProfile?.income}
+            keepOrder
             anyLabel="Any income"
             className={inputClass}
             onValuesChange={(income) => setDraft((prev) => ({ ...prev, income }))}

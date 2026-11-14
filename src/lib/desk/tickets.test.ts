@@ -6,6 +6,7 @@ import {
   readNoteBody,
   readNoteStatus,
   stampNoteBody,
+  memberRequestStatus,
   ticketEnquiryLabel,
   ticketStatusClass,
   ticketStatusLabel,
@@ -47,5 +48,15 @@ describe("desk tickets", () => {
     expect(readNoteBody(stored)).toBe("called family");
     expect(readNoteStatus({ body: stored })).toBe("done");
     expect(readNoteStatus({ body: stored, ticket_status: "on_hold" })).toBe("on_hold");
+  });
+
+  it("explains request progress to the family without desk wording", () => {
+    expect(memberRequestStatus("new").label).toBe("Received");
+    expect(memberRequestStatus("in_progress").label).toBe("In review");
+    expect(memberRequestStatus("on_hold").label).toBe("Paused");
+    expect(memberRequestStatus("done")).toEqual({
+      label: "Resolved",
+      hint: "This request is closed.",
+    });
   });
 });

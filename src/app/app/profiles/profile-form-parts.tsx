@@ -54,6 +54,7 @@ export function PlaceBlock({
           name={countryName}
           required
           value={country}
+          prefer={[country]}
           onChange={(e) => {
             const next = e.target.value;
             onCountry(next);
@@ -86,6 +87,7 @@ export function PlaceBlock({
               name={stateName}
               required
               value={state}
+              prefer={[state]}
               onChange={(e) => {
                 const next = e.target.value;
                 onState(next);
@@ -105,6 +107,7 @@ export function PlaceBlock({
               name={cityName}
               required
               value={city}
+              prefer={[city]}
               onChange={(e) => onCity(e.target.value)}
               className={inputClass}
             >
