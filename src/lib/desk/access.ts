@@ -29,7 +29,7 @@ export function canEditMemberProfile(
   return false;
 }
 
-export async function requireDesk(next = "/desk") {
+export async function requireDesk(next = "/desk/tickets") {
   const { supabase, user } = await getAuth();
   if (!supabase || !user) redirect(`/login?next=${next}`);
   const me = await ensureAppUser(supabase, user);

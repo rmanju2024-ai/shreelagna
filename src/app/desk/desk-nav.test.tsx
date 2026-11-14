@@ -4,7 +4,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { DeskNav } from "./desk-nav";
 
-const path = vi.fn(() => "/desk");
+const path = vi.fn(() => "/desk/tickets");
 
 vi.mock("next/navigation", () => ({
   usePathname: () => path(),
@@ -12,7 +12,7 @@ vi.mock("next/navigation", () => ({
 
 afterEach(() => {
   cleanup();
-  path.mockReturnValue("/desk");
+  path.mockReturnValue("/desk/tickets");
 });
 
 describe("Desk menu", () => {
@@ -23,19 +23,20 @@ describe("Desk menu", () => {
     expect(screen.getByRole("link", { name: /Verification/i }).getAttribute("href")).toBe("/desk/verification");
   });
 
-  it("opens as a decorative hub on /desk", () => {
+  it("stays a compact rail and highlights Ticketing on the default desk", () => {
     render(<DeskNav admin={false} />);
-    expect(screen.getByRole("navigation", { name: "House desk" }).className).toContain("is-hub");
-    expect(screen.getByRole("link", { name: /Look/i }).getAttribute("href")).toBe("/desk/look");
-    expect(screen.queryByRole("link", { name: /Verification/i })).toBeNull();
-  });
-
-  it("shows a compact rail on a desk page", () => {
-    path.mockReturnValue("/desk/look");
-    render(<DeskNav admin />);
     const nav = screen.getByRole("navigation", { name: "House desk" });
     expect(nav.className).toContain("is-rail");
-    expect(screen.queryByRole("link", { name: "All desks" })).toBeNull();
+    expect(nav.className).not.toContain("is-hub");
+    expect(screen.getByRole("link", { name: "Ticketing" }).getAttribute("aria-current")).toBe("page");
+    expect(screen.getByRole("link", { name: "Look" }).getAttribute("href")).toBe("/desk/look");
+  });
+
+  it("highlights the open desk on another page", () => {
+    path.mockReturnValue("/desk/look");
+    render(<DeskNav admin />);
+    expect(screen.getByRole("navigation", { name: "House desk" }).className).toContain("is-rail");
     expect(screen.getByRole("link", { name: "Look" }).getAttribute("aria-current")).toBe("page");
+    expect(screen.getByRole("link", { name: "Ticketing" }).getAttribute("aria-current")).toBeNull();
   });
 });

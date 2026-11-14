@@ -28,30 +28,24 @@ function isOn(path: string, href: string) {
 
 export function DeskNav({ admin }: { admin: boolean }) {
   const path = usePathname();
-  const hub = path === "/desk";
   const items = deskItemsFor(admin);
   return (
-    <nav className={`desk-menu${hub ? " is-hub" : " is-rail"}`} aria-label="House desk">
-      {hub ? <p className="browse-kicker">{admin ? "Admin desks" : "Staff desks"}</p> : null}
+    <nav className="desk-menu is-rail" aria-label="House desk">
       {items.map((item) => {
         const on = isOn(path, item.href);
-        const hint = item.id === "analytics" && admin ? "House and staff" : item.hint;
         return (
           <Link
             key={item.id}
             prefetch
             href={item.href}
             aria-current={on ? "page" : undefined}
-            className={`${hub ? "desk-menu-tile" : "desk-menu-chip"}${on ? " is-on" : ""}`}
+            className={`desk-menu-chip${on ? " is-on" : ""}`}
             data-desk={item.id}
           >
             <span className="desk-menu-ico" aria-hidden>
               <NavGlyph name={item.icon} />
             </span>
-            <span>
-              <b>{item.label}</b>
-              {hub ? <small>{hint}</small> : null}
-            </span>
+            <b>{item.label}</b>
           </Link>
         );
       })}
