@@ -75,5 +75,11 @@ export function saveErrorMessage(error: DbError): string {
   if (hay.includes("profiles_one_per_account") || hay.includes("one profile")) {
     return "This login can hold up to three profiles. Open Home to choose one, or edit an existing profile.";
   }
+  if (
+    (hay.includes("verified_mobile") || hay.includes("subject_mobile")) &&
+    (hay.includes("duplicate") || hay.includes("unique") || hay.includes("23505"))
+  ) {
+    return "This mobile is already used on another profile. Enter a different number.";
+  }
   return "We could not save just now. Please try again.";
 }

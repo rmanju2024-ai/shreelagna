@@ -16,7 +16,7 @@ import {
   orderedProfilePair,
 } from "@/lib/match/interest-status";
 import { complimentaryPaidProfileAccess, pairPlanLive } from "@/lib/membership/access";
-import { loadInterestQuota, loadMembership } from "@/lib/membership/load";
+import { loadInterestQuota, loadMembershipForProfile, loadWorkingMembership } from "@/lib/membership/load";
 import { canViewProfile, isListedProfileStatus, isPublicProfileStatus, type ProfileType } from "@/lib/profile/visibility";
 import { recordAndDeliverNotice } from "@/lib/notify/house-notice";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -326,14 +326,15 @@ export async function BrowseProfileView({
   let kundali: ReturnType<typeof kundaliScore> | null = null;
   let contact: ProfileData["contact"] = undefined;
   let shortlisted = false;
-  const [access, ownerRes, myProfilesRes, verifyCasesRes] = await Promise.all([
-    loadMembership(db, me),
+  const [workingMem, ownerRes, myProfilesRes, verifyCasesRes] = await Promise.all([
+    loadWorkingMembership(db, me),
     db.from("app_users").select("id, role, welcome_started_at, welcome_days, email, email_otp_verified_at").eq("id", profile.created_by).maybeSingle(),
     own
       ? Promise.resolve({ data: [] as Record<string, unknown>[] })
       : db.from("profiles").select("*, religions(name), communities(name)").eq("created_by", me.id),
     db.from("profile_verification_cases").select("document_type, status").eq("profile_id", id),
   ]);
+  const access = workingMem.access;
   needPlan = !access.live;
   const owner = ownerRes.data;
   const mineList = (myProfilesRes.data ?? []) as Record<string, unknown>[];
@@ -348,7 +349,7 @@ export async function BrowseProfileView({
   let chatThreadId: string | null = null;
   let chatNotes: { id: string; sender_profile_id: string; body: string; created_at: string; read_at?: string | null }[] = [];
 
-  const targetAccessP = owner ? loadMembership(db, owner) : Promise.resolve(null);
+  const targetAccessP = loadMembershipForProfile(db, id);
 
   if (mine && String(mine.id) !== id) {
     const [interestRes, quota, blockRes, viewedRes, shortRes, mineMediaRes] = await Promise.all([

@@ -13,6 +13,7 @@ import {
 import { fetchPendingPlanCode, fetchPlans, loadInterestQuota, loadMembership } from "@/lib/membership/load";
 import { formatIstDate } from "@/lib/time/ist";
 import { createServiceClient } from "@/lib/supabase/server";
+import { requireWorkingProfile } from "@/lib/profile/working-profile";
 import { redirect } from "next/navigation";
 import { profileOpenHref } from "@/lib/ui/dismiss";
 
@@ -29,18 +30,13 @@ export default async function PlansPage({
   const me = await ensureAppUser(supabase, user);
   if (!me) redirect("/login?error=account");
   const db = createServiceClient() ?? supabase;
-  const [access, { data: mine }, plans, pendingCode] = await Promise.all([
-    loadMembership(db, me),
-    db.from("profiles").select("id").eq("created_by", me.id),
+  const working = await requireWorkingProfile(supabase, me);
+  const [access, plans, pendingCode] = await Promise.all([
+    loadMembership(db, me, { id: working.id, created_at: working.listed.find((row) => row.id === working.id)?.created_at }),
     fetchPlans(db),
-    fetchPendingPlanCode(db, me.id),
+    fetchPendingPlanCode(db, me.id, working.id),
   ]);
-  const quota = await loadInterestQuota(
-    db,
-    me,
-    access,
-    (mine ?? []).map((row) => row.id),
-  );
+  const quota = await loadInterestQuota(db, me, access, [working.id]);
   const { data: touchRows } = quota.touchedIds.length
     ? await db.from("profiles").select("id, subject_full_name, member_code").in("id", quota.touchedIds)
     : { data: [] as { id: string; subject_full_name?: string | null; member_code?: string | null }[] };
@@ -55,7 +51,7 @@ export default async function PlansPage({
         <div className="plans-header">
           <p className="browse-kicker">Membership</p>
           <h1>Plans</h1>
-          <p className="plans-intro">One unique family is one count. Five new families a day. Chat stays open on families already introduced.</p>
+          <p className="plans-intro">Each bride or groom has their own plan. One unique family is one count on this profile. Five new families a day. Chat stays open on families already introduced.</p>
         </div>
 
         <div className={`plans-status is-${access.kind}`}>
@@ -73,7 +69,7 @@ export default async function PlansPage({
                 Used {quota.used} of {quota.limit} · {quota.left ?? 0} left
               </p>
             ) : access.live ? (
-              <p>Profiles used: {quota.used} (unique profiles viewed or sent interest)</p>
+              <p>This profile used: {quota.used} (unique families viewed or sent interest)</p>
             ) : (
               <p>Search remains open. A send request or contact view needs a plan.</p>
             )}

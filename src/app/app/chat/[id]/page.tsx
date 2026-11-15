@@ -50,7 +50,7 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
           `and(from_profile_id.eq.${mine.id},to_profile_id.eq.${otherId}),and(from_profile_id.eq.${otherId},to_profile_id.eq.${mine.id})`,
         )
         .limit(8),
-      loadMembership(db, me),
+      loadMembership(db, me, { id: mine.id }),
       loadMembershipForProfile(db, otherId),
       supabase
         .from("profiles")

@@ -41,6 +41,15 @@ describe("save errors", () => {
     ).toBe("current_state");
   });
 
+  it("explains a duplicate confirmed mobile", () => {
+    expect(
+      saveErrorMessage({
+        code: "23505",
+        message: 'duplicate key value violates unique constraint "profiles_verified_mobile_uidx"',
+      }),
+    ).toBe("This mobile is already used on another profile. Enter a different number.");
+  });
+
   it("does not tell a signed-in member to sign in when a write is refused", () => {
     expect(
       saveErrorMessage({ message: "new row violates row-level security policy for table \"profiles\"" }),

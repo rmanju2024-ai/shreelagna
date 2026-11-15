@@ -43,13 +43,21 @@ function asDb(db: unknown): AnyDb {
 
 async function activateRow(
   db: AnyDb,
-  row: { id: string; user_id: string; plan_code: string },
+  row: { id: string; user_id: string; plan_code: string; profile_id?: string | null },
   actorId: string | undefined,
   months: number,
 ) {
   const starts = new Date();
   const ends = addMonths(starts, months);
-  await db.from("memberships").update({ status: "cancelled" }).eq("user_id", row.user_id).eq("status", "active");
+  if (row.profile_id) {
+    await (db as { from: (t: string) => { update: (r: object) => { eq: (c: string, v: string) => { eq: (c: string, v: string) => PromiseLike<unknown> } } } })
+      .from("memberships")
+      .update({ status: "cancelled" })
+      .eq("profile_id", row.profile_id)
+      .eq("status", "active");
+  } else {
+    await db.from("memberships").update({ status: "cancelled" }).eq("user_id", row.user_id).eq("status", "active");
+  }
   await db.from("memberships").update({
     status: "active",
     starts_at: starts.toISOString(),
@@ -67,7 +75,7 @@ export async function confirmPlan(formData: FormData) {
   const db = asDb(createServiceClient() ?? desk.supabase);
   const { data: row } = await db
     .from("memberships")
-    .select("id, user_id, plan_code, status")
+    .select("id, user_id, plan_code, status, profile_id")
     .eq("id", id)
     .maybeSingle();
   if (!row || row.status !== "pending") return;
@@ -79,7 +87,12 @@ export async function confirmPlan(formData: FormData) {
     await applyPlusFive(db, userId, rowId);
   } else {
     const months = plan?.months ?? 3;
-    await activateRow(db, { id: rowId, user_id: userId, plan_code: planCode }, desk.me?.id, months);
+    await activateRow(
+      db,
+      { id: rowId, user_id: userId, plan_code: planCode, profile_id: row.profile_id ? String(row.profile_id) : null },
+      desk.me?.id,
+      months,
+    );
     const ends = addMonths(new Date(), months);
     await notifyPlanActivated(userId, plan?.name ?? planCode, ends);
   }
@@ -142,11 +155,38 @@ export async function grantPlan(formData: FormData) {
   const { data: member } = await db.from("app_users").select("id, role, email").eq("email", email).maybeSingle();
   if (!member || member.role === "admin") return;
   const memberId = String(member.id ?? "");
-  await db.from("memberships").update({ status: "cancelled" }).eq("user_id", memberId).eq("status", "pending");
+  const { data: firstProfile } = await (db as {
+    from: (t: string) => {
+      select: (c: string) => {
+        eq: (c: string, v: string) => {
+          order: (c: string, o: { ascending: boolean }) => {
+            limit: (n: number) => { maybeSingle: () => Promise<{ data: { id?: string } | null }> };
+          };
+        };
+      };
+    };
+  })
+    .from("profiles")
+    .select("id")
+    .eq("created_by", memberId)
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  const grantProfileId = firstProfile?.id ? String(firstProfile.id) : null;
+  if (grantProfileId) {
+    await (db as { from: (t: string) => { update: (r: object) => { eq: (c: string, v: string) => { eq: (c: string, v: string) => PromiseLike<unknown> } } } })
+      .from("memberships")
+      .update({ status: "cancelled" })
+      .eq("profile_id", grantProfileId)
+      .eq("status", "pending");
+  } else {
+    await db.from("memberships").update({ status: "cancelled" }).eq("user_id", memberId).eq("status", "pending");
+  }
   const { data: inserted } = await db
     .from("memberships")
     .insert({
       user_id: memberId,
+      profile_id: grantProfileId,
       plan_code: code,
       source: "grant",
       status: "pending",
@@ -159,7 +199,12 @@ export async function grantPlan(formData: FormData) {
   } else {
     await activateRow(
       db,
-      { id: String(inserted.id), user_id: String(inserted.user_id ?? memberId), plan_code: String(inserted.plan_code ?? code) },
+      {
+        id: String(inserted.id),
+        user_id: String(inserted.user_id ?? memberId),
+        plan_code: String(inserted.plan_code ?? code),
+        profile_id: grantProfileId,
+      },
       desk.me?.id,
       plan.months,
     );

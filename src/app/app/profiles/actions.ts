@@ -5,6 +5,8 @@ import { ensureAppUser } from "@/lib/auth/session";
 import { findOwnProfile, listOwnProfiles } from "@/lib/profile/own-profile";
 import { canAddProfile } from "@/lib/profile/caps";
 import { isUniqueViolation, missingPayloadColumn, saveErrorMessage } from "@/lib/profile/db-errors";
+import { consumePendingMobileVerification } from "@/app/app/profiles/otp-actions";
+import { findProfileUsingMobile, MOBILE_IN_USE } from "@/lib/profile/mobile-unique";
 import { displayFirstName, toDbCreatorRelationship } from "@/lib/profile/options";
 import { isMandatoryReadyFromRecord, nextReviewStatus, smsOtpRequiredFromEnv } from "@/lib/profile/completeness";
 import { loadHouseReady, viewerEmailVerified } from "@/lib/profile/house-ready";
@@ -26,7 +28,7 @@ import { writeAudit } from "@/lib/desk/audit";
 import { recordAndDeliverNotice } from "@/lib/notify/house-notice";
 import { digitsOnly } from "@/lib/notify/phone";
 import { complimentaryPaidProfileAccess, pairPlanLive } from "@/lib/membership/access";
-import { loadInterestQuota, loadMembership } from "@/lib/membership/load";
+import { loadInterestQuota, loadMembership, loadMembershipForProfile } from "@/lib/membership/load";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { readSessionFromCookies, restInsertProfile } from "@/lib/supabase/user-rest";
 import { writeFile } from "node:fs/promises";
@@ -390,7 +392,24 @@ export async function saveProfile(formData: FormData) {
   });
   const payload = pickSaveRow(fullPayload, section, Boolean(editingId));
 
+  const bounceSave = (error: string): never => {
+    const desk = bounceId
+      ? deskPeopleEditReturn(formData, bounceId, { error, section })
+      : null;
+    if (desk) redirect(desk);
+    const path = bounceId ? `/app/profiles/${bounceId}` : "/app/profiles/new";
+    const extra = bounceId && section ? `&edit=1&section=${section}` : bounceId ? "&edit=1" : "";
+    redirect(`${path}?error=${encodeURIComponent(error)}${extra}`);
+  };
+
   let profileId = editingId;
+  if (typeof payload.subject_mobile === "string" && payload.subject_mobile) {
+    const holder = await findProfileUsingMobile(supabase, payload.subject_mobile, editingId);
+    if (holder) bounceSave(MOBILE_IN_USE);
+    if (await consumePendingMobileVerification(supabase, me.id, payload.subject_mobile)) {
+      payload.phone_otp_verified_at = new Date().toISOString();
+    }
+  }
   if (editingId && typeof payload.subject_mobile === "string") {
     const { data: currentMobile } = await supabase
       .from("profiles")
@@ -647,7 +666,7 @@ export async function sendInterest(formData: FormData): Promise<{
   if (!mine?.ready || mine.status !== "active") return { ok: false, error: "incomplete" };
   if (!canSendInterest(mine.id, toId)) return { ok: false, error: "self" };
 
-  const access = await loadMembership(supabase, me);
+  const access = await loadMembership(supabase, me, { id: mine.id });
   if (!access.live) return { ok: false, error: "plan" };
   const [quota, alreadyView] = await Promise.all([
     loadInterestQuota(supabase, me, access, [mine.id]),
@@ -808,13 +827,9 @@ export async function revealContact(toId: string): Promise<{
   let limit: number | null = null;
   let dailyLeft: number | null = null;
   if (!alreadyCounted) {
-    const access = await loadMembership(supabase, me);
+    const access = await loadMembership(supabase, me, { id: mine.id });
     if (!access.live) {
-      const ownerId = typeof target.created_by === "string" ? target.created_by : "";
-      const { data: ownerRow } = ownerId
-        ? await db.from("app_users").select("id, role, welcome_started_at, welcome_days").eq("id", ownerId).maybeSingle()
-        : { data: null };
-      const targetAccess = ownerRow ? await loadMembership(db, ownerRow) : null;
+      const targetAccess = await loadMembershipForProfile(db, toId);
       const { data: links } = await db
         .from("interests")
         .select("status, created_at")

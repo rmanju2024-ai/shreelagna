@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { sendMobileOtp, verifyMobileOtp } from "@/app/app/profiles/otp-actions";
+import { checkMobileAvailable, sendMobileOtp, verifyMobileOtp } from "@/app/app/profiles/otp-actions";
 import { indiaMobileInput } from "@/lib/notify/phone";
 import { btnGhost, inputClass } from "@/lib/ui/classes";
 
@@ -48,7 +48,6 @@ export function MobileOtpField({
   const showVerified = ok && sameAsSaved;
 
   async function send() {
-    if (!profileId) return;
     setBusy("send");
     setNote("");
     const result = await sendMobileOtp(profileId, mobile);
@@ -68,7 +67,6 @@ export function MobileOtpField({
   }
 
   async function verify() {
-    if (!profileId) return;
     setBusy("verify");
     setNote("");
     const result = await verifyMobileOtp(profileId, mobile, code);
@@ -100,14 +98,18 @@ export function MobileOtpField({
             setMobile(indiaMobileInput(e.target.value));
             setOk(false);
             setSent(false);
+            setNote("");
+          }}
+          onBlur={async () => {
+            if (staffView || mobile.replace(/\D/g, "").length < 10) return;
+            const result = await checkMobileAvailable(mobile, profileId);
+            if (!result.ok) setNote(result.error);
           }}
           className={inputClass}
         />
       )}
       {staffView ? (
         <p className="otp-hint">The member confirms this number on WhatsApp after they sign in.</p>
-      ) : !profileId ? (
-        <p className="otp-hint">Save the profile, then confirm this number on WhatsApp.</p>
       ) : (
         <>
           {showVerified ? <VerifyFlag on tone="whatsapp" label="WhatsApp verified" /> : null}

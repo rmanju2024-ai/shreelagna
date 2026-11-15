@@ -3,8 +3,7 @@ import { BannerGreeting } from "@/components/home/banner-greeting";
 import { setActiveProfile } from "@/app/app/profiles/actions";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { publicMediaUrl } from "@/lib/match/inbox-card";
-import { loadMembership } from "@/lib/membership/load";
-import type { Membership } from "@/lib/membership/access";
+import { resolveMembership, type Membership, type PaidRow } from "@/lib/membership/access";
 import { canAddProfile, MAX_PROFILES_PER_ACCOUNT } from "@/lib/profile/caps";
 import { displayFirstName, profileKindLabel } from "@/lib/profile/options";
 import { listOwnProfiles } from "@/lib/profile/own-profile";
@@ -81,15 +80,19 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
   const stats = new Map<string, Stats>();
   for (const id of ids) stats.set(id, emptyStats());
   const db = createServiceClient() ?? supabase;
-  const [views, rec, sen, threads, photos, access] = await Promise.all([
+  const [views, rec, sen, threads, photos, paidRows] = await Promise.all([
     supabase.from("profile_views").select("viewed_profile_id").in("viewed_profile_id", ids),
     supabase.from("interests").select("to_profile_id").in("to_profile_id", ids),
     supabase.from("interests").select("from_profile_id").in("from_profile_id", ids),
     supabase.from("threads").select("profile_a, profile_b").or(`profile_a.in.(${ids.join(",")}),profile_b.in.(${ids.join(",")})`),
     db.from("media").select("profile_id, storage_path, is_primary").in("profile_id", ids).eq("kind", "photo").order("created_at"),
-    loadMembership(db, me),
+    db.from("memberships").select("profile_id, plan_code, status, starts_at, ends_at").eq("user_id", me.id).eq("status", "active"),
   ]);
-  const plan = planLine(access);
+  const paidByProfile = new Map<string, PaidRow>();
+  for (const row of paidRows.data ?? []) {
+    const pid = String((row as { profile_id?: string | null }).profile_id ?? "");
+    if (pid) paidByProfile.set(pid, row as PaidRow);
+  }
   for (const row of views.data ?? []) {
     const key = String((row as { viewed_profile_id: string }).viewed_profile_id);
     const cur = stats.get(key) ?? emptyStats();
@@ -138,6 +141,15 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
           const bride = row.profile_type !== "vara";
           const photo = publicMediaUrl(photoOf.get(row.id));
           const name = displayFirstName(row.subject_full_name ?? "") || "Profile";
+          const paid = paidByProfile.get(row.id) ?? null;
+          const plan = planLine(
+            resolveMembership({
+              role: me.role,
+              welcomeStartedAt: row.created_at,
+              welcomeDays: me.welcome_days,
+              paid,
+            }),
+          );
           return (
             <li key={row.id} className={`home-family-card${on ? " is-on" : ""}${bride ? " is-bride" : " is-groom"}`}>
               <div className="home-family-pic">

@@ -9,12 +9,13 @@ import {
   withBonusSlots,
   type InterestQuota,
 } from "@/lib/membership/quota";
+import { workingProfileId } from "@/lib/profile/working-profile";
 import { istDayStart } from "@/lib/time/ist";
 
 type Query = {
   eq: (col: string, value: string) => Query;
   in: (col: string, value: string[]) => Query & PromiseLike<{ data: unknown[] | null; error?: unknown }>;
-  order: (col: string, opts: { ascending: boolean }) => Query;
+  order: (col: string, opts: { ascending: boolean }) => Query & PromiseLike<{ data: unknown[] | null; error?: unknown }>;
   limit: (n: number) => Query;
   maybeSingle: () => PromiseLike<{ data: unknown }>;
 };
@@ -29,36 +30,42 @@ function asDb(db: unknown): Db {
   return db as Db;
 }
 
-export async function fetchPaidMembership(db: unknown, userId: string): Promise<PaidRow | null> {
+async function membershipRow(
+  db: unknown,
+  userId: string,
+  status: "active" | "pending",
+  profileId?: string | null,
+): Promise<(PaidRow & { profile_id?: string | null }) | null> {
+  const orderCol = status === "pending" ? "created_at" : "ends_at";
   try {
-    const { data } = await asDb(db)
+    let query = asDb(db)
       .from("memberships")
-      .select("plan_code, status, starts_at, ends_at")
+      .select("plan_code, status, starts_at, ends_at, profile_id")
       .eq("user_id", userId)
-      .eq("status", "active")
-      .order("ends_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    return (data as PaidRow | null) ?? null;
+      .eq("status", status);
+    if (profileId) query = query.eq("profile_id", profileId);
+    const { data } = await query.order(orderCol, { ascending: false }).limit(1).maybeSingle();
+    return (data as PaidRow & { profile_id?: string | null }) ?? null;
   } catch {
     return null;
   }
 }
 
-export async function fetchPendingPlanCode(db: unknown, userId: string): Promise<string | null> {
-  try {
-    const { data } = await asDb(db)
-      .from("memberships")
-      .select("plan_code, status, starts_at, ends_at")
-      .eq("user_id", userId)
-      .eq("status", "pending")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    return (data as PaidRow | null)?.plan_code ?? null;
-  } catch {
-    return null;
-  }
+export async function fetchPaidMembership(
+  db: unknown,
+  userId: string,
+  profileId?: string | null,
+): Promise<PaidRow | null> {
+  return membershipRow(db, userId, "active", profileId);
+}
+
+export async function fetchPendingPlanCode(
+  db: unknown,
+  userId: string,
+  profileId?: string | null,
+): Promise<string | null> {
+  const row = await membershipRow(db, userId, "pending", profileId);
+  return row?.plan_code ?? null;
 }
 
 export async function fetchPlans(db: unknown): Promise<PlanCard[]> {
@@ -94,9 +101,23 @@ export async function loadInterestQuota(
   const bonus = await readInterestBonus(db, me.id);
   const limit = withBonusSlots(interestLimitFor(access.kind, plan?.interestLimit), bonus);
   if (!profileIds.length) return resolveQuota(limit, 0);
-  const paid = access.kind === "paid" ? await fetchPaidMembership(db, me.id) : null;
+  const paid = access.kind === "paid" ? await fetchPaidMembership(db, me.id, profileIds[0]) : null;
+  let welcomeStartedAt = me.welcome_started_at;
+  if (access.kind === "welcome" && profileIds[0]) {
+    try {
+      const { data: born } = await asDb(db)
+        .from("profiles")
+        .select("created_at")
+        .eq("id", profileIds[0])
+        .maybeSingle();
+      const at = (born as { created_at?: string | null } | null)?.created_at;
+      if (at) welcomeStartedAt = at;
+    } catch {
+      /* keep account welcome date */
+    }
+  }
   const since = quotaWindowStart(access.kind, {
-    welcomeStartedAt: me.welcome_started_at,
+    welcomeStartedAt,
     paidStartsAt: paid?.starts_at,
   });
   try {
@@ -139,24 +160,51 @@ async function readInterestBonus(db: unknown, userId: string): Promise<number> {
   }
 }
 
+export type MembershipMe = {
+  id: string;
+  role?: string | null;
+  welcome_started_at?: string | null;
+  welcome_days?: number | null;
+  active_profile_id?: string | null;
+};
+
 export async function loadMembership(
   db: unknown,
-  me: {
-    id: string;
-    role?: string | null;
-    welcome_started_at?: string | null;
-    welcome_days?: number | null;
-  },
+  me: MembershipMe,
+  profile?: { id?: string | null; created_at?: string | null } | null,
 ): Promise<Membership> {
-  const paid = me.role === "admin" || me.role === "service" ? null : await fetchPaidMembership(db, me.id);
+  const profileId = profile?.id ?? null;
+  const paid =
+    me.role === "admin" || me.role === "service" ? null : await fetchPaidMembership(db, me.id, profileId);
   const named = paid?.plan_code ? await fetchPlanByCode(db, paid.plan_code) : null;
   return resolveMembership({
     role: me.role,
-    welcomeStartedAt: me.welcome_started_at,
+    welcomeStartedAt: profile?.created_at ?? me.welcome_started_at,
     welcomeDays: me.welcome_days,
     paid,
     planName: named?.name,
   });
+}
+
+export async function loadWorkingMembership(
+  db: unknown,
+  me: MembershipMe,
+): Promise<{ access: Membership; profileId: string | null; createdAt: string | null }> {
+  try {
+    const { data } = await asDb(db)
+      .from("profiles")
+      .select("id, created_at")
+      .eq("created_by", me.id)
+      .order("created_at", { ascending: true });
+    const listed = (data ?? []) as { id: string; created_at?: string | null }[];
+    const profileId = workingProfileId(me.active_profile_id, listed.map((row) => row.id));
+    const row = listed.find((item) => item.id === profileId) ?? (listed.length === 1 ? listed[0] : null);
+    const access = await loadMembership(db, me, row);
+    return { access, profileId: row?.id ?? null, createdAt: row?.created_at ?? null };
+  } catch {
+    const access = await loadMembership(db, me);
+    return { access, profileId: me.active_profile_id ?? null, createdAt: me.welcome_started_at ?? null };
+  }
 }
 
 const NO_PLAN: Membership = {
@@ -170,7 +218,11 @@ const NO_PLAN: Membership = {
 
 export async function loadMembershipForProfile(db: unknown, profileId: string): Promise<Membership> {
   try {
-    const { data: profile } = await asDb(db).from("profiles").select("created_by").eq("id", profileId).maybeSingle();
+    const { data: profile } = await asDb(db)
+      .from("profiles")
+      .select("created_by, created_at")
+      .eq("id", profileId)
+      .maybeSingle();
     const ownerId = String((profile as { created_by?: string | null } | null)?.created_by ?? "");
     if (!ownerId) return NO_PLAN;
     const { data: owner } = await asDb(db)
@@ -179,7 +231,10 @@ export async function loadMembershipForProfile(db: unknown, profileId: string): 
       .eq("id", ownerId)
       .maybeSingle();
     if (!owner) return NO_PLAN;
-    return loadMembership(db, owner as { id: string; role?: string | null; welcome_started_at?: string | null; welcome_days?: number | null });
+    return loadMembership(db, owner as MembershipMe, {
+      id: profileId,
+      created_at: (profile as { created_at?: string | null }).created_at,
+    });
   } catch {
     return NO_PLAN;
   }

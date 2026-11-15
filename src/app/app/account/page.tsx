@@ -8,7 +8,7 @@ import { isOpenTicket } from "@/lib/desk/tickets";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { planByCode } from "@/lib/membership/catalog";
 import { planHeaderMarks, type PlanMark } from "@/lib/membership/account-plan";
-import { fetchPendingPlanCode, fetchPlans, loadInterestQuota, loadMembership } from "@/lib/membership/load";
+import { fetchPendingPlanCode, fetchPlans, loadInterestQuota, loadWorkingMembership } from "@/lib/membership/load";
 import { unreadLabel } from "@/lib/match/chat-ui";
 import { unreadNoticeBadge } from "@/lib/notices/unread-badge";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -59,17 +59,17 @@ export default async function AccountHubPage() {
   const me = await ensureAppUser(supabase, user);
   if (!me) redirect("/login?error=account");
   const db = createServiceClient() ?? supabase;
-  const [access, mineRows, pendingCode, plans, inbox, requests] = await Promise.all([
-    loadMembership(db, me),
+  const [workingMem, mineRows, plans, inbox, requests] = await Promise.all([
+    loadWorkingMembership(db, me),
     db.from("profiles").select("id, subject_full_name").eq("created_by", me.id),
-    fetchPendingPlanCode(db, me.id),
     fetchPlans(db),
     unreadNoticeBadge(me.id).catch(() => ({ chatUnread: 0, alertUnread: 0, likesPending: 0 })),
     loadMemberSupportRequests(db, { id: me.id || user.id, email: me.email ?? user.email }).catch(() => []),
   ]);
-  const mineIds = (mineRows.data ?? []).map((row) => String(row.id));
+  const access = workingMem.access;
+  const pendingCode = await fetchPendingPlanCode(db, me.id, workingMem.profileId);
+  const quota = await loadInterestQuota(db, me, access, workingMem.profileId ? [workingMem.profileId] : []);
   const ownerName = accountOwnerName(mineRows.data ?? [], me.active_profile_id, me.display_name);
-  const quota = await loadInterestQuota(db, me, access, mineIds);
   const inboxCounts: Record<string, number> = {
     ...accountInboxCounts(inbox),
     "/about?tab=requests": requests.filter((row) => isOpenTicket(row.status)).length,

@@ -4,6 +4,7 @@ import { ensureAppUser } from "@/lib/auth/session";
 import { writeAudit } from "@/lib/desk/audit";
 import { isPlanCode } from "@/lib/membership/catalog";
 import { fetchPlanByCode } from "@/lib/membership/load";
+import { requireWorkingProfile } from "@/lib/profile/working-profile";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -29,10 +30,13 @@ export async function requestPlan(formData: FormData) {
   const plan = isPlanCode(code) ? await fetchPlanByCode(db, code) : null;
   if (!plan?.forSale) redirect("/app/plans");
 
+  const working = await requireWorkingProfile(supabase, me);
+
   const { data: pending } = await db
     .from("memberships")
     .select("id")
     .eq("user_id", me.id)
+    .eq("profile_id", working.id)
     .eq("status", "pending")
     .maybeSingle();
 
@@ -41,6 +45,7 @@ export async function requestPlan(formData: FormData) {
   } else {
     const { error } = await db.from("memberships").insert({
       user_id: me.id,
+      profile_id: working.id,
       plan_code: code,
       source: "request",
       status: "pending",

@@ -341,7 +341,7 @@ async function postChatMessage(formData: FormData) {
     )
     .limit(8);
   if (!pairCanChat(interestRows ?? [], mine.id, other.id)) return { ok: false as const, bounce, threadId };
-  const myAccess = await loadMembership(supabase, me);
+  const myAccess = await loadMembership(supabase, me, { id: mine.id });
   const otherAccess = await loadMembershipForProfile(supabase, other.id);
   if (!pairPlanLive(myAccess.live, otherAccess.live)) return { ok: false as const, bounce, threadId };
   const text = body.slice(0, 4000);
