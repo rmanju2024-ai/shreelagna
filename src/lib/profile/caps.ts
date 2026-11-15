@@ -1,4 +1,4 @@
-export const MAX_PROFILES_PER_ACCOUNT = 1;
+export const MAX_PROFILES_PER_ACCOUNT = 3;
 export const MAX_PHOTOS_PER_PROFILE = 3;
 export const MAX_INTRO_SECONDS = 180;
 

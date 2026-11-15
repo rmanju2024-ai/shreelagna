@@ -21,6 +21,7 @@ import { displayFirstName } from "@/lib/profile/options";
 import { isListedProfileStatus } from "@/lib/profile/visibility";
 import { profileOpenHref } from "@/lib/ui/dismiss";
 import { createServiceClient } from "@/lib/supabase/server";
+import { requireWorkingProfile } from "@/lib/profile/working-profile";
 import { redirect } from "next/navigation";
 
 function nestedName(value: unknown): string | null {
@@ -70,11 +71,11 @@ export async function InterestsView({ only }: { only?: SectionId } = {}) {
   const me = await ensureAppUser(supabase, user);
   if (!me) redirect("/login?error=account");
 
-  const [, { data: mine }] = await Promise.all([
+  const [, working] = await Promise.all([
     expireStaleInterests(),
-    supabase.from("profiles").select("id, subject_full_name").eq("created_by", me.id),
+    requireWorkingProfile(supabase, me),
   ]);
-  const ids = (mine ?? []).map((p) => p.id);
+  const ids = [working.id];
   const idSet = new Set(ids);
 
   // Start every query that only needs this member's profile ids now, so they run together.

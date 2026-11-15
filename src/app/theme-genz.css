@@ -2839,7 +2839,7 @@ button.field-help-btn,
   align-items: center;
   text-align: center;
   gap: 0.72rem;
-  width: min(100%, 26rem);
+  width: min(100%, 42rem);
   padding: 1.15rem 1.35rem 1.2rem;
   border-radius: 1.25rem;
   background:
@@ -2911,6 +2911,66 @@ button.field-help-btn,
   min-height: 2.35rem;
   padding: 0.42rem 0.9rem;
   font-size: 0.82rem;
+}
+.home-invite-pick {
+  font-weight: 700;
+  color: #6f1d1b;
+}
+.home-profile-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 0.85rem;
+  border: 1px solid rgb(212 168 90 / 45%);
+  background: rgb(255 252 245 / 70%);
+}
+.home-profile-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+  text-align: left;
+}
+.home-profile-table caption {
+  caption-side: top;
+  padding: 0.55rem 0.7rem 0.2rem;
+  font-weight: 700;
+  color: #6f1d1b;
+  text-align: left;
+}
+.home-profile-table th,
+.home-profile-table td {
+  padding: 0.45rem 0.55rem;
+  border-top: 1px solid rgb(212 168 90 / 28%);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.home-profile-table th {
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #7a4a28;
+}
+.home-profile-table tr.is-working {
+  background: rgb(255 236 196 / 55%);
+}
+.home-profile-city {
+  display: block;
+  font-size: 0.68rem;
+  color: #7a4a28;
+}
+.home-profile-on {
+  font-weight: 700;
+  color: #6f1d1b;
+}
+.home-profile-use {
+  appearance: none;
+  border: 1px solid rgb(111 29 27 / 35%);
+  background: #fffdf8;
+  color: #6f1d1b;
+  border-radius: 999px;
+  padding: 0.22rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
 }
 .sx-hero .brand-motto {
   margin: 0.55rem 0 0;
@@ -3067,6 +3127,9 @@ button.field-help-btn,
   .home-invite {
     width: min(100%, 22rem);
     padding: 0.95rem 1rem 1rem;
+  }
+  .home-invite:has(.home-profile-table) {
+    width: min(100%, 100%);
   }
   .home-split-title { font-size: clamp(1.7rem, 8vw, 2.15rem); max-width: 16ch; }
 }

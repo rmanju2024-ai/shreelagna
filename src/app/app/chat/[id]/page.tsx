@@ -12,6 +12,7 @@ import { loadMembership, loadMembershipForProfile } from "@/lib/membership/load"
 import { displayFirstName } from "@/lib/profile/options";
 import { profileOpenHref } from "@/lib/ui/dismiss";
 import { canSearchFamilies } from "@/lib/profile/visibility";
+import { requireWorkingProfile } from "@/lib/profile/working-profile";
 import { createServiceClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 
@@ -21,6 +22,7 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
   if (!supabase || !user) redirect(`/login?next=/app/chat/${id}`);
   const me = await ensureAppUser(supabase, user);
   if (!me) redirect("/login?error=account");
+  const working = await requireWorkingProfile(supabase, me);
 
   const { data: thread } = await supabase
     .from("threads")
@@ -35,7 +37,7 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
     .select("id, status")
     .eq("created_by", me.id)
     .in("id", [thread.profile_a, thread.profile_b]);
-  const mine = mineRows?.find((row) => row.id === me.active_profile_id) ?? mineRows?.[0] ?? null;
+  const mine = mineRows?.find((row) => row.id === working.id) ?? null;
   if (!mine || !canSearchFamilies(mine.status)) notFound();
 
   const otherId = mine.id === thread.profile_a ? thread.profile_b : thread.profile_a;

@@ -2,6 +2,7 @@ import { BackToAccount } from "@/components/back-to-account";
 import Link from "next/link";
 import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
+import { requireWorkingProfile } from "@/lib/profile/working-profile";
 import { redirect } from "next/navigation";
 import { requestVerification, uploadVerificationEvidence } from "@/app/app/verification/actions";
 import { EVIDENCE_BUCKET, EVIDENCE_MAX_FILES, EVIDENCE_RETENTION_NOTICE, evidenceFolder, evidenceStore } from "@/lib/verification/evidence";
@@ -40,12 +41,13 @@ export default async function MemberVerificationPage({ searchParams }: { searchP
   const { supabase, user } = await getAuth();
   if (!supabase || !user) redirect("/login?next=/app/verification");
   const me = await ensureAppUser(supabase, user);
-  if (!me?.active_profile_id) redirect("/app/profiles/new");
-  const { data: cases } = await supabase.from("profile_verification_cases").select("id, document_type, status, created_at, recheck_due_at, rejection_reason").eq("profile_id", me.active_profile_id).order("created_at", { ascending: false }).limit(20);
+  if (!me) redirect("/login?error=account");
+  const working = await requireWorkingProfile(supabase, me);
+  const { data: cases } = await supabase.from("profile_verification_cases").select("id, document_type, status, created_at, recheck_due_at, rejection_reason").eq("profile_id", working.id).order("created_at", { ascending: false }).limit(20);
   const store = cases?.length ? await evidenceStore() : null;
   const fileCount = new Map<string, number>();
   for (const item of cases ?? []) {
-    const listed = store ? await store.storage.from(EVIDENCE_BUCKET).list(evidenceFolder(me.active_profile_id, item.id)) : null;
+    const listed = store ? await store.storage.from(EVIDENCE_BUCKET).list(evidenceFolder(working.id, item.id)) : null;
     fileCount.set(item.id, listed?.data?.length ?? 0);
   }
   return (

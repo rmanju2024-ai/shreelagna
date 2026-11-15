@@ -4,6 +4,7 @@ import Link from "next/link";
 import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { createServiceClient } from "@/lib/supabase/server";
+import { requireWorkingProfile } from "@/lib/profile/working-profile";
 import { redirect } from "next/navigation";
 import { btnPrimary, cardClass } from "@/lib/ui/classes";
 
@@ -12,12 +13,13 @@ export default async function SafetyPage({ searchParams }: { searchParams: Promi
   const { supabase, user } = await getAuth();
   if (!supabase || !user) redirect("/login?next=/app/safety");
   const me = await ensureAppUser(supabase, user);
-  if (!me?.active_profile_id) redirect("/app");
+  if (!me) redirect("/login?error=account");
+  const working = await requireWorkingProfile(supabase, me);
   const db = createServiceClient() ?? supabase;
   const { data: reports } = await db
     .from("safety_reports")
     .select("id, category, status, created_at")
-    .eq("reporter_profile_id", me.active_profile_id)
+    .eq("reporter_profile_id", working.id)
     .order("created_at", { ascending: false })
     .limit(20);
 

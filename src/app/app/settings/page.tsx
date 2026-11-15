@@ -28,8 +28,10 @@ export default async function SettingsPage({
       .order("updated_at", { ascending: false }),
     supabase.from("app_users").select("notify_match_email, notify_whatsapp").eq("id", me.id).maybeSingle(),
   ]);
-  const profile = profiles?.find((row) => row.id === me.active_profile_id) ?? profiles?.[0];
-  if (!profile) redirect("/app");
+  const profile =
+    profiles?.find((row) => row.id === me.active_profile_id) ??
+    ((profiles?.length ?? 0) === 1 ? profiles?.[0] : undefined);
+  if (!profile) redirect((profiles?.length ?? 0) > 1 ? "/?pick=1" : "/app");
 
   let account = accountResult.data;
   const accountError = accountResult.error;

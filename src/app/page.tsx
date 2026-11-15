@@ -2,16 +2,21 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { GoogleSignIn } from "@/app/login/google-button";
 import { KalyanBanner } from "@/components/home/kalyan-banner";
-import { BannerGreeting } from "@/components/home/banner-greeting";
+import { HomeProfilesBoard } from "@/components/home/home-profiles-board";
 import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { pageInner } from "@/components/site-chrome";
 import { getAuth } from "@/lib/auth/session";
 import { BrandMotto } from "@/components/brand-motto";
-import { btnHero, btnHeroGhost } from "@/lib/ui/classes";
+import { btnHeroGhost } from "@/lib/ui/classes";
 
 export const dynamic = "force-dynamic";
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ pick?: string }>;
+}) {
+  const { pick } = await searchParams;
   const { user } = await getAuth();
 
   return (
@@ -24,20 +29,16 @@ export default async function HomePage() {
           <div className="home-invite">
             {user ? (
               <Suspense fallback={null}>
-                <BannerGreeting />
+                <HomeProfilesBoard pick={pick === "1"} />
               </Suspense>
             ) : (
-              <BrandMotto as="h1" />
+              <>
+                <BrandMotto as="h1" />
+                <div className="home-invite-actions">
+                  <GoogleSignIn label="Continue with Gmail" tone="ivory" />
+                </div>
+              </>
             )}
-            <div className="home-invite-actions">
-              {user ? (
-                <Link href="/app" className={btnHero}>
-                  My profile
-                </Link>
-              ) : (
-                <GoogleSignIn label="Continue with Gmail" tone="ivory" />
-              )}
-            </div>
           </div>
         </div>
       </section>

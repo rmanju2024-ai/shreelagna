@@ -8,6 +8,7 @@ import { chatStamp, countByKey, latestByThread, pickFirstChat, previewText, unre
 import { pickPrimaryPhotoMap, publicMediaUrl } from "@/lib/match/inbox-card";
 import { pairCanChat } from "@/lib/match/interest-status";
 import { displayFirstName } from "@/lib/profile/options";
+import { requireWorkingProfile } from "@/lib/profile/working-profile";
 import { createServiceClient } from "@/lib/supabase/server";
 
 /** One shared, per-request load of the chat list (sidebar and first-chat redirect reuse it). */
@@ -17,8 +18,8 @@ const loadChatData = cache(async () => {
   const me = await ensureAppUser(supabase, user);
   if (!me) redirect("/login?error=account");
 
-  const { data: mine } = await supabase.from("profiles").select("id").eq("created_by", me.id);
-  const ids = (mine ?? []).map((p) => p.id);
+  const working = await requireWorkingProfile(supabase, me);
+  const ids = [working.id];
   const [{ data: threads }, { data: chatRows }, { data: unreadNotes }] = await Promise.all([
     ids.length
       ? supabase

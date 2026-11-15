@@ -19,14 +19,20 @@ export default async function AppHome() {
     .eq("created_by", me.id)
     .order("updated_at", { ascending: false });
 
-  const active = profiles?.find((p) => p.id === me.active_profile_id) ?? profiles?.[0];
-  if (active) {
-    if (me.active_profile_id !== active.id) {
+  const ids = (profiles ?? []).map((p) => p.id);
+  if (ids.length > 1) {
+    const chosen = me.active_profile_id && ids.includes(me.active_profile_id) ? me.active_profile_id : null;
+    if (!chosen) redirect("/?pick=1");
+    redirect(`/app/profiles/${chosen}`);
+  }
+  const only = ids[0];
+  if (only) {
+    if (me.active_profile_id !== only) {
       after(async () => {
-        await supabase.from("app_users").update({ active_profile_id: active.id }).eq("id", me.id);
+        await supabase.from("app_users").update({ active_profile_id: only }).eq("id", me.id);
       });
     }
-    redirect(`/app/profiles/${active.id}`);
+    redirect(`/app/profiles/${only}`);
   }
 
   return (

@@ -339,8 +339,10 @@ export async function BrowseProfileView({
   const mineList = (myProfilesRes.data ?? []) as Record<string, unknown>[];
   const mine =
     mineList.find((row) => row.id === me.active_profile_id) ??
-    mineList.find((row) => isListedProfileStatus(typeof row.status === "string" ? row.status : null)) ??
-    mineList[0] ??
+    (mineList.length === 1
+      ? mineList.find((row) => isListedProfileStatus(typeof row.status === "string" ? row.status : null)) ??
+        mineList[0]
+      : null) ??
     null;
   const myIds = mineList.map((row) => String(row.id)).filter((profileId) => profileId !== id);
   let chatThreadId: string | null = null;

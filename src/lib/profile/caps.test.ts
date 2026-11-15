@@ -9,9 +9,11 @@ import {
 } from "./caps";
 
 describe("caps", () => {
-  it("allows one profile per email and up to 3 photos", () => {
+  it("allows up to three profiles per email and up to 3 photos", () => {
     expect(canAddProfile(0)).toBe(true);
-    expect(canAddProfile(1)).toBe(false);
+    expect(canAddProfile(1)).toBe(true);
+    expect(canAddProfile(2)).toBe(true);
+    expect(canAddProfile(3)).toBe(false);
     expect(canAddPhoto(2)).toBe(true);
     expect(canAddPhoto(3)).toBe(false);
   });

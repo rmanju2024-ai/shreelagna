@@ -1,6 +1,25 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { isMissingColumnError } from "@/lib/profile/db-errors";
 
+export type OwnProfileListRow = {
+  id: string;
+  subject_full_name: string | null;
+  profile_type: string | null;
+  member_code: string | null;
+  status: string | null;
+  current_city: string | null;
+  created_at: string | null;
+};
+
+export async function listOwnProfiles(supabase: SupabaseClient, userId: string): Promise<OwnProfileListRow[]> {
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, subject_full_name, profile_type, member_code, status, current_city, created_at")
+    .eq("created_by", userId)
+    .order("created_at", { ascending: true });
+  return (data ?? []) as OwnProfileListRow[];
+}
+
 export async function findOwnProfile(supabase: SupabaseClient, userId: string) {
   const full = await supabase
     .from("profiles")

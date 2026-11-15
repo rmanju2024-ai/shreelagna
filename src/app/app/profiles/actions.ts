@@ -2,7 +2,8 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { ensureAppUser } from "@/lib/auth/session";
-import { findOwnProfile } from "@/lib/profile/own-profile";
+import { findOwnProfile, listOwnProfiles } from "@/lib/profile/own-profile";
+import { canAddProfile } from "@/lib/profile/caps";
 import { isUniqueViolation, missingPayloadColumn, saveErrorMessage } from "@/lib/profile/db-errors";
 import { displayFirstName, toDbCreatorRelationship } from "@/lib/profile/options";
 import { isMandatoryReadyFromRecord, nextReviewStatus, smsOtpRequiredFromEnv } from "@/lib/profile/completeness";
@@ -331,42 +332,44 @@ export async function saveProfile(formData: FormData) {
   }
 
   const editingId = bounceId || parsed.data.id || null;
-  const mine = await findOwnProfile(supabase, me.id);
   const memberCode = String(formData.get("member_code") ?? "").trim();
-  const houseEdit = Boolean(isStaffRole(me.role) && editingId && editingId !== mine?.id);
-  let target = mine;
+  let houseEdit = false;
+  let target: {
+    id: string;
+    created_by?: string;
+    creator_relationship?: string | null;
+    profile_type?: string | null;
+    member_code?: string | null;
+  } | null = null;
   let ownerId = me.id;
 
-  if (houseEdit && editingId) {
+  if (editingId) {
     const { data: row } = await supabase
       .from("profiles")
       .select("id, created_by, creator_relationship, profile_type, member_code")
       .eq("id", editingId)
       .maybeSingle();
-    if (!row) redirect("/desk/profiles");
-    const { data: owner } = await supabase.from("app_users").select("id, role").eq("id", row.created_by).maybeSingle();
-    if (!canEditMemberProfile(me, { id: row.created_by, role: owner?.role })) {
-      redirect("/desk/profiles");
+    if (!row) redirect(isStaffRole(me.role) ? "/desk/profiles" : "/");
+    if (row.created_by === me.id) {
+      target = row;
+      if (memberCode && row.member_code && memberCode !== row.member_code) {
+        redirect(`/app/profiles/${row.id}?error=${encodeURIComponent("This profile belongs to another member ID.")}&edit=1`);
+      }
+    } else if (isStaffRole(me.role)) {
+      const { data: owner } = await supabase.from("app_users").select("id, role").eq("id", row.created_by).maybeSingle();
+      if (!canEditMemberProfile(me, { id: row.created_by, role: owner?.role })) {
+        redirect("/desk/profiles");
+      }
+      houseEdit = true;
+      target = row;
+      ownerId = row.created_by;
+    } else {
+      redirect("/");
     }
-    target = row;
-    ownerId = row.created_by;
   } else {
-    if (mine && !editingId) {
-      redirect(`/app/profiles/${mine.id}`);
-    }
-    if (mine && editingId && editingId !== mine.id) {
-      redirect(`/app/profiles/${mine.id}`);
-    }
-    if (
-      editingId &&
-      memberCode &&
-      mine &&
-      "member_code" in mine &&
-      typeof mine.member_code === "string" &&
-      mine.member_code &&
-      memberCode !== mine.member_code
-    ) {
-      redirect(`/app/profiles/${mine.id}?error=${encodeURIComponent("This profile belongs to another member ID.")}&edit=1`);
+    const listed = await listOwnProfiles(supabase, me.id);
+    if (!canAddProfile(listed.length)) {
+      redirect(listed[0]?.id ? `/app/profiles/${listed[0].id}` : "/");
     }
   }
 
@@ -405,8 +408,8 @@ export async function saveProfile(formData: FormData) {
       let update = supabase.from("profiles").update(current).eq("id", editingId);
       if (!houseEdit) {
         update = update.eq("created_by", me.id);
-        if (mine && "member_code" in mine && typeof mine.member_code === "string" && mine.member_code) {
-          update = update.eq("member_code", mine.member_code);
+        if (target && typeof target.member_code === "string" && target.member_code) {
+          update = update.eq("member_code", target.member_code);
         }
       }
       const { error } = await update;
@@ -510,9 +513,13 @@ export async function setActiveProfile(formData: FormData) {
     .maybeSingle();
   if (!data) redirect("/app");
   await supabase.from("app_users").update({ active_profile_id: id }).eq("id", me.id);
+  revalidatePath("/");
   revalidatePath("/app");
   revalidatePath("/browse");
-  redirect("/app");
+  revalidatePath("/app/interests");
+  revalidatePath("/app/chat");
+  const next = String(formData.get("next") ?? "").trim();
+  redirect(next.startsWith("/") && !next.startsWith("//") ? next : "/browse");
 }
 
 export async function deleteOwnProfile(

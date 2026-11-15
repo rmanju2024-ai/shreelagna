@@ -10,6 +10,7 @@ import { noticeProfileListed } from "@/lib/notify/house-notice";
 import { publicMediaUrl } from "@/lib/match/inbox-card";
 import { createServiceClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { requireWorkingProfile } from "@/lib/profile/working-profile";
 import { profileOpenHref, withProfileFrom } from "@/lib/ui/dismiss";
 
 const alertStyle = (kind: string) => {
@@ -28,9 +29,10 @@ export async function AlertsFeed() {
   if (!supabase || !user) redirect("/login?next=/app/alerts");
   const me = await ensureAppUser(supabase, user);
   if (!me) redirect("/login?error=account");
-  if (me.active_profile_id) {
+  const working = await requireWorkingProfile(supabase, me);
+  if (working.id) {
     // Scanning for new matches is slow; do it after the page is sent so Alerts opens at once.
-    const profileId = me.active_profile_id;
+    const profileId = working.id;
     after(async () => {
       try {
         const { recordMatchNotices } = await import("@/lib/match/notices");
@@ -51,7 +53,7 @@ export async function AlertsFeed() {
         media.from("media").select("profile_id, storage_path, created_at").eq("kind", "photo").eq("status", "approved").in("profile_id", profileIds).order("created_at"),
       ])
     : [{ data: [] as { id: string }[] }, { data: [] as { profile_id: string; storage_path: string | null }[] }];
-  const blocked = await loadBlockedProfileIds(media, me.active_profile_id ? [me.active_profile_id] : []);
+  const blocked = await loadBlockedProfileIds(media, [working.id]);
   const alerts = noticesForActiveProfiles(
     collapsed,
     new Set(

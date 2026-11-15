@@ -7,6 +7,7 @@ import { displayFirstName } from "@/lib/profile/options";
 import { createServiceClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { requireWorkingProfile } from "@/lib/profile/working-profile";
 import { profileOpenHref } from "@/lib/ui/dismiss";
 
 export default async function BlockedProfilesPage({ searchParams }: { searchParams: Promise<{ safety?: string }> }) {
@@ -14,12 +15,13 @@ export default async function BlockedProfilesPage({ searchParams }: { searchPara
   const { supabase, user } = await getAuth();
   if (!supabase || !user) redirect("/login?next=/app/blocked");
   const me = await ensureAppUser(supabase, user);
-  if (!me?.active_profile_id) redirect("/app");
+  if (!me) redirect("/login?error=account");
+  const working = await requireWorkingProfile(supabase, me);
   const db = createServiceClient() ?? supabase;
   const { data: blocks } = await db
     .from("member_blocks")
     .select("blocked_profile_id, created_at")
-    .eq("blocker_profile_id", me.active_profile_id)
+    .eq("blocker_profile_id", working.id)
     .order("created_at", { ascending: false });
   const ids = (blocks ?? []).map((row) => row.blocked_profile_id as string);
   const [{ data: profiles }, { data: photos }] = ids.length

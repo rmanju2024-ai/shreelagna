@@ -36,7 +36,8 @@ import { yearsFromDob } from "@/lib/profile/completeness";
 import { loadFaithCatalog } from "@/lib/profile/load-form-lists";
 import { formatHeightImperial, matchSelfFromProfile } from "@/lib/profile/match-compare";
 import { canSearchFamilies, oppositeType, type ProfileType } from "@/lib/profile/visibility";
-import { findOwnProfile } from "@/lib/profile/own-profile";
+import { listOwnProfiles } from "@/lib/profile/own-profile";
+import { workingProfileId } from "@/lib/profile/working-profile";
 import { displayFirstName, profileKindLabel } from "@/lib/profile/options";
 import { fetchAdminUserIds } from "@/lib/desk/admin-ids";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -143,9 +144,13 @@ export async function BrowsePage({
     notice = "Sign in and create a profile to search families.";
   } else {
     const me = await timed("ensureAppUser", ensureAppUser(supabase, user));
-    const own = me && !me.active_profile_id ? await findOwnProfile(supabase, me.id) : null;
-    const mineId = me?.active_profile_id || own?.id || null;
-    if (!me || !mineId) {
+    const listed = me ? await listOwnProfiles(supabase, me.id) : [];
+    const mineId = me ? workingProfileId(me.active_profile_id, listed.map((row) => row.id)) : null;
+    if (!me || (!listed.length && !mineId)) {
+      notice = "Create a profile first, then search.";
+    } else if (listed.length > 1 && !mineId) {
+      notice = "Choose a bride or groom on Home first. Discover lists that one profile only.";
+    } else if (!mineId) {
       notice = "Create a profile first, then search.";
     } else {
       const db = supabase as unknown as {

@@ -69,13 +69,11 @@ export function saveErrorMessage(error: DbError): string {
   if (hay.includes("creator_relationship") || hay.includes("invalid input value")) {
     return "Choose who is registering, then save again.";
   }
-  if (
-    hay.includes("one profile") ||
-    hay.includes("duplicate") ||
-    hay.includes("23505") ||
-    hay.includes("profiles_one_per_account")
-  ) {
-    return "This email already has a profile. Open it to update details.";
+  if (hay.includes("account cap") || hay.includes("profile account cap")) {
+    return "This login can hold up to three profiles. Open Home to choose one, or edit an existing profile.";
+  }
+  if (hay.includes("profiles_one_per_account") || hay.includes("one profile")) {
+    return "This login can hold up to three profiles. Open Home to choose one, or edit an existing profile.";
   }
   return "We could not save just now. Please try again.";
 }

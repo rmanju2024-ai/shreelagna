@@ -1,7 +1,8 @@
 import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { KalyanBanner } from "@/components/home/kalyan-banner";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
-import { findOwnProfile } from "@/lib/profile/own-profile";
+import { canAddProfile } from "@/lib/profile/caps";
+import { listOwnProfiles } from "@/lib/profile/own-profile";
 import { loadFaithCatalog, loadFormLists } from "@/lib/profile/load-form-lists";
 import { redirect } from "next/navigation";
 import { ProfileForm } from "../profile-form";
@@ -17,8 +18,10 @@ export default async function NewProfilePage({
   const me = await ensureAppUser(supabase, user);
   if (!me) redirect("/login?error=account");
 
-  const mine = await findOwnProfile(supabase, me.id);
-  if (mine) redirect(`/app/profiles/${mine.id}`);
+  const listed = await listOwnProfiles(supabase, me.id);
+  if (!canAddProfile(listed.length)) {
+    redirect(listed[0]?.id ? `/app/profiles/${listed[0].id}` : "/");
+  }
 
   const [{ religions, communities }, lists] = await Promise.all([loadFaithCatalog(), loadFormLists()]);
 
