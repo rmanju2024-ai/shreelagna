@@ -2,11 +2,13 @@ import Link from "next/link";
 import { BannerGreeting } from "@/components/home/banner-greeting";
 import { setActiveProfile } from "@/app/app/profiles/actions";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
+import { publicMediaUrl } from "@/lib/match/inbox-card";
 import { canAddProfile, MAX_PROFILES_PER_ACCOUNT } from "@/lib/profile/caps";
 import { displayFirstName, profileKindLabel } from "@/lib/profile/options";
 import { listOwnProfiles } from "@/lib/profile/own-profile";
 import { workingProfileId } from "@/lib/profile/working-profile";
-import { btnHero, btnHeroGhost } from "@/lib/ui/classes";
+import { createServiceClient } from "@/lib/supabase/server";
+import { btnHero, btnHeroGhost, btnPrimary, btnGhost } from "@/lib/ui/classes";
 
 type Stats = { views: number; interestsIn: number; interestsOut: number; chats: number };
 
@@ -28,44 +30,52 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
 
   if (!listed.length) {
     return (
-      <>
+      <div className="home-family">
         <BannerGreeting asMember />
-        <p className="home-invite-line">Create a bride or groom profile to begin.</p>
-        <div className="home-invite-actions">
+        <p className="home-family-kicker">A careful house for a blessed match</p>
+        <h2 className="home-family-title">Begin with a bride or groom</h2>
+        <p className="home-invite-line">One story. One profile. You can add up to two more later.</p>
+        <div className="home-invite-actions home-family-cta">
           <Link href="/app/profiles/new" className={btnHero}>
             Create your first profile
           </Link>
         </div>
-      </>
+      </div>
     );
   }
 
   if (listed.length === 1) {
     const only = listed[0];
     return (
-      <>
+      <div className="home-family">
         <BannerGreeting asMember />
-        <div className="home-invite-actions">
+        <p className="home-family-kicker">Your story is on the house</p>
+        <div className="home-invite-actions home-family-cta">
           <Link href={`/app/profiles/${only.id}`} className={btnHero}>
-            My profile
+            Open profile
+          </Link>
+          <Link href="/browse" className={btnHeroGhost}>
+            Discover matches
           </Link>
           {room ? (
-            <Link href="/app/profiles/new" className={btnHeroGhost}>
-              Add another profile
+            <Link href="/app/profiles/new" className={btnGhost}>
+              Add another
             </Link>
           ) : null}
         </div>
-      </>
+      </div>
     );
   }
 
   const stats = new Map<string, Stats>();
   for (const id of ids) stats.set(id, emptyStats());
-  const [views, rec, sen, threads] = await Promise.all([
+  const db = createServiceClient() ?? supabase;
+  const [views, rec, sen, threads, photos] = await Promise.all([
     supabase.from("profile_views").select("viewed_profile_id").in("viewed_profile_id", ids),
     supabase.from("interests").select("to_profile_id").in("to_profile_id", ids),
     supabase.from("interests").select("from_profile_id").in("from_profile_id", ids),
     supabase.from("threads").select("profile_a, profile_b").or(`profile_a.in.(${ids.join(",")}),profile_b.in.(${ids.join(",")})`),
+    db.from("media").select("profile_id, storage_path, is_primary").in("profile_id", ids).eq("kind", "photo").order("created_at"),
   ]);
   for (const row of views.data ?? []) {
     const key = String((row as { viewed_profile_id: string }).viewed_profile_id);
@@ -95,99 +105,103 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
       stats.set(key, cur);
     }
   }
+  const photoOf = new Map<string, string>();
+  for (const row of photos.data ?? []) {
+    const id = String((row as { profile_id: string }).profile_id);
+    const path = (row as { storage_path?: string | null; is_primary?: boolean }).storage_path;
+    if (!path) continue;
+    if ((row as { is_primary?: boolean }).is_primary || !photoOf.has(id)) photoOf.set(id, path);
+  }
   const workingRow = listed.find((row) => row.id === working);
+  const kind = workingRow ? profileKindLabel(workingRow.profile_type) : null;
 
   return (
-    <>
+    <div className="home-family">
       <BannerGreeting asMember />
-      {needPick || pick ? (
-        <p className="home-invite-line home-invite-pick">
-          Choose a <b>bride</b> or a <b>groom</b> first. Discover and Inbox list that one profile only.
-        </p>
-      ) : (
-        <p className="home-invite-line">
-          Discover is for{" "}
-          <b>
-            {profileKindLabel(workingRow?.profile_type)}
-            {workingRow?.subject_full_name ? ` · ${displayFirstName(workingRow.subject_full_name)}` : ""}
-          </b>
-          . Tap Use this on another row to switch.
-        </p>
-      )}
-      <div className="home-profile-table-wrap">
-        <table className="home-profile-table">
-          <caption>
-            Your profiles ({listed.length} of {MAX_PROFILES_PER_ACCOUNT})
-          </caption>
-          <thead>
-            <tr>
-              <th>Profile</th>
-              <th>Kind</th>
-              <th>ID</th>
-              <th>Views</th>
-              <th>Interests in</th>
-              <th>Sent</th>
-              <th>Chats</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {listed.map((row) => {
-              const s = stats.get(row.id) ?? emptyStats();
-              const on = row.id === working;
-              return (
-                <tr key={row.id} className={on ? "is-working" : undefined}>
-                  <td>
-                    <Link href={`/app/profiles/${row.id}`}>
-                      {displayFirstName(row.subject_full_name ?? "") || "Profile"}
-                    </Link>
-                    {row.current_city ? <span className="home-profile-city">{row.current_city}</span> : null}
-                  </td>
-                  <td>
-                    <span
-                      className={`home-profile-kind is-${row.profile_type === "vara" ? "groom" : "bride"}`}
-                    >
-                      {profileKindLabel(row.profile_type)}
-                    </span>
-                  </td>
-                  <td className="home-profile-id">{row.member_code ?? "—"}</td>
-                  <td>{s.views}</td>
-                  <td>{s.interestsIn}</td>
-                  <td>{s.interestsOut}</td>
-                  <td>{s.chats}</td>
-                  <td>
-                    {on ? (
-                      <span className="home-profile-on">Using</span>
-                    ) : (
-                      <form action={setActiveProfile}>
-                        <input type="hidden" name="id" value={row.id} />
-                        <input type="hidden" name="next" value="/browse" />
-                        <button type="submit" className="home-profile-use">
-                          Use this
-                        </button>
-                      </form>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-      <div className="home-invite-actions">
-        {working ? (
-          <Link href="/browse" className={btnHero}>
-            Discover for this profile
-          </Link>
-        ) : null}
+      <p className="home-family-kicker">Up to {MAX_PROFILES_PER_ACCOUNT} stories on one login</p>
+      <h2 className="home-family-title">
+        {needPick || pick
+          ? "Who should Discover meet today?"
+          : `Meet matches for this ${kind?.toLowerCase()}`}
+      </h2>
+      <p className="home-invite-line">
+        {needPick || pick
+          ? "Pick a bride or a groom. Lists stay empty until you choose."
+          : `${displayFirstName(workingRow?.subject_full_name ?? "")} is in play. Switch cards anytime.`}
+      </p>
+      <ul className="home-family-grid">
+        {listed.map((row) => {
+          const s = stats.get(row.id) ?? emptyStats();
+          const on = row.id === working;
+          const bride = row.profile_type !== "vara";
+          const photo = publicMediaUrl(photoOf.get(row.id));
+          const name = displayFirstName(row.subject_full_name ?? "") || "Profile";
+          return (
+            <li key={row.id} className={`home-family-card${on ? " is-on" : ""}${bride ? " is-bride" : " is-groom"}`}>
+              <div className="home-family-photo">
+                {photo ? (
+                  <img src={photo} alt={name} />
+                ) : (
+                  <span aria-hidden>{name.slice(0, 1)}</span>
+                )}
+              </div>
+              <div className="home-family-meta">
+                <span className={`home-profile-kind is-${bride ? "bride" : "groom"}`}>
+                  {profileKindLabel(row.profile_type)}
+                </span>
+                {on ? <span className="home-profile-on">In play</span> : null}
+                <Link href={`/app/profiles/${row.id}`} className="home-family-name">
+                  {name}
+                </Link>
+                <p>
+                  {row.current_city || "City not set"}
+                  {row.member_code ? ` · ${row.member_code}` : ""}
+                </p>
+                <dl>
+                  <div>
+                    <dt>Views</dt>
+                    <dd>{s.views}</dd>
+                  </div>
+                  <div>
+                    <dt>In</dt>
+                    <dd>{s.interestsIn}</dd>
+                  </div>
+                  <div>
+                    <dt>Sent</dt>
+                    <dd>{s.interestsOut}</dd>
+                  </div>
+                  <div>
+                    <dt>Chats</dt>
+                    <dd>{s.chats}</dd>
+                  </div>
+                </dl>
+                {on ? (
+                  <Link href="/browse" className={btnPrimary}>
+                    Discover matches
+                  </Link>
+                ) : (
+                  <form action={setActiveProfile}>
+                    <input type="hidden" name="id" value={row.id} />
+                    <input type="hidden" name="next" value="/" />
+                    <button type="submit" className={btnGhost}>
+                      Use this {profileKindLabel(row.profile_type).toLowerCase()}
+                    </button>
+                  </form>
+                )}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+      <div className="home-invite-actions home-family-cta">
         {room ? (
           <Link href="/app/profiles/new" className={btnHeroGhost}>
-            Add another profile
+            Add another profile · {listed.length} of {MAX_PROFILES_PER_ACCOUNT}
           </Link>
         ) : (
-          <p className="home-invite-line">You have reached the three-profile limit for this login.</p>
+          <p className="home-invite-line">Three profiles is the house limit for this login.</p>
         )}
       </div>
-    </>
+    </div>
   );
 }
