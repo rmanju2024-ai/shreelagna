@@ -2,14 +2,68 @@
 
 import { useEffect, useState } from "react";
 
-interface Greeting { text: string; emoji: string }
+type GreetingMark = "sunrise" | "sun" | "moon" | "spark";
+
+interface Greeting {
+  text: string;
+  mark: GreetingMark;
+}
 
 export function getGreeting(now = new Date()): Greeting {
   const h = now.getHours();
-  if (h >= 5  && h < 12) return { text: "Good Morning",   emoji: "🌅" };
-  if (h >= 12 && h < 17) return { text: "Good Afternoon", emoji: "☀️" };
-  if (h >= 17 && h < 21) return { text: "Good Evening",   emoji: "🌆" };
-  return                         { text: "Welcome tonight", emoji: "✨" };
+  if (h >= 5 && h < 12) return { text: "Good Morning", mark: "sunrise" };
+  if (h >= 12 && h < 17) return { text: "Good Afternoon", mark: "sun" };
+  if (h >= 17 && h < 21) return { text: "Good Evening", mark: "moon" };
+  return { text: "Welcome tonight", mark: "spark" };
+}
+
+function GreetingJewel({ mark }: { mark: GreetingMark }) {
+  return (
+    <svg className="home-greeting-mark" viewBox="0 0 24 24" aria-hidden focusable="false">
+      {mark === "sunrise" ? (
+        <>
+          <path
+            fill="currentColor"
+            d="M12 3.2 13.2 6h2.6L14 7.8l.8 2.6L12 9.2 9.2 10.4l.8-2.6L8.2 6h2.6L12 3.2Z"
+          />
+          <path
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            d="M5 16.5c1.8-2.4 4.2-3.6 7-3.6s5.2 1.2 7 3.6M4 19.2h16M7.4 14.2 6 12.6M16.6 14.2 18 12.6M12 12.2V10"
+          />
+        </>
+      ) : null}
+      {mark === "sun" ? (
+        <>
+          <circle cx="12" cy="12" r="4.1" fill="currentColor" />
+          <path
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.7"
+            strokeLinecap="round"
+            d="M12 3.2v2.1M12 18.7v2.1M3.2 12h2.1M18.7 12h2.1M5.7 5.7l1.5 1.5M16.8 16.8l1.5 1.5M18.3 5.7l-1.5 1.5M7.2 16.8l-1.5 1.5"
+          />
+        </>
+      ) : null}
+      {mark === "moon" ? (
+        <>
+          <path
+            fill="currentColor"
+            d="M14.2 4.2a7.6 7.6 0 1 0 5.5 13.2A8.2 8.2 0 0 1 9.4 8.4 7.5 7.5 0 0 0 14.2 4.2Z"
+          />
+          <path fill="currentColor" d="M17.8 6.2 18.5 8l1.8.3-1.4 1.2.4 1.8-1.5-1-1.5 1 .4-1.8-1.4-1.2 1.8-.3Z" />
+        </>
+      ) : null}
+      {mark === "spark" ? (
+        <path
+          fill="currentColor"
+          d="M12 2.6 13.6 8.4 19.4 10 13.6 11.6 12 17.4 10.4 11.6 4.6 10 10.4 8.4 12 2.6Zm6.6 12.2.8 2.4 2.4.7-2.4.7-.8 2.4-.8-2.4-2.4-.7 2.4-.7.8-2.4ZM5.4 14.4l.6 1.8 1.8.5-1.8.5-.6 1.8-.6-1.8-1.8-.5 1.8-.5.6-1.8Z"
+        />
+      ) : null}
+    </svg>
+  );
 }
 
 /** Tagline-style greeting — replaces BrandMotto in the home panel for logged-in users */
@@ -31,7 +85,14 @@ export function BannerGreetingTagline({
       aria-label={g ? `${g.text}, ${name}` : `Welcome back, ${name}`}
     >
       <span className="home-greeting-chip">
-        {g ? `${g.text} ${g.emoji}` : "Welcome back"}
+        {g ? (
+          <>
+            {g.text}
+            <GreetingJewel mark={g.mark} />
+          </>
+        ) : (
+          "Welcome back"
+        )}
       </span>
       <strong className="home-greeting-name">{name}</strong>
       <span className="home-greeting-role">{roleLabel}</span>

@@ -45,14 +45,16 @@ function FileCard({
   title,
   count,
   children,
+  open = false,
 }: {
   kicker: string;
   title: string;
   count: number;
   children: ReactNode;
+  open?: boolean;
 }) {
   return (
-    <details className="desk-file-card">
+    <details className="desk-file-card" open={open || undefined}>
       <summary>
         <span>
           <span className="desk-file-kicker">{kicker}</span>
@@ -205,13 +207,6 @@ export async function MemberDossier({
           <dt>Place</dt>
           <dd>{place || "—"}</dd>
         </div>
-        <div>
-          <dt>Current membership</dt>
-          <dd>
-            {currentPlan}
-            <small>{currentHint}</small>
-          </dd>
-        </div>
       </dl>
 
       <div className="desk-file-actions">
@@ -227,7 +222,17 @@ export async function MemberDossier({
       </div>
 
       <div className="desk-file-board">
-        <FileCard kicker="Membership" title={historyTitle} count={plans.length}>
+        <article className="desk-file-now">
+          <p className="desk-file-kicker">Current membership</p>
+          <div className="desk-file-now-row">
+            <div>
+              <h3>{currentPlan}</h3>
+              <p>{currentHint}</p>
+            </div>
+            <em className={`desk-pill${access?.live ? " is-done" : ""}`}>{access?.live ? "Live" : "Not live"}</em>
+          </div>
+        </article>
+        <FileCard kicker="Plan history" title={historyTitle} count={plans.length} open={plans.length > 0}>
           {plans.length ? (
             <ul>
               {plans.map(

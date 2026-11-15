@@ -9367,6 +9367,31 @@ a.inbox-name.inbox-open:focus-visible {
   display: grid;
   gap: 0.7rem;
 }
+.desk-file-now {
+  padding: 0.9rem 1rem 1rem;
+  border-radius: 1.05rem;
+  border: 1px solid rgb(196 154 98 / 40%);
+  background: linear-gradient(180deg, #fffefb 0%, #f6ead6 100%);
+}
+.desk-file-now h3 {
+  margin: 0.18rem 0 0.2rem;
+  font-family: var(--font-display), ui-serif, serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #3f0e0d;
+}
+.desk-file-now p {
+  margin: 0;
+  color: #6a574c;
+  font-size: 0.86rem;
+}
+.desk-file-now-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.55rem 1rem;
+}
 .desk-file-card {
   border-radius: 1.05rem;
   border: 1px solid rgb(196 154 98 / 40%);
