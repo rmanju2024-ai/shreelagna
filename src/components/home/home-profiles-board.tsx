@@ -140,7 +140,7 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
                 </Link>
                 <p>
                   {row.current_city || "City not set"}
-                  {row.member_code ? ` · ${row.member_code}` : ""}
+                  {row.member_code ? <span>{row.member_code}</span> : null}
                 </p>
                 <dl>
                   <div>
@@ -169,7 +169,7 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
                     <input type="hidden" name="id" value={row.id} />
                     <input type="hidden" name="next" value="/" />
                     <button type="submit" className={btnGhost}>
-                      Switch to this profile
+                      Switch
                     </button>
                   </form>
                 )}
