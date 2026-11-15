@@ -2942,6 +2942,11 @@ button.field-help-btn,
   letter-spacing: 0.06em;
   color: #b8894c;
 }
+.home-family-cap a {
+  color: #6f1d1b;
+  text-decoration: none;
+  border-bottom: 1px solid rgb(184 137 76 / 55%);
+}
 .home-family-grid {
   list-style: none;
   margin: 0;
@@ -2975,9 +2980,10 @@ button.field-help-btn,
 }
 .home-family-photo {
   width: 100%;
-  aspect-ratio: 9 / 12;
-  border-radius: 0.9rem;
-  padding: 0.28rem;
+  aspect-ratio: 4 / 3;
+  max-height: 7.2rem;
+  border-radius: 0.75rem;
+  padding: 0.18rem;
   overflow: hidden;
   background:
     linear-gradient(135deg, #fde8a8 0%, #f0c870 22%, #d8a038 48%, #f5d468 72%, #e8b840 100%);
@@ -3062,10 +3068,19 @@ button.field-help-btn,
   padding: 0.4rem 0.7rem;
   font-size: 0.78rem;
 }
-.home-family-cta .btn-3d {
-  min-height: 2.65rem !important;
-  padding: 0.5rem 1.15rem !important;
-  font-size: 0.88rem !important;
+.home-family-selected {
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-weight: 800;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #c2415a;
+  padding: 0.42rem 0.5rem;
+  border-radius: 999px;
+  background: rgb(255 236 220 / 80%);
+  box-shadow: inset 0 0 0 1px rgb(194 65 90 / 22%);
 }
 .home-profile-kind {
   display: inline-block;

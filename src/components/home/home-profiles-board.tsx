@@ -8,7 +8,7 @@ import { displayFirstName, profileKindLabel } from "@/lib/profile/options";
 import { listOwnProfiles } from "@/lib/profile/own-profile";
 import { workingProfileId } from "@/lib/profile/working-profile";
 import { createServiceClient } from "@/lib/supabase/server";
-import { btnHero, btnHeroGhost, btnPrimary, btnGhost } from "@/lib/ui/classes";
+import { btnHero, btnHeroGhost, btnGhost } from "@/lib/ui/classes";
 
 type Stats = { views: number; interestsIn: number; interestsOut: number; chats: number };
 
@@ -134,7 +134,6 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
                 <span className={`home-profile-kind is-${bride ? "bride" : "groom"}`}>
                   {profileKindLabel(row.profile_type)}
                 </span>
-                {on ? <span className="home-profile-on">Using</span> : null}
                 <Link href={`/app/profiles/${row.id}`} className="home-family-name">
                   {name}
                 </Link>
@@ -161,9 +160,7 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
                   </div>
                 </dl>
                 {on ? (
-                  <Link href="/browse" className={btnPrimary}>
-                    Find a match
-                  </Link>
+                  <span className="home-family-selected">Selected</span>
                 ) : (
                   <form action={setActiveProfile}>
                     <input type="hidden" name="id" value={row.id} />
@@ -178,14 +175,15 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
           );
         })}
       </ul>
-      <div className="home-invite-actions home-family-cta">
+      <p className="home-family-cap">
+        {listed.length} of {MAX_PROFILES_PER_ACCOUNT} profiles
         {room ? (
-          <Link href="/app/profiles/new" className={btnHeroGhost}>
-            Add another profile
-          </Link>
+          <>
+            {" · "}
+            <Link href="/app/profiles/new">Add another</Link>
+          </>
         ) : null}
-      </div>
-      <p className="home-family-cap">{listed.length} of {MAX_PROFILES_PER_ACCOUNT} profiles</p>
+      </p>
     </div>
   );
 }
