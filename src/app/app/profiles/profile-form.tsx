@@ -60,6 +60,7 @@ export function ProfileForm({
   nextHref,
   omitAbout = false,
   allowMobileOtp = true,
+  another = false,
 }: {
   values?: ProfileFormValues;
   religions: { id: string; name: string }[];
@@ -75,6 +76,7 @@ export function ProfileForm({
   nextHref?: string;
   omitAbout?: boolean;
   allowMobileOtp?: boolean;
+  another?: boolean;
 }) {
   const d = PROFILE_FORM_DEFAULTS;
   const roles = creatorRolesForForm(values?.creator_relationship);
@@ -237,11 +239,14 @@ export function ProfileForm({
       {show("family") && mode !== "edit" ? (
       <section className={panelClass(1)} data-step="1">
         <p className="form-3d-kicker">Step one</p>
-        <h2 className="form-3d-title">Who is creating this profile?</h2>
+        <h2 className="form-3d-title">
+          {another ? "Who is this next profile for?" : "Who is creating this profile?"}
+        </h2>
         <div className="gold-ornament" />
         <p className="mt-3 text-sm text-[var(--muted)]">
-          Self means the bride or groom is writing. Family means a parent, sister, brother, or
-          guardian is writing on their behalf.
+          {another
+            ? "This is a new bride or groom on the same login. It does not replace the profile you already have. Pick bride or groom clearly, and use a different confirmed mobile."
+            : "Self means the bride or groom is writing. Family means a parent, sister, brother, or guardian is writing on their behalf."}
         </p>
         <div className="choice-3d-grid mt-6">
           <label className="choice-3d choice-3d-wide">

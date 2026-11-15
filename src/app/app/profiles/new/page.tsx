@@ -41,6 +41,7 @@ export default async function NewProfilePage({
             religions={religions ?? []}
             communities={communities ?? []}
             lists={lists}
+            another={listed.length > 0}
           />
         </div>
       </div>

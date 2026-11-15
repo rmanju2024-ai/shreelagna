@@ -24,46 +24,6 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
   const ids = listed.map((row) => row.id);
   const working = workingProfileId(me.active_profile_id, ids);
   const needPick = listed.length > 1 && !working;
-
-  const stats = new Map<string, Stats>();
-  for (const id of ids) stats.set(id, emptyStats());
-  if (ids.length) {
-    const [views, rec, sen, threads] = await Promise.all([
-      supabase.from("profile_views").select("viewed_profile_id").in("viewed_profile_id", ids),
-      supabase.from("interests").select("to_profile_id").in("to_profile_id", ids),
-      supabase.from("interests").select("from_profile_id").in("from_profile_id", ids),
-      supabase.from("threads").select("profile_a, profile_b").or(`profile_a.in.(${ids.join(",")}),profile_b.in.(${ids.join(",")})`),
-    ]);
-    for (const row of views.data ?? []) {
-      const key = String((row as { viewed_profile_id: string }).viewed_profile_id);
-      const cur = stats.get(key) ?? emptyStats();
-      cur.views += 1;
-      stats.set(key, cur);
-    }
-    for (const row of rec.data ?? []) {
-      const key = String((row as { to_profile_id: string }).to_profile_id);
-      const cur = stats.get(key) ?? emptyStats();
-      cur.interestsIn += 1;
-      stats.set(key, cur);
-    }
-    for (const row of sen.data ?? []) {
-      const key = String((row as { from_profile_id: string }).from_profile_id);
-      const cur = stats.get(key) ?? emptyStats();
-      cur.interestsOut += 1;
-      stats.set(key, cur);
-    }
-    for (const row of threads.data ?? []) {
-      const a = String((row as { profile_a: string }).profile_a);
-      const b = String((row as { profile_b: string }).profile_b);
-      for (const key of [a, b]) {
-        if (!stats.has(key)) continue;
-        const cur = stats.get(key) ?? emptyStats();
-        cur.chats += 1;
-        stats.set(key, cur);
-      }
-    }
-  }
-
   const room = canAddProfile(listed.length);
 
   if (!listed.length) {
@@ -80,15 +40,67 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
     );
   }
 
+  if (listed.length === 1) {
+    const only = listed[0];
+    return (
+      <>
+        <BannerGreeting />
+        <div className="home-invite-actions">
+          <Link href={`/app/profiles/${only.id}`} className={btnHero}>
+            My profile
+          </Link>
+          {room ? (
+            <Link href="/app/profiles/new" className={btnHeroGhost}>
+              Add another profile
+            </Link>
+          ) : null}
+        </div>
+      </>
+    );
+  }
+
+  const stats = new Map<string, Stats>();
+  for (const id of ids) stats.set(id, emptyStats());
+  const [views, rec, sen, threads] = await Promise.all([
+    supabase.from("profile_views").select("viewed_profile_id").in("viewed_profile_id", ids),
+    supabase.from("interests").select("to_profile_id").in("to_profile_id", ids),
+    supabase.from("interests").select("from_profile_id").in("from_profile_id", ids),
+    supabase.from("threads").select("profile_a, profile_b").or(`profile_a.in.(${ids.join(",")}),profile_b.in.(${ids.join(",")})`),
+  ]);
+  for (const row of views.data ?? []) {
+    const key = String((row as { viewed_profile_id: string }).viewed_profile_id);
+    const cur = stats.get(key) ?? emptyStats();
+    cur.views += 1;
+    stats.set(key, cur);
+  }
+  for (const row of rec.data ?? []) {
+    const key = String((row as { to_profile_id: string }).to_profile_id);
+    const cur = stats.get(key) ?? emptyStats();
+    cur.interestsIn += 1;
+    stats.set(key, cur);
+  }
+  for (const row of sen.data ?? []) {
+    const key = String((row as { from_profile_id: string }).from_profile_id);
+    const cur = stats.get(key) ?? emptyStats();
+    cur.interestsOut += 1;
+    stats.set(key, cur);
+  }
+  for (const row of threads.data ?? []) {
+    const a = String((row as { profile_a: string }).profile_a);
+    const b = String((row as { profile_b: string }).profile_b);
+    for (const key of [a, b]) {
+      if (!stats.has(key)) continue;
+      const cur = stats.get(key) ?? emptyStats();
+      cur.chats += 1;
+      stats.set(key, cur);
+    }
+  }
+  const workingRow = listed.find((row) => row.id === working);
+
   return (
     <>
       <BannerGreeting />
-      {listed.length === 1 ? (
-        <p className="home-invite-line">
-          One login can hold up to {MAX_PROFILES_PER_ACCOUNT} profiles — for twins, or a parent
-          managing more than one child. Discover stays as it is until you add another.
-        </p>
-      ) : needPick || pick ? (
+      {needPick || pick ? (
         <p className="home-invite-line home-invite-pick">
           Choose which profile Discover should use: bride or groom. Lists stay empty until you pick.
         </p>
@@ -96,10 +108,8 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
         <p className="home-invite-line">
           Working as{" "}
           <b>
-            {profileKindLabel(listed.find((row) => row.id === working)?.profile_type)}
-            {listed.find((row) => row.id === working)?.subject_full_name
-              ? ` · ${displayFirstName(listed.find((row) => row.id === working)?.subject_full_name)}`
-              : ""}
+            {profileKindLabel(workingRow?.profile_type)}
+            {workingRow?.subject_full_name ? ` · ${displayFirstName(workingRow.subject_full_name)}` : ""}
           </b>
           . Switch below, then open Discover.
         </p>
@@ -129,7 +139,7 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
                 <tr key={row.id} className={on ? "is-working" : undefined}>
                   <td>
                     <Link href={`/app/profiles/${row.id}`}>
-                      {displayFirstName(row.subject_full_name) || "Profile"}
+                      {displayFirstName(row.subject_full_name ?? "") || "Profile"}
                     </Link>
                     {row.current_city ? <span className="home-profile-city">{row.current_city}</span> : null}
                   </td>
@@ -159,18 +169,14 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
         </table>
       </div>
       <div className="home-invite-actions">
-        {listed.length === 1 ? (
-          <Link href={`/app/profiles/${listed[0].id}`} className={btnHero}>
-            My profile
-          </Link>
-        ) : working ? (
+        {working ? (
           <Link href="/browse" className={btnHero}>
             Discover for this profile
           </Link>
         ) : null}
         {room ? (
-          <Link href="/app/profiles/new" className={listed.length === 1 ? btnHeroGhost : btnHero}>
-            {listed.length === 1 ? "Add a second profile" : "Add another profile"}
+          <Link href="/app/profiles/new" className={btnHeroGhost}>
+            Add another profile
           </Link>
         ) : (
           <p className="home-invite-line">You have reached the three-profile limit for this login.</p>

@@ -37,7 +37,7 @@ import { loadFaithCatalog } from "@/lib/profile/load-form-lists";
 import { formatHeightImperial, matchSelfFromProfile } from "@/lib/profile/match-compare";
 import { canSearchFamilies, oppositeType, type ProfileType } from "@/lib/profile/visibility";
 import { listOwnProfiles } from "@/lib/profile/own-profile";
-import { workingProfileId } from "@/lib/profile/working-profile";
+import { syncSingleActiveProfile, workingProfileId } from "@/lib/profile/working-profile";
 import { displayFirstName, profileKindLabel } from "@/lib/profile/options";
 import { fetchAdminUserIds } from "@/lib/desk/admin-ids";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -153,6 +153,9 @@ export async function BrowsePage({
     } else if (!mineId) {
       notice = "Create a profile first, then search.";
     } else {
+      if (listed.length === 1) {
+        await syncSingleActiveProfile(supabase, me.id, me.active_profile_id, mineId);
+      }
       const db = supabase as unknown as {
         from: (table: string) => {
           select: (cols: string) => {
@@ -216,12 +219,6 @@ export async function BrowsePage({
         mineSlim.data ??
         (await db.from("profiles").select(BROWSE_PROFILE_SELECT_STAR).eq("id", mineId).maybeSingle())
           .data;
-      if (!mine && own?.id && own.id !== mineId) {
-        const fallback =
-          (await db.from("profiles").select(BROWSE_PROFILE_SELECT).eq("id", own.id).maybeSingle()).data ??
-          (await db.from("profiles").select(BROWSE_PROFILE_SELECT_STAR).eq("id", own.id).maybeSingle()).data;
-        mine = fallback;
-      }
       if (!mine) {
         notice = "Create a profile first, then search.";
       } else if (!canSearchFamilies(mine.status as string | undefined)) {

@@ -342,6 +342,7 @@ export async function saveProfile(formData: FormData) {
     member_code?: string | null;
   } | null = null;
   let ownerId = me.id;
+  let ownedBeforeCreate = 0;
 
   if (editingId) {
     const { data: row } = await supabase
@@ -368,6 +369,7 @@ export async function saveProfile(formData: FormData) {
     }
   } else {
     const listed = await listOwnProfiles(supabase, me.id);
+    ownedBeforeCreate = listed.length;
     if (!canAddProfile(listed.length)) {
       redirect(listed[0]?.id ? `/app/profiles/${listed[0].id}` : "/");
     }
@@ -451,9 +453,10 @@ export async function saveProfile(formData: FormData) {
       usingService ? undefined : accessToken,
     );
     if (!inserted.id) {
-      const again = await findOwnProfile(supabase, me.id);
-      if (again) {
-        redirect(`/app/profiles/${again.id}`);
+      const after = await listOwnProfiles(supabase, me.id);
+      if (after.length > ownedBeforeCreate) {
+        const created = after[after.length - 1];
+        if (created?.id) redirect(`/app/profiles/${created.id}`);
       }
       redirect(`/app/profiles/new?error=${encodeURIComponent(saveErrorMessage(inserted.error))}`);
     }

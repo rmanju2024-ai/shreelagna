@@ -13,6 +13,16 @@ export function mustPickWorkingProfile(activeId: string | null | undefined, ownI
   return ownIds.length > 1 && !workingProfileId(activeId, ownIds);
 }
 
+export async function syncSingleActiveProfile(
+  supabase: SupabaseClient,
+  userId: string,
+  activeId: string | null | undefined,
+  onlyId: string,
+) {
+  if (activeId === onlyId) return;
+  await supabase.from("app_users").update({ active_profile_id: onlyId }).eq("id", userId);
+}
+
 export async function requireWorkingProfile(
   supabase: SupabaseClient,
   me: { id: string; active_profile_id?: string | null },
@@ -22,8 +32,8 @@ export async function requireWorkingProfile(
   if (ids.length === 0) redirect("/app/profiles/new");
   const id = workingProfileId(me.active_profile_id, ids);
   if (!id) redirect("/?pick=1");
-  if (ids.length === 1 && me.active_profile_id !== id) {
-    await supabase.from("app_users").update({ active_profile_id: id }).eq("id", me.id);
+  if (ids.length === 1) {
+    await syncSingleActiveProfile(supabase, me.id, me.active_profile_id, id);
   }
   return { id, listed };
 }
