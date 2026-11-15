@@ -1,10 +1,7 @@
 import Link from "next/link";
-import { ChatSidebar } from "@/app/app/chat/chat-sidebar";
-import { InboxSwitcher } from "@/components/inbox-switcher";
 import { LiveRefresh } from "@/components/live-refresh";
 import { after } from "next/server";
 import { ThreadView } from "@/app/app/chat/[id]/thread-view";
-import { InnerShell as PageShell } from "@/components/chrome-layout";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { publicMediaUrl } from "@/lib/match/inbox-card";
 import { isOnlineNow } from "@/lib/profile/last-seen";
@@ -38,66 +35,60 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
     .select("id, status")
     .eq("created_by", me.id)
     .in("id", [thread.profile_a, thread.profile_b]);
-  const mine =
-    mineRows?.find((row) => row.id === me.active_profile_id) ??
-    mineRows?.[0] ??
-    null;
+  const mine = mineRows?.find((row) => row.id === me.active_profile_id) ?? mineRows?.[0] ?? null;
   if (!mine || !canSearchFamilies(mine.status)) notFound();
 
   const otherId = mine.id === thread.profile_a ? thread.profile_b : thread.profile_a;
   const [{ data: interestRows }, myAccess, otherAccess, { data: other }, { data: messages }, { data: photos }] =
     await Promise.all([
-    supabase
-      .from("interests")
-      .select("from_profile_id, to_profile_id, status, created_at")
-      .or(
-        `and(from_profile_id.eq.${mine.id},to_profile_id.eq.${otherId}),and(from_profile_id.eq.${otherId},to_profile_id.eq.${mine.id})`,
-      )
-      .limit(8),
-    loadMembership(db, me),
-    loadMembershipForProfile(db, otherId),
-    supabase
-      .from("profiles")
-      .select("id, subject_full_name, status, last_seen_at, hide_last_seen")
-      .eq("id", otherId)
-      .maybeSingle(),
-    supabase
-      .from("messages")
-      .select("id, sender_profile_id, body, created_at, read_at, edited_at, deleted_at")
-      .eq("thread_id", id)
-      .order("created_at", { ascending: false })
-      .limit(100)
-      .then((first) =>
-        first.error
-          ? supabase
-              .from("messages")
-              .select("id, sender_profile_id, body, created_at, read_at")
-              .eq("thread_id", id)
-              .order("created_at", { ascending: false })
-              .limit(100)
-          : first,
-      ),
-    db
-      .from("media")
-      .select("storage_path, is_primary")
-      .eq("profile_id", otherId)
-      .eq("kind", "photo")
-      .eq("status", "approved")
-      .order("created_at"),
-  ]);
+      supabase
+        .from("interests")
+        .select("from_profile_id, to_profile_id, status, created_at")
+        .or(
+          `and(from_profile_id.eq.${mine.id},to_profile_id.eq.${otherId}),and(from_profile_id.eq.${otherId},to_profile_id.eq.${mine.id})`,
+        )
+        .limit(8),
+      loadMembership(db, me),
+      loadMembershipForProfile(db, otherId),
+      supabase
+        .from("profiles")
+        .select("id, subject_full_name, status, last_seen_at, hide_last_seen")
+        .eq("id", otherId)
+        .maybeSingle(),
+      supabase
+        .from("messages")
+        .select("id, sender_profile_id, body, created_at, read_at, edited_at, deleted_at")
+        .eq("thread_id", id)
+        .order("created_at", { ascending: false })
+        .limit(100)
+        .then((first) =>
+          first.error
+            ? supabase
+                .from("messages")
+                .select("id, sender_profile_id, body, created_at, read_at")
+                .eq("thread_id", id)
+                .order("created_at", { ascending: false })
+                .limit(100)
+            : first,
+        ),
+      db
+        .from("media")
+        .select("storage_path, is_primary")
+        .eq("profile_id", otherId)
+        .eq("kind", "photo")
+        .eq("status", "approved")
+        .order("created_at"),
+    ]);
   if (!pairCanChat(interestRows ?? [], mine.id, otherId)) notFound();
   const chatLive = pairPlanLive(myAccess.live, otherAccess.live);
   const otherOpen = Boolean(other && other.status === "active");
-  // Hidden/deleted profiles do not retain a reachable chat route or inbox presence.
   if (!otherOpen) notFound();
-  const name = otherOpen
-    ? (other?.subject_full_name ?? "").replace(/\s+/g, " ").trim() || displayFirstName(other?.subject_full_name ?? "Match")
-    : "Profile unavailable";
+  const name =
+    (other?.subject_full_name ?? "").replace(/\s+/g, " ").trim() || displayFirstName(other?.subject_full_name ?? "Match");
   const cover = (photos ?? []).find((row) => row.is_primary) ?? photos?.[0];
-  const photo = otherOpen ? publicMediaUrl(cover?.storage_path) : null;
-  const online = otherOpen && !other?.hide_last_seen ? isOnlineNow(other?.last_seen_at) : false;
-  const presence =
-    otherOpen && !other?.hide_last_seen ? chatPresenceLine(online, other?.last_seen_at ?? null) : otherOpen ? "" : "This chat is closed";
+  const photo = publicMediaUrl(cover?.storage_path);
+  const online = !other?.hide_last_seen ? isOnlineNow(other?.last_seen_at) : false;
+  const presence = !other?.hide_last_seen ? chatPresenceLine(online, other?.last_seen_at ?? null) : "";
   after(async () => {
     await supabase
       .from("notices")
@@ -108,46 +99,40 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
       .is("read_at", null);
   });
   return (
-    <PageShell>
+    <>
       <LiveRefresh table="messages" filter={`thread_id=eq.${id}`} />
-      <div className="inbox-unified">
-        <InboxSwitcher active="chats" />
-        <div className="wc-shell has-thread">
-        <ChatSidebar activeId={id} />
-        <ThreadView
-          threadId={id}
-          myProfileId={mine.id}
-          peerName={name}
-          peerPhoto={photo}
-          peerHref={otherOpen ? profileOpenHref(otherId, "chat") : null}
-          presence={presence}
-          online={online}
-          needPlan={!thread.frozen && otherOpen && !chatLive}
-          messages={[...(messages ?? [])].reverse().map((msg) => {
-            const row = msg as typeof msg & { edited_at?: string | null; deleted_at?: string | null };
-            return {
-              id: String(row.id),
-              sender_profile_id: row.sender_profile_id,
-              body: row.body,
-              created_at: row.created_at,
-              read_at: row.read_at,
-              edited_at: typeof row.edited_at === "string" ? row.edited_at : null,
-              deleted_at: typeof row.deleted_at === "string" ? row.deleted_at : null,
-            };
-          })}
-          canSend={!thread.frozen && otherOpen && chatLive}
-          closedNote={
-            thread.frozen || !otherOpen ? (
-              <p className="salon-closed">This chat is closed.</p>
-            ) : !chatLive ? (
-              <p className="salon-closed">
-                A live plan is needed to keep chatting. <Link href="/app/plans">Open plans</Link>
-              </p>
-            ) : null
-          }
-        />
-        </div>
-      </div>
-    </PageShell>
+      <ThreadView
+        threadId={id}
+        myProfileId={mine.id}
+        peerName={name}
+        peerPhoto={photo}
+        peerHref={profileOpenHref(otherId, "chat")}
+        presence={presence}
+        online={online}
+        needPlan={!thread.frozen && !chatLive}
+        messages={[...(messages ?? [])].reverse().map((msg) => {
+          const row = msg as typeof msg & { edited_at?: string | null; deleted_at?: string | null };
+          return {
+            id: String(row.id),
+            sender_profile_id: row.sender_profile_id,
+            body: row.body,
+            created_at: row.created_at,
+            read_at: row.read_at,
+            edited_at: typeof row.edited_at === "string" ? row.edited_at : null,
+            deleted_at: typeof row.deleted_at === "string" ? row.deleted_at : null,
+          };
+        })}
+        canSend={!thread.frozen && chatLive}
+        closedNote={
+          thread.frozen ? (
+            <p className="salon-closed">This chat is closed.</p>
+          ) : !chatLive ? (
+            <p className="salon-closed">
+              A live plan is needed to keep chatting. <Link href="/app/plans">Open plans</Link>
+            </p>
+          ) : null
+        }
+      />
+    </>
   );
 }

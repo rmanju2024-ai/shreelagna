@@ -1,8 +1,8 @@
 import { loadBlockedProfileIds } from "@/lib/safety/blocked";
-import Link from "next/link";
+import { after } from "next/server";
 import { cache } from "react";
 import { redirect } from "next/navigation";
-import { ChatAvatar } from "@/app/app/chat/chat-avatar";
+import { ChatThreadList } from "@/app/app/chat/chat-thread-list";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { chatStamp, countByKey, latestByThread, pickFirstChat, previewText, unreadLabel } from "@/lib/match/chat-ui";
 import { pickPrimaryPhotoMap, publicMediaUrl } from "@/lib/match/inbox-card";
@@ -39,7 +39,7 @@ const loadChatData = cache(async () => {
   const otherIds = [...new Set(acceptedThreads.map((t) => (ids.includes(t.profile_a) ? t.profile_b : t.profile_a)))];
   const media = createServiceClient() ?? supabase;
 
-  const [{ data: names }, { data: msgs }, photoRows] = await Promise.all([
+  const [{ data: names }, { data: msgs }, photoRows, blocked] = await Promise.all([
     otherIds.length
       ? supabase.from("profiles").select("id, subject_full_name, status").in("id", otherIds)
       : Promise.resolve({ data: [] as { id: string; subject_full_name: string | null; status: string }[] }),
@@ -65,8 +65,8 @@ const loadChatData = cache(async () => {
               : (first.data ?? []),
           )
       : Promise.resolve([]),
+    loadBlockedProfileIds(media, ids),
   ]);
-  const blocked = await loadBlockedProfileIds(media, ids);
   const nameMap = new Map((names ?? []).map((n) => [n.id, n]));
   // A hidden/deleted match cannot be opened, so it must not remain as a
   // conversation or produce an unread-message badge.
@@ -82,13 +82,15 @@ const loadChatData = cache(async () => {
   // badge from resurfacing if its independent badge query runs before this
   // sidebar is rendered on a future request.
   if (closedChatHrefs.length) {
-    await supabase
-      .from("notices")
-      .update({ read_at: new Date().toISOString() })
-      .eq("user_id", me.id)
-      .eq("kind", "chat")
-      .is("read_at", null)
-      .in("href", closedChatHrefs);
+    after(async () => {
+      await supabase
+        .from("notices")
+        .update({ read_at: new Date().toISOString() })
+        .eq("user_id", me.id)
+        .eq("kind", "chat")
+        .is("read_at", null)
+        .in("href", closedChatHrefs);
+    });
   }
   const lastMap = latestByThread(msgs ?? []);
   const visibleChatHrefs = new Set(openThreads.map((thread) => `/app/chat/${thread.id}`));
@@ -100,56 +102,31 @@ const loadChatData = cache(async () => {
 /** Left column of the chat screen: every accepted conversation, newest first. */
 export async function ChatSidebar({ activeId }: { activeId?: string; autoOpen?: boolean }) {
   const { ids, openThreads, nameMap, lastMap, unreadMap, photoMap } = await loadChatData();
+  void activeId;
+  const threads = openThreads.map((thread) => {
+    const other = ids.includes(thread.profile_a) ? thread.profile_b : thread.profile_a;
+    const row = nameMap.get(other);
+    const name = displayFirstName(row?.subject_full_name ?? "Match");
+    const last = lastMap.get(thread.id);
+    return {
+      id: thread.id,
+      name,
+      photo: publicMediaUrl(photoMap.get(other)),
+      stamp: chatStamp(last?.created_at || thread.created_at),
+      preview: previewText(last?.body),
+      unread: unreadLabel(unreadMap.get(`/app/chat/${thread.id}`) ?? 0),
+    };
+  });
 
   return (
     <aside className="wc-side" aria-label="Conversations">
       <header className="wc-side-head">
         <h1>Chats</h1>
-        <p>{openThreads.length} {openThreads.length === 1 ? "match" : "matches"}</p>
+        <p>
+          {openThreads.length} {openThreads.length === 1 ? "match" : "matches"}
+        </p>
       </header>
-      {openThreads.length ? (
-        <ul className="wc-list">
-          {openThreads.map((thread) => {
-            const other = ids.includes(thread.profile_a) ? thread.profile_b : thread.profile_a;
-            const row = nameMap.get(other);
-            const name = displayFirstName(row?.subject_full_name ?? "Match");
-            const last = lastMap.get(thread.id);
-            const unread = unreadLabel(unreadMap.get(`/app/chat/${thread.id}`) ?? 0);
-            const inner = (
-              <>
-                <ChatAvatar name={name} src={publicMediaUrl(photoMap.get(other))} />
-                <span className="wa-row-main">
-                  <span className="wa-row-top">
-                    <b>{name}</b>
-                    <span className="wa-row-meta">
-                      <time>{chatStamp(last?.created_at || thread.created_at)}</time>
-                    </span>
-                  </span>
-                  <span className="wc-row-bottom">
-                    <span className={`wa-preview${unread ? " is-new" : ""}`}>
-                      {previewText(last?.body)}
-                    </span>
-                    {unread ? <span className="wa-unread">{unread}</span> : null}
-                  </span>
-                </span>
-              </>
-            );
-            return (
-              <li key={thread.id}>
-                <Link
-                  href={`/app/chat/${thread.id}`}
-                  className={`wa-row${thread.id === activeId ? " is-active" : ""}`}
-                  aria-current={thread.id === activeId ? "page" : undefined}
-                >
-                  {inner}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      ) : (
-        <p className="wa-empty">No accepted chats yet.</p>
-      )}
+      {threads.length ? <ChatThreadList threads={threads} /> : <p className="wa-empty">No accepted chats yet.</p>}
     </aside>
   );
 }

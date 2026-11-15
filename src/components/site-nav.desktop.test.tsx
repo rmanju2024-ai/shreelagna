@@ -51,7 +51,7 @@ describe("laptop primary navigation", () => {
     const nav = screen.getByRole("navigation", { name: "Primary" });
     expect(screen.getByRole("link", { name: "Home" }).getAttribute("href")).toBe("/");
     expect(screen.getByRole("link", { name: "Discover" }).getAttribute("href")).toBe("/browse");
-    expect(screen.getByRole("link", { name: /Inbox/ }).getAttribute("href")).toBe("/app/interests");
+    expect(screen.getByRole("link", { name: /Inbox/ }).getAttribute("href")).toBe("/app/chat");
     expect(screen.getByRole("link", { name: "Account" }).getAttribute("href")).toBe("/app/account");
     expect(nav.textContent).toContain("6");
     expect(screen.queryByRole("link", { name: "Desk" })).toBeNull();

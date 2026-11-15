@@ -29,6 +29,7 @@ export function InboxSwitcherNav({
             <Link
               key={tab.id}
               href={hrefFor ? hrefFor(tab.id) : tab.href}
+              prefetch
               className={tab.id === active ? "is-on" : undefined}
               aria-current={tab.id === active ? "page" : undefined}
               scroll={false}

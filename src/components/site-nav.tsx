@@ -252,7 +252,7 @@ export function HeaderNav({
         {user ? (
           <NavChip
             item={{
-              href: "/app/interests",
+              href: "/app/chat",
               label: "Inbox",
               icon: "inbox",
               badge: chatUnread + alertUnread + likesPending,
