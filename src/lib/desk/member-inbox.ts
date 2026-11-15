@@ -1,6 +1,5 @@
 import { chatStamp, latestByThread, previewText } from "@/lib/match/chat-ui";
 import { pickPrimaryPhotoMap, publicMediaUrl } from "@/lib/match/inbox-card";
-import { pairCanChat } from "@/lib/match/interest-status";
 import { displayFirstName } from "@/lib/profile/options";
 import { buildSalonRows, type SalonMsg } from "@/lib/match/salon-thread";
 
@@ -16,34 +15,41 @@ export type StaffInboxThread = {
   stamp: string;
 };
 
+type ThreadRow = { id: string; profile_a: string; profile_b: string; frozen?: boolean; created_at: string };
+
+async function threadsOwnedBy(db: TicketClient, ids: string[]): Promise<ThreadRow[]> {
+  const cols = "id, profile_a, profile_b, frozen, created_at";
+  const hits = await Promise.all(
+    ids.flatMap((id) => [
+      db.from("threads").select(cols).eq("profile_a", id),
+      db.from("threads").select(cols).eq("profile_b", id),
+    ]),
+  );
+  const seen = new Set<string>();
+  const open: ThreadRow[] = [];
+  for (const hit of hits) {
+    for (const thread of (hit.data ?? []) as ThreadRow[]) {
+      if (!thread?.id || seen.has(thread.id)) continue;
+      seen.add(thread.id);
+      open.push(thread);
+    }
+  }
+  open.sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+  return open;
+}
+
 export async function loadStaffInbox(
   db: TicketClient,
   profileId: string,
 ): Promise<{ myIds: string[]; threads: StaffInboxThread[] }> {
   const { data: profile } = await db.from("profiles").select("id, created_by").eq("id", profileId).maybeSingle();
-  if (!profile) return { myIds: [], threads: [] };
+  if (!profile) return { myIds: [profileId], threads: [] };
   const ownerId = String(profile.created_by ?? "");
   const { data: mine } = ownerId
     ? await db.from("profiles").select("id").eq("created_by", ownerId)
     : { data: [{ id: profileId }] };
-  const myIds = (mine ?? []).map((row: { id: string }) => String(row.id)).filter(Boolean);
-  if (!myIds.length) return { myIds: [], threads: [] };
-
-  const [{ data: threads }, { data: interests }] = await Promise.all([
-    db
-      .from("threads")
-      .select("id, profile_a, profile_b, frozen, created_at")
-      .or(`profile_a.in.(${myIds.join(",")}),profile_b.in.(${myIds.join(",")})`)
-      .order("created_at", { ascending: false }),
-    db
-      .from("interests")
-      .select("from_profile_id, to_profile_id, status, created_at")
-      .or(`from_profile_id.in.(${myIds.join(",")}),to_profile_id.in.(${myIds.join(",")})`),
-  ]);
-
-  const open = (threads ?? []).filter((thread: { profile_a: string; profile_b: string }) =>
-    pairCanChat(interests ?? [], thread.profile_a, thread.profile_b),
-  );
+  const myIds = [...new Set([profileId, ...(mine ?? []).map((row: { id: string }) => String(row.id)).filter(Boolean)])];
+  const open = await threadsOwnedBy(db, myIds);
   const otherIds = [
     ...new Set(
       open.map((thread: { profile_a: string; profile_b: string }) =>
@@ -71,7 +77,6 @@ export async function loadStaffInbox(
           .from("media")
           .select("profile_id, storage_path, created_at, is_primary")
           .eq("kind", "photo")
-          .eq("status", "approved")
           .in("profile_id", otherIds)
           .order("created_at")
           .then((first: { error?: unknown; data?: unknown[] }) =>
@@ -80,7 +85,6 @@ export async function loadStaffInbox(
                   .from("media")
                   .select("profile_id, storage_path")
                   .eq("kind", "photo")
-                  .eq("status", "approved")
                   .in("profile_id", otherIds)
                   .then((row: { data?: unknown[] }) => row.data ?? [])
               : (first.data ?? []),
@@ -132,9 +136,12 @@ export async function loadStaffThread(
     .eq("id", threadId)
     .maybeSingle();
   if (!thread) return null;
-  const myProfileId = myIds.includes(thread.profile_a) ? thread.profile_a : thread.profile_b;
-  if (!myIds.includes(myProfileId)) return null;
-  const otherId = myProfileId === thread.profile_a ? thread.profile_b : thread.profile_a;
+  const mine = myIds.includes(thread.profile_a)
+    ? thread.profile_a
+    : myIds.includes(thread.profile_b)
+      ? thread.profile_b
+      : thread.profile_a;
+  const otherId = mine === thread.profile_a ? thread.profile_b : thread.profile_a;
   const [{ data: other }, { data: msgs }, { data: photos }] = await Promise.all([
     db.from("profiles").select("subject_full_name").eq("id", otherId).maybeSingle(),
     db
@@ -143,22 +150,16 @@ export async function loadStaffThread(
       .eq("thread_id", threadId)
       .order("created_at", { ascending: true })
       .limit(250),
-    db
-      .from("media")
-      .select("storage_path, is_primary")
-      .eq("profile_id", otherId)
-      .eq("kind", "photo")
-      .eq("status", "approved")
-      .order("created_at"),
+    db.from("media").select("storage_path, is_primary").eq("profile_id", otherId).eq("kind", "photo").order("created_at"),
   ]);
   const messages = (msgs ?? []) as SalonMsg[];
   const peerName = displayFirstName(other?.subject_full_name ?? "Match");
   const primary = (photos ?? []).find((row: { is_primary?: boolean }) => row.is_primary) ?? (photos ?? [])[0];
   return {
-    myProfileId,
+    myProfileId: mine,
     peerName,
     peerPhoto: publicMediaUrl(primary?.storage_path),
     frozen: Boolean(thread.frozen),
-    rows: buildSalonRows(messages, myProfileId, peerName),
+    rows: buildSalonRows(messages, mine, peerName),
   };
 }

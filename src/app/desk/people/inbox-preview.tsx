@@ -139,7 +139,7 @@ async function ChatPane({
   const activeId = threadId && inbox.threads.some((row) => row.id === threadId) ? threadId : inbox.threads[0]?.id;
   const open = activeId ? await loadStaffThread(db, activeId, inbox.myIds) : null;
   return (
-    <div className="desk-inbox-preview wc-shell">
+    <div className={`desk-inbox-preview wc-shell${open ? " has-thread" : ""}`}>
       <aside className="wc-side" aria-label="Member conversations">
         <header className="wc-side-head">
           <h3>Chats</h3>
