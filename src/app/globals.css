@@ -9236,6 +9236,9 @@ a.inbox-name.inbox-open:focus-visible {
   align-items: end;
   margin: 0 0 1rem;
 }
+.desk-file-search.has-sort {
+  grid-template-columns: minmax(0, 1fr) minmax(11rem, 14rem) auto;
+}
 .desk-file-search label {
   display: grid;
   gap: 0.28rem;
@@ -9623,7 +9626,8 @@ a.inbox-name.inbox-open:focus-visible {
   .desk-file-facts { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 @media (max-width: 640px) {
-  .desk-file-search { grid-template-columns: minmax(0, 1fr); }
+  .desk-file-search,
+  .desk-file-search.has-sort { grid-template-columns: minmax(0, 1fr); }
   .desk-file-facts { grid-template-columns: minmax(0, 1fr); }
   .desk-file-hit { grid-template-columns: auto minmax(0, 1fr) auto; }
   .desk-file-go { display: none; }

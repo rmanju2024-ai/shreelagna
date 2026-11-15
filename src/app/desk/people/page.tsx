@@ -6,16 +6,17 @@ import { MemberDossier } from "@/app/desk/people/member-dossier";
 import { StaffMemberEdit } from "@/app/desk/people/staff-edit";
 import { requireDesk } from "@/lib/desk/access";
 import { deskPage, deskRange } from "@/lib/desk/pager";
+import { parsePeopleSort, peopleSortSpec } from "@/lib/desk/people-sort";
+import { PeopleToolbar } from "@/app/desk/people/people-toolbar";
 import { isMemberCode, memberCodeLookup } from "@/lib/profile/member-code";
 import { pickPrimaryPhotoMap, publicMediaUrl } from "@/lib/match/inbox-card";
 import { createServiceClient } from "@/lib/supabase/server";
-import { btnPrimary, inputClass } from "@/lib/ui/classes";
 import Image from "next/image";
 import Link from "next/link";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const HIT_COLS =
-  "id, member_code, subject_full_name, status, profile_type, current_city, current_state, created_at";
+  "id, member_code, subject_full_name, status, profile_type, current_city, current_state, created_at, updated_at, last_seen_at";
 
 function statusLabel(status: string | null | undefined) {
   if (status === "on_hold") return "Paused";
@@ -44,17 +45,22 @@ function peopleHref(open: string, extra: Record<string, string | undefined> = {}
 export default async function DeskPeoplePage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; page?: string; open?: string; peek?: string; thread?: string; tab?: string; section?: string; saved?: string; error?: string }>;
+  searchParams: Promise<{ q?: string; sort?: string; page?: string; open?: string; peek?: string; thread?: string; tab?: string; section?: string; saved?: string; error?: string }>;
 }) {
   const desk = await requireDesk("/desk/people");
   if (!desk.allowed) return null;
-  const { q: raw, page: pageRaw, open, peek, thread, tab, section, saved, error } = await searchParams;
+  const { q: raw, sort: sortRaw, page: pageRaw, open, peek, thread, tab, section, saved, error } = await searchParams;
   const q = String(raw ?? "").trim();
+  const sort = parsePeopleSort(sortRaw);
+  const spec = peopleSortSpec(sort);
   const page = deskPage(pageRaw);
   const { from, to } = deskRange(page);
   const db = createServiceClient() ?? desk.supabase;
 
-  let query = db.from("profiles").select(HIT_COLS, { count: "exact" }).order("created_at", { ascending: false });
+  let query = db
+    .from("profiles")
+    .select(HIT_COLS, { count: "exact" })
+    .order(spec.column, { ascending: spec.ascending, nullsFirst: false });
   if (q && !UUID.test(q) && !isMemberCode(q)) {
     query = query.ilike("subject_full_name", `%${q}%`);
   } else if (q && isMemberCode(q)) {
@@ -75,12 +81,18 @@ export default async function DeskPeoplePage({
         .order("created_at")
     : { data: [] };
   const photoMap = pickPrimaryPhotoMap(photoRows ?? []);
-  const listHref = (id: string) => {
+  const listQuery = () => {
     const params = new URLSearchParams();
     if (q) params.set("q", q);
+    if (sort !== "newest") params.set("sort", sort);
+    return params;
+  };
+  const listHref = (id: string) => {
+    const params = listQuery();
     params.set("open", id);
     return `/desk/people?${params.toString()}`;
   };
+  const listExtra = Object.fromEntries(listQuery());
 
   let ownerId = "";
   if (open && (peek === "inbox" || peek === "profile")) {
@@ -88,7 +100,8 @@ export default async function DeskPeoplePage({
     ownerId = String(ownerRow?.created_by ?? "");
   }
   const fileHref = open ? peopleHref(open) : "/desk/people";
-  const closeList = q ? `/desk/people?q=${encodeURIComponent(q)}` : "/desk/people";
+  const closeQs = listQuery().toString();
+  const closeList = closeQs ? `/desk/people?${closeQs}` : "/desk/people";
 
   return (
     <section className="desk-panel desk-file">
@@ -99,15 +112,7 @@ export default async function DeskPeoplePage({
         </div>
         <p>{total} on file</p>
       </header>
-      <form className="desk-file-search" action="/desk/people" method="get">
-        <label>
-          Name, member ID, or profile id
-          <input name="q" className={inputClass} defaultValue={q} placeholder="Name or SL0100003" autoComplete="off" />
-        </label>
-        <button className={btnPrimary} type="submit">
-          Search
-        </button>
-      </form>
+      <PeopleToolbar q={q} sort={sort} />
       {q && !hits.length ? <p className="desk-empty">No member matched “{q}”.</p> : null}
       {hits.length ? (
         <ul className="desk-file-hits">
@@ -149,7 +154,7 @@ export default async function DeskPeoplePage({
       ) : !q ? (
         <p className="desk-empty">No profiles on file yet.</p>
       ) : null}
-      <DeskPager path="/desk/people" page={page} count={total} extra={q ? { q } : {}} />
+      <DeskPager path="/desk/people" page={page} count={total} extra={listExtra} />
 
       {open && !peek ? (
         <DeskPeek title="Member file" kicker="Staff case · member file" closeHref={closeList}>
