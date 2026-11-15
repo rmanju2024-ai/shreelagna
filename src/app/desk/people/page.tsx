@@ -6,8 +6,10 @@ import { MemberDossier } from "@/app/desk/people/member-dossier";
 import { requireDesk } from "@/lib/desk/access";
 import { deskPage, deskRange } from "@/lib/desk/pager";
 import { isMemberCode, memberCodeLookup } from "@/lib/profile/member-code";
+import { pickPrimaryPhotoMap, publicMediaUrl } from "@/lib/match/inbox-card";
 import { createServiceClient } from "@/lib/supabase/server";
 import { btnPrimary, inputClass } from "@/lib/ui/classes";
+import Image from "next/image";
 import Link from "next/link";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -62,6 +64,16 @@ export default async function DeskPeoplePage({
   const { data, count } = await query.range(from, to);
   const hits = data ?? [];
   const total = count ?? hits.length;
+  const hitIds = hits.map((row) => String(row.id));
+  const { data: photoRows } = hitIds.length
+    ? await db
+        .from("media")
+        .select("profile_id, storage_path, is_primary")
+        .eq("kind", "photo")
+        .in("profile_id", hitIds)
+        .order("created_at")
+    : { data: [] };
+  const photoMap = pickPrimaryPhotoMap(photoRows ?? []);
   const listHref = (id: string) => {
     const params = new URLSearchParams();
     if (q) params.set("q", q);
@@ -100,9 +112,24 @@ export default async function DeskPeoplePage({
         <ul className="desk-file-hits">
           {hits.map((row) => {
             const place = [row.current_city, row.current_state].filter(Boolean).join(", ");
+            const thumb = publicMediaUrl(photoMap.get(row.id));
             return (
               <li key={row.id}>
                 <Link href={listHref(row.id)} className="desk-file-hit" scroll={false}>
+                  <span className="desk-file-thumb">
+                    {thumb ? (
+                      <Image
+                        src={thumb}
+                        alt=""
+                        fill
+                        sizes="48px"
+                        quality={40}
+                        style={{ objectFit: "cover", objectPosition: "center 18%" }}
+                      />
+                    ) : (
+                      <em>{(row.subject_full_name || "?").slice(0, 1)}</em>
+                    )}
+                  </span>
                   <span className="desk-file-hit-copy">
                     <strong>{row.subject_full_name || "Unnamed"}</strong>
                     <small>

@@ -9246,6 +9246,40 @@ a.inbox-name.inbox-open:focus-visible {
   display: grid;
   gap: 0.4rem;
 }
+.desk-file-id.desk-panel-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.85rem 1rem;
+}
+.desk-file-photo,
+.desk-file-thumb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: linear-gradient(180deg, #f3e4c8, #e4cda8);
+  color: #6f1d1b;
+  font-family: var(--font-display), ui-serif, serif;
+  font-weight: 700;
+}
+.desk-file-photo {
+  width: 4.6rem;
+  height: 5.5rem;
+  border-radius: 0.9rem;
+  box-shadow: inset 0 1px 0 #fff, 0 6px 14px rgb(47 22 14 / 16%);
+}
+.desk-file-thumb {
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 0.7rem;
+  flex-shrink: 0;
+}
+.desk-file-photo em,
+.desk-file-thumb em {
+  font-style: normal;
+  font-size: 1.15rem;
+}
 .desk-file-hit,
 .desk-file-row {
   display: grid;
@@ -9261,6 +9295,9 @@ a.inbox-name.inbox-open:focus-visible {
   text-decoration: none;
   text-align: left;
   font: inherit;
+}
+.desk-file-hit {
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
 }
 .desk-file-hit-copy,
 .desk-file-row > span {
@@ -9498,7 +9535,7 @@ a.inbox-name.inbox-open:focus-visible {
 @media (max-width: 640px) {
   .desk-file-search { grid-template-columns: minmax(0, 1fr); }
   .desk-file-facts { grid-template-columns: minmax(0, 1fr); }
-  .desk-file-hit { grid-template-columns: minmax(0, 1fr) auto; }
+  .desk-file-hit { grid-template-columns: auto minmax(0, 1fr) auto; }
   .desk-file-go { display: none; }
 }
 

@@ -2,8 +2,10 @@ import type { ReactNode } from "react";
 import { safetyCategoryLabel } from "@/lib/desk/safety-cases";
 import { ticketStatusLabel } from "@/lib/desk/tickets";
 import { planByCode } from "@/lib/membership/catalog";
+import { publicMediaUrl } from "@/lib/match/inbox-card";
 import { formatIstDateTime } from "@/lib/time/ist";
 import { btnGhost } from "@/lib/ui/classes";
+import Image from "next/image";
 import Link from "next/link";
 
 function statusLabel(status: string | null | undefined) {
@@ -74,7 +76,7 @@ export async function MemberDossier({
   ]
     .filter(Boolean)
     .join(",");
-  const [memberships, tickets, reports] = await Promise.all([
+  const [memberships, tickets, reports, media] = await Promise.all([
     ownerId
       ? db
           .from("memberships")
@@ -97,6 +99,12 @@ export async function MemberDossier({
       .or(`reporter_profile_id.eq.${id},reported_profile_id.eq.${id}`)
       .order("created_at", { ascending: false })
       .limit(8),
+    db
+      .from("media")
+      .select("storage_path, is_primary, status")
+      .eq("profile_id", id)
+      .eq("kind", "photo")
+      .order("created_at"),
   ]);
 
   const place = [profile.current_city, profile.current_state].filter(Boolean).join(", ");
@@ -107,11 +115,24 @@ export async function MemberDossier({
     : "No membership on file";
   const ticketRows = tickets.data ?? [];
   const reportRows = reports.data ?? [];
+  const photos = media.data ?? [];
+  const primary =
+    photos.find((row: { is_primary?: boolean | null }) => row.is_primary) ??
+    photos.find((row: { status?: string | null }) => row.status === "approved") ??
+    photos[0];
+  const photoUrl = publicMediaUrl(primary?.storage_path);
   const join = (extra: string) => (fileHref.includes("?") ? `${fileHref}&${extra}` : `${fileHref}?${extra}`);
 
   return (
     <div className="desk-file desk-file-dossier">
-      <header className="desk-panel-head">
+      <header className="desk-panel-head desk-file-id">
+        <span className="desk-file-photo">
+          {photoUrl ? (
+            <Image src={photoUrl} alt={profile.subject_full_name || "Profile photo"} fill sizes="96px" quality={55} style={{ objectFit: "cover", objectPosition: "center 18%" }} />
+          ) : (
+            <em>{(profile.subject_full_name || "?").slice(0, 1)}</em>
+          )}
+        </span>
         <div>
           <p className="browse-kicker">Member file</p>
           <h2>{profile.subject_full_name || "Unnamed"}</h2>
