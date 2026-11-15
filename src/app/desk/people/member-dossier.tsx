@@ -1,9 +1,10 @@
 import type { ReactNode } from "react";
 import { safetyCategoryLabel } from "@/lib/desk/safety-cases";
 import { ticketStatusLabel } from "@/lib/desk/tickets";
-import { planByCode } from "@/lib/membership/catalog";
+import { planByCode, WELCOME_PLAN_NAME } from "@/lib/membership/catalog";
+import { loadMembership } from "@/lib/membership/load";
 import { publicMediaUrl } from "@/lib/match/inbox-card";
-import { formatIstDateTime } from "@/lib/time/ist";
+import { formatIstDate, formatIstDateTime } from "@/lib/time/ist";
 import { btnGhost } from "@/lib/ui/classes";
 import Image from "next/image";
 import Link from "next/link";
@@ -21,6 +22,22 @@ function kindLabel(type: string | null | undefined) {
   if (type === "vadhu") return "Bride";
   if (type === "vara") return "Groom";
   return "Profile";
+}
+
+function planStatusLabel(status: string) {
+  if (status === "pending") return "Waiting for payment";
+  if (status === "active") return "Live";
+  if (status === "declined") return "Declined";
+  if (status === "cancelled") return "Cancelled";
+  if (status === "expired") return "Ended";
+  return status.replace(/_/g, " ");
+}
+
+function planSourceLabel(source: string) {
+  if (source === "grant") return "Staff grant";
+  if (source === "request") return "Payment request";
+  if (source === "welcome") return WELCOME_PLAN_NAME;
+  return source.replace(/_/g, " ");
 }
 
 function FileCard({
@@ -68,7 +85,11 @@ export async function MemberDossier({
 
   const ownerId = String(profile.created_by ?? "");
   const owner = ownerId
-    ? await db.from("app_users").select("id, email, display_name, role").eq("id", ownerId).maybeSingle()
+    ? await db
+        .from("app_users")
+        .select("id, email, display_name, role, welcome_started_at, welcome_days")
+        .eq("id", ownerId)
+        .maybeSingle()
     : { data: null as { email?: string | null } | null };
   const ticketOr = [
     profile.subject_mobile ? `mobile.eq.${profile.subject_mobile}` : "",
@@ -80,10 +101,10 @@ export async function MemberDossier({
     ownerId
       ? db
           .from("memberships")
-          .select("id, plan_code, status, source, ends_at, created_at")
+          .select("id, plan_code, status, source, ends_at, starts_at, created_at, note")
           .eq("user_id", ownerId)
           .order("created_at", { ascending: false })
-          .limit(8)
+          .limit(20)
       : Promise.resolve({ data: [] }),
     ticketOr
       ? db
@@ -109,10 +130,31 @@ export async function MemberDossier({
 
   const place = [profile.current_city, profile.current_state].filter(Boolean).join(", ");
   const plans = memberships.data ?? [];
-  const livePlan = plans.find((row: { status?: string | null }) => String(row.status) === "active") ?? plans[0];
-  const planTitle = livePlan
-    ? `${planByCode(String(livePlan.plan_code))?.name ?? String(livePlan.plan_code)} · ${String(livePlan.status)}`
-    : "No membership on file";
+  const access = owner.data
+    ? await loadMembership(db, {
+        id: ownerId,
+        role: owner.data.role,
+        welcome_started_at: owner.data.welcome_started_at,
+        welcome_days: owner.data.welcome_days,
+      })
+    : null;
+  const waiting = plans.find((row: { status?: string | null }) => String(row.status) === "pending");
+  const currentPlan =
+    access?.kind === "house"
+      ? access.label
+      : access?.kind === "paid"
+        ? access.label.replace(/\s+plan$/i, "")
+        : access?.kind === "welcome"
+          ? WELCOME_PLAN_NAME
+          : "No live plan";
+  const currentHint = access?.live
+    ? access.until
+      ? `Live · ${access.daysLeft} days left · until ${formatIstDate(access.until)}`
+      : "Live"
+    : waiting
+      ? `${planByCode(String(waiting.plan_code))?.name ?? waiting.plan_code} waiting for payment`
+      : "Not live";
+  const historyTitle = plans.length ? "Plan history" : "No plan history";
   const ticketRows = tickets.data ?? [];
   const reportRows = reports.data ?? [];
   const photos = media.data ?? [];
@@ -163,6 +205,13 @@ export async function MemberDossier({
           <dt>Place</dt>
           <dd>{place || "—"}</dd>
         </div>
+        <div>
+          <dt>Current membership</dt>
+          <dd>
+            {currentPlan}
+            <small>{currentHint}</small>
+          </dd>
+        </div>
       </dl>
 
       <div className="desk-file-actions">
@@ -178,24 +227,38 @@ export async function MemberDossier({
       </div>
 
       <div className="desk-file-board">
-        <FileCard kicker="Membership" title={planTitle} count={plans.length}>
+        <FileCard kicker="Membership" title={historyTitle} count={plans.length}>
           {plans.length ? (
             <ul>
-              {plans.map((row: { id: string; plan_code?: string; status?: string; source?: string; ends_at?: string | null }) => (
-                <li key={String(row.id)} className="desk-file-row">
-                  <span>
-                    <strong>{planByCode(String(row.plan_code))?.name ?? String(row.plan_code)}</strong>
-                    <small>
-                      {String(row.status)}
-                      {row.source ? ` · ${String(row.source)}` : ""}
-                      {row.ends_at ? ` · until ${formatIstDateTime(String(row.ends_at))}` : ""}
-                    </small>
-                  </span>
-                </li>
-              ))}
+              {plans.map(
+                (row: {
+                  id: string;
+                  plan_code?: string;
+                  status?: string;
+                  source?: string;
+                  ends_at?: string | null;
+                  starts_at?: string | null;
+                  created_at?: string | null;
+                  note?: string | null;
+                }) => (
+                  <li key={String(row.id)} className="desk-file-row">
+                    <span>
+                      <strong>{planByCode(String(row.plan_code))?.name ?? String(row.plan_code)}</strong>
+                      <small>
+                        {planStatusLabel(String(row.status ?? ""))}
+                        {row.source ? ` · ${planSourceLabel(String(row.source))}` : ""}
+                        {row.created_at ? ` · ${formatIstDateTime(String(row.created_at))}` : ""}
+                        {row.ends_at ? ` · until ${formatIstDateTime(String(row.ends_at))}` : ""}
+                        {row.note ? ` · ${String(row.note)}` : ""}
+                      </small>
+                    </span>
+                    <em>{planStatusLabel(String(row.status ?? ""))}</em>
+                  </li>
+                ),
+              )}
             </ul>
           ) : (
-            <p>This account has no paid or granted cover.</p>
+            <p>No payment requests, grants, or plan changes on this account yet.</p>
           )}
         </FileCard>
 
