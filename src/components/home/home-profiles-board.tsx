@@ -32,9 +32,6 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
     return (
       <div className="home-family">
         <BannerGreeting asMember />
-        <p className="home-family-kicker">A careful house for a blessed match</p>
-        <h2 className="home-family-title">Begin with a bride or groom</h2>
-        <p className="home-invite-line">One story. One profile. You can add up to two more later.</p>
         <div className="home-invite-actions home-family-cta">
           <Link href="/app/profiles/new" className={btnHero}>
             Create your first profile
@@ -49,7 +46,6 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
     return (
       <div className="home-family">
         <BannerGreeting asMember />
-        <p className="home-family-kicker">Your story is on the house</p>
         <div className="home-invite-actions home-family-cta">
           <Link href={`/app/profiles/${only.id}`} className={btnHero}>
             Open profile
@@ -112,23 +108,12 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
     if (!path) continue;
     if ((row as { is_primary?: boolean }).is_primary || !photoOf.has(id)) photoOf.set(id, path);
   }
-  const workingRow = listed.find((row) => row.id === working);
-  const kind = workingRow ? profileKindLabel(workingRow.profile_type) : null;
-
   return (
     <div className="home-family">
       <BannerGreeting asMember />
-      <p className="home-family-kicker">Up to {MAX_PROFILES_PER_ACCOUNT} stories on one login</p>
-      <h2 className="home-family-title">
-        {needPick || pick
-          ? "Who should Discover meet today?"
-          : `Meet matches for this ${kind?.toLowerCase()}`}
-      </h2>
-      <p className="home-invite-line">
-        {needPick || pick
-          ? "Pick a bride or a groom. Lists stay empty until you choose."
-          : `${displayFirstName(workingRow?.subject_full_name ?? "")} is in play. Switch cards anytime.`}
-      </p>
+      {needPick || pick ? (
+        <p className="home-invite-line home-invite-pick">Choose a bride or groom</p>
+      ) : null}
       <ul className="home-family-grid">
         {listed.map((row) => {
           const s = stats.get(row.id) ?? emptyStats();
@@ -149,7 +134,7 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
                 <span className={`home-profile-kind is-${bride ? "bride" : "groom"}`}>
                   {profileKindLabel(row.profile_type)}
                 </span>
-                {on ? <span className="home-profile-on">In play</span> : null}
+                {on ? <span className="home-profile-on">Using</span> : null}
                 <Link href={`/app/profiles/${row.id}`} className="home-family-name">
                   {name}
                 </Link>
@@ -184,7 +169,7 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
                     <input type="hidden" name="id" value={row.id} />
                     <input type="hidden" name="next" value="/" />
                     <button type="submit" className={btnGhost}>
-                      Use this {profileKindLabel(row.profile_type).toLowerCase()}
+                      Switch to this profile
                     </button>
                   </form>
                 )}
@@ -196,12 +181,11 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
       <div className="home-invite-actions home-family-cta">
         {room ? (
           <Link href="/app/profiles/new" className={btnHeroGhost}>
-            Add another profile · {listed.length} of {MAX_PROFILES_PER_ACCOUNT}
+            Add another profile
           </Link>
-        ) : (
-          <p className="home-invite-line">Three profiles is the house limit for this login.</p>
-        )}
+        ) : null}
       </div>
+      <p className="home-family-cap">{listed.length} of {MAX_PROFILES_PER_ACCOUNT} profiles</p>
     </div>
   );
 }
