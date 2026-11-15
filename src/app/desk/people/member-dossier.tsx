@@ -172,7 +172,7 @@ export async function MemberDossier({
         <Link href={join("peek=inbox")} className={btnGhost} scroll={false}>
           Preview inbox
         </Link>
-        <Link href={`/app/profiles/${id}`} className={btnGhost}>
+        <Link href={join("peek=edit")} className={btnGhost} scroll={false}>
           Edit biodata
         </Link>
       </div>

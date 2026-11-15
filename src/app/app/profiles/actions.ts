@@ -34,6 +34,19 @@ import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { redirect } from "next/navigation";
 
+function deskPeopleEditReturn(formData: FormData, profileId: string, extra: Record<string, string | undefined>) {
+  const next = String(formData.get("next") ?? "").trim();
+  if (!next.startsWith("/desk/people")) return null;
+  const params = new URLSearchParams(next.includes("?") ? next.slice(next.indexOf("?") + 1) : "");
+  params.set("open", profileId);
+  params.set("peek", "edit");
+  for (const [key, value] of Object.entries(extra)) {
+    if (value) params.set(key, value);
+    else params.delete(key);
+  }
+  return `/desk/people?${params.toString()}`;
+}
+
 async function requireMember() {
   const supabase = await createClient();
   const {
@@ -305,6 +318,13 @@ export async function saveProfile(formData: FormData) {
   );
 
   if (!parsed.ok) {
+    const desk = bounceId
+      ? deskPeopleEditReturn(formData, bounceId, {
+          error: parsed.error,
+          section,
+        })
+      : null;
+    if (desk) redirect(desk);
     const path = bounceId ? `/app/profiles/${bounceId}` : "/app/profiles/new";
     const extra = bounceId && section ? `&edit=1&section=${section}` : bounceId ? "&edit=1" : "";
     redirect(`${path}?error=${encodeURIComponent(parsed.error)}${extra}`);
@@ -402,13 +422,21 @@ export async function saveProfile(formData: FormData) {
       }
       await recordSaveError(error);
       redirect(
-        `/app/profiles/${editingId}?error=${encodeURIComponent(saveErrorMessage(error))}&edit=1${section ? `&section=${section}` : ""}`,
+        deskPeopleEditReturn(formData, editingId, {
+          error: saveErrorMessage(error),
+          section,
+        }) ??
+          `/app/profiles/${editingId}?error=${encodeURIComponent(saveErrorMessage(error))}&edit=1${section ? `&section=${section}` : ""}`,
       );
     }
     if (!saved) {
       await recordSaveError(lastError);
       redirect(
-        `/app/profiles/${editingId}?error=${encodeURIComponent(saveErrorMessage(lastError))}&edit=1${section ? `&section=${section}` : ""}`,
+        deskPeopleEditReturn(formData, editingId, {
+          error: saveErrorMessage(lastError),
+          section,
+        }) ??
+          `/app/profiles/${editingId}?error=${encodeURIComponent(saveErrorMessage(lastError))}&edit=1${section ? `&section=${section}` : ""}`,
       );
     }
   } else {
@@ -460,6 +488,11 @@ export async function saveProfile(formData: FormData) {
 
   revalidatePath(`/app/profiles/${profileId}`);
   revalidatePath("/desk/profiles");
+  revalidatePath("/desk/people");
+  const desk = profileId
+    ? deskPeopleEditReturn(formData, profileId, { saved: "1", section, error: undefined })
+    : null;
+  if (desk) redirect(desk);
   const stay = new URLSearchParams({ edit: "1", saved: "1" });
   if (section) stay.set("section", section);
   redirect(`/app/profiles/${profileId}?${stay.toString()}`);

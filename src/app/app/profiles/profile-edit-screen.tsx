@@ -32,6 +32,11 @@ export async function ProfileEditScreen({
   error,
   section,
   saved,
+  embedded = false,
+  staffEdit = false,
+  cancelHref: cancelOverride,
+  sectionHref,
+  nextHref,
 }: {
   profile: Record<string, unknown> & { id: string; subject_full_name: string; profile_type: string };
   me: { id: string; email?: string | null };
@@ -42,26 +47,40 @@ export async function ProfileEditScreen({
   error?: string;
   section?: ProfileEditTarget;
   saved?: boolean;
+  embedded?: boolean;
+  staffEdit?: boolean;
+  cancelHref?: string;
+  sectionHref?: (section: string) => string;
+  nextHref?: string;
 }) {
   const aboutText = aboutPlainText(String(profile.about ?? ""));
   const backTab = portraitTabForSection(section);
-  const cancelHref = `/app/profiles/${profile.id}${backTab ? `?tab=${backTab}` : ""}`;
+  const cancelHref = cancelOverride ?? `/app/profiles/${profile.id}${backTab ? `?tab=${backTab}` : ""}`;
+  const tabHref = (tab: string) =>
+    sectionHref ? sectionHref(tab) : `/app/profiles/${profile.id}?edit=1&section=${tab}`;
   const watermark = watermarkLine(displayFirstName(profile.subject_full_name));
   const [{ religions, communities }, lists] = await Promise.all([loadFaithCatalog(), loadFormLists()]);
   const current = section && EDIT_TABS.some((tab) => tab.id === section) ? section : "album";
   const formSection = isProfileEditSection(current) && current !== "about" ? current : undefined;
 
-  return (
-    <PageShell>
-      <BackToMyProfile href={cancelHref} />
-      <div className="page-head-panel atelier">
+  const body = (
+    <>
+      {embedded ? null : <BackToMyProfile href={cancelHref} />}
+      <div className={`page-head-panel atelier${staffEdit ? " is-staff-edit" : ""}`}>
         <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)]">
-          Amend profile
+          {staffEdit ? "Staff edit · this member’s biodata" : "Amend profile"}
           {memberCode ? ` · ${memberCode}` : ""}
         </p>
         <h1 className="mt-2 font-[family-name:var(--font-british)] text-4xl">{profile.subject_full_name}</h1>
+        {staffEdit ? (
+          <p className="mt-3 text-sm font-medium text-[#6f1d1b]">You are editing their house file. This is not your personal profile.</p>
+        ) : null}
         {saved ? (
-          <p className="mt-3 text-sm font-medium text-emerald-800">Saved. Stay here to keep editing, or go back to my profile when you are done.</p>
+          <p className="mt-3 text-sm font-medium text-emerald-800">
+            {staffEdit
+              ? "Saved on their biodata. Close this window to return to the member file."
+              : "Saved. Stay here to keep editing, or go back to my profile when you are done."}
+          </p>
         ) : null}
       </div>
       <div id="album" className="profile-studio mt-8">
@@ -69,7 +88,7 @@ export async function ProfileEditScreen({
           {EDIT_TABS.map((tab) => (
             <Link
               key={tab.id}
-              href={`/app/profiles/${profile.id}?edit=1&section=${tab.id}`}
+              href={tabHref(tab.id)}
               className={`studio-jewel${current === tab.id ? " is-current" : ""}`}
               data-tab={tab.id}
               aria-current={current === tab.id ? "page" : undefined}
@@ -109,7 +128,7 @@ export async function ProfileEditScreen({
               <Link href={cancelHref} className={`${btnHeroGhost} form-3d-cancel`}>
                 Cancel
               </Link>
-              <Link href={`/app/profiles/${profile.id}?edit=1&section=album&saved=1`} className={btnHero}>
+              <Link href={sectionHref ? `${tabHref("album")}&saved=1` : `/app/profiles/${profile.id}?edit=1&section=album&saved=1`} className={btnHero}>
                 Save
               </Link>
             </div>
@@ -138,6 +157,7 @@ export async function ProfileEditScreen({
             mode="edit"
             section={formSection}
             cancelHref={cancelHref}
+            nextHref={nextHref}
             omitAbout
             allowMobileOtp={profile.created_by === me.id}
             values={{ ...profile, member_code: memberCode }}
@@ -150,6 +170,9 @@ export async function ProfileEditScreen({
           />
         ) : null}
       </div>
-    </PageShell>
+    </>
   );
+
+  if (embedded) return <div className="desk-staff-edit">{body}</div>;
+  return <PageShell>{body}</PageShell>;
 }

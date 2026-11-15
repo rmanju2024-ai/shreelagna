@@ -7,10 +7,12 @@ import { btnGhost } from "@/lib/ui/classes";
 
 export function DeskPeek({
   title,
+  kicker = "Staff preview · view only",
   closeHref,
   children,
 }: {
   title: string;
+  kicker?: string;
   closeHref: string;
   children: ReactNode;
 }) {
@@ -49,7 +51,7 @@ export function DeskPeek({
       >
         <header className="desk-peek-head">
           <div>
-            <p className="browse-kicker">Staff preview · view only</p>
+            <p className="browse-kicker">{kicker}</p>
             <h2 id="desk-peek-title">{title}</h2>
           </div>
           <button type="button" className={`${btnGhost} desk-ticket-modal-close`} onClick={() => router.replace(closeHref)}>

@@ -57,6 +57,7 @@ export function ProfileForm({
   section,
   loginEmail,
   cancelHref,
+  nextHref,
   omitAbout = false,
   allowMobileOtp = true,
 }: {
@@ -71,6 +72,7 @@ export function ProfileForm({
   hasVideo?: boolean;
   hasAudio?: boolean;
   cancelHref?: string;
+  nextHref?: string;
   omitAbout?: boolean;
   allowMobileOtp?: boolean;
 }) {
@@ -171,6 +173,7 @@ export function ProfileForm({
       }}
     >
       {values?.id ? <input type="hidden" name="id" value={values.id} /> : null}
+      {nextHref ? <input type="hidden" name="next" value={nextHref} /> : null}
       {values?.member_code ? <input type="hidden" name="member_code" value={values.member_code} /> : null}
       {activeSection ? <input type="hidden" name="section" value={activeSection} /> : null}
       {mode === "edit" && values?.member_code ? (

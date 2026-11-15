@@ -3,6 +3,7 @@ import { DeskPager } from "@/app/desk/desk-pager";
 import { DeskPeek } from "@/app/desk/people/desk-peek";
 import { StaffInboxPreview } from "@/app/desk/people/inbox-preview";
 import { MemberDossier } from "@/app/desk/people/member-dossier";
+import { StaffMemberEdit } from "@/app/desk/people/staff-edit";
 import { requireDesk } from "@/lib/desk/access";
 import { deskPage, deskRange } from "@/lib/desk/pager";
 import { isMemberCode, memberCodeLookup } from "@/lib/profile/member-code";
@@ -43,11 +44,11 @@ function peopleHref(open: string, extra: Record<string, string | undefined> = {}
 export default async function DeskPeoplePage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; page?: string; open?: string; peek?: string; thread?: string; tab?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; open?: string; peek?: string; thread?: string; tab?: string; section?: string; saved?: string; error?: string }>;
 }) {
   const desk = await requireDesk("/desk/people");
   if (!desk.allowed) return null;
-  const { q: raw, page: pageRaw, open, peek, thread, tab } = await searchParams;
+  const { q: raw, page: pageRaw, open, peek, thread, tab, section, saved, error } = await searchParams;
   const q = String(raw ?? "").trim();
   const page = deskPage(pageRaw);
   const { from, to } = deskRange(page);
@@ -151,7 +152,7 @@ export default async function DeskPeoplePage({
       <DeskPager path="/desk/people" page={page} count={total} extra={q ? { q } : {}} />
 
       {open && !peek ? (
-        <DeskPeek title="Member file" closeHref={closeList}>
+        <DeskPeek title="Member file" kicker="Staff case · member file" closeHref={closeList}>
           <MemberDossier db={db} id={open} fileHref={fileHref} />
         </DeskPeek>
       ) : null}
@@ -163,6 +164,17 @@ export default async function DeskPeoplePage({
       {open && peek === "inbox" ? (
         <DeskPeek title="Inbox preview" closeHref={fileHref}>
           <StaffInboxPreview db={db} profileId={open} ownerId={ownerId} tab={tab} threadId={thread} baseHref={fileHref} />
+        </DeskPeek>
+      ) : null}
+      {open && peek === "edit" ? (
+        <DeskPeek title="Edit member biodata" kicker="Staff edit · not your profile" closeHref={fileHref}>
+          <StaffMemberEdit
+            id={open}
+            fileHref={fileHref}
+            section={section}
+            saved={saved === "1"}
+            error={error}
+          />
         </DeskPeek>
       ) : null}
     </section>

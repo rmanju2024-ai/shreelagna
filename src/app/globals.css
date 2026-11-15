@@ -9490,6 +9490,12 @@ a.inbox-name.inbox-open:focus-visible {
   font-size: 1.25rem;
 }
 .desk-peek-body { min-width: 0; }
+.desk-staff-edit { min-width: 0; }
+.desk-staff-edit .page-head-panel.is-staff-edit {
+  border: 1px solid rgb(166 48 41 / 35%);
+  background: linear-gradient(180deg, #fff8f2, #f6e0d4);
+}
+.desk-staff-edit .profile-studio { margin-top: 0.85rem; }
 .desk-inbox-full { display: grid; gap: 0.7rem; min-width: 0; }
 .desk-inbox-pane {
   max-height: min(64dvh, 40rem);
