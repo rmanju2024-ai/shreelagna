@@ -1,13 +1,18 @@
+import { BrowseProfileView } from "@/app/browse/browse-profile-view";
+import { DeskPager } from "@/app/desk/desk-pager";
+import { DeskPeek } from "@/app/desk/people/desk-peek";
+import { StaffInboxPreview } from "@/app/desk/people/inbox-preview";
+import { MemberDossier } from "@/app/desk/people/member-dossier";
 import { requireDesk } from "@/lib/desk/access";
+import { deskPage, deskRange } from "@/lib/desk/pager";
 import { isMemberCode, memberCodeLookup } from "@/lib/profile/member-code";
 import { createServiceClient } from "@/lib/supabase/server";
 import { btnPrimary, inputClass } from "@/lib/ui/classes";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const HIT_COLS =
-  "id, member_code, subject_full_name, status, profile_type, current_city, current_state";
+  "id, member_code, subject_full_name, status, profile_type, current_city, current_state, created_at";
 
 function statusLabel(status: string | null | undefined) {
   if (status === "on_hold") return "Paused";
@@ -24,48 +29,62 @@ function kindLabel(type: string | null | undefined) {
   return "Profile";
 }
 
-export default async function DeskPeopleSearchPage({
+function peopleHref(open: string, extra: Record<string, string | undefined> = {}) {
+  const q = new URLSearchParams();
+  q.set("open", open);
+  for (const [key, value] of Object.entries(extra)) {
+    if (value) q.set(key, value);
+  }
+  return `/desk/people?${q.toString()}`;
+}
+
+export default async function DeskPeoplePage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; open?: string; peek?: string; thread?: string; tab?: string }>;
 }) {
   const desk = await requireDesk("/desk/people");
   if (!desk.allowed) return null;
-  const { q: raw } = await searchParams;
+  const { q: raw, page: pageRaw, open, peek, thread, tab } = await searchParams;
   const q = String(raw ?? "").trim();
+  const page = deskPage(pageRaw);
+  const { from, to } = deskRange(page);
   const db = createServiceClient() ?? desk.supabase;
-  let hits: {
-    id: string;
-    member_code?: string | null;
-    subject_full_name?: string | null;
-    status?: string | null;
-    profile_type?: string | null;
-    current_city?: string | null;
-    current_state?: string | null;
-  }[] = [];
 
-  if (q) {
-    if (UUID.test(q)) redirect(`/desk/people/${q}`);
-    if (isMemberCode(q)) {
-      const { data } = await db.from("profiles").select("id").eq("member_code", memberCodeLookup(q)).maybeSingle();
-      if (data?.id) redirect(`/desk/people/${data.id}`);
-    }
-    const { data } = await db
-      .from("profiles")
-      .select(HIT_COLS)
-      .ilike("subject_full_name", `%${q}%`)
-      .order("created_at", { ascending: false })
-      .limit(20);
-    hits = data ?? [];
+  let query = db.from("profiles").select(HIT_COLS, { count: "exact" }).order("created_at", { ascending: false });
+  if (q && !UUID.test(q) && !isMemberCode(q)) {
+    query = query.ilike("subject_full_name", `%${q}%`);
+  } else if (q && isMemberCode(q)) {
+    query = query.eq("member_code", memberCodeLookup(q));
+  } else if (q && UUID.test(q)) {
+    query = query.eq("id", q);
   }
+  const { data, count } = await query.range(from, to);
+  const hits = data ?? [];
+  const total = count ?? hits.length;
+  const listHref = (id: string) => {
+    const params = new URLSearchParams();
+    if (q) params.set("q", q);
+    params.set("open", id);
+    return `/desk/people?${params.toString()}`;
+  };
+
+  let ownerId = "";
+  if (open && (peek === "inbox" || peek === "profile")) {
+    const { data: ownerRow } = await db.from("profiles").select("created_by").eq("id", open).maybeSingle();
+    ownerId = String(ownerRow?.created_by ?? "");
+  }
+  const fileHref = open ? peopleHref(open) : "/desk/people";
+  const closeList = q ? `/desk/people?q=${encodeURIComponent(q)}` : "/desk/people";
 
   return (
     <section className="desk-panel desk-file">
       <header className="desk-panel-head">
         <div>
           <p className="browse-kicker">People</p>
-          <h2>Find a member</h2>
+          <h2>Members</h2>
         </div>
+        <p>{total} on file</p>
       </header>
       <form className="desk-file-search" action="/desk/people" method="get">
         <label>
@@ -83,7 +102,7 @@ export default async function DeskPeopleSearchPage({
             const place = [row.current_city, row.current_state].filter(Boolean).join(", ");
             return (
               <li key={row.id}>
-                <Link href={`/desk/people/${row.id}`} className="desk-file-hit">
+                <Link href={listHref(row.id)} className="desk-file-hit" scroll={false}>
                   <span className="desk-file-hit-copy">
                     <strong>{row.subject_full_name || "Unnamed"}</strong>
                     <small>
@@ -99,6 +118,25 @@ export default async function DeskPeopleSearchPage({
             );
           })}
         </ul>
+      ) : !q ? (
+        <p className="desk-empty">No profiles on file yet.</p>
+      ) : null}
+      <DeskPager path="/desk/people" page={page} count={total} extra={q ? { q } : {}} />
+
+      {open && !peek ? (
+        <DeskPeek title="Member file" closeHref={closeList}>
+          <MemberDossier db={db} id={open} fileHref={fileHref} />
+        </DeskPeek>
+      ) : null}
+      {open && peek === "profile" ? (
+        <DeskPeek title="Profile preview" closeHref={fileHref}>
+          <BrowseProfileView params={Promise.resolve({ id: open })} searchParams={Promise.resolve({ from: "desk" })} />
+        </DeskPeek>
+      ) : null}
+      {open && peek === "inbox" ? (
+        <DeskPeek title="Inbox preview" closeHref={fileHref}>
+          <StaffInboxPreview db={db} profileId={open} ownerId={ownerId} tab={tab} threadId={thread} baseHref={fileHref} />
+        </DeskPeek>
       ) : null}
     </section>
   );

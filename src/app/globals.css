@@ -9453,6 +9453,15 @@ a.inbox-name.inbox-open:focus-visible {
   font-size: 1.25rem;
 }
 .desk-peek-body { min-width: 0; }
+.desk-inbox-full { display: grid; gap: 0.7rem; min-width: 0; }
+.desk-inbox-pane {
+  max-height: min(64dvh, 40rem);
+  overflow: auto;
+  padding: 0.2rem 0.15rem 0.6rem;
+  border-radius: 1rem;
+  background: rgb(255 252 247 / 70%);
+}
+.desk-inbox-pane .inbox-modern { margin: 0; }
 .desk-peek-modal .pv-close-bar,
 .desk-peek-modal .pv-shell .pv-close-bar { display: none !important; }
 .desk-inbox-preview {

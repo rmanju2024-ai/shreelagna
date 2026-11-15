@@ -50,8 +50,10 @@ export function InboxBoard({
   viewed = [],
   visited = [],
   only,
+  readOnly = false,
 }: {
   only?: SectionId;
+  readOnly?: boolean;
   received: InboxNote[];
   sent: InboxNote[];
   accepted: InboxNote[];
@@ -60,7 +62,9 @@ export function InboxBoard({
   visited?: InboxView[];
 }) {
   const notes: Record<SectionId, InboxNote[]> = { received, sent, accepted, history, viewed, visited };
-  const actions: Partial<Record<SectionId, (note: InboxNote) => ReactNode>> = {
+  const actions: Partial<Record<SectionId, (note: InboxNote) => ReactNode>> = readOnly
+    ? {}
+    : {
     received: (note) => (
       <>
         <form action={respondInterest}>

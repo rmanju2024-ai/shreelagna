@@ -1,24 +1,143 @@
 import Link from "next/link";
 import { ChatAvatar } from "@/app/app/chat/chat-avatar";
+import { InboxBoard } from "@/app/app/interests/inbox-board";
+import { InboxSwitcherNav, type InboxTab } from "@/components/inbox-switcher";
 import { loadStaffInbox, loadStaffThread } from "@/lib/desk/member-inbox";
+import { alertHeadline, loadStaffAlerts, loadStaffLikes } from "@/lib/desk/staff-inbox-extras";
 import { chatBodyLine } from "@/lib/match/chat-ui";
+import { alertWhen } from "@/lib/match/alert-copy";
 import { formatIstTime, parseInstant } from "@/lib/time/ist";
+
+const alertStyle = (kind: string) => {
+  if (kind === "interest_received") return { icon: "💌", tone: "interest" };
+  if (kind === "interest_accepted") return { icon: "✨", tone: "accepted" };
+  if (kind === "profile_view") return { icon: "👀", tone: "view" };
+  if (kind === "shortlist") return { icon: "♥", tone: "shortlist" };
+  if (kind === "contact_view") return { icon: "📇", tone: "contact" };
+  if (kind === "match") return { icon: "💫", tone: "match" };
+  return { icon: "🔔", tone: "general" };
+};
+
+function parseTab(raw?: string | null): InboxTab {
+  if (raw === "likes" || raw === "alerts") return raw;
+  return "chats";
+}
+
+function withParams(base: string, extra: Record<string, string>) {
+  const q = new URLSearchParams(base.split("?")[1] ?? "");
+  for (const [key, value] of Object.entries(extra)) q.set(key, value);
+  const path = base.split("?")[0];
+  return `${path}?${q.toString()}`;
+}
 
 export async function StaffInboxPreview({
   db,
   profileId,
+  ownerId,
+  tab,
   threadId,
   baseHref,
 }: {
   db: { from: (table: string) => any };
   profileId: string;
+  ownerId: string;
+  tab?: string | null;
   threadId?: string | null;
   baseHref: string;
 }) {
-  const inbox = await loadStaffInbox(db, profileId);
+  const active = parseTab(tab);
+  const inboxHref = (id: InboxTab) => withParams(baseHref, { peek: "inbox", tab: id });
+  const [inbox, likes, alerts] = await Promise.all([
+    loadStaffInbox(db, profileId),
+    loadStaffLikes(db, ownerId),
+    loadStaffAlerts(db, ownerId),
+  ]);
+  const counts = {
+    chatUnread: inbox.threads.length,
+    likesPending: likes.pendingCount,
+    alertUnread: alerts.unread,
+  };
+
+  return (
+    <div className="desk-inbox-full">
+      <InboxSwitcherNav active={active} counts={counts} hrefFor={inboxHref} />
+      {active === "chats" ? (
+        <ChatPane inbox={inbox} threadId={threadId} baseHref={baseHref} db={db} />
+      ) : null}
+      {active === "likes" ? (
+        <div className="desk-inbox-pane">
+          <InboxBoard
+            readOnly
+            received={likes.received}
+            sent={likes.sent}
+            accepted={likes.accepted}
+            history={likes.history}
+            viewed={likes.viewed}
+            visited={likes.visited}
+          />
+        </div>
+      ) : null}
+      {active === "alerts" ? (
+        <section className="desk-inbox-pane inbox-alerts-panel" aria-label="Member alerts">
+          <header>
+            <p>Member inbox</p>
+            <h3>Updates</h3>
+          </header>
+          <div className="alerts-genz inbox-alerts">
+            <ul className="alert-list alerts-genz-list">
+              {alerts.alerts.map((note) => {
+                const unread = !note.read_at;
+                const { name, detail } = alertHeadline(note.kind, note.title ?? "", note.body ?? "");
+                const style = alertStyle(note.kind);
+                return (
+                  <li key={note.id}>
+                    <div className={`alert-card${unread ? " is-new" : ""}`}>
+                      <span className={`alerts-genz-icon is-${style.tone}`} aria-hidden>
+                        {style.icon}
+                      </span>
+                      <ChatAvatar name={name} src={note.photo} />
+                      <span className="alert-copy">
+                        <span className="alert-line">
+                          <b>{name}</b> {detail}
+                        </span>
+                        <span className="alerts-genz-meta">
+                          <time dateTime={note.created_at}>{alertWhen(note.created_at)}</time>
+                        </span>
+                      </span>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+            {!alerts.alerts.length ? (
+              <div className="sx-empty alerts-genz-empty">
+                <span aria-hidden>✨</span>
+                <div>
+                  <h3>No alerts on this account</h3>
+                  <p>Matches, views and interest notes will list here.</p>
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
+    </div>
+  );
+}
+
+async function ChatPane({
+  db,
+  inbox,
+  threadId,
+  baseHref,
+}: {
+  db: { from: (table: string) => any };
+  inbox: Awaited<ReturnType<typeof loadStaffInbox>>;
+  threadId?: string | null;
+  baseHref: string;
+}) {
   const activeId = threadId && inbox.threads.some((row) => row.id === threadId) ? threadId : inbox.threads[0]?.id;
   const open = activeId ? await loadStaffThread(db, activeId, inbox.myIds) : null;
-
   return (
     <div className="desk-inbox-preview wc-shell">
       <aside className="wc-side" aria-label="Member conversations">
@@ -33,7 +152,7 @@ export async function StaffInboxPreview({
             {inbox.threads.map((thread) => (
               <li key={thread.id}>
                 <Link
-                  href={`${baseHref}?peek=inbox&thread=${thread.id}`}
+                  href={withParams(baseHref, { peek: "inbox", tab: "chats", thread: thread.id })}
                   className={`wa-row${thread.id === activeId ? " is-active" : ""}`}
                   replace
                   scroll={false}

@@ -14,9 +14,11 @@ const TABS: { id: InboxTab; href: string; label: string; countKey: "chatUnread" 
 export function InboxSwitcherNav({
   active,
   counts = { chatUnread: 0, alertUnread: 0, likesPending: 0 },
+  hrefFor,
 }: {
   active: InboxTab;
   counts?: { chatUnread: number; alertUnread: number; likesPending: number };
+  hrefFor?: (id: InboxTab) => string;
 }) {
   return (
     <div className="inbox-switcher-wrap">
@@ -26,9 +28,10 @@ export function InboxSwitcherNav({
           return (
             <Link
               key={tab.id}
-              href={tab.href}
+              href={hrefFor ? hrefFor(tab.id) : tab.href}
               className={tab.id === active ? "is-on" : undefined}
               aria-current={tab.id === active ? "page" : undefined}
+              scroll={false}
             >
               {tab.label}
               {mark ? <b className="inbox-switcher-badge">{mark}</b> : null}
