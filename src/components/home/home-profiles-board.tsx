@@ -3,10 +3,13 @@ import { BannerGreeting } from "@/components/home/banner-greeting";
 import { setActiveProfile } from "@/app/app/profiles/actions";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { publicMediaUrl } from "@/lib/match/inbox-card";
+import { loadMembership } from "@/lib/membership/load";
+import type { Membership } from "@/lib/membership/access";
 import { canAddProfile, MAX_PROFILES_PER_ACCOUNT } from "@/lib/profile/caps";
 import { displayFirstName, profileKindLabel } from "@/lib/profile/options";
 import { listOwnProfiles } from "@/lib/profile/own-profile";
 import { workingProfileId } from "@/lib/profile/working-profile";
+import { formatIstDate } from "@/lib/time/ist";
 import { createServiceClient } from "@/lib/supabase/server";
 import { btnHero, btnHeroGhost, btnGhost } from "@/lib/ui/classes";
 
@@ -14,6 +17,18 @@ type Stats = { views: number; interestsIn: number; interestsOut: number; chats: 
 
 function emptyStats(): Stats {
   return { views: 0, interestsIn: 0, interestsOut: 0, chats: 0 };
+}
+
+function planLine(access: Membership) {
+  const name = access.label.replace(/ plan$/i, "");
+  if (!access.live) {
+    return { name: name || "No plan", expiry: "Expired — renew to search" };
+  }
+  if (!access.until) {
+    return { name, expiry: "No expiry" };
+  }
+  const days = access.daysLeft === 1 ? "1 day left" : `${access.daysLeft} days left`;
+  return { name, expiry: `Until ${formatIstDate(access.until)} · ${days}` };
 }
 
 export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
@@ -66,13 +81,15 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
   const stats = new Map<string, Stats>();
   for (const id of ids) stats.set(id, emptyStats());
   const db = createServiceClient() ?? supabase;
-  const [views, rec, sen, threads, photos] = await Promise.all([
+  const [views, rec, sen, threads, photos, access] = await Promise.all([
     supabase.from("profile_views").select("viewed_profile_id").in("viewed_profile_id", ids),
     supabase.from("interests").select("to_profile_id").in("to_profile_id", ids),
     supabase.from("interests").select("from_profile_id").in("from_profile_id", ids),
     supabase.from("threads").select("profile_a, profile_b").or(`profile_a.in.(${ids.join(",")}),profile_b.in.(${ids.join(",")})`),
     db.from("media").select("profile_id, storage_path, is_primary").in("profile_id", ids).eq("kind", "photo").order("created_at"),
+    loadMembership(db, me),
   ]);
+  const plan = planLine(access);
   for (const row of views.data ?? []) {
     const key = String((row as { viewed_profile_id: string }).viewed_profile_id);
     const cur = stats.get(key) ?? emptyStats();
@@ -140,6 +157,10 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
                 <p>
                   {row.current_city || "City not set"}
                   {row.member_code ? <span>{row.member_code}</span> : null}
+                </p>
+                <p className="home-family-plan">
+                  <b>{plan.name}</b>
+                  <span>{plan.expiry}</span>
                 </p>
                 <dl>
                   <div>

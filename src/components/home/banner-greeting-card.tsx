@@ -98,7 +98,7 @@ export function BannerGreetingTagline({
         )}
       </span>
       <strong className="home-greeting-name">{name}</strong>
-      <span className="home-greeting-role">{roleLabel}</span>
+      {mark !== "member" ? <span className="home-greeting-role">{roleLabel}</span> : null}
     </p>
   );
 }
