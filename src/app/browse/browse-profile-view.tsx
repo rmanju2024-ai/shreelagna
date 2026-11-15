@@ -535,7 +535,7 @@ export async function BrowseProfileView({
     contact = undefined;
   }
 
-  if (!isStaff && me.active_profile_id && me.active_profile_id !== id && !own && mine) {
+  if (!isStaff && !staffPreview && me.active_profile_id && me.active_profile_id !== id && !own && mine) {
     const viewerId = me.active_profile_id;
     after(async () => {
       await supabase.from("profile_views").upsert(

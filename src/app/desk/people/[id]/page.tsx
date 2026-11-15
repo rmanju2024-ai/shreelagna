@@ -1,4 +1,7 @@
 import type { ReactNode } from "react";
+import { BrowseProfileView } from "@/app/browse/browse-profile-view";
+import { DeskPeek } from "@/app/desk/people/desk-peek";
+import { StaffInboxPreview } from "@/app/desk/people/inbox-preview";
 import { requireDesk } from "@/lib/desk/access";
 import { safetyCategoryLabel } from "@/lib/desk/safety-cases";
 import { ticketStatusLabel } from "@/lib/desk/tickets";
@@ -6,7 +9,6 @@ import { planByCode } from "@/lib/membership/catalog";
 import { createServiceClient } from "@/lib/supabase/server";
 import { formatIstDateTime } from "@/lib/time/ist";
 import { btnGhost, inputClass } from "@/lib/ui/classes";
-import { profileOpenHref } from "@/lib/ui/dismiss";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -50,10 +52,17 @@ function FileCard({
   );
 }
 
-export default async function DeskMemberFilePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function DeskMemberFilePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ peek?: string; thread?: string }>;
+}) {
   const desk = await requireDesk("/desk/people");
   if (!desk.allowed) return null;
   const { id } = await params;
+  const { peek, thread } = await searchParams;
   const db = createServiceClient() ?? desk.supabase;
   const { data: profile } = await db
     .from("profiles")
@@ -99,43 +108,9 @@ export default async function DeskMemberFilePage({ params }: { params: Promise<{
       .limit(8),
     db
       .from("threads")
-      .select("id, profile_a, profile_b, frozen, created_at")
-      .or(`profile_a.eq.${id},profile_b.eq.${id}`)
-      .order("created_at", { ascending: false })
-      .limit(8),
+      .select("id")
+      .or(`profile_a.eq.${id},profile_b.eq.${id}`),
   ]);
-
-  const threadRows = threads.data ?? [];
-  const otherIds = [
-    ...new Set(
-      threadRows
-        .map((row) => String(row.profile_a === id ? row.profile_b : row.profile_a))
-        .filter(Boolean),
-    ),
-  ];
-  const threadIds = threadRows.map((row) => String(row.id));
-  const [{ data: lastNotes }, { data: others }] = await Promise.all([
-    threadIds.length
-      ? db
-          .from("messages")
-          .select("id, thread_id, body, created_at, deleted_at")
-          .in("thread_id", threadIds)
-          .order("created_at", { ascending: false })
-          .limit(40)
-      : Promise.resolve({ data: [] }),
-    otherIds.length
-      ? db.from("profiles").select("id, subject_full_name, member_code").in("id", otherIds)
-      : Promise.resolve({ data: [] }),
-  ]);
-
-  const otherById = new Map((others ?? []).map((row) => [String(row.id), row]));
-  const notesByThread = new Map<string, typeof lastNotes>();
-  for (const note of lastNotes ?? []) {
-    const key = String(note.thread_id);
-    const list = notesByThread.get(key) ?? [];
-    if (list.length < 6) list.push(note);
-    notesByThread.set(key, list);
-  }
 
   const place = [profile.current_city, profile.current_state].filter(Boolean).join(", ");
   const plans = memberships.data ?? [];
@@ -145,186 +120,154 @@ export default async function DeskMemberFilePage({ params }: { params: Promise<{
     : "No membership on file";
   const ticketRows = tickets.data ?? [];
   const reportRows = reports.data ?? [];
-  const ticketTitle = ticketRows.length
-    ? `${ticketRows.length} house request${ticketRows.length === 1 ? "" : "s"}`
-    : "No house requests";
-  const safetyTitle = reportRows.length
-    ? `${reportRows.length} safety report${reportRows.length === 1 ? "" : "s"}`
-    : "No safety reports";
-  const chatTitle = threadRows.length
-    ? `${threadRows.length} conversation${threadRows.length === 1 ? "" : "s"}`
-    : "No conversations";
+  const chatCount = (threads.data ?? []).length;
+  const fileHref = `/desk/people/${id}`;
 
   return (
-    <section className="desk-panel desk-file">
-      <header className="desk-panel-head">
-        <div>
-          <p className="browse-kicker">Member file</p>
-          <h2>{profile.subject_full_name || "Unnamed"}</h2>
-          <p className="desk-file-sub">
-            {kindLabel(profile.profile_type)} · {profile.member_code || "No member ID"}
-          </p>
-        </div>
-        <span className="desk-pill">{statusLabel(profile.status)}</span>
-      </header>
+    <>
+      <section className="desk-panel desk-file">
+        <header className="desk-panel-head">
+          <div>
+            <p className="browse-kicker">Member file</p>
+            <h2>{profile.subject_full_name || "Unnamed"}</h2>
+            <p className="desk-file-sub">
+              {kindLabel(profile.profile_type)} · {profile.member_code || "No member ID"}
+            </p>
+          </div>
+          <span className="desk-pill">{statusLabel(profile.status)}</span>
+        </header>
 
-      <form className="desk-file-search is-compact" action="/desk/people" method="get">
-        <label>
-          Find another member
-          <input name="q" className={inputClass} placeholder="Name or member ID" autoComplete="off" />
-        </label>
-        <button className={btnGhost} type="submit">
-          Search
-        </button>
-      </form>
+        <form className="desk-file-search is-compact" action="/desk/people" method="get">
+          <label>
+            Find another member
+            <input name="q" className={inputClass} placeholder="Name or member ID" autoComplete="off" />
+          </label>
+          <button className={btnGhost} type="submit">
+            Search
+          </button>
+        </form>
 
-      <dl className="desk-file-facts">
-        <div>
-          <dt>Member ID</dt>
-          <dd>{profile.member_code || "—"}</dd>
-        </div>
-        <div>
-          <dt>Mobile</dt>
-          <dd>
-            {profile.subject_mobile || "—"}
-            <small>{profile.phone_otp_verified_at ? "Confirmed" : "Not confirmed"}</small>
-          </dd>
-        </div>
-        <div>
-          <dt>Gmail</dt>
-          <dd>{owner.data?.email || "—"}</dd>
-        </div>
-        <div>
-          <dt>Place</dt>
-          <dd>{place || "—"}</dd>
-        </div>
-      </dl>
+        <dl className="desk-file-facts">
+          <div>
+            <dt>Member ID</dt>
+            <dd>{profile.member_code || "—"}</dd>
+          </div>
+          <div>
+            <dt>Mobile</dt>
+            <dd>
+              {profile.subject_mobile || "—"}
+              <small>{profile.phone_otp_verified_at ? "Confirmed" : "Not confirmed"}</small>
+            </dd>
+          </div>
+          <div>
+            <dt>Gmail</dt>
+            <dd>{owner.data?.email || "—"}</dd>
+          </div>
+          <div>
+            <dt>Place</dt>
+            <dd>{place || "—"}</dd>
+          </div>
+        </dl>
 
-      <div className="desk-file-actions">
-        <Link href={profileOpenHref(id, "desk")} className={btnGhost}>
-          Preview profile
-        </Link>
-        <Link href={`/app/profiles/${id}`} className={btnGhost}>
-          Edit biodata
-        </Link>
-        <Link href="/desk/media" className={btnGhost}>
-          Media queue
-        </Link>
-      </div>
+        <div className="desk-file-actions">
+          <Link href={`${fileHref}?peek=profile`} className={btnGhost} scroll={false}>
+            Preview profile
+          </Link>
+          <Link href={`${fileHref}?peek=inbox`} className={btnGhost} scroll={false}>
+            Preview inbox
+          </Link>
+          <Link href={`/app/profiles/${id}`} className={btnGhost}>
+            Edit biodata
+          </Link>
+        </div>
 
-      <div className="desk-file-board">
-        <FileCard kicker="Membership" title={planTitle} count={plans.length}>
-          {plans.length ? (
-            <ul>
-              {plans.map((row) => (
-                <li key={String(row.id)} className="desk-file-row">
-                  <span>
-                    <strong>{planByCode(String(row.plan_code))?.name ?? String(row.plan_code)}</strong>
-                    <small>
-                      {String(row.status)}
-                      {row.source ? ` · ${String(row.source)}` : ""}
-                      {row.ends_at ? ` · until ${formatIstDateTime(String(row.ends_at))}` : ""}
-                    </small>
-                  </span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>This account has no paid or granted cover.</p>
-          )}
-        </FileCard>
-
-        <FileCard kicker="House requests" title={ticketTitle} count={ticketRows.length}>
-          {ticketRows.length ? (
-            <ul>
-              {ticketRows.map((row) => (
-                <li key={String(row.id)}>
-                  <Link href={`/desk/tickets?open=${row.id}`} className="desk-file-row">
+        <div className="desk-file-board">
+          <FileCard kicker="Membership" title={planTitle} count={plans.length}>
+            {plans.length ? (
+              <ul>
+                {plans.map((row) => (
+                  <li key={String(row.id)} className="desk-file-row">
                     <span>
-                      <strong>{row.name || "Request"}</strong>
+                      <strong>{planByCode(String(row.plan_code))?.name ?? String(row.plan_code)}</strong>
                       <small>
-                        {ticketStatusLabel(String(row.status))} · {formatIstDateTime(String(row.created_at))}
+                        {String(row.status)}
+                        {row.source ? ` · ${String(row.source)}` : ""}
+                        {row.ends_at ? ` · until ${formatIstDateTime(String(row.ends_at))}` : ""}
                       </small>
                     </span>
-                    <em>Open</em>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>No notes from this Gmail or mobile.</p>
-          )}
-        </FileCard>
-
-        <FileCard kicker="Safety" title={safetyTitle} count={reportRows.length}>
-          {reportRows.length ? (
-            <ul>
-              {reportRows.map((row) => (
-                <li key={String(row.id)}>
-                  <Link href="/desk/safety" className="desk-file-row">
-                    <span>
-                      <strong>{safetyCategoryLabel(String(row.category))}</strong>
-                      <small>
-                        {String(row.status).replace(/_/g, " ")} · {formatIstDateTime(String(row.created_at))}
-                      </small>
-                    </span>
-                    <em>Open</em>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>This profile has not been named in a report.</p>
-          )}
-        </FileCard>
-
-        <FileCard kicker="Conversations" title={chatTitle} count={threadRows.length}>
-          {threadRows.length ? (
-            <ul>
-              {threadRows.map((row) => {
-                const otherId = String(row.profile_a === id ? row.profile_b : row.profile_a);
-                const other = otherById.get(otherId);
-                const notes = notesByThread.get(String(row.id)) ?? [];
-                const latest = notes[0];
-                const preview = latest?.deleted_at
-                  ? "Message removed"
-                  : String(latest?.body ?? "").trim() || "No messages yet";
-                return (
-                  <li key={String(row.id)}>
-                    <details className="desk-file-thread">
-                      <summary className="desk-file-row">
-                        <span>
-                          <strong>{other?.subject_full_name || "Other profile"}</strong>
-                          <small>
-                            {other?.member_code ? `${other.member_code} · ` : ""}
-                            {row.frozen ? "Frozen · " : ""}
-                            {latest ? formatIstDateTime(String(latest.created_at)) : formatIstDateTime(String(row.created_at))}
-                          </small>
-                          <em className="desk-file-preview">{preview.slice(0, 120)}</em>
-                        </span>
-                      </summary>
-                      {notes.length ? (
-                        <ol className="desk-file-notes">
-                          {notes.map((note) => (
-                            <li key={String(note.id)}>
-                              <p>{note.deleted_at ? "Message removed" : String(note.body ?? "")}</p>
-                              <time>{formatIstDateTime(String(note.created_at))}</time>
-                            </li>
-                          ))}
-                        </ol>
-                      ) : (
-                        <p>No messages in this conversation yet.</p>
-                      )}
-                    </details>
                   </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <p>This member has not opened a salon thread.</p>
-          )}
-        </FileCard>
-      </div>
-    </section>
+                ))}
+              </ul>
+            ) : (
+              <p>This account has no paid or granted cover.</p>
+            )}
+          </FileCard>
+
+          <FileCard kicker="House requests" title={ticketRows.length ? `${ticketRows.length} house request${ticketRows.length === 1 ? "" : "s"}` : "No house requests"} count={ticketRows.length}>
+            {ticketRows.length ? (
+              <ul>
+                {ticketRows.map((row) => (
+                  <li key={String(row.id)}>
+                    <Link href={`/desk/tickets?open=${row.id}`} className="desk-file-row">
+                      <span>
+                        <strong>{row.name || "Request"}</strong>
+                        <small>
+                          {ticketStatusLabel(String(row.status))} · {formatIstDateTime(String(row.created_at))}
+                        </small>
+                      </span>
+                      <em>Open</em>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No notes from this Gmail or mobile.</p>
+            )}
+          </FileCard>
+
+          <FileCard kicker="Safety" title={reportRows.length ? `${reportRows.length} safety report${reportRows.length === 1 ? "" : "s"}` : "No safety reports"} count={reportRows.length}>
+            {reportRows.length ? (
+              <ul>
+                {reportRows.map((row) => (
+                  <li key={String(row.id)}>
+                    <Link href="/desk/safety" className="desk-file-row">
+                      <span>
+                        <strong>{safetyCategoryLabel(String(row.category))}</strong>
+                        <small>
+                          {String(row.status).replace(/_/g, " ")} · {formatIstDateTime(String(row.created_at))}
+                        </small>
+                      </span>
+                      <em>Open</em>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>This profile has not been named in a report.</p>
+            )}
+          </FileCard>
+
+          <Link href={`${fileHref}?peek=inbox`} className="desk-file-card desk-file-launch" scroll={false}>
+            <span>
+              <span className="desk-file-kicker">Conversations</span>
+              <strong>{chatCount ? `${chatCount} conversation${chatCount === 1 ? "" : "s"}` : "No conversations"}</strong>
+              <small>Preview inbox · read only, no alerts</small>
+            </span>
+            <b className="desk-file-count">{chatCount}</b>
+          </Link>
+        </div>
+      </section>
+
+      {peek === "profile" ? (
+        <DeskPeek title="Profile preview" closeHref={fileHref}>
+          <BrowseProfileView params={Promise.resolve({ id })} searchParams={Promise.resolve({ from: "desk" })} />
+        </DeskPeek>
+      ) : null}
+      {peek === "inbox" ? (
+        <DeskPeek title="Inbox preview" closeHref={fileHref}>
+          <StaffInboxPreview db={db} profileId={id} threadId={thread} baseHref={fileHref} />
+        </DeskPeek>
+      ) : null}
+    </>
   );
 }
