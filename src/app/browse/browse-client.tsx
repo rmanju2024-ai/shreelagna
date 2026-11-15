@@ -92,13 +92,13 @@ const JOURNEY_LINKS = [
     href: "/app/shortlist",
     icon: "shortlist",
     label: "Shortlist",
-    tip: "Shortlist — families you saved to revisit later",
+    tip: "Shortlist — saved to revisit",
   },
   {
     href: "/app/blocked",
     icon: "block",
     label: "Blocked",
-    tip: "Blocked — families you chose not to see again",
+    tip: "Blocked — hidden from Discover",
   },
 ] as const;
 

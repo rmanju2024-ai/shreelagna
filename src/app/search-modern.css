@@ -2,7 +2,7 @@
 .sx-stage { width: 100%; max-width: 86rem; margin-inline: auto; padding: 0.75rem 0 3rem; display: grid; gap: 1.1rem; }
 .sx-hero {
   display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 1rem 1.25rem;
-  padding: 1.35rem 1.4rem; border-radius: 1.35rem; color: #fff8e7; position: relative; overflow: hidden;
+  padding: 1.35rem 1.4rem; border-radius: 1.35rem; color: #fff8e7; position: relative; overflow: visible;
   background: radial-gradient(120% 140% at 0% 0%, #8c2a27 0%, #4a0f0e 55%, #2a0807 100%);
   box-shadow: 0 20px 40px -20px rgb(63 14 13 / 55%);
 }
@@ -344,7 +344,8 @@
   flex-wrap: wrap;
   gap: 0.45rem;
   margin-top: 0.15rem;
-  z-index: 2;
+  z-index: 8;
+  overflow: visible;
 }
 .sx-journey-ico {
   position: relative;
@@ -358,28 +359,37 @@
   border: 1.5px solid rgb(184 120 40 / 45%);
   box-shadow: 0 8px 14px -12px rgb(63 14 13 / 40%);
   text-decoration: none;
+  overflow: visible;
+  z-index: 1;
+}
+.sx-journey-ico:hover,
+.sx-journey-ico:focus-visible,
+.sx-journey-ico:focus {
+  z-index: 12;
 }
 .sx-journey-ico svg { width: 1.25rem; height: 1.25rem; }
 .sx-journey-tip {
   position: absolute;
-  left: 50%;
-  top: auto;
-  bottom: calc(100% + 0.4rem);
+  left: 0;
+  top: calc(100% + 0.42rem);
+  bottom: auto;
   width: max-content;
-  max-width: min(16rem, 70vw);
-  transform: translateX(-50%);
-  padding: 0.4rem 0.6rem;
+  max-width: min(18rem, calc(100vw - 2rem));
+  transform: none;
+  padding: 0.42rem 0.65rem;
   border-radius: 0.7rem;
   background: #3f0e0d;
   color: #fff8e7;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  line-height: 1.3;
+  line-height: 1.35;
+  white-space: normal;
+  text-align: left;
   opacity: 0;
   pointer-events: none;
   box-shadow: 0 10px 20px -12px rgb(63 14 13 / 55%);
   transition: opacity 0.15s ease;
-  z-index: 5;
+  z-index: 20;
 }
 .sx-journey-ico:hover .sx-journey-tip,
 .sx-journey-ico:focus-visible .sx-journey-tip,
@@ -1384,20 +1394,26 @@ button.sx-view-all{font:inherit;font-size:.8rem;font-weight:800;cursor:pointer;b
   content: attr(data-tip);
   position: absolute;
   top: calc(100% + 0.38rem);
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 0.18rem 0.45rem;
+  left: 0;
+  right: auto;
+  transform: none;
+  padding: 0.22rem 0.5rem;
   border-radius: 0.4rem;
   background: #3f0e0d;
   color: #fff8e7;
-  font-size: 0.62rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-size: 0.68rem;
+  letter-spacing: 0.03em;
+  text-transform: none;
   font-weight: 800;
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
-  z-index: 5;
+  z-index: 20;
+}
+.pv-shell .pv-top-actions > :last-child::after,
+.pv-shell .pv-top-actions .safety-profile-control .safety-btn.is-icon:last-child::after {
+  left: auto;
+  right: 0;
 }
 .pv-shell .pv-ico-btn:hover::after,
 .pv-shell .pv-ico-btn:focus-visible::after,

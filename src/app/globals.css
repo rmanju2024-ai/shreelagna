@@ -1071,6 +1071,12 @@ a.card-premium:hover,
   align-items: center;
   flex-shrink: 0;
   margin-left: 0.12rem;
+  overflow: visible;
+  z-index: 1;
+}
+.field-help:hover,
+.field-help:focus-within {
+  z-index: 50;
 }
 
 .field-help-btn {
@@ -1105,7 +1111,9 @@ a.card-premium:hover,
   left: 0;
   top: calc(100% + 0.4rem);
   z-index: 40;
-  width: min(18rem, 70vw);
+  width: min(18rem, calc(100vw - 2rem));
+  white-space: normal;
+  text-align: left;
   border-radius: 0.75rem;
   background: #3a2018;
   color: #f7efe4;
