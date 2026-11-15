@@ -9357,6 +9357,11 @@ a.inbox-name.inbox-open:focus-visible {
   font-size: 0.72rem;
   font-weight: 600;
 }
+.desk-file-facts .is-plan {
+  grid-column: 1 / -1;
+  padding-top: 0.55rem;
+  border-top: 1px solid rgb(196 154 98 / 32%);
+}
 .desk-file-actions {
   display: flex;
   flex-wrap: wrap;

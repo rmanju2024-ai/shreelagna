@@ -204,6 +204,16 @@ export async function MemberDossier({
           <dt>Place</dt>
           <dd>{place || "—"}</dd>
         </div>
+        <div className="is-plan">
+          <dt>Current membership</dt>
+          <dd>
+            {currentPlan}
+            <small>
+              {access?.live ? "Live" : "Not live"}
+              {currentHint ? ` · ${currentHint}` : ""}
+            </small>
+          </dd>
+        </div>
       </dl>
 
       <div className="desk-file-actions">
@@ -222,13 +232,11 @@ export async function MemberDossier({
         <header className="desk-file-panel-head">
           <div>
             <p className="desk-file-kicker">Membership</p>
-            <h3>{currentPlan}</h3>
-            <p>{currentHint}</p>
+            <h3>Plan history</h3>
+            <p>Payment requests, grants, and cancels.</p>
           </div>
-          <em className={`desk-pill${access?.live ? " is-done" : ""}`}>{access?.live ? "Live" : "Not live"}</em>
         </header>
         <div className="desk-file-panel-body">
-          <p className="desk-file-kicker">Plan history</p>
           {plans.length ? (
             <ul>
               {plans.map(
