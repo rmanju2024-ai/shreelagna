@@ -9367,30 +9367,86 @@ a.inbox-name.inbox-open:focus-visible {
   display: grid;
   gap: 0.7rem;
 }
-.desk-file-now {
-  padding: 0.9rem 1rem 1rem;
+.desk-file-dossier {
+  display: grid;
+  gap: 0.85rem;
+}
+.desk-file-panel {
   border-radius: 1.05rem;
   border: 1px solid rgb(196 154 98 / 40%);
   background: linear-gradient(180deg, #fffefb 0%, #f6ead6 100%);
+  overflow: hidden;
 }
-.desk-file-now h3 {
-  margin: 0.18rem 0 0.2rem;
-  font-family: var(--font-display), ui-serif, serif;
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: #3f0e0d;
-}
-.desk-file-now p {
-  margin: 0;
-  color: #6a574c;
-  font-size: 0.86rem;
-}
-.desk-file-now-row {
+.desk-file-panel-head {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: 0.55rem 1rem;
+  padding: 0.9rem 1rem 0.75rem;
+}
+.desk-file-panel-head h3 {
+  margin: 0.12rem 0 0.15rem;
+  font-family: var(--font-display), ui-serif, serif;
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: #3f0e0d;
+}
+.desk-file-panel-head p {
+  margin: 0;
+  color: #6a574c;
+  font-size: 0.84rem;
+}
+.desk-file-panel-body {
+  padding: 0 0.65rem 0.8rem;
+  border-top: 1px solid rgb(196 154 98 / 28%);
+}
+.desk-file-panel-body > .desk-file-kicker {
+  margin: 0.7rem 0.35rem 0.35rem;
+}
+.desk-file-panel-body > ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.desk-file-muted {
+  margin: 0.55rem 0.35rem 0.2rem;
+  color: #6a574c;
+  font-size: 0.86rem;
+}
+.desk-file-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.55rem;
+  list-style: none;
+  margin: 0;
+  padding: 0 1rem 1rem;
+}
+.desk-file-stats li {
+  min-width: 0;
+  padding: 0.65rem 0.7rem;
+  border-radius: 0.8rem;
+  border: 1px solid rgb(196 154 98 / 32%);
+  background: rgb(255 252 247 / 88%);
+}
+.desk-file-stats span {
+  display: block;
+  color: #8a6a3d;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.desk-file-stats strong {
+  display: block;
+  margin-top: 0.22rem;
+  color: #3f0e0d;
+  font-size: 0.98rem;
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 820px) {
+  .desk-file-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 .desk-file-card {
   border-radius: 1.05rem;

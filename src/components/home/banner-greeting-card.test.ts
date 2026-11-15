@@ -10,7 +10,7 @@ describe("home greeting", () => {
     expect(getGreeting(atHour(8)).text).toBe("Good Morning");
     expect(getGreeting(atHour(13)).text).toBe("Good Afternoon");
     expect(getGreeting(atHour(19)).text).toBe("Good Evening");
-    expect(getGreeting(atHour(19)).mark).toBe("moon");
+    expect(getGreeting(atHour(19)).mark).toBe("dusk");
     expect(getGreeting(atHour(8)).mark).toBe("sunrise");
     expect(getGreeting(atHour(22)).text).toBe("Welcome tonight");
     expect(getGreeting(atHour(1)).text).toBe("Welcome tonight");

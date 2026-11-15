@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-type GreetingMark = "sunrise" | "sun" | "moon" | "spark";
+type GreetingMark = "sunrise" | "sun" | "dusk" | "spark";
 
 interface Greeting {
   text: string;
@@ -13,7 +13,7 @@ export function getGreeting(now = new Date()): Greeting {
   const h = now.getHours();
   if (h >= 5 && h < 12) return { text: "Good Morning", mark: "sunrise" };
   if (h >= 12 && h < 17) return { text: "Good Afternoon", mark: "sun" };
-  if (h >= 17 && h < 21) return { text: "Good Evening", mark: "moon" };
+  if (h >= 17 && h < 21) return { text: "Good Evening", mark: "dusk" };
   return { text: "Welcome tonight", mark: "spark" };
 }
 
@@ -47,13 +47,16 @@ function GreetingJewel({ mark }: { mark: GreetingMark }) {
           />
         </>
       ) : null}
-      {mark === "moon" ? (
+      {mark === "dusk" ? (
         <>
+          <path fill="currentColor" d="M6.2 15.2a5.8 5.8 0 0 1 11.6 0H6.2Z" />
           <path
-            fill="currentColor"
-            d="M14.2 4.2a7.6 7.6 0 1 0 5.5 13.2A8.2 8.2 0 0 1 9.4 8.4 7.5 7.5 0 0 0 14.2 4.2Z"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            d="M4 17.8h16M12 6.2v2.2M7.2 8.2 8.4 9.8M16.8 8.2 15.6 9.8"
           />
-          <path fill="currentColor" d="M17.8 6.2 18.5 8l1.8.3-1.4 1.2.4 1.8-1.5-1-1.5 1 .4-1.8-1.4-1.2 1.8-.3Z" />
         </>
       ) : null}
       {mark === "spark" ? (

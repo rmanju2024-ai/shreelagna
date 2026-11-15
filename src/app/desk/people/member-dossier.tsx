@@ -1,8 +1,8 @@
-import type { ReactNode } from "react";
 import { safetyCategoryLabel } from "@/lib/desk/safety-cases";
 import { ticketStatusLabel } from "@/lib/desk/tickets";
 import { planByCode, WELCOME_PLAN_NAME } from "@/lib/membership/catalog";
 import { loadMembership } from "@/lib/membership/load";
+import { effectiveInterestStatus } from "@/lib/match/interest-status";
 import { publicMediaUrl } from "@/lib/match/inbox-card";
 import { formatIstDate, formatIstDateTime } from "@/lib/time/ist";
 import { btnGhost } from "@/lib/ui/classes";
@@ -40,33 +40,6 @@ function planSourceLabel(source: string) {
   return source.replace(/_/g, " ");
 }
 
-function FileCard({
-  kicker,
-  title,
-  count,
-  children,
-  open = false,
-}: {
-  kicker: string;
-  title: string;
-  count: number;
-  children: ReactNode;
-  open?: boolean;
-}) {
-  return (
-    <details className="desk-file-card" open={open || undefined}>
-      <summary>
-        <span>
-          <span className="desk-file-kicker">{kicker}</span>
-          <strong>{title}</strong>
-        </span>
-        <b className="desk-file-count">{count}</b>
-      </summary>
-      <div className="desk-file-body">{children}</div>
-    </details>
-  );
-}
-
 export async function MemberDossier({
   db,
   id,
@@ -79,7 +52,7 @@ export async function MemberDossier({
   const { data: profile } = await db
     .from("profiles")
     .select(
-      "id, member_code, subject_full_name, status, profile_type, created_by, created_at, subject_mobile, phone_otp_verified_at, current_city, current_state",
+      "id, member_code, subject_full_name, status, profile_type, created_by, created_at, subject_mobile, phone_otp_verified_at, current_city, current_state, last_seen_at",
     )
     .eq("id", id)
     .maybeSingle();
@@ -89,17 +62,17 @@ export async function MemberDossier({
   const owner = ownerId
     ? await db
         .from("app_users")
-        .select("id, email, display_name, role, welcome_started_at, welcome_days")
+        .select("id, email, display_name, role, welcome_started_at, welcome_days, last_seen_at")
         .eq("id", ownerId)
         .maybeSingle()
-    : { data: null as { email?: string | null } | null };
+    : { data: null as { email?: string | null; last_seen_at?: string | null } | null };
   const ticketOr = [
     profile.subject_mobile ? `mobile.eq.${profile.subject_mobile}` : "",
     owner.data?.email ? `email.eq.${owner.data.email}` : "",
   ]
     .filter(Boolean)
     .join(",");
-  const [memberships, tickets, reports, media] = await Promise.all([
+  const [memberships, tickets, reports, media, interestRows, threadRows] = await Promise.all([
     ownerId
       ? db
           .from("memberships")
@@ -128,6 +101,11 @@ export async function MemberDossier({
       .eq("profile_id", id)
       .eq("kind", "photo")
       .order("created_at"),
+    db
+      .from("interests")
+      .select("id, status, created_at, from_profile_id, to_profile_id")
+      .or(`from_profile_id.eq.${id},to_profile_id.eq.${id}`),
+    db.from("threads").select("id").or(`profile_a.eq.${id},profile_b.eq.${id}`),
   ]);
 
   const place = [profile.current_city, profile.current_state].filter(Boolean).join(", ");
@@ -135,9 +113,9 @@ export async function MemberDossier({
   const access = owner.data
     ? await loadMembership(db, {
         id: ownerId,
-        role: owner.data.role,
-        welcome_started_at: owner.data.welcome_started_at,
-        welcome_days: owner.data.welcome_days,
+        role: (owner.data as { role?: string | null }).role,
+        welcome_started_at: (owner.data as { welcome_started_at?: string | null }).welcome_started_at,
+        welcome_days: (owner.data as { welcome_days?: number | null }).welcome_days,
       })
     : null;
   const waiting = plans.find((row: { status?: string | null }) => String(row.status) === "pending");
@@ -151,12 +129,24 @@ export async function MemberDossier({
           : "No live plan";
   const currentHint = access?.live
     ? access.until
-      ? `Live · ${access.daysLeft} days left · until ${formatIstDate(access.until)}`
-      : "Live"
+      ? `${access.daysLeft} days left · until ${formatIstDate(access.until)}`
+      : "House access"
     : waiting
       ? `${planByCode(String(waiting.plan_code))?.name ?? waiting.plan_code} waiting for payment`
-      : "Not live";
-  const historyTitle = plans.length ? "Plan history" : "No plan history";
+      : "No live cover";
+
+  const interests = interestRows.data ?? [];
+  const statuses = interests.map((row: { status?: string | null; created_at?: string | null }) =>
+    effectiveInterestStatus(row.status, row.created_at ?? ""),
+  );
+  const sent = interests.filter((row: { from_profile_id: string }) => row.from_profile_id === id).length;
+  const received = interests.filter((row: { to_profile_id: string }) => row.to_profile_id === id).length;
+  const accepted = statuses.filter((status: string) => status === "accepted").length;
+  const declined = statuses.filter((status: string) => status === "declined").length;
+  const pending = statuses.filter((status: string) => status === "pending").length;
+  const chats = (threadRows.data ?? []).length;
+  const lastSeen = profile.last_seen_at || owner.data?.last_seen_at || null;
+
   const ticketRows = tickets.data ?? [];
   const reportRows = reports.data ?? [];
   const photos = media.data ?? [];
@@ -172,7 +162,14 @@ export async function MemberDossier({
       <header className="desk-panel-head desk-file-id">
         <span className="desk-file-photo">
           {photoUrl ? (
-            <Image src={photoUrl} alt={profile.subject_full_name || "Profile photo"} fill sizes="96px" quality={55} style={{ objectFit: "cover", objectPosition: "center 18%" }} />
+            <Image
+              src={photoUrl}
+              alt={profile.subject_full_name || "Profile photo"}
+              fill
+              sizes="96px"
+              quality={55}
+              style={{ objectFit: "cover", objectPosition: "center 18%" }}
+            />
           ) : (
             <em>{(profile.subject_full_name || "?").slice(0, 1)}</em>
           )}
@@ -221,18 +218,17 @@ export async function MemberDossier({
         </Link>
       </div>
 
-      <div className="desk-file-board">
-        <article className="desk-file-now">
-          <p className="desk-file-kicker">Current membership</p>
-          <div className="desk-file-now-row">
-            <div>
-              <h3>{currentPlan}</h3>
-              <p>{currentHint}</p>
-            </div>
-            <em className={`desk-pill${access?.live ? " is-done" : ""}`}>{access?.live ? "Live" : "Not live"}</em>
+      <section className="desk-file-panel">
+        <header className="desk-file-panel-head">
+          <div>
+            <p className="desk-file-kicker">Membership</p>
+            <h3>{currentPlan}</h3>
+            <p>{currentHint}</p>
           </div>
-        </article>
-        <FileCard kicker="Plan history" title={historyTitle} count={plans.length} open={plans.length > 0}>
+          <em className={`desk-pill${access?.live ? " is-done" : ""}`}>{access?.live ? "Live" : "Not live"}</em>
+        </header>
+        <div className="desk-file-panel-body">
+          <p className="desk-file-kicker">Plan history</p>
           {plans.length ? (
             <ul>
               {plans.map(
@@ -242,7 +238,6 @@ export async function MemberDossier({
                   status?: string;
                   source?: string;
                   ends_at?: string | null;
-                  starts_at?: string | null;
                   created_at?: string | null;
                   note?: string | null;
                 }) => (
@@ -263,15 +258,62 @@ export async function MemberDossier({
               )}
             </ul>
           ) : (
-            <p>No payment requests, grants, or plan changes on this account yet.</p>
+            <p className="desk-file-muted">No payment requests, grants, or plan changes yet.</p>
           )}
-        </FileCard>
+        </div>
+      </section>
 
-        <FileCard
-          kicker="House requests"
-          title={ticketRows.length ? `${ticketRows.length} house request${ticketRows.length === 1 ? "" : "s"}` : "No house requests"}
-          count={ticketRows.length}
-        >
+      <section className="desk-file-panel">
+        <header className="desk-file-panel-head">
+          <div>
+            <p className="desk-file-kicker">Activity</p>
+            <h3>Profile statistics</h3>
+          </div>
+        </header>
+        <ul className="desk-file-stats">
+          <li>
+            <span>Last login</span>
+            <strong>{lastSeen ? formatIstDateTime(String(lastSeen)) : "Never"}</strong>
+          </li>
+          <li>
+            <span>Joined</span>
+            <strong>{profile.created_at ? formatIstDate(new Date(String(profile.created_at))) : "—"}</strong>
+          </li>
+          <li>
+            <span>Chats</span>
+            <strong>{chats}</strong>
+          </li>
+          <li>
+            <span>Connected</span>
+            <strong>{accepted}</strong>
+          </li>
+          <li>
+            <span>Interests sent</span>
+            <strong>{sent}</strong>
+          </li>
+          <li>
+            <span>Interests received</span>
+            <strong>{received}</strong>
+          </li>
+          <li>
+            <span>Pending</span>
+            <strong>{pending}</strong>
+          </li>
+          <li>
+            <span>Declined</span>
+            <strong>{declined}</strong>
+          </li>
+        </ul>
+      </section>
+
+      <section className="desk-file-panel">
+        <header className="desk-file-panel-head">
+          <div>
+            <p className="desk-file-kicker">House requests</p>
+            <h3>{ticketRows.length ? `${ticketRows.length} on file` : "None"}</h3>
+          </div>
+        </header>
+        <div className="desk-file-panel-body">
           {ticketRows.length ? (
             <ul>
               {ticketRows.map((row: { id: string; name?: string | null; status?: string | null; created_at?: string }) => (
@@ -289,15 +331,19 @@ export async function MemberDossier({
               ))}
             </ul>
           ) : (
-            <p>No notes from this Gmail or mobile.</p>
+            <p className="desk-file-muted">No notes from this Gmail or mobile.</p>
           )}
-        </FileCard>
+        </div>
+      </section>
 
-        <FileCard
-          kicker="Safety"
-          title={reportRows.length ? `${reportRows.length} safety report${reportRows.length === 1 ? "" : "s"}` : "No safety reports"}
-          count={reportRows.length}
-        >
+      <section className="desk-file-panel">
+        <header className="desk-file-panel-head">
+          <div>
+            <p className="desk-file-kicker">Safety</p>
+            <h3>{reportRows.length ? `${reportRows.length} report${reportRows.length === 1 ? "" : "s"}` : "No reports"}</h3>
+          </div>
+        </header>
+        <div className="desk-file-panel-body">
           {reportRows.length ? (
             <ul>
               {reportRows.map((row: { id: string; category?: string | null; status?: string | null; created_at?: string }) => (
@@ -315,10 +361,10 @@ export async function MemberDossier({
               ))}
             </ul>
           ) : (
-            <p>This profile has not been named in a report.</p>
+            <p className="desk-file-muted">This profile has not been named in a report.</p>
           )}
-        </FileCard>
-      </div>
+        </div>
+      </section>
     </div>
   );
 }
