@@ -11,7 +11,7 @@ import { listOwnProfiles } from "@/lib/profile/own-profile";
 import { workingProfileId } from "@/lib/profile/working-profile";
 import { formatIstDate } from "@/lib/time/ist";
 import { createServiceClient } from "@/lib/supabase/server";
-import { btnHero, btnHeroGhost, btnGhost } from "@/lib/ui/classes";
+import { btnHero, btnHeroGhost, btnGhost, btnPrimary } from "@/lib/ui/classes";
 
 type Stats = { views: number; interestsIn: number; interestsOut: number; chats: number };
 
@@ -181,7 +181,7 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
                   </div>
                 </dl>
                 {on ? (
-                  <span className="home-family-selected">Selected</span>
+                  <span className={btnPrimary}>Selected</span>
                 ) : (
                   <form action={setActiveProfile}>
                     <input type="hidden" name="id" value={row.id} />
