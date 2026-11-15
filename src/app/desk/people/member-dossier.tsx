@@ -231,7 +231,6 @@ export async function MemberDossier({
       <section className="desk-file-panel">
         <header className="desk-file-panel-head">
           <div>
-            <p className="desk-file-kicker">Membership</p>
             <h3>Plan history</h3>
             <p>Payment requests, grants, and cancels.</p>
           </div>
