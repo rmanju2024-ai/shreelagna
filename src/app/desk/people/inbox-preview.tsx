@@ -65,25 +65,31 @@ export async function StaffInboxPreview({
         <ChatPane inbox={inbox} threadId={threadId} baseHref={baseHref} db={db} />
       ) : null}
       {active === "likes" ? (
-        <div className="desk-inbox-pane">
-          <InboxBoard
-            readOnly
-            received={likes.received}
-            sent={likes.sent}
-            accepted={likes.accepted}
-            history={likes.history}
-            viewed={likes.viewed}
-            visited={likes.visited}
-          />
+        <div className="desk-inbox-preview is-stack">
+          <header className="wc-side-head">
+            <h1>Interests</h1>
+            <p>Read only · member is not notified</p>
+          </header>
+          <div className="desk-inbox-pane">
+            <InboxBoard
+              readOnly
+              received={likes.received}
+              sent={likes.sent}
+              accepted={likes.accepted}
+              history={likes.history}
+              viewed={likes.viewed}
+              visited={likes.visited}
+            />
+          </div>
         </div>
       ) : null}
       {active === "alerts" ? (
-        <section className="desk-inbox-pane inbox-alerts-panel" aria-label="Member alerts">
-          <header>
-            <p>Member inbox</p>
-            <h3>Updates</h3>
+        <section className="desk-inbox-preview is-stack" aria-label="Member alerts">
+          <header className="wc-side-head">
+            <h1>Alerts</h1>
+            <p>Member inbox · view only</p>
           </header>
-          <div className="alerts-genz inbox-alerts">
+          <div className="desk-inbox-pane alerts-genz inbox-alerts">
             <ul className="alert-list alerts-genz-list">
               {alerts.alerts.map((note) => {
                 const unread = !note.read_at;
@@ -113,7 +119,7 @@ export async function StaffInboxPreview({
               <div className="sx-empty alerts-genz-empty">
                 <span aria-hidden>✨</span>
                 <div>
-                  <h3>No alerts on this account</h3>
+                  <h2>No alerts on this account</h2>
                   <p>Matches, views and interest notes will list here.</p>
                 </div>
               </div>
@@ -142,7 +148,7 @@ async function ChatPane({
     <div className={`desk-inbox-preview wc-shell${open ? " has-thread" : ""}`}>
       <aside className="wc-side" aria-label="Member conversations">
         <header className="wc-side-head">
-          <h3>Chats</h3>
+          <h1>Chats</h1>
           <p>
             {inbox.threads.length} {inbox.threads.length === 1 ? "match" : "matches"}
           </p>
