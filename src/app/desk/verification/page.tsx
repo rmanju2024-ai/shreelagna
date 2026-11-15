@@ -72,7 +72,7 @@ export default async function DeskVerificationPage({
   }
   return (
     <section className="desk-panel">
-      <header className="desk-panel-head"><div><p className="browse-kicker">Restricted review</p><h2>Verification cases</h2></div><p>{cases?.length ?? 0} waiting</p></header>
+      <header className="desk-panel-head"><div><p className="browse-kicker">Verify</p><h2>Cases</h2></div><p>{cases?.length ?? 0} waiting</p></header>
       <p className="desk-profile-queue-note">Only administrators can approve identity checks (name, age, date of birth). Documents are deleted as soon as review is complete; the profile keeps only the result.</p>
       <QueueViewLinks path="/desk/verification" view={view} />
       {cases?.length ? <ul className="desk-ticket-list">{cases.map((item) => (

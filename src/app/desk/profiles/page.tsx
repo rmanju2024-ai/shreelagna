@@ -205,8 +205,8 @@ export default async function DeskProfilesPage({
     <section className="desk-panel">
       <header className="desk-panel-head">
         <div>
-          <p className="browse-kicker">Profiles</p>
-          <h2>Review queue</h2>
+          <p className="browse-kicker">Review</p>
+          <h2>Queue</h2>
         </div>
         <p>{q ? (found.length ? `${found.length} found` : "No match") : `${view === "ready" ? readyCount : incompleteCount} shown`}</p>
       </header>

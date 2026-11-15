@@ -4,10 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const TABS = [
-  { href: "/desk/analytics", label: "Pulse", hint: "House totals" },
-  { href: "/desk/analytics/place", label: "Place", hint: "State, city, abroad" },
+  { href: "/desk/analytics", label: "Overview", hint: "House totals" },
+  { href: "/desk/analytics/place", label: "Place", hint: "State and city" },
   { href: "/desk/analytics/people", label: "People", hint: "Age, work, family" },
-  { href: "/desk/analytics/health", label: "Health", hint: "Quiet, complete, media" },
+  { href: "/desk/analytics/health", label: "Quality", hint: "Complete and media" },
 ] as const;
 
 export function AnalyticsTabs() {

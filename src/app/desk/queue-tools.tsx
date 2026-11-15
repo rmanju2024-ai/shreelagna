@@ -8,7 +8,7 @@ export function QueueViewLinks({ path, view }: { path: string; view: QueueView }
     { id: "all", label: "All" },
     { id: "mine", label: "Mine" },
     { id: "unassigned", label: "Unassigned" },
-    { id: "overdue", label: "Older than 24h" },
+    { id: "overdue", label: "Overdue" },
   ];
   return (
     <p className="desk-queue-views">

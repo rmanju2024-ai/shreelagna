@@ -50,7 +50,8 @@ export default async function DeskTicketsPage({
     <section className="desk-panel">
       <header className="desk-panel-head">
         <div>
-          <h2>Contact from families</h2>
+          <p className="browse-kicker">Tickets</p>
+          <h2>Requests</h2>
         </div>
         <p>
           {open} open on this page · {count} total

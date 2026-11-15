@@ -5,17 +5,17 @@ import { usePathname } from "next/navigation";
 import { NavGlyph } from "@/components/nav-icons";
 
 export const DESK_ITEMS = [
-  { href: "/desk/tickets", id: "tickets", icon: "tickets", label: "Ticketing", hint: "Contact from families" },
+  { href: "/desk/tickets", id: "tickets", icon: "tickets", label: "Tickets", hint: "Family requests" },
   { href: "/desk/media", id: "media", icon: "look", label: "Media", hint: "Photos and intros" },
-  { href: "/desk/people", id: "people", icon: "profile", label: "People", hint: "One member file" },
+  { href: "/desk/people", id: "people", icon: "profile", label: "Members", hint: "Member file" },
   { href: "/desk/safety", id: "safety", icon: "safety", label: "Safety", hint: "Reports and blocks" },
-  { href: "/desk/analytics", id: "analytics", icon: "analytics", label: "Analytics", hint: "Pulse, place, people" },
+  { href: "/desk/analytics", id: "analytics", icon: "analytics", label: "Insights", hint: "Totals and place" },
   { href: "/desk/audit", id: "audit", icon: "audit", label: "Audit", hint: "Staff and admin log" },
-  { href: "/desk/profiles", id: "profiles", icon: "profile", label: "Profiles", hint: "Review or find by ID" },
-  { href: "/desk/look", id: "look", icon: "look", label: "Look", hint: "Filter bride and groom" },
-  { href: "/desk/verification", id: "verification", icon: "verify", label: "Verification", hint: "Restricted evidence review", adminOnly: true },
+  { href: "/desk/profiles", id: "profiles", icon: "profile", label: "Review", hint: "Queue and ID search" },
+  { href: "/desk/look", id: "look", icon: "look", label: "Browse", hint: "Filter bride and groom" },
+  { href: "/desk/verification", id: "verification", icon: "verify", label: "Verify", hint: "Identity cases", adminOnly: true },
   { href: "/desk/staff", id: "staff", icon: "staff", label: "Staff", hint: "Appoint and remove" },
-  { href: "/desk/plans", id: "plans", icon: "plans", label: "Plans", hint: "Confirm membership" },
+  { href: "/desk/plans", id: "plans", icon: "plans", label: "Plans", hint: "Membership" },
 ] as const;
 
 export function deskItemsFor(admin: boolean) {

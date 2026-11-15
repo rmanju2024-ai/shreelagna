@@ -34,7 +34,7 @@ export default async function DeskStaffPage() {
       <header className="desk-panel-head">
         <div>
           <p className="browse-kicker">Staff</p>
-          <h2>Appoint and remove</h2>
+          <h2>Roster</h2>
         </div>
       </header>
       <form action={appointStaff} className="desk-ticket-note-form">

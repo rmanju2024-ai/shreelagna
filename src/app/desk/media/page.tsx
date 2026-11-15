@@ -42,8 +42,8 @@ export default async function DeskMediaPage() {
     <section className="desk-panel">
       <header className="desk-panel-head">
         <div>
-          <p className="browse-kicker">Photo & intro</p>
-          <h2>Media waiting</h2>
+          <p className="browse-kicker">Media</p>
+          <h2>Queue</h2>
         </div>
         <p>{rows.length} pending</p>
       </header>

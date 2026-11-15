@@ -53,9 +53,9 @@ export function slaChip(input: {
   now?: number;
 }): { label: string; tone: "ok" | "warn" | "late" } {
   if (isClosedDeskStatus(input.status)) return { label: "Closed", tone: "ok" };
-  if (isOverdueCase(input)) return { label: "Older than 24h", tone: "late" };
+  if (isOverdueCase(input)) return { label: "Overdue", tone: "late" };
   if (!input.assignedTo) return { label: "Unassigned", tone: "warn" };
-  return { label: "On the clock", tone: "ok" };
+  return { label: "On time", tone: "ok" };
 }
 
 export function defaultDueIso(from = new Date()): string {

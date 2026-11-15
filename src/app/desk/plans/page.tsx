@@ -149,7 +149,7 @@ export default async function DeskPlansPage({
       <header className="desk-panel-head">
         <div>
           <p className="browse-kicker">Plans</p>
-          <h2>Member cover</h2>
+          <h2>Membership</h2>
         </div>
         <p>
           {pending} waiting · {live} live

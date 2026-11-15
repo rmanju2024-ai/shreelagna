@@ -26,8 +26,8 @@ const PROFILE_LEAVE: Record<string, { href: string; label: string }> = {
   alerts: { href: "/app/alerts", label: "Back to alerts" },
   chat: { href: "/app/chat", label: "Back to inbox" },
   discover: { href: "/browse", label: "Close" },
-  look: { href: "/desk/look", label: "Back to Look" },
-  desk: { href: "/desk/profiles", label: "Back to profiles" },
+  look: { href: "/desk/look", label: "Back to browse" },
+  desk: { href: "/desk/profiles", label: "Back to review" },
   safety: { href: "/desk/safety", label: "Back to safety" },
   plans: { href: "/app/plans", label: "Back to membership" },
 };

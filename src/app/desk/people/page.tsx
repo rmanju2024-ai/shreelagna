@@ -94,8 +94,8 @@ export default async function DeskPeoplePage({
     <section className="desk-panel desk-file">
       <header className="desk-panel-head">
         <div>
-          <p className="browse-kicker">People</p>
-          <h2>Members</h2>
+          <p className="browse-kicker">Members</p>
+          <h2>Directory</h2>
         </div>
         <p>{total} on file</p>
       </header>

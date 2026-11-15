@@ -7,8 +7,8 @@ export default function AnalyticsLayout({ children }: { children: React.ReactNod
     <section className="desk-panel">
       <header className="desk-panel-head">
         <div>
-          <p className="browse-kicker">Analytics</p>
-          <h2>House pulse</h2>
+          <p className="browse-kicker">Insights</p>
+          <h2>Overview</h2>
         </div>
       </header>
       <AnalyticsTabs />

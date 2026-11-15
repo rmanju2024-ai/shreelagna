@@ -109,8 +109,8 @@ export function DeskLookBoard({
     <section className="desk-panel sx-results" aria-live="polite">
       <header className="desk-panel-head">
         <div>
-          <p className="browse-kicker">Look</p>
-          <h2>Browse with advanced filter</h2>
+          <p className="browse-kicker">Browse</p>
+          <h2>Filters</h2>
           <p>
             Same Discover filters, plus membership and last login. Active is a login within {ACTIVE_DAYS} days.
             Nothing lists until you Apply.

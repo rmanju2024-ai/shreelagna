@@ -66,8 +66,8 @@ export default async function DeskSafetyPage({
     <section className="desk-panel">
       <header className="desk-panel-head">
         <div>
-          <p className="browse-kicker">Trust & safety</p>
-          <h2>Reports from families</h2>
+          <p className="browse-kicker">Safety</p>
+          <h2>Reports</h2>
         </div>
         <p>{openCount} still open</p>
       </header>
