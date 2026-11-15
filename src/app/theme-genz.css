@@ -2943,6 +2943,29 @@ button.field-help-btn,
   vertical-align: middle;
   white-space: nowrap;
 }
+.home-profile-id {
+  white-space: normal;
+  word-break: break-all;
+  font-variant-numeric: tabular-nums;
+  max-width: 9.5rem;
+}
+.home-profile-kind {
+  display: inline-block;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+}
+.home-profile-kind.is-bride {
+  color: #6f1d1b;
+  background: rgb(255 220 210 / 75%);
+}
+.home-profile-kind.is-groom {
+  color: #1d3a6f;
+  background: rgb(210 225 255 / 75%);
+}
 .home-profile-table th {
   font-size: 0.68rem;
   letter-spacing: 0.04em;

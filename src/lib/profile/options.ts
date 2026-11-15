@@ -118,14 +118,26 @@ export const DIETS = [
 ] as const;
 
 export const DONT_KNOW = "Don't know";
+export const NOT_APPLICABLE = "Not applicable";
 
 /** Keep one unknown choice at the top of lists people may not be sure about. */
 export function withDontKnow(list: readonly string[]): string[] {
   return [DONT_KNOW, ...list.filter((item) => item !== DONT_KNOW)];
 }
 
+/** Clan / kundali lists: not applicable or don't know first, for every faith. */
+export function withNotApplicable(list: readonly string[]): string[] {
+  return [
+    NOT_APPLICABLE,
+    DONT_KNOW,
+    ...list.filter((item) => item !== NOT_APPLICABLE && item !== DONT_KNOW),
+  ];
+}
+
 export function choiceLabel(value: string) {
-  return value === DONT_KNOW ? "Dont Know" : value;
+  if (value === DONT_KNOW) return "Dont Know";
+  if (value === NOT_APPLICABLE) return "Not applicable";
+  return value;
 }
 
 export const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Don't know"] as const;
@@ -175,7 +187,7 @@ export const HOPE_ANY = {
 
 export const PREF_MANAGED = ["Self", "Family"] as const;
 
-export const HOROSCOPE_PREF = ["Yes", "No", "Does not matter"] as const;
+export const HOROSCOPE_PREF = ["Not applicable", "Yes", "No", "Does not matter"] as const;
 
 /** Seed for `lookup_astronomy`. Forms and validation read through FormLists. */
 export const RASHIS = [

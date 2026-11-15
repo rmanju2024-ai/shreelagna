@@ -22,6 +22,7 @@ import {
   RESIDENCY_STATUSES,
   YONI_ANIMALS,
   withDontKnow,
+  withNotApplicable,
 } from "@/lib/profile/options";
 import { compareLabel, emptyFormLists, pinIndiaFirst, sortLabels, type FormLists } from "@/lib/profile/form-lists";
 
@@ -95,15 +96,15 @@ export function enrichFormLists(loaded: FormLists): FormLists {
     countries: pinIndiaFirst(take(loaded.countries, seed.countries)),
     hopeCountries: pinIndiaFirst(take(loaded.hopeCountries, seed.hopeCountries)),
     residency: take(loaded.residency, seed.residency, "alpha"),
-    gotras: withDontKnow(take(loaded.gotras, seed.gotras, "alpha")),
+    gotras: withNotApplicable(take(loaded.gotras, seed.gotras, "alpha")),
     prefManaged: take(loaded.prefManaged, seed.prefManaged),
     horoscopePref: take(loaded.horoscopePref, seed.horoscopePref),
     creatorRoles: loaded.creatorRoles.length ? loaded.creatorRoles : seed.creatorRoles,
-    rashis: withDontKnow(take(loaded.rashis, seed.rashis)),
-    nakshatras: withDontKnow(take(loaded.nakshatras, seed.nakshatras)),
-    nakshatraPadas: withDontKnow(take(loaded.nakshatraPadas, seed.nakshatraPadas)),
-    ganas: withDontKnow(take(loaded.ganas, seed.ganas)),
-    yoniAnimals: withDontKnow(take(loaded.yoniAnimals, seed.yoniAnimals, "alpha")),
-    manglik: withDontKnow(take(loaded.manglik, seed.manglik)),
+    rashis: withNotApplicable(take(loaded.rashis, seed.rashis)),
+    nakshatras: withNotApplicable(take(loaded.nakshatras, seed.nakshatras)),
+    nakshatraPadas: withNotApplicable(take(loaded.nakshatraPadas, seed.nakshatraPadas)),
+    ganas: withNotApplicable(take(loaded.ganas, seed.ganas)),
+    yoniAnimals: withNotApplicable(take(loaded.yoniAnimals, seed.yoniAnimals, "alpha")),
+    manglik: withNotApplicable(take(loaded.manglik, seed.manglik)),
   };
 }

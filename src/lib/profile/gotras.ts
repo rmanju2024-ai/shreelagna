@@ -97,7 +97,8 @@ export const GOTRAS = [
 ] as const;
 
 export const GOTRA_DONT_KNOW = "Don't know";
+export const GOTRA_NOT_APPLICABLE = "Not applicable";
 export const GOTRA_OTHER = "Other";
 
-/** Own gothra and hoped-for gothra: Don't know and Other first, then A–Z. */
-export const GOTRA_CHOICES = [GOTRA_DONT_KNOW, GOTRA_OTHER, ...GOTRAS] as const;
+/** Own gothra: not applicable, don't know, Other, then A–Z — every faith. */
+export const GOTRA_CHOICES = [GOTRA_NOT_APPLICABLE, GOTRA_DONT_KNOW, GOTRA_OTHER, ...GOTRAS] as const;

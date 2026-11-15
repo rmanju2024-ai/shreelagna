@@ -127,11 +127,11 @@ export function hopeComparisons(
       you: youOrMissing(me.diet),
     },
     horoscope: {
-      match: kundaliFit ?? (horoscope === "Does not matter" || !horoscope),
+      match: kundaliFit ?? (horoscope === "Does not matter" || horoscope === "Not applicable" || !horoscope),
       you:
         kundaliTotal != null
           ? `Kundali ${kundaliTotal}/36${kundaliFit ? " · match" : " · not a match"}`
-          : horoscope === "Does not matter" || !horoscope
+          : horoscope === "Does not matter" || horoscope === "Not applicable" || !horoscope
             ? "No Kundali score yet"
             : "No Kundali score yet",
     },

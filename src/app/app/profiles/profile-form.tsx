@@ -12,8 +12,10 @@ import {
   PARENT_PROFESSIONS,
   SETTLE_ABROAD,
   DONT_KNOW,
+  NOT_APPLICABLE,
   choiceLabel,
 } from "@/lib/profile/options";
+import { GOTRA_OTHER } from "@/lib/profile/gotras";
 import { citiesForState, pickListed, sortLabels, type FormLists } from "@/lib/profile/form-lists";
 import { asStringList, hopeValues, languagesKnown } from "@/lib/profile/multi-values";
 import { parseParentTags } from "@/lib/profile/parent-line";
@@ -812,9 +814,14 @@ export function ProfileForm({
           </Field>
           <Field
             label="Gothra"
-            help="In Hindu families, gothra is the clan. Marriage within the same gothra is usually not preferred."
+            help="Clan, if the family uses one. Anyone may choose Not applicable or Dont Know."
           >
-            <Select3d name="gotra" defaultValue={values?.gotra ?? ""} className={inputClass}>
+            <Select3d
+              name="gotra"
+              defaultValue={values?.gotra ?? ""}
+              prefer={[NOT_APPLICABLE, DONT_KNOW, GOTRA_OTHER]}
+              className={inputClass}
+            >
               <option value="">Select</option>
               {lists.gotras.map((item) => (
                 <option key={item} value={item}>
@@ -823,8 +830,13 @@ export function ProfileForm({
               ))}
             </Select3d>
           </Field>
-          <Field label="Rashi" help="Moon sign.">
-            <Select3d name="rashi" defaultValue={values?.rashi ?? ""} className={inputClass}>
+          <Field label="Rashi" help="Moon sign. Anyone may choose Not applicable or Dont Know.">
+            <Select3d
+              name="rashi"
+              defaultValue={values?.rashi ?? ""}
+              prefer={[NOT_APPLICABLE, DONT_KNOW]}
+              className={inputClass}
+            >
               <option value="">Not mentioned</option>
               {lists.rashis.map((item) => (
                 <option key={item} value={item}>
@@ -833,8 +845,13 @@ export function ProfileForm({
               ))}
             </Select3d>
           </Field>
-          <Field label="Lagna" help="Ascendant sign.">
-            <Select3d name="lagna" defaultValue={values?.lagna ?? ""} className={inputClass}>
+          <Field label="Lagna" help="Ascendant sign. Anyone may choose Not applicable or Dont Know.">
+            <Select3d
+              name="lagna"
+              defaultValue={values?.lagna ?? ""}
+              prefer={[NOT_APPLICABLE, DONT_KNOW]}
+              className={inputClass}
+            >
               <option value="">Not mentioned</option>
               {lists.rashis.map((item) => (
                 <option key={`lagna-${item}`} value={item}>
@@ -843,8 +860,13 @@ export function ProfileForm({
               ))}
             </Select3d>
           </Field>
-          <Field label="Nakshatra">
-            <Select3d name="nakshatra" defaultValue={values?.nakshatra ?? ""} className={inputClass}>
+          <Field label="Nakshatra" help="Anyone may choose Not applicable or Dont Know.">
+            <Select3d
+              name="nakshatra"
+              defaultValue={values?.nakshatra ?? ""}
+              prefer={[NOT_APPLICABLE, DONT_KNOW]}
+              className={inputClass}
+            >
               <option value="">Not mentioned</option>
               {lists.nakshatras.map((item) => (
                 <option key={item} value={item}>
@@ -853,18 +875,28 @@ export function ProfileForm({
               ))}
             </Select3d>
           </Field>
-          <Field label="Nakshatra pada">
-            <Select3d name="nakshatra_pada" defaultValue={values?.nakshatra_pada ?? ""} className={inputClass}>
+          <Field label="Nakshatra pada" help="Anyone may choose Not applicable or Dont Know.">
+            <Select3d
+              name="nakshatra_pada"
+              defaultValue={values?.nakshatra_pada ?? ""}
+              prefer={[NOT_APPLICABLE, DONT_KNOW]}
+              className={inputClass}
+            >
               <option value="">Not mentioned</option>
               {lists.nakshatraPadas.map((item) => (
                 <option key={item} value={item}>
-                  {item === DONT_KNOW ? choiceLabel(item) : `Pada ${item}`}
+                  {item === DONT_KNOW || item === NOT_APPLICABLE ? choiceLabel(item) : `Pada ${item}`}
                 </option>
               ))}
             </Select3d>
           </Field>
-          <Field label="Gana">
-            <Select3d name="gana" defaultValue={values?.gana ?? ""} className={inputClass}>
+          <Field label="Gana" help="Anyone may choose Not applicable or Dont Know.">
+            <Select3d
+              name="gana"
+              defaultValue={values?.gana ?? ""}
+              prefer={[NOT_APPLICABLE, DONT_KNOW]}
+              className={inputClass}
+            >
               <option value="">Not mentioned</option>
               {lists.ganas.map((item) => (
                 <option key={item} value={item}>
@@ -873,8 +905,13 @@ export function ProfileForm({
               ))}
             </Select3d>
           </Field>
-          <Field label="Yoni animal">
-            <Select3d name="yoni_animal" defaultValue={values?.yoni_animal ?? ""} className={inputClass}>
+          <Field label="Yoni animal" help="Anyone may choose Not applicable or Dont Know.">
+            <Select3d
+              name="yoni_animal"
+              defaultValue={values?.yoni_animal ?? ""}
+              prefer={[NOT_APPLICABLE, DONT_KNOW]}
+              className={inputClass}
+            >
               <option value="">Not mentioned</option>
               {lists.yoniAnimals.map((item) => (
                 <option key={item} value={item}>
@@ -883,8 +920,13 @@ export function ProfileForm({
               ))}
             </Select3d>
           </Field>
-          <Field label="Mangalik">
-            <Select3d name="manglik" defaultValue={values?.manglik ?? ""} className={inputClass}>
+          <Field label="Mangalik" help="Anyone may choose Not applicable or Dont Know.">
+            <Select3d
+              name="manglik"
+              defaultValue={values?.manglik ?? ""}
+              prefer={[NOT_APPLICABLE, DONT_KNOW]}
+              className={inputClass}
+            >
               <option value="">Not mentioned</option>
               {lists.manglik.map((item) => (
                 <option key={item} value={item}>
@@ -1184,11 +1226,12 @@ export function ProfileForm({
           />
           <Field
             label="Is horoscopic match preferred?"
-            help="Whether matching kundali / horoscope matters for this alliance."
+            help="Whether kundali matching matters. Anyone may choose Not applicable."
           >
             <Select3d
               name="pref_horoscope"
               defaultValue={hopeValues(values, "pref_horoscope")[0] ?? "Does not matter"}
+              prefer={[NOT_APPLICABLE]}
               className={inputClass}
             >
               {lists.horoscopePref.map((item) => (

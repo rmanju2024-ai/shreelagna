@@ -61,16 +61,17 @@ describe("form lists", () => {
     expect(lists.countries[0]).toBe("India");
     expect(lists.countries.slice(1)).toEqual(alpha(lists.countries.slice(1)));
     expect(lists.hopeCountries.slice(0, 2)).toEqual(["Any country", "India"]);
-    expect(lists.yoniAnimals[0]).toBe("Don't know");
-    expect(lists.yoniAnimals.slice(1)).toEqual(alpha(lists.yoniAnimals.slice(1)));
-    expect(lists.gotras[0]).toBe("Don't know");
-    expect(lists.gotras.slice(1)).toEqual(alpha(lists.gotras.slice(1)));
+    expect(lists.yoniAnimals.slice(0, 2)).toEqual(["Not applicable", "Don't know"]);
+    expect(lists.yoniAnimals.slice(2)).toEqual(alpha(lists.yoniAnimals.slice(2)));
+    expect(lists.gotras.slice(0, 2)).toEqual(["Not applicable", "Don't know"]);
+    expect(lists.gotras.slice(2)).toEqual(alpha(lists.gotras.slice(2)));
   });
 
   it("keeps seed catalogs for every registration list", () => {
     const seed = listsFromSeed();
     expect(seed.countries).toContain("India");
-    expect(seed.gotras[0]).toBe("Don't know");
+    expect(seed.gotras[0]).toBe("Not applicable");
+    expect(seed.gotras[1]).toBe("Don't know");
     expect(seed.yoniAnimals).toHaveLength(14);
     expect(seed.hopeIncomes.length).toBeGreaterThan(5);
     expect(seed.bloodGroups).toContain("O+");
@@ -78,10 +79,10 @@ describe("form lists", () => {
     expect(seed.occupations).toContain("Other profession");
     expect(seed.employedIn).toContain("Family business");
     const lists = enrichFormLists(seed);
-    expect(lists.nakshatraPadas[0]).toBe("Don't know");
-    expect(lists.rashis[0]).toBe("Don't know");
-    expect(lists.ganas[0]).toBe("Don't know");
-    expect(lists.yoniAnimals[0]).toBe("Don't know");
+    expect(lists.nakshatraPadas.slice(0, 2)).toEqual(["Not applicable", "Don't know"]);
+    expect(lists.rashis.slice(0, 2)).toEqual(["Not applicable", "Don't know"]);
+    expect(lists.ganas.slice(0, 2)).toEqual(["Not applicable", "Don't know"]);
+    expect(lists.yoniAnimals.slice(0, 2)).toEqual(["Not applicable", "Don't know"]);
   });
 
   it("uses loaded catalogs instead of seed when present", () => {

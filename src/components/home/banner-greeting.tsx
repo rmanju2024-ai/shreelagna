@@ -3,7 +3,7 @@ import { houseRoleMark } from "@/lib/desk/access";
 import { BannerGreetingTagline } from "./banner-greeting-card";
 
 /** Server component — fetches member data, renders the time greeting */
-export async function BannerGreeting() {
+export async function BannerGreeting({ asMember = false }: { asMember?: boolean } = {}) {
   try {
     const { user, supabase } = await getAuth();
     if (!user || !supabase) return null;
@@ -11,7 +11,7 @@ export async function BannerGreeting() {
     const me = await ensureAppUser(supabase, user);
     if (!me) return null;
 
-    const mark = houseRoleMark(me.role) ?? "member";
+    const mark = asMember ? "member" : houseRoleMark(me.role) ?? "member";
 
     const { data: profile } = me.active_profile_id
       ? await supabase

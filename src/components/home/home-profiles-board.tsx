@@ -29,7 +29,7 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
   if (!listed.length) {
     return (
       <>
-        <BannerGreeting />
+        <BannerGreeting asMember />
         <p className="home-invite-line">Create a bride or groom profile to begin.</p>
         <div className="home-invite-actions">
           <Link href="/app/profiles/new" className={btnHero}>
@@ -44,7 +44,7 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
     const only = listed[0];
     return (
       <>
-        <BannerGreeting />
+        <BannerGreeting asMember />
         <div className="home-invite-actions">
           <Link href={`/app/profiles/${only.id}`} className={btnHero}>
             My profile
@@ -99,19 +99,19 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
 
   return (
     <>
-      <BannerGreeting />
+      <BannerGreeting asMember />
       {needPick || pick ? (
         <p className="home-invite-line home-invite-pick">
-          Choose which profile Discover should use: bride or groom. Lists stay empty until you pick.
+          Choose a <b>bride</b> or a <b>groom</b> first. Discover and Inbox list that one profile only.
         </p>
       ) : (
         <p className="home-invite-line">
-          Working as{" "}
+          Discover is for{" "}
           <b>
             {profileKindLabel(workingRow?.profile_type)}
             {workingRow?.subject_full_name ? ` · ${displayFirstName(workingRow.subject_full_name)}` : ""}
           </b>
-          . Switch below, then open Discover.
+          . Tap Use this on another row to switch.
         </p>
       )}
       <div className="home-profile-table-wrap">
@@ -143,8 +143,14 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
                     </Link>
                     {row.current_city ? <span className="home-profile-city">{row.current_city}</span> : null}
                   </td>
-                  <td>{profileKindLabel(row.profile_type)}</td>
-                  <td>{row.member_code ?? "—"}</td>
+                  <td>
+                    <span
+                      className={`home-profile-kind is-${row.profile_type === "vara" ? "groom" : "bride"}`}
+                    >
+                      {profileKindLabel(row.profile_type)}
+                    </span>
+                  </td>
+                  <td className="home-profile-id">{row.member_code ?? "—"}</td>
                   <td>{s.views}</td>
                   <td>{s.interestsIn}</td>
                   <td>{s.interestsOut}</td>
