@@ -51,7 +51,7 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
             Open profile
           </Link>
           <Link href="/browse" className={btnHeroGhost}>
-            Discover matches
+            Find a match
           </Link>
           {room ? (
             <Link href="/app/profiles/new" className={btnGhost}>
@@ -162,7 +162,7 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
                 </dl>
                 {on ? (
                   <Link href="/browse" className={btnPrimary}>
-                    Discover matches
+                    Find a match
                   </Link>
                 ) : (
                   <form action={setActiveProfile}>

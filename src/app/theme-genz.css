@@ -2943,17 +2943,16 @@ button.field-help-btn,
   padding: 0;
   width: 100%;
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
   gap: 0.55rem;
 }
 .home-family-card {
-  display: grid;
-  grid-template-columns: 4.6rem minmax(0, 1fr);
-  gap: 0.55rem;
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
   text-align: left;
   border-radius: 1.15rem;
-  padding: 0.5rem 0.55rem 0.55rem;
+  padding: 0.5rem 0.5rem 0.55rem;
   background:
     linear-gradient(180deg, #fffefb 0%, #f6ead4 100%);
   border: 1px solid rgb(212 168 90 / 48%);
@@ -2974,6 +2973,7 @@ button.field-help-btn,
 .home-family-photo {
   width: 100%;
   aspect-ratio: 9 / 12;
+  max-height: 11rem;
   border-radius: 0.7rem;
   overflow: hidden;
   background: linear-gradient(160deg, #f3d7c4, #e8c9a0);
