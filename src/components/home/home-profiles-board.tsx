@@ -140,9 +140,9 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
           const name = displayFirstName(row.subject_full_name ?? "") || "Profile";
           return (
             <li key={row.id} className={`home-family-card${on ? " is-on" : ""}${bride ? " is-bride" : " is-groom"}`}>
-              <div className="home-family-photo">
+              <div className="home-family-pic">
                 {photo ? (
-                  <img src={photo} alt={name} />
+                  <img src={photo} alt={name} width={56} height={56} />
                 ) : (
                   <span aria-hidden>{name.slice(0, 1)}</span>
                 )}
@@ -181,7 +181,9 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
                   </div>
                 </dl>
                 {on ? (
-                  <span className={btnPrimary}>Selected</span>
+                  <button type="button" className={btnPrimary} disabled>
+                    Selected
+                  </button>
                 ) : (
                   <form action={setActiveProfile}>
                     <input type="hidden" name="id" value={row.id} />

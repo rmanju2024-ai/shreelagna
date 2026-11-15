@@ -3975,3 +3975,45 @@ html[data-scene="rain"] .home-greeting-role {
   background: #e8f6ec;
 }
 
+/* Compact family picker — last so scene themes cannot enlarge the thumbs */
+.home-family-card {
+  grid-template-columns: 3.5rem minmax(0, 1fr) !important;
+}
+.home-family-pic {
+  box-sizing: border-box;
+  width: 3.5rem !important;
+  height: 3.5rem !important;
+  min-width: 3.5rem;
+  min-height: 3.5rem;
+  max-width: 3.5rem;
+  max-height: 3.5rem;
+  border-radius: 0.65rem;
+  padding: 0.12rem;
+  overflow: hidden;
+  background: linear-gradient(135deg, #fde8a8, #d8a038 50%, #f5d468);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 55%);
+}
+.home-family-pic img,
+.home-family-pic span {
+  box-sizing: border-box;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  object-position: center 20%;
+  border-radius: 0.5rem;
+  display: block;
+}
+.home-family-pic span {
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display), ui-serif, serif;
+  font-size: 1.15rem;
+  color: #6f1d1b;
+  background: linear-gradient(160deg, #f8e4d0, #edd0a8);
+}
+.home-family-meta button.btn-3d:disabled {
+  opacity: 1;
+  cursor: default;
+  transform: none;
+}
+
