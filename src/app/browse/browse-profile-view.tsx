@@ -559,6 +559,7 @@ export async function BrowseProfileView({
           body: copy.body,
           href: `/browse/${mine.id}`,
           matchProfileId: String(mine.id),
+          forProfileId: id,
         });
       }
     });

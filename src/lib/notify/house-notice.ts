@@ -19,23 +19,24 @@ export async function recordCollapsibleNotice(
     body: string;
     href: string;
     matchProfileId?: string | null;
+    forProfileId?: string | null;
     mobileHint?: string | null;
   },
 ): Promise<{ created: boolean }> {
   const client = supabase as { from: (table: string) => any };
   const matchId = input.matchProfileId ?? null;
+  const forId = input.forProfileId ?? null;
   let existing: { id: string } | null = null;
   if (matchId) {
-    const found = await client
+    let found = client
       .from("notices")
       .select("id")
       .eq("user_id", input.userId)
       .eq("kind", input.kind)
-      .eq("match_profile_id", matchId)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    existing = found.data ?? null;
+      .eq("match_profile_id", matchId);
+    if (forId) found = found.eq("for_profile_id", forId);
+    const row = await found.order("created_at", { ascending: false }).limit(1).maybeSingle();
+    existing = row.data ?? null;
   }
   const now = new Date().toISOString();
   if (existing?.id) {
@@ -58,6 +59,7 @@ export async function recordCollapsibleNotice(
     body: input.body,
     href: input.href,
     match_profile_id: matchId,
+    for_profile_id: forId,
   });
   return { created: true };
 }
@@ -71,6 +73,7 @@ export async function recordAndDeliverNotice(
     body: string;
     href: string;
     matchProfileId?: string | null;
+    forProfileId?: string | null;
     mobileHint?: string | null;
   },
 ): Promise<void> {

@@ -150,6 +150,7 @@ export async function respondInterest(formData: FormData) {
         body: copy.body,
         href: thread?.id ? `/app/chat/${thread.id}` : "/app/chat",
         matchProfileId: mine.id,
+        forProfileId: other.id,
       });
     }
   }
@@ -168,6 +169,7 @@ export async function respondInterest(formData: FormData) {
         body: copy.body,
         href: "/app/interests",
         matchProfileId: mine.id,
+        forProfileId: other.id,
       });
     }
   }
@@ -360,6 +362,7 @@ async function postChatMessage(formData: FormData) {
     body: copy.body,
     href: `/app/chat/${threadId}`,
     match_profile_id: mine.id,
+    for_profile_id: other.id,
   });
   revalidatePath(`/app/chat/${threadId}`);
   revalidatePath("/app/chat");

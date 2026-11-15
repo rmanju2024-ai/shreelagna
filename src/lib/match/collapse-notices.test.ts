@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { collapseNotices, noticesForActiveProfiles } from "./collapse-notices";
+import { collapseNotices, noticesForActiveProfiles, noticesForWorkingProfile } from "./collapse-notices";
 
 describe("collapse notices", () => {
   it("keeps one profile-view alert per person", () => {
@@ -37,5 +37,14 @@ describe("collapse notices", () => {
       "active",
       "system",
     ]);
+  });
+
+  it("keeps only alerts for the chosen profile when several exist", () => {
+    const rows = [
+      { id: "a", kind: "profile_view", for_profile_id: "bride" },
+      { id: "b", kind: "profile_view", for_profile_id: "groom" },
+      { id: "house", kind: "house_desk", for_profile_id: null },
+    ];
+    expect(noticesForWorkingProfile(rows, "bride", 2).map((row) => row.id)).toEqual(["a", "house"]);
   });
 });

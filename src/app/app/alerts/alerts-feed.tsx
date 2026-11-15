@@ -5,7 +5,7 @@ import { after } from "next/server";
 import { ChatAvatar } from "@/app/app/chat/chat-avatar";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { alertHeadline, alertWhen } from "@/lib/match/alert-copy";
-import { collapseNotices, noticesForActiveProfiles } from "@/lib/match/collapse-notices";
+import { collapseNotices, noticesForActiveProfiles, noticesForWorkingProfile } from "@/lib/match/collapse-notices";
 import { noticeProfileListed } from "@/lib/notify/house-notice";
 import { publicMediaUrl } from "@/lib/match/inbox-card";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -42,8 +42,9 @@ export async function AlertsFeed() {
       }
     });
   }
-  const { data: notices } = await supabase.from("notices").select("id, kind, title, body, href, created_at, read_at, match_profile_id").eq("user_id", me.id).neq("kind", "chat").order("created_at", { ascending: false }).limit(50);
-  const collapsed = collapseNotices(notices ?? []);
+  const { data: notices } = await supabase.from("notices").select("id, kind, title, body, href, created_at, read_at, match_profile_id, for_profile_id").eq("user_id", me.id).neq("kind", "chat").order("created_at", { ascending: false }).limit(80);
+  const scoped = noticesForWorkingProfile(notices ?? [], working.id, working.listed.length);
+  const collapsed = collapseNotices(scoped);
   const profileIds = [...new Set(collapsed.map((row) => row.match_profile_id).filter(Boolean))] as string[];
   const media = createServiceClient() ?? supabase;
   // Independent lookups run together instead of one after another.
@@ -67,7 +68,9 @@ export async function AlertsFeed() {
   const readAt = new Date().toISOString();
   // Marking as read happens after the page is sent; it is scoped to this member and never blocks the view.
   after(async () => {
-    await media.from("notices").update({ read_at: readAt }).eq("user_id", me.id).neq("kind", "chat").is("read_at", null);
+    let mark = media.from("notices").update({ read_at: readAt }).eq("user_id", me.id).neq("kind", "chat").is("read_at", null);
+    if (working.listed.length > 1) mark = mark.eq("for_profile_id", working.id);
+    await mark;
   });
   const shownAlerts = alerts; // unread ones stay highlighted this visit
   return (

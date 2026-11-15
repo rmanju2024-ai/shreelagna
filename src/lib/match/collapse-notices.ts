@@ -38,3 +38,17 @@ export function noticesForActiveProfiles<T extends { match_profile_id?: string |
 ): T[] {
   return rows.filter((row) => !row.match_profile_id || activeProfileIds.has(row.match_profile_id));
 }
+
+/** Keep alerts that belong to the chosen bride or groom. House notes have no profile. */
+export function noticesForWorkingProfile<T extends { for_profile_id?: string | null; kind?: string }>(
+  rows: T[],
+  workingId: string | null,
+  ownCount: number,
+): T[] {
+  if (!workingId) return ownCount <= 1 ? rows : [];
+  if (ownCount <= 1) return rows;
+  return rows.filter((row) => {
+    if (!row.for_profile_id) return row.kind === "house_desk";
+    return row.for_profile_id === workingId;
+  });
+}

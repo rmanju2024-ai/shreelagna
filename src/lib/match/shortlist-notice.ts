@@ -2,21 +2,20 @@ import { profileShortlistedCopy } from "@/lib/match/alert-copy";
 
 export async function upsertShortlistNotice(
   supabase: { from: (table: string) => unknown },
-  input: { ownerUserId: string; viewerProfileId: string; viewerName: string },
+  input: { ownerUserId: string; ownerProfileId?: string; viewerProfileId: string; viewerName: string },
 ) {
   const client = supabase as { from: (table: string) => any };
   const copy = profileShortlistedCopy(input.viewerName);
   const now = new Date().toISOString();
   const href = `/browse/${input.viewerProfileId}`;
-  const { data: existing } = await client
+  let lookup = client
     .from("notices")
     .select("id")
     .eq("user_id", input.ownerUserId)
     .eq("kind", copy.kind)
-    .eq("match_profile_id", input.viewerProfileId)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .eq("match_profile_id", input.viewerProfileId);
+  if (input.ownerProfileId) lookup = lookup.eq("for_profile_id", input.ownerProfileId);
+  const { data: existing } = await lookup.order("created_at", { ascending: false }).limit(1).maybeSingle();
   if (existing?.id) {
     await client
       .from("notices")
@@ -31,5 +30,6 @@ export async function upsertShortlistNotice(
     body: copy.body,
     href,
     match_profile_id: input.viewerProfileId,
+    for_profile_id: input.ownerProfileId ?? null,
   });
 }

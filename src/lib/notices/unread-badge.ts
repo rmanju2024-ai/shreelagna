@@ -1,8 +1,9 @@
 import { cache } from "react";
 import { loadBlockedProfileIds } from "@/lib/safety/blocked";
 import { isListedProfileStatus } from "@/lib/profile/visibility";
-import { collapseNotices, noticesForActiveProfiles } from "@/lib/match/collapse-notices";
+import { collapseNotices, noticesForActiveProfiles, noticesForWorkingProfile } from "@/lib/match/collapse-notices";
 import { effectiveInterestStatus, pairCanChat } from "@/lib/match/interest-status";
+import { workingProfileId } from "@/lib/profile/working-profile";
 import { createServiceClient } from "@/lib/supabase/server";
 
 type Thread = { id: string; profile_a: string; profile_b: string };
@@ -13,25 +14,27 @@ export const unreadNoticeBadge = cache(async function unreadNoticeBadge(userId: 
   const db = createServiceClient();
   if (!db) return { chatUnread: 0, alertUnread: 0, likesPending: 0 };
 
-  // Stage 1: unread notices and the member's own profiles, together.
-  const [noticeResult, ownResult] = await Promise.all([
+  const [noticeResult, ownResult, meResult] = await Promise.all([
     db
       .from("notices")
-      .select("id, kind, href, match_profile_id, created_at")
+      .select("id, kind, href, match_profile_id, for_profile_id, created_at")
       .eq("user_id", userId)
       .is("read_at", null)
       .order("created_at", { ascending: false })
       .limit(80),
     db.from("profiles").select("id").eq("created_by", userId),
+    db.from("app_users").select("active_profile_id").eq("id", userId).maybeSingle(),
   ]);
   if (noticeResult.error) throw noticeResult.error;
   if (ownResult.error) throw ownResult.error;
-  const collapsed = collapseNotices(noticeResult.data ?? []);
+  const allOwnIds = (ownResult.data ?? []).map((profile) => profile.id);
+  const workingId = workingProfileId(meResult.data?.active_profile_id, allOwnIds);
+  const ownIds = workingId ? [workingId] : allOwnIds.length === 1 ? allOwnIds : [];
+  const scoped = noticesForWorkingProfile(noticeResult.data ?? [], workingId, allOwnIds.length);
+  const collapsed = collapseNotices(scoped);
   const profileIds = [...new Set(collapsed.map((row) => row.match_profile_id).filter(Boolean))] as string[];
-  const ownIds = (ownResult.data ?? []).map((profile) => profile.id);
   const ownList = ownIds.join(",");
 
-  // Stage 2: everything that depends only on stage 1, including blocks.
   const [activeResult, threadResult, pairResult, blocked] = await Promise.all([
     profileIds.length
       ? db.from("profiles").select("id, status").in("id", profileIds)
@@ -60,7 +63,6 @@ export const unreadNoticeBadge = cache(async function unreadNoticeBadge(userId: 
   );
   const threads = (threadResult.data ?? []) as Thread[];
 
-  // Stage 3: status of the people on the other side of each thread.
   const otherIds = [...new Set(threads.map((thread) => (ownIds.includes(thread.profile_a) ? thread.profile_b : thread.profile_a)))];
   const othersResult = otherIds.length
     ? await db.from("profiles").select("id, status").in("id", otherIds)

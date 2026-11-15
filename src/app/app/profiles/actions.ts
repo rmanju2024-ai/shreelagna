@@ -603,6 +603,7 @@ export async function saveShortlist(profileId: string, want: boolean): Promise<{
         body: `${viewerName} shortlisted your profile.`,
         href: `/browse/${viewerId}`,
         matchProfileId: viewerId,
+        forProfileId: profileId,
       });
       revalidatePath("/app/alerts");
     });
@@ -716,6 +717,7 @@ export async function sendInterest(formData: FormData): Promise<{
         body: copy.body,
         href: "/app/interests",
         matchProfileId: mine.id,
+        forProfileId: toId,
         mobileHint: mobile,
       });
       revalidatePath("/app/alerts");
@@ -873,6 +875,7 @@ export async function revealContact(toId: string): Promise<{
         body: copy.body,
         href: `/browse/${mine.id}`,
         matchProfileId: mine.id,
+        forProfileId: toId,
       });
     });
   } else {

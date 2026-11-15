@@ -46,6 +46,7 @@ export async function recordMatchNotices(
     .select("match_profile_id")
     .eq("user_id", userId)
     .eq("kind", "match")
+    .eq("for_profile_id", profileId)
     .not("match_profile_id", "is", null);
   const told = new Set<string>((known ?? []).map((row: { match_profile_id: string }) => String(row.match_profile_id)));
   for (const other of others ?? []) {
@@ -63,6 +64,7 @@ export async function recordMatchNotices(
       body: copy.body,
       href: `/browse/${other.id}`,
       matchProfileId: other.id,
+      forProfileId: profileId,
     });
   }
 }

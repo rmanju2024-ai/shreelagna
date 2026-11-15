@@ -56,6 +56,7 @@ describe("shortlist notice", () => {
         body: "Rohan shortlisted your profile.",
         href: "/browse/viewer-1",
         match_profile_id: "viewer-1",
+        for_profile_id: null,
       },
     ]);
   });
