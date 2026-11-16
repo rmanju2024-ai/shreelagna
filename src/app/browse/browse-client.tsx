@@ -310,7 +310,7 @@ export function BrowseClient({
 
   return (
     <div className="sx-stage">
-      <header className="sx-hero">
+      <header className="sx-hero is-house">
         <div className="sx-hero-copy">
           <p className="sx-eyebrow">Search</p>
           <h1>{listMode ? currentView.label : lookingFor ? `Find your ${lookingFor}` : "Find your match"}</h1>

@@ -293,7 +293,7 @@ export async function InterestsView({ only }: { only?: SectionId } = {}) {
     <PageShell>
       <div className="sx-stage">
       <div className="inbox-unified"><InboxSwitcher active="likes" /></div>
-      <header className="sx-hero is-inbox">
+      <header className="sx-hero is-inbox is-house">
         <div className="sx-hero-copy">
           <p className="sx-eyebrow">Inbox</p>
           <h1>{only ? SECTIONS.find((item) => item.id === only)?.label ?? "Interests" : "Interests"}</h1>

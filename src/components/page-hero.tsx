@@ -15,7 +15,10 @@ export function PageHero({
   motto?: boolean;
 }) {
   return (
-    <header className="sx-hero">
+    <header className="sx-hero is-house">
+      <span className="house-head-seal" aria-hidden>
+        ✦
+      </span>
       <div className="sx-hero-copy">
         {kicker ? <p className="sx-eyebrow">{kicker}</p> : null}
         <h1 className="foil-title">{title}</h1>
@@ -28,6 +31,7 @@ export function PageHero({
           <span>{stat.label}</span>
         </p>
       ) : null}
+      <span className="house-head-bar" aria-hidden />
     </header>
   );
 }

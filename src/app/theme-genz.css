@@ -3286,12 +3286,12 @@ button.field-help-btn,
 @media (max-width: 860px) {
   .home-split { grid-template-columns: 1fr; min-height: 0; max-height: none; }
   .home-split-art {
-    width: min(100%, 22.5rem);
+    width: min(100%, 18.5rem);
     margin-inline: auto;
     height: auto;
     min-height: 0;
-    aspect-ratio: 9 / 12;
-    max-height: 78svh;
+    aspect-ratio: 3 / 4;
+    max-height: min(48svh, 20rem);
   }
   .home-split-copy {
     padding: 0.55rem 0.75rem 5.4rem;
@@ -3300,8 +3300,8 @@ button.field-help-btn,
   }
   .home-invite {
     width: min(100%, 22.5rem);
-    aspect-ratio: 9 / 12;
-    max-height: 78svh;
+    aspect-ratio: auto;
+    max-height: none;
     min-height: 0;
     padding: 0.95rem 0.85rem 1rem;
   }
@@ -3695,7 +3695,7 @@ button.field-help-btn,
 
   .home-split-tiles { grid-template-columns: minmax(0, 1fr); }
   .home-split-copy { padding: 0.55rem 0.75rem 5.4rem; }
-  .home-split-art { aspect-ratio: 9 / 12; max-height: 78svh; min-height: 0; width: min(100%, 22.5rem); }
+  .home-split-art { aspect-ratio: 3 / 4; max-height: min(48svh, 20rem); min-height: 0; width: min(100%, 18.5rem); }
   .home-split-art .lotus-lake { inset: 0.42rem; border-radius: 0.85rem; }
   .home-value-row { grid-template-columns: minmax(0, 1fr); padding-bottom: 2rem; }
   .home-steps { padding: 1.6rem 0 2rem; }
@@ -4077,6 +4077,139 @@ html[data-scene="rain"] .home-greeting-role {
   }
 }
 
+/* House premium heads (member, desk queues, public). Staff review peek keeps its own chrome. */
+.app-main .sx-hero,
+.app-main .page-head-panel,
+.app-main .plans-header,
+.app-main .account-hub-head,
+.app-main .desk-mast,
+.app-main .desk-panel > .desk-panel-head:not(.desk-file-hero):not(.desk-file-id),
+.app-main .inbox-alerts-panel > header,
+.public-stage .sx-hero,
+.public-stage .page-head-panel {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid rgb(212 168 90 / 50%);
+  background:
+    radial-gradient(22rem 14rem at 100% -20%, rgb(245 200 76 / 28%), transparent 58%),
+    radial-gradient(18rem 12rem at 0% 0%, rgb(255 232 170 / 42%), transparent 52%),
+    linear-gradient(165deg, #fffdf8 0%, #f6e8d2 58%, #ead4b4 100%);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 0 0 1px rgb(255 248 232 / 55%),
+    0 4px 0 rgb(203 176 135 / 45%),
+    0 18px 32px -22px rgb(63 14 13 / 40%);
+}
+.app-main .sx-hero,
+.public-stage .sx-hero {
+  padding: 1.15rem 1.25rem 1.2rem;
+  border-radius: 1.25rem;
+}
+.app-main .page-head-panel,
+.public-stage .page-head-panel {
+  max-width: 62rem;
+  padding: 1.05rem 1.25rem 1.15rem;
+}
+.app-main .desk-mast {
+  padding: 0.85rem 1.05rem 0.95rem;
+  border-radius: 1.15rem;
+  margin-bottom: 0.35rem;
+}
+.app-main .desk-panel > .desk-panel-head:not(.desk-file-hero):not(.desk-file-id) {
+  align-items: center;
+  margin: 0 0 1rem;
+  padding: 0.8rem 0.95rem;
+  border-radius: 1.05rem;
+}
+.app-main .inbox-alerts-panel > header {
+  margin: 0 0 0.85rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.95rem;
+}
+.app-main .plans-header {
+  text-align: center;
+}
+.app-main .sx-hero h1,
+.app-main .page-head-panel h1,
+.app-main .plans-header h1,
+.app-main .desk-mast h1,
+.app-main .desk-panel > .desk-panel-head:not(.desk-file-hero):not(.desk-file-id) h2,
+.app-main .inbox-alerts-panel > header h1,
+.public-stage .sx-hero h1,
+.public-stage .page-head-panel h1 {
+  color: #3f0e0d;
+  text-shadow: 0 1px 0 rgb(255 248 231 / 70%);
+}
+.app-main .sx-eyebrow {
+  background: rgb(255 255 255 / 78%);
+  color: #7c2d12;
+  box-shadow: inset 0 0 0 1px rgb(184 137 76 / 28%);
+}
+.house-head-seal {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.75rem;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 50%;
+  color: #fff8e7;
+  background: linear-gradient(145deg, #6f1d1b, #c2415a);
+  box-shadow: 0 0 0 3px rgb(255 248 231 / 55%), 0 8px 14px rgb(111 29 27 / 22%);
+  font-size: 0.88rem;
+}
+.house-head-bar {
+  position: absolute;
+  left: 1.15rem;
+  right: 1.15rem;
+  bottom: 0.45rem;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, #c8883a, #6f1d1b, #c8883a, transparent);
+  pointer-events: none;
+}
+.app-main .sx-hero.is-house .sx-hero-copy,
+.app-main .sx-hero.is-house .sx-hero-count {
+  padding-right: 2.4rem;
+}
+.app-main .sx-hero.is-house:not(:has(.house-head-seal))::before {
+  content: "✦";
+  position: absolute;
+  top: 0.7rem;
+  right: 0.75rem;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 50%;
+  color: #fff8e7;
+  background: linear-gradient(145deg, #6f1d1b, #c2415a);
+  box-shadow: 0 0 0 3px rgb(255 248 231 / 55%), 0 8px 14px rgb(111 29 27 / 22%);
+  font-size: 0.88rem;
+}
+.app-main .page-head-panel::after,
+.app-main .plans-header::after,
+.app-main .desk-mast::after,
+.app-main .desk-panel > .desk-panel-head:not(.desk-file-hero):not(.desk-file-id)::after,
+.app-main .inbox-alerts-panel > header::after {
+  content: "";
+  flex: 1 0 100%;
+  display: block;
+  height: 3px;
+  margin: 0.55rem 0 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, #c8883a, #6f1d1b, #c8883a, transparent);
+}
+@media (max-width: 640px) {
+  .house-head-seal { width: 1.75rem; height: 1.75rem; font-size: 0.75rem; }
+  .app-main .sx-hero,
+  .public-stage .sx-hero { padding: 0.95rem 1rem 1.05rem; }
+}
+
 /* Staff review popup: do not inherit member inbox 100dvh / stacked switcher */
 .desk-review-wc.wc-shell {
   display: grid !important;
@@ -4098,5 +4231,48 @@ html[data-scene="rain"] .home-greeting-role {
   }
   .desk-review-wc.wc-shell:not(.has-thread) .wc-welcome { display: none !important; }
   .desk-review-wc.wc-shell.has-thread .wc-side { display: none !important; }
+}
+
+/* Phone: Home → Settings and staff review stay inside the thumb zone */
+@media (max-width: 820px) {
+  .home-invite-actions { flex-direction: column; }
+  .home-invite-actions .btn-3d,
+  .home-invite-actions button,
+  .home-invite-actions a { width: 100%; justify-content: center; }
+  .brand-motto > span { font-size: clamp(0.95rem, 4.6vw, 1.15rem); max-width: 18ch; }
+  .home-banner-line { max-width: calc(100% - 1.4rem); }
+
+  .house-head-seal,
+  .app-main .sx-hero.is-house:not(:has(.house-head-seal))::before {
+    width: 1.7rem;
+    height: 1.7rem;
+    font-size: 0.72rem;
+    top: 0.55rem;
+    right: 0.55rem;
+  }
+  .app-main .sx-hero.is-house .sx-hero-copy,
+  .app-main .sx-hero.is-house .sx-hero-count { padding-right: 2rem; }
+  .app-main .sx-hero h1,
+  .public-stage .sx-hero h1 { font-size: clamp(1.28rem, 6.4vw, 1.7rem); line-height: 1.15; }
+  .app-main .sx-hero-sub { max-width: 100%; padding: 0.55rem 0.7rem; font-size: 0.86rem; }
+  .house-head-bar { left: 0.8rem; right: 0.8rem; }
+
+  .set-panel { padding-inline: 0.1rem; padding-bottom: 5.5rem; }
+  .set-row { align-items: start; gap: 0.55rem; }
+  .set-row b { font-size: 0.95rem; }
+  .set-row-select .select-3d { width: 100%; max-width: none; }
+  .settings-page .sx-hero { margin-bottom: 0.35rem; }
+
+  .desk-peek-head-copy { min-width: 0; flex: 1 1 8rem; }
+  .desk-peek-head h2 { overflow-wrap: anywhere; }
+  .desk-peek-bar,
+  .desk-peek-glow,
+  .desk-peek-corner { display: none; }
+  .desk-review-tabs { gap: 0.28rem; }
+  .desk-review-tabs a { min-height: 2.75rem; }
+  .desk-file-hero { align-items: center; }
+  .desk-file-hero h2 { font-size: 1.15rem; }
+  .desk-peek-modal.is-premium { max-height: 100dvh; padding-bottom: env(safe-area-inset-bottom); }
+  .desk-review-likes-board { -webkit-overflow-scrolling: touch; }
 }
 
