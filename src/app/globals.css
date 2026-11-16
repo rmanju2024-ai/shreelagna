@@ -9701,9 +9701,23 @@ button.set-switch[aria-checked="true"]::after,
   font-family: var(--font-display), ui-serif, serif;
   font-size: 1.25rem;
 }
+.desk-peek-modal {
+  display: flex;
+  flex-direction: column;
+  width: min(92rem, calc(100vw - 1.2rem));
+  max-height: min(92dvh, 58rem);
+  overflow: hidden;
+}
+.desk-peek-modal.is-wide {
+  width: min(96rem, calc(100vw - 0.8rem));
+}
 .desk-peek-body {
   min-width: 0;
-  min-height: min(62dvh, 36rem);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 1.1rem 1.1rem;
 }
 .desk-staff-edit { min-width: 0; }
 .desk-staff-edit .page-head-panel.is-staff-edit {
@@ -9973,21 +9987,58 @@ button.set-switch[aria-checked="true"]::after,
   gap: 0.75rem;
   min-width: 0;
 }
-.desk-review.inbox-unified {
-  gap: 0.55rem;
-}
-.desk-review .inbox-switcher-wrap {
-  padding-top: 0;
-}
-.desk-review-wc {
-  min-height: min(58dvh, 36rem);
+.desk-review-wc.wc-shell,
+.desk-peek-modal .desk-review-wc {
+  display: grid !important;
+  grid-template-columns: minmax(13rem, 18rem) minmax(0, 1fr) !important;
+  height: min(52dvh, 34rem) !important;
+  max-height: min(52dvh, 34rem) !important;
+  min-height: 18rem !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
   border-radius: 1.1rem;
   overflow: hidden;
   border: 1px solid rgb(196 154 98 / 38%);
   background: #fffaf3;
 }
+.desk-review-wc .wc-side {
+  min-width: 0;
+  border-right: 1px solid rgb(196 154 98 / 28%);
+  overflow: auto;
+  max-height: min(52dvh, 34rem);
+}
 .desk-review-wc .wc-welcome {
+  display: grid;
+  place-items: center;
   min-height: 16rem;
+  padding: 1.2rem;
+  text-align: center;
+}
+.desk-review-wc .salon-chat {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+.desk-review-wc .salon-back {
+  display: none;
+}
+.desk-review-likes-board {
+  overflow: auto;
+}
+.desk-review-likes-board .inbox-modern {
+  margin: 0;
+}
+.desk-review-likes-board .sx-feed.is-board,
+.desk-review-likes-board .sx-feed.inbox-modern.is-board {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: none;
+  gap: 0.7rem;
+}
+.desk-review-likes-board .sx-feed-row {
+  min-height: 0;
+  height: auto;
 }
 .desk-review-likes {
   padding: 0 0.75rem 0.85rem;
@@ -10035,10 +10086,6 @@ button.set-switch[aria-checked="true"]::after,
   min-width: 0;
 }
 .desk-review-like small { color: #6a574c; font-size: 0.75rem; margin-top: 0.1rem; }
-.desk-review {  display: grid;
-  gap: 0.75rem;
-  min-width: 0;
-}
 .desk-review-note {
   margin: 0;
   color: #6a574c;
@@ -10263,12 +10310,46 @@ button.set-switch[aria-checked="true"]::after,
   background: #fff4e3;
 }
 .desk-review-panel .inbox-modern { margin: 0; padding: 0 0.4rem 0.7rem; }
+.desk-review-alerts { padding: 0.7rem 0.75rem 0.9rem; }
+.desk-review-alerts .alert-list { grid-template-columns: 1fr; }
+.desk-review-likes-board .sx-row { grid-auto-columns: minmax(10.5rem, 46vw); }
 @media (max-width: 820px) {
   .desk-review-chat { grid-template-columns: minmax(0, 1fr); min-height: 0; }
   .desk-review-chat.has-thread .desk-review-list { display: none; }
   .desk-review-chat:not(.has-thread) .desk-review-thread { display: none; }
   .desk-review-list ul { max-height: none; }
   .desk-review-stream { min-height: 22rem; }
+  .desk-review-tabs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    position: sticky;
+    top: 0;
+    z-index: 3;
+  }
+  .desk-review-tabs a {
+    font-size: 0.78rem;
+    min-height: 2.7rem;
+    padding: 0.35rem 0.2rem;
+  }
+  .desk-review-wc.wc-shell,
+  .desk-peek-modal .desk-review-wc {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: min(58dvh, 28rem) !important;
+  }
+  .desk-review-wc .wc-side {
+    display: flex !important;
+    max-height: none;
+    height: auto !important;
+    min-height: 16rem;
+    border-right: 0;
+  }
+  .desk-review-wc.has-thread .wc-side { display: none !important; }
+  .desk-review-wc:not(.has-thread) .salon-chat,
+  .desk-review-wc:not(.has-thread) .wc-welcome { display: none !important; }
+  .desk-review-wc.has-thread .salon-back { display: inline-flex !important; }
+  .desk-review-wc.has-thread .salon-chat { display: flex !important; min-height: min(68dvh, 32rem); }
 }
 @media (min-width: 900px) {
   .desk-file-facts { grid-template-columns: repeat(4, minmax(0, 1fr)); }

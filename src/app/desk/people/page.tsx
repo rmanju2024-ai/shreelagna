@@ -174,7 +174,7 @@ export default async function DeskPeoplePage({
       <DeskPager path="/desk/people" page={page} count={total} extra={listExtra} />
 
       {open && !peek ? (
-        <DeskPeek title="Member file" kicker="Staff review · not your login" closeHref={closeList}>
+        <DeskPeek title="Member file" kicker="Staff review · not your login" closeHref={closeList} wide>
           <MemberDossier db={db} id={open} fileHref={fileHref} />
         </DeskPeek>
       ) : null}
@@ -187,6 +187,7 @@ export default async function DeskPeoplePage({
               : "Staff review · not your login · this member's profile"
           }
           closeHref={profileCloseHref}
+          wide
         >
           <BrowseProfileView
             params={Promise.resolve({ id: inspectId || open })}
@@ -195,7 +196,7 @@ export default async function DeskPeoplePage({
         </DeskPeek>
       ) : null}
       {open && peek === "inbox" ? (
-        <DeskPeek title="This member's inbox" kicker="Staff review · not your login · read only" closeHref={fileHref}>
+        <DeskPeek title="This member's inbox" kicker="Staff review · not your login · read only" closeHref={fileHref} wide>
           <StaffInboxPreview
             db={db}
             profileId={open}
@@ -208,7 +209,7 @@ export default async function DeskPeoplePage({
         </DeskPeek>
       ) : null}
       {open && peek === "edit" ? (
-        <DeskPeek title="Edit member biodata" kicker="Staff edit · not your profile" closeHref={fileHref}>
+        <DeskPeek title="Edit member biodata" kicker="Staff edit · not your profile" closeHref={fileHref} wide>
           <StaffMemberEdit
             id={open}
             fileHref={fileHref}

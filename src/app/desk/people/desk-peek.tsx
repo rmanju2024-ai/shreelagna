@@ -9,11 +9,13 @@ export function DeskPeek({
   title,
   kicker = "Staff preview · view only",
   closeHref,
+  wide = false,
   children,
 }: {
   title: string;
   kicker?: string;
   closeHref: string;
+  wide?: boolean;
   children: ReactNode;
 }) {
   const router = useRouter();
@@ -43,7 +45,7 @@ export function DeskPeek({
   return createPortal(
     <div className="desk-ticket-layer portrait-peek-layer" role="presentation" onClick={() => router.replace(closeHref)}>
       <div
-        className="desk-ticket-modal card-3d portrait-peek-modal desk-peek-modal"
+        className={`desk-ticket-modal card-3d portrait-peek-modal desk-peek-modal${wide ? " is-wide" : ""}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="desk-peek-title"

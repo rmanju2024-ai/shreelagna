@@ -4077,3 +4077,26 @@ html[data-scene="rain"] .home-greeting-role {
   }
 }
 
+/* Staff review popup: do not inherit member inbox 100dvh / stacked switcher */
+.desk-review-wc.wc-shell {
+  display: grid !important;
+  grid-template-columns: minmax(13rem, 18rem) minmax(0, 1fr) !important;
+  height: min(52dvh, 34rem) !important;
+  max-height: min(52dvh, 34rem) !important;
+  min-height: 18rem !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+@media (max-width: 820px) {
+  .desk-review-wc.wc-shell {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 16rem !important;
+  }
+  .desk-review-wc.wc-shell:not(.has-thread) .wc-welcome { display: none !important; }
+  .desk-review-wc.wc-shell.has-thread .wc-side { display: none !important; }
+}
+

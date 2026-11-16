@@ -3,7 +3,7 @@ import { ChatAvatar } from "@/app/app/chat/chat-avatar";
 import { ChatThreadList } from "@/app/app/chat/chat-thread-list";
 import { ThreadView } from "@/app/app/chat/[id]/thread-view";
 import { InboxBoard } from "@/app/app/interests/inbox-board";
-import { InboxSwitcherNav, type InboxTab } from "@/components/inbox-switcher";
+import { type InboxTab } from "@/components/inbox-switcher";
 import { loadStaffInbox, loadStaffThread } from "@/lib/desk/member-inbox";
 import { alertHeadline, loadStaffAlerts, loadStaffLikes } from "@/lib/desk/staff-inbox-extras";
 import { alertWhen } from "@/lib/match/alert-copy";
@@ -73,21 +73,22 @@ export async function StaffInboxPreview({
   ]);
 
   return (
-    <div className="desk-review inbox-unified">
+    <div className="desk-review">
       <p className="desk-review-note">
-        Staff popup · this member&apos;s inbox · not your profile · read only · nobody is notified
+        This member&apos;s inbox · not your profile · read only · nobody is notified
       </p>
-      <InboxSwitcherNav
-        active={active}
-        hrefFor={hrefFor}
-        counts={{ chatUnread: 0, likesPending: likes.pendingCount, alertUnread: 0 }}
-      />
+      <nav className="desk-review-tabs" aria-label="Inbox sections">
+        <TabLink href={hrefFor("chats")} on={active === "chats"} label="Chats" count={inbox.threads.length} />
+        <TabLink href={hrefFor("likes")} on={active === "likes"} label="Interests" count={likes.received.length + likes.sent.length} />
+        <TabLink href={hrefFor("alerts")} on={active === "alerts"} label="Alerts" count={alerts.alerts.length} />
+      </nav>
 
       {active === "chats" ? (
         <StaffChatPane inbox={inbox} threadId={threadId} baseHref={baseHref} db={db} inspectHref={inspectHref} />
       ) : null}
 
       {active === "likes" ? (
+        <div className="desk-review-panel desk-review-likes-board">
         <InboxBoard
           readOnly
           openFrom="desk"
@@ -101,9 +102,11 @@ export async function StaffInboxPreview({
           viewed={likes.viewed}
           visited={likes.visited}
         />
+        </div>
       ) : null}
 
       {active === "alerts" ? (
+        <div className="desk-review-panel desk-review-alerts">
         <div className="alerts-genz inbox-alerts">
           <ul className="alert-list alerts-genz-list">
             {alerts.alerts.map((note) => {
@@ -154,8 +157,18 @@ export async function StaffInboxPreview({
             </div>
           ) : null}
         </div>
+        </div>
       ) : null}
     </div>
+  );
+}
+
+function TabLink({ href, on, label, count }: { href: string; on: boolean; label: string; count: number }) {
+  return (
+    <Link href={href} className={on ? "is-on" : undefined} aria-current={on ? "page" : undefined} scroll={false}>
+      {label}
+      <b>{count}</b>
+    </Link>
   );
 }
 
