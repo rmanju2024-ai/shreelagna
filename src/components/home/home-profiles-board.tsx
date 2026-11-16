@@ -176,19 +176,19 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
                 </p>
                 <dl>
                   <div>
-                    <dt>Views</dt>
+                    <dt title="Times families opened this profile">Views</dt>
                     <dd>{s.views}</dd>
                   </div>
                   <div>
-                    <dt>In</dt>
+                    <dt title="Interests received">Received</dt>
                     <dd>{s.interestsIn}</dd>
                   </div>
                   <div>
-                    <dt>Sent</dt>
+                    <dt title="Interests sent">Sent</dt>
                     <dd>{s.interestsOut}</dd>
                   </div>
                   <div>
-                    <dt>Chats</dt>
+                    <dt title="Open chats">Chats</dt>
                     <dd>{s.chats}</dd>
                   </div>
                 </dl>

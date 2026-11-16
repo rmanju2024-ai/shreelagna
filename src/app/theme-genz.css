@@ -2919,14 +2919,14 @@ button.field-help-btn,
   font-size: 0.82rem;
 }
 .home-invite:has(.home-family) {
-  width: min(100%, 34rem);
+  width: min(100%, 44rem);
   min-height: 0;
   max-height: none;
   height: auto;
   aspect-ratio: auto;
   overflow: visible;
-  padding: 0.7rem 0.8rem 0.65rem;
-  gap: 0.4rem;
+  padding: 0.85rem 1rem 0.8rem;
+  gap: 0.45rem;
 }
 .home-family {
   display: flex;
@@ -2970,7 +2970,7 @@ button.field-help-btn,
   width: 100%;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.55rem;
+  gap: 0.7rem;
 }
 .home-family-card {
   display: grid;
@@ -3078,20 +3078,32 @@ button.field-help-btn,
 .home-family-meta dl {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.15rem;
+  gap: 0.2rem 0.35rem;
   width: 100%;
   margin: 0.05rem 0 0.2rem;
 }
+.home-family-meta dl > div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  gap: 0.05rem;
+}
 .home-family-meta dt {
-  font-size: 0.58rem;
-  letter-spacing: 0.08em;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.62rem;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
   color: #b8894c;
 }
 .home-family-meta dd {
   margin: 0;
   font-weight: 800;
-  font-size: 0.95rem;
+  font-size: 1rem;
+  line-height: 1.1;
   color: #6f1d1b;
 }
 .home-family-meta .btn-3d,
@@ -3293,10 +3305,39 @@ button.field-help-btn,
     padding: 0.95rem 0.85rem 1rem;
   }
   .home-invite:has(.home-family) {
-    width: min(100%, 36rem);
+    width: min(100%, 26rem);
     aspect-ratio: auto;
     max-height: none;
     overflow: visible;
+    padding: 0.75rem 0.7rem 0.8rem;
+  }
+  .home-family-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.65rem;
+  }
+  .home-family-card {
+    grid-template-columns: 4.25rem minmax(0, 1fr) !important;
+    padding: 0.6rem;
+    gap: 0.65rem;
+  }
+  .home-family-pic {
+    width: 4.25rem !important;
+    height: 4.25rem !important;
+    min-width: 4.25rem;
+    min-height: 4.25rem;
+    max-width: 4.25rem;
+    max-height: 4.25rem;
+  }
+  .home-family-plan {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.1rem 0.4rem;
+  }
+  .home-family-plan span {
+    display: block !important;
+    margin-left: 0 !important;
+    width: 100%;
   }
   .home-split-title { font-size: clamp(1.7rem, 8vw, 2.15rem); max-width: 16ch; }
 }
@@ -3977,16 +4018,16 @@ html[data-scene="rain"] .home-greeting-role {
 
 /* Compact family picker — last so scene themes cannot enlarge the thumbs */
 .home-family-card {
-  grid-template-columns: 3.5rem minmax(0, 1fr) !important;
+  grid-template-columns: 4.1rem minmax(0, 1fr) !important;
 }
 .home-family-pic {
   box-sizing: border-box;
-  width: 3.5rem !important;
-  height: 3.5rem !important;
-  min-width: 3.5rem;
-  min-height: 3.5rem;
-  max-width: 3.5rem;
-  max-height: 3.5rem;
+  width: 4.1rem !important;
+  height: 4.1rem !important;
+  min-width: 4.1rem;
+  min-height: 4.1rem;
+  max-width: 4.1rem;
+  max-height: 4.1rem;
   border-radius: 0.65rem;
   padding: 0.12rem;
   overflow: hidden;
@@ -4015,5 +4056,23 @@ html[data-scene="rain"] .home-greeting-role {
   opacity: 1;
   cursor: default;
   transform: none;
+}
+
+@media (max-width: 860px) {
+  .home-family-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .home-family-card {
+    grid-template-columns: 4.5rem minmax(0, 1fr) !important;
+    padding: 0.7rem;
+  }
+  .home-family-pic {
+    width: 4.5rem !important;
+    height: 4.5rem !important;
+    min-width: 4.5rem;
+    min-height: 4.5rem;
+    max-width: 4.5rem;
+    max-height: 4.5rem;
+  }
 }
 
