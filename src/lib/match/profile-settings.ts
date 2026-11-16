@@ -1,14 +1,32 @@
+export type ContactReleaseMode = "sent_interest" | "accepted_interest" | "never";
+
 export type ProfileSettings = {
   hideLastSeen: boolean;
   hidePhotoUntilAccept: boolean;
   hideDetailsUntilAccept: boolean;
-  contactReleaseMode: "accepted_interest" | "never";
+  contactReleaseMode: ContactReleaseMode;
   notifyProfileViews: boolean;
   notifyInterest: boolean;
   notifyMatchEmail: boolean;
   notifyWhatsapp: boolean;
   paused: boolean;
 };
+
+export function parseContactReleaseMode(value: unknown): ContactReleaseMode {
+  if (value === "accepted_interest" || value === "never" || value === "sent_interest") return value;
+  return "sent_interest";
+}
+
+/** Whether this viewer may see the other family's mobile and email. */
+export function contactMayRelease(
+  mode: unknown,
+  input: { sentByMe?: boolean; accepted?: boolean },
+): boolean {
+  const parsed = parseContactReleaseMode(mode);
+  if (parsed === "never") return false;
+  if (parsed === "accepted_interest") return Boolean(input.accepted);
+  return Boolean(input.sentByMe || input.accepted);
+}
 
 export function flagOn(value: unknown, fallback = true): boolean {
   if (value === false || value === 0 || value === "false" || value === "0") return false;
@@ -25,7 +43,7 @@ export function readProfileSettings(
     hideLastSeen: flagOn(profile?.hide_last_seen, false),
     hidePhotoUntilAccept: flagOn(profile?.hide_photo_until_accept, true),
     hideDetailsUntilAccept: flagOn(profile?.hide_details_until_accept, false),
-    contactReleaseMode: profile?.contact_release_mode === "never" ? "never" : "accepted_interest",
+    contactReleaseMode: parseContactReleaseMode(profile?.contact_release_mode),
     notifyProfileViews: flagOn(profile?.notify_profile_views, true),
     notifyInterest: flagOn(profile?.notify_interest, true),
     notifyMatchEmail: flagOn(account?.notify_match_email, true),

@@ -109,6 +109,8 @@ export type ProfileData = {
     locked: boolean;
     accepted: boolean;
     needPlan: boolean;
+    needInterest?: boolean;
+    needAccept?: boolean;
     counted: boolean;
     self?: boolean;
     canReveal: boolean;
@@ -211,6 +213,12 @@ function ContactPanel({
                 ? "This cover’s family limit is used. Request Five more on Plans."
                 : res.error === "review"
                   ? "House review is still open on your profile. Contact waits until it is live."
+                : res.error === "contact_private"
+                  ? "They keep mobile and email private."
+                : res.error === "need_interest"
+                  ? "Send interest first. Then contact can be shown."
+                : res.error === "need_accept"
+                  ? "Contact opens after this family accepts your interest."
                 : "Could not show contact just now. Try again.",
         );
         return;
@@ -257,6 +265,10 @@ function ContactPanel({
         </>
       ) : contact.locked ? (
         <p className="pv-contact-note">They keep mobile and email private.</p>
+      ) : contact.needInterest ? (
+        <p className="pv-contact-note">Send interest first. Mobile and email open after you send.</p>
+      ) : contact.needAccept ? (
+        <p className="pv-contact-note">Mobile and email open only after this family accepts your interest.</p>
       ) : contact.needPlan ? (
         <p className="pv-contact-note">
           A live plan is needed to view contact. <Link href="/app/plans">See plans</Link>

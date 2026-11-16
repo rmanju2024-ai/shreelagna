@@ -14,7 +14,8 @@ import { formList } from "@/lib/profile/multi-values";
 import { loadFormLists } from "@/lib/profile/load-form-lists";
 import { ABOUT_MAX, ABOUT_MIN, FAMILY_NOTE_MAX, aboutPlainText } from "@/lib/profile/about-html";
 import { contactViewedCopy, interestReceivedCopy } from "@/lib/match/alert-copy";
-import { canAlertInterest } from "@/lib/match/profile-settings";
+import { canAlertInterest, contactMayRelease, parseContactReleaseMode } from "@/lib/match/profile-settings";
+import { requireWorkingProfile } from "@/lib/profile/working-profile";
 import { loadBlockedProfileIds } from "@/lib/safety/blocked";
 import { canSendInterest, effectiveInterestStatus, openInterestBlocksSend } from "@/lib/match/interest-status";
 import { joinParentTags } from "@/lib/profile/parent-line";
@@ -805,13 +806,20 @@ export async function revealContact(toId: string): Promise<{
   error?: string;
 }> {
   const { supabase, me } = await requireMember();
-  if (!toId || !me.active_profile_id) return { ok: false, error: "need_profile" };
   const db = createServiceClient() ?? supabase;
-  const mineId = me.active_profile_id;
+  const working = await requireWorkingProfile(supabase, me);
+  const mineId = working.id;
+  if (!toId || !mineId) return { ok: false, error: "need_profile" };
   const [mine, viewRes, interestRes, targetRes] = await Promise.all([
     loadHouseReady(supabase, mineId, viewerEmailVerified(me)),
     db.from("contact_views").select("id").eq("viewer_profile_id", mineId).eq("viewed_profile_id", toId).maybeSingle(),
-    db.from("interests").select("id").eq("from_profile_id", mineId).eq("to_profile_id", toId).limit(1).maybeSingle(),
+    db
+      .from("interests")
+      .select("id, from_profile_id, to_profile_id, status, created_at")
+      .or(
+        `and(from_profile_id.eq.${mineId},to_profile_id.eq.${toId}),and(from_profile_id.eq.${toId},to_profile_id.eq.${mineId})`,
+      )
+      .limit(8),
     db.from("profiles").select("id, status, subject_mobile, created_by, contact_release_mode").eq("id", toId).maybeSingle(),
   ]);
   const target = targetRes.data;
@@ -819,9 +827,21 @@ export async function revealContact(toId: string): Promise<{
   if (mine.status !== "active") return { ok: false, error: "review" };
   if (mine.id === toId) return { ok: false, error: "own" };
   if (!target || target.status !== "active") return { ok: false, error: "unavailable" };
-  if (target.contact_release_mode === "never") return { ok: false, error: "contact_private" };
+  const links = interestRes.data ?? [];
+  const sentByMe = links.some(
+    (row) =>
+      row.from_profile_id === mineId &&
+      openInterestBlocksSend(effectiveInterestStatus(row.status, row.created_at ?? "")),
+  );
+  const accepted = links.some((row) => effectiveInterestStatus(row.status, row.created_at ?? "") === "accepted");
+  const mode = parseContactReleaseMode(target.contact_release_mode);
+  if (!contactMayRelease(mode, { sentByMe, accepted })) {
+    if (mode === "never") return { ok: false, error: "contact_private" };
+    if (mode === "accepted_interest") return { ok: false, error: "need_accept" };
+    return { ok: false, error: "need_interest" };
+  }
 
-  const alreadyCounted = Boolean(viewRes.data || interestRes.data);
+  const alreadyCounted = Boolean(viewRes.data || sentByMe || accepted);
   let used = 0;
   let left: number | null = null;
   let limit: number | null = null;
@@ -913,6 +933,8 @@ export async function viewContact(formData: FormData) {
     if (result.error === "plan") redirect(`/browse/${toId}?error=plan`);
     if (result.error === "quota") redirect(`/browse/${toId}?error=quota`);
     if (result.error === "contact_private") redirect(`/browse/${toId}?error=contact_private`);
+    if (result.error === "need_interest") redirect(`/browse/${toId}?error=need_interest`);
+    if (result.error === "need_accept") redirect(`/browse/${toId}?error=need_accept`);
     if (result.error === "unavailable") redirect("/browse?error=unavailable");
     if (result.error === "could_not_send") redirect(`/browse/${toId}?error=could_not_send`);
     redirect(`/browse/${toId}`);

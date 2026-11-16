@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   canAlertInterest,
   canAlertProfileView,
+  contactMayRelease,
   flagOn,
+  parseContactReleaseMode,
   readProfileSettings,
 } from "./profile-settings";
 
@@ -44,5 +46,15 @@ describe("profile settings", () => {
     expect(canAlertProfileView({ notify_profile_views: false })).toBe(false);
     expect(canAlertInterest({ notify_interest: false })).toBe(false);
     expect(flagOn(undefined, false)).toBe(false);
+  });
+
+  it("releases contact after send, after accept, or never", () => {
+    expect(parseContactReleaseMode(undefined)).toBe("sent_interest");
+    expect(contactMayRelease("sent_interest", { sentByMe: true })).toBe(true);
+    expect(contactMayRelease("sent_interest", { sentByMe: false, accepted: false })).toBe(false);
+    expect(contactMayRelease("accepted_interest", { sentByMe: true, accepted: false })).toBe(false);
+    expect(contactMayRelease("accepted_interest", { accepted: true })).toBe(true);
+    expect(contactMayRelease("never", { sentByMe: true, accepted: true })).toBe(false);
+    expect(readProfileSettings({}).contactReleaseMode).toBe("sent_interest");
   });
 });

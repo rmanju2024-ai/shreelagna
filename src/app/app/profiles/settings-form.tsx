@@ -84,15 +84,16 @@ export function SettingsForm({
         <div className="set-row set-row-select">
           <span>
             <b>Contact release</b>
-            <small>Choose when your mobile and email can be shown. Open the list — two options.</small>
+            <small>When another family may see your mobile and email. Open the list — three options.</small>
           </span>
           <Select3d
             name="contact_release_mode"
             defaultValue={values.contactReleaseMode}
             aria-label="Contact release options"
           >
-            <option value="accepted_interest">After you accept their interest</option>
-            <option value="never">Keep mobile and email private</option>
+            <option value="sent_interest">After they send interest (default)</option>
+            <option value="accepted_interest">Only after you accept their interest</option>
+            <option value="never">Never release mobile or email</option>
           </Select3d>
         </div>
       </section>

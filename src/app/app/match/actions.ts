@@ -5,7 +5,7 @@ import { writeAudit } from "@/lib/desk/audit";
 import { recordAndDeliverNotice } from "@/lib/notify/house-notice";
 import { missingPayloadColumn, isMissingColumnError } from "@/lib/profile/db-errors";
 import { chatReceivedCopy, interestAcceptedCopy, interestDeclinedCopy } from "@/lib/match/alert-copy";
-import { canAlertInterest } from "@/lib/match/profile-settings";
+import { canAlertInterest, parseContactReleaseMode } from "@/lib/match/profile-settings";
 import { orderedProfilePair, pairCanChat, isStalePending, trimDeclineReason } from "@/lib/match/interest-status";
 import { pairPlanLive } from "@/lib/membership/access";
 import { loadMembership, loadMembershipForProfile } from "@/lib/membership/load";
@@ -209,7 +209,7 @@ export async function saveProfileSettings(formData: FormData) {
     hide_last_seen: formData.get("hide_last_seen") === "on",
     hide_photo_until_accept: formData.get("hide_photo_until_accept") === "on",
     hide_details_until_accept: formData.get("hide_details_until_accept") === "on",
-    contact_release_mode: formData.get("contact_release_mode") === "never" ? "never" : "accepted_interest",
+    contact_release_mode: parseContactReleaseMode(formData.get("contact_release_mode")),
     notify_profile_views: formData.get("notify_profile_views") === "on",
     notify_interest: formData.get("notify_interest") === "on",
   };

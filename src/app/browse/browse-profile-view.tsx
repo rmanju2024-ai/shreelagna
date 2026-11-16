@@ -1,7 +1,7 @@
 import { ProfileRedesign, type ProfileData } from "@/app/browse/profile-redesign";
 import { isStaffProfilePreview, profileLeaveTarget } from "@/lib/ui/dismiss";
 import { profileViewedCopy } from "@/lib/match/alert-copy";
-import { canAlertProfileView } from "@/lib/match/profile-settings";
+import { canAlertProfileView, contactMayRelease, parseContactReleaseMode } from "@/lib/match/profile-settings";
 import { displayFirstName } from "@/lib/profile/options";
 import { parentSentence } from "@/lib/profile/parent-line";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
@@ -404,7 +404,11 @@ export async function BrowseProfileView({
       (row) => myIds.includes(row.from_profile_id) || myIds.includes(row.to_profile_id),
     );
     interestStatus = link ? effectiveInterestStatus(link.status, link.created_at) : null;
-    sentByMe = Boolean(link && myIds.includes(link.from_profile_id));
+    sentByMe = Boolean(
+      link &&
+        myIds.includes(link.from_profile_id) &&
+        (interestStatus === "pending" || interestStatus === "accepted"),
+    );
     accepted = interestStatus === "accepted";
     interestId = typeof link?.id === "string" ? link.id : null;
     const counted = quota.touchedIds.includes(id) || sentByMe;
@@ -429,27 +433,30 @@ export async function BrowseProfileView({
       },
     );
 
-    const mode = typeof profile.contact_release_mode === "string" ? profile.contact_release_mode : "";
+    const mode = parseContactReleaseMode(profile.contact_release_mode);
     const viewed = viewedRes.data;
     const liveViewer = live || isStaff;
-    const revealed = (Boolean(viewed) || isStaff) && (complete || isStaff) && liveViewer;
+    const eligible = isStaff || contactMayRelease(mode, { sentByMe, accepted });
+    const revealed = eligible && (Boolean(viewed) || sentByMe || accepted || isStaff) && (complete || isStaff) && liveViewer;
     contact = {
       revealed,
       mobile: revealed && typeof profile.subject_mobile === "string" ? profile.subject_mobile.trim() : "",
       email: revealed && typeof owner?.email === "string" ? owner.email.trim() : "",
       locked: mode === "never",
       accepted,
+      needInterest: mode === "sent_interest" && !sentByMe && !accepted && !isStaff,
+      needAccept: mode === "accepted_interest" && !accepted && !isStaff,
       needPlan,
       needComplete: !complete && !isStaff,
       awaitingReview: complete && !live && !isStaff,
-      counted: sentByMe || Boolean(viewed),
+      counted: sentByMe || accepted || Boolean(viewed),
       canReveal:
         complete &&
         liveViewer &&
         !revealed &&
-        mode !== "never" &&
+        eligible &&
         !needPlan &&
-        (quotaLeft === null || quotaLeft > 0 || sentByMe || Boolean(viewed) || isStaff),
+        (quotaLeft === null || quotaLeft > 0 || sentByMe || accepted || Boolean(viewed) || isStaff),
       used: quotaUsed,
       left: quotaLeft,
       limit: quotaLimit,
