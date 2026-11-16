@@ -39,6 +39,31 @@ describe("ThreadView message options", () => {
     expect((screen.getByLabelText("Edit your note") as HTMLTextAreaElement).value).toBe("iji");
   });
 
+  it("hides send and edit when staff is only reading", () => {
+    render(
+      <ThreadView
+        threadId="t1"
+        myProfileId="me"
+        canSend={false}
+        readOnly
+        peerName="Priya"
+        presence="Read only"
+        online={false}
+        messages={[
+          {
+            id: "1",
+            sender_profile_id: "me",
+            body: "iji",
+            created_at: "2026-09-28T10:00:00Z",
+          },
+        ]}
+      />,
+    );
+    expect(screen.queryByRole("button", { name: "Message options" })).toBeNull();
+    expect(screen.queryByRole("textbox")).toBeNull();
+    expect(screen.getByText(/nobody is notified/i)).toBeTruthy();
+  });
+
   it("keeps send off until there is a note, and marks Seen on the last read send", () => {
     render(
       <ThreadView

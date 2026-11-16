@@ -22,6 +22,8 @@ export function ThreadView({
   online,
   needPlan = false,
   closedNote,
+  readOnly = false,
+  backHref = "/app/chat",
 }: {
   threadId: string;
   myProfileId: string;
@@ -34,6 +36,8 @@ export function ThreadView({
   online: boolean;
   needPlan?: boolean;
   closedNote?: ReactNode;
+  readOnly?: boolean;
+  backHref?: string;
 }) {
   const [pending, setPending] = useState<Msg[]>([]);
   const [draft, setDraft] = useState("");
@@ -146,7 +150,7 @@ export function ThreadView({
   }
 
   function startHold(msg: Msg, mine: boolean, gone: boolean) {
-    if (!mine || gone || msg.pending) return;
+    if (readOnly || !mine || gone || msg.pending) return;
     clearHold();
     holdRef.current = window.setTimeout(() => setMenuId(msg.id), 420);
   }
@@ -178,7 +182,7 @@ export function ThreadView({
   return (
     <article className="salon-chat wa-app wc-pane">
       <header className="salon-head">
-        <Link href="/app/chat" className="salon-back" aria-label="All chats">
+        <Link href={backHref} className="salon-back" aria-label="All chats" scroll={false}>
           ‹
         </Link>
         {peerHref ? (
@@ -271,13 +275,13 @@ export function ThreadView({
                 onPointerCancel={clearHold}
                 onPointerLeave={clearHold}
                 onContextMenu={(event) => {
-                  if (!row.mine || gone || msg.pending) return;
+                  if (readOnly || !row.mine || gone || msg.pending) return;
                   event.preventDefault();
                   setMenuId(msg.id);
                 }}
               >
                 <div className="salon-slip">
-                  {row.mine && !msg.pending && !gone ? (
+                  {row.mine && !readOnly && !msg.pending && !gone ? (
                     <div className="salon-msg-tools">
                       <button
                         type="button"
@@ -317,6 +321,9 @@ export function ThreadView({
           })}
         </ul>
       </div>
+      {readOnly ? (
+        <p className="salon-readonly">Read only · staff review · nobody is notified</p>
+      ) : (
       <form
           className="salon-composer"
           onSubmit={(event) => {
@@ -381,7 +388,8 @@ export function ThreadView({
             </svg>
           </button>
         </form>
-      {closedNote && !needPlan ? closedNote : null}
+      )}
+      {closedNote && !needPlan && !readOnly ? closedNote : null}
     </article>
   );
 }

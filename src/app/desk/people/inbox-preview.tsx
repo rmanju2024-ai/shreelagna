@@ -1,33 +1,17 @@
 import Link from "next/link";
 import { ChatAvatar } from "@/app/app/chat/chat-avatar";
+import { ChatThreadList } from "@/app/app/chat/chat-thread-list";
+import { ThreadView } from "@/app/app/chat/[id]/thread-view";
 import { InboxBoard } from "@/app/app/interests/inbox-board";
+import { InboxSwitcherNav, type InboxTab } from "@/components/inbox-switcher";
 import { loadStaffInbox, loadStaffThread } from "@/lib/desk/member-inbox";
 import { alertHeadline, loadStaffAlerts, loadStaffLikes } from "@/lib/desk/staff-inbox-extras";
-import { chatBodyLine } from "@/lib/match/chat-ui";
 import { alertWhen } from "@/lib/match/alert-copy";
-import { SECTIONS, type SectionId } from "@/lib/match/likes-sections";
-import { formatIstTime, parseInstant } from "@/lib/time/ist";
-import { btnGhost } from "@/lib/ui/classes";
+import { type SectionId } from "@/lib/match/likes-sections";
 
-type ReviewTab = "chats" | "likes" | "alerts";
-
-const alertStyle = (kind: string) => {
-  if (kind === "interest_received") return { icon: "💌", tone: "interest" };
-  if (kind === "interest_accepted") return { icon: "✨", tone: "accepted" };
-  if (kind === "profile_view") return { icon: "👀", tone: "view" };
-  if (kind === "shortlist") return { icon: "♥", tone: "shortlist" };
-  if (kind === "contact_view") return { icon: "📇", tone: "contact" };
-  if (kind === "match") return { icon: "💫", tone: "match" };
-  return { icon: "🔔", tone: "general" };
-};
-
-function parseTab(raw?: string | null): ReviewTab {
+function parseTab(raw?: string | null): InboxTab {
   if (raw === "likes" || raw === "alerts") return raw;
   return "chats";
-}
-
-function parseSection(raw?: string | null): SectionId | undefined {
-  return SECTIONS.some((row) => row.id === raw) ? (raw as SectionId) : undefined;
 }
 
 function withParams(base: string, extra: Record<string, string | undefined>) {
@@ -39,6 +23,16 @@ function withParams(base: string, extra: Record<string, string | undefined>) {
   const path = base.split("?")[0];
   return `${path}?${q.toString()}`;
 }
+
+const alertStyle = (kind: string) => {
+  if (kind === "interest_received") return { icon: "💌", tone: "interest" };
+  if (kind === "interest_accepted") return { icon: "✨", tone: "accepted" };
+  if (kind === "profile_view") return { icon: "👀", tone: "view" };
+  if (kind === "shortlist") return { icon: "♥", tone: "shortlist" };
+  if (kind === "contact_view") return { icon: "📇", tone: "contact" };
+  if (kind === "match") return { icon: "💫", tone: "match" };
+  return { icon: "🔔", tone: "general" };
+};
 
 export async function StaffInboxPreview({
   db,
@@ -58,207 +52,184 @@ export async function StaffInboxPreview({
   baseHref: string;
 }) {
   const active = parseTab(tab);
-  const likeSection = parseSection(section);
-  const hrefFor = (id: ReviewTab) => withParams(baseHref, { peek: "inbox", tab: id, thread: undefined, section: undefined });
+  const hrefFor = (id: InboxTab) => withParams(baseHref, { peek: "inbox", tab: id, thread: undefined, section: undefined });
+  const inspectHref = (profileId: string) =>
+    profileId
+      ? withParams(baseHref, {
+          peek: "profile",
+          view: profileId,
+          tab: active,
+          thread: threadId ?? undefined,
+          section: section ?? undefined,
+        })
+      : baseHref;
+  const emptyInbox = { myIds: [profileId], threads: [] as Awaited<ReturnType<typeof loadStaffInbox>>["threads"] };
+  const emptyLikes = { received: [], sent: [], accepted: [], history: [], viewed: [], visited: [], pendingCount: 0 };
+  const emptyAlerts = { alerts: [], unread: 0 };
   const [inbox, likes, alerts] = await Promise.all([
-    loadStaffInbox(db, profileId),
-    loadStaffLikes(db, profileId),
-    loadStaffAlerts(db, ownerId, profileId),
+    loadStaffInbox(db, profileId).catch(() => emptyInbox),
+    loadStaffLikes(db, profileId).catch(() => emptyLikes),
+    loadStaffAlerts(db, ownerId, profileId).catch(() => emptyAlerts),
   ]);
-  const counts = {
-    chats: inbox.threads.length,
-    likes: likes.received.length + likes.sent.length,
-    alerts: alerts.alerts.length,
-  };
 
   return (
-    <div className="desk-review">
-      <p className="desk-review-note">Read only · this profile · the member is not notified</p>
-      <nav className="desk-review-tabs" aria-label="Inbox preview">
-        <TabLink href={hrefFor("chats")} on={active === "chats"} label="Chats" count={counts.chats} />
-        <TabLink href={hrefFor("likes")} on={active === "likes"} label="Interests" count={counts.likes} />
-        <TabLink href={hrefFor("alerts")} on={active === "alerts"} label="Alerts" count={counts.alerts} />
-      </nav>
+    <div className="desk-review inbox-unified">
+      <p className="desk-review-note">
+        Staff popup · this member&apos;s inbox · not your profile · read only · nobody is notified
+      </p>
+      <InboxSwitcherNav
+        active={active}
+        hrefFor={hrefFor}
+        counts={{ chatUnread: 0, likesPending: likes.pendingCount, alertUnread: 0 }}
+      />
 
-      {active === "chats" ? <ChatPane inbox={inbox} threadId={threadId} baseHref={baseHref} db={db} /> : null}
+      {active === "chats" ? (
+        <StaffChatPane inbox={inbox} threadId={threadId} baseHref={baseHref} db={db} inspectHref={inspectHref} />
+      ) : null}
 
       {active === "likes" ? (
-        <div className="desk-review-panel">
-          <header className="desk-review-head">
-            <div>
-              <h3>{likeSection ? SECTIONS.find((row) => row.id === likeSection)?.label : "Interests"}</h3>
-              <p>Interest in and interest out for this profile only.</p>
-            </div>
-            {likeSection ? (
-              <Link href={hrefFor("likes")} className={btnGhost} scroll={false}>
-                All sections
-              </Link>
-            ) : null}
-          </header>
-          <InboxBoard
-            readOnly
-            openFrom="desk"
-            only={likeSection}
-            viewAllHref={(id) => withParams(baseHref, { peek: "inbox", tab: "likes", section: id, thread: undefined })}
-            received={likes.received}
-            sent={likes.sent}
-            accepted={likes.accepted}
-            history={likes.history}
-            viewed={likes.viewed}
-            visited={likes.visited}
-          />
-        </div>
+        <InboxBoard
+          readOnly
+          openFrom="desk"
+          inspectHref={inspectHref}
+          only={section as SectionId | undefined}
+          viewAllHref={(id) => withParams(baseHref, { peek: "inbox", tab: "likes", section: id, thread: undefined })}
+          received={likes.received}
+          sent={likes.sent}
+          accepted={likes.accepted}
+          history={likes.history}
+          viewed={likes.viewed}
+          visited={likes.visited}
+        />
       ) : null}
 
       {active === "alerts" ? (
-        <div className="desk-review-panel">
-          <header className="desk-review-head">
-            <div>
-              <h3>Alerts</h3>
-              <p>Views, interest notes and house messages. Read only.</p>
-            </div>
-          </header>
-          <ul className="desk-review-alerts">
+        <div className="alerts-genz inbox-alerts">
+          <ul className="alert-list alerts-genz-list">
             {alerts.alerts.map((note) => {
+              const unread = !note.read_at;
               const { name, detail } = alertHeadline(note.kind, note.title ?? "", note.body ?? "");
               const style = alertStyle(note.kind);
-              const href = note.match_profile_id ? `/browse/${note.match_profile_id}?from=desk` : null;
+              const fromHref = note.href?.startsWith("/browse/") ? note.href.split("/")[2]?.split("?")[0] : "";
+              const otherId = note.match_profile_id || fromHref;
+              const openHref = otherId ? inspectHref(otherId) : null;
               const inner = (
                 <>
-                  <span className={`desk-review-icon is-${style.tone}`} aria-hidden>
+                  <span className={`alerts-genz-icon is-${style.tone}`} aria-hidden>
                     {style.icon}
                   </span>
                   <ChatAvatar name={name} src={note.photo} />
-                  <span className="desk-review-alert-copy">
-                    <b>{name}</b>
-                    <span>{detail || note.body || note.title || note.kind.replace(/_/g, " ")}</span>
-                    {note.body && detail && note.body !== detail ? <small>{note.body}</small> : null}
-                    <time dateTime={note.created_at}>{alertWhen(note.created_at)}</time>
+                  <span className="alert-copy">
+                    <span className="alert-line">
+                      <b>{name}</b> {detail || note.body || note.title}
+                    </span>
+                    <span className="alerts-genz-meta">
+                      <time dateTime={note.created_at}>{alertWhen(note.created_at)}</time>
+                      <span>Open →</span>
+                    </span>
                   </span>
+                  {unread ? <span className="alert-dot" aria-label="Unread for the member" /> : null}
                 </>
               );
               return (
                 <li key={note.id}>
-                  {href ? (
-                    <a href={href} className={`desk-review-alert${!note.read_at ? " is-new" : ""}`}>
+                  {openHref ? (
+                    <Link href={openHref} className={`alert-card${unread ? " is-new" : ""}`}>
                       {inner}
-                    </a>
+                    </Link>
                   ) : (
-                    <div className={`desk-review-alert${!note.read_at ? " is-new" : ""}`}>{inner}</div>
+                    <div className={`alert-card${unread ? " is-new" : ""}`}>{inner}</div>
                   )}
                 </li>
               );
             })}
           </ul>
-          {!alerts.alerts.length ? <p className="desk-review-empty">No alerts on this profile.</p> : null}
+          {!alerts.alerts.length ? (
+            <div className="sx-empty alerts-genz-empty">
+              <span aria-hidden>✨</span>
+              <div>
+                <h3>No alerts on this profile</h3>
+                <p>When this member gets views or interest notes, they will show here. Opening them does not notify anyone.</p>
+              </div>
+            </div>
+          ) : null}
         </div>
       ) : null}
     </div>
   );
 }
 
-function TabLink({ href, on, label, count }: { href: string; on: boolean; label: string; count: number }) {
-  return (
-    <Link href={href} className={on ? "is-on" : undefined} aria-current={on ? "page" : undefined} scroll={false}>
-      {label}
-      <b>{count}</b>
-    </Link>
-  );
-}
-
-async function ChatPane({
+async function StaffChatPane({
   db,
   inbox,
   threadId,
   baseHref,
+  inspectHref,
 }: {
   db: { from: (table: string) => any };
   inbox: Awaited<ReturnType<typeof loadStaffInbox>>;
   threadId?: string | null;
   baseHref: string;
+  inspectHref: (profileId: string) => string;
 }) {
   const activeId = threadId && inbox.threads.some((row) => row.id === threadId) ? threadId : null;
-  const open = activeId ? await loadStaffThread(db, activeId, inbox.myIds) : null;
+  const open = activeId ? await loadStaffThread(db, activeId, inbox.myIds).catch(() => null) : null;
   const listHref = withParams(baseHref, { peek: "inbox", tab: "chats", thread: undefined, section: undefined });
+  const messages = open
+    ? open.rows
+        .filter((row): row is Extract<typeof row, { kind: "msg" }> => row.kind === "msg")
+        .map((row) => row.msg)
+    : [];
+
   return (
-    <div className={`desk-review-chat${open ? " has-thread" : ""}`}>
-      <aside className="desk-review-list" aria-label="Conversations">
-        <header className="desk-review-head">
-          <div>
-            <h3>Chats</h3>
-            <p>
-              {inbox.threads.length} {inbox.threads.length === 1 ? "thread" : "threads"} · tap one to read
-            </p>
-          </div>
-        </header>
+    <div className={`wc-shell desk-review-wc${open ? " has-thread" : ""}`}>
+      <aside className="wc-side">
         {inbox.threads.length ? (
-          <ul>
-            {inbox.threads.map((thread) => (
-              <li key={thread.id}>
-                <Link
-                  href={withParams(baseHref, { peek: "inbox", tab: "chats", thread: thread.id, section: undefined })}
-                  className={`desk-review-chat-row${thread.id === activeId ? " is-on" : ""}`}
-                  replace
-                  scroll={false}
-                >
-                  <ChatAvatar name={thread.name} src={thread.photo} />
-                  <span>
-                    <b>{thread.name}</b>
-                    <small>{thread.preview || "No messages yet"}</small>
-                  </span>
-                  <time>{thread.stamp}</time>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <ChatThreadList
+            threads={inbox.threads.map((thread) => ({
+              id: thread.id,
+              name: thread.name,
+              photo: thread.photo,
+              stamp: thread.stamp,
+              preview: thread.preview,
+              unread: "",
+            }))}
+            hrefFor={(id) => withParams(baseHref, { peek: "inbox", tab: "chats", thread: id, section: undefined })}
+            activeId={activeId}
+          />
         ) : (
           <p className="desk-review-empty">No chats on this profile.</p>
         )}
       </aside>
-      <section className="desk-review-thread" aria-label="Conversation">
-        {open ? (
-          <>
-            <header className="desk-review-thread-head">
-              <Link href={listHref} className="desk-review-back" scroll={false}>
-                Chats
-              </Link>
-              <ChatAvatar name={open.peerName} src={open.peerPhoto} size="sm" />
-              <div>
-                <h3>{open.peerName}</h3>
-                <p>{open.frozen ? "Frozen · read only" : "Read only"}</p>
-              </div>
-            </header>
-            <div className="desk-review-stream">
-              <ul>
-                {open.rows.map((row) => {
-                  if (row.kind === "day") {
-                    return (
-                      <li key={row.key} className="desk-review-day">
-                        {row.label}
-                      </li>
-                    );
-                  }
-                  if (row.kind === "unread") return null;
-                  const msg = row.msg;
-                  const gone = Boolean(msg.deleted_at);
-                  const at = parseInstant(msg.created_at);
-                  return (
-                    <li key={msg.id} className={`desk-review-msg ${row.mine ? "is-mine" : "is-theirs"}`}>
-                      <p>{chatBodyLine(msg.body, gone)}</p>
-                      <time>{at ? formatIstTime(at) : ""}</time>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          </>
-        ) : (
-          <div className="desk-review-pick">
-            <h3>Pick a chat</h3>
-            <p>Open a thread on the left. You can read every message. You cannot send, edit, or delete.</p>
+      {open && activeId ? (
+        <ThreadView
+          threadId={activeId}
+          myProfileId={open.myProfileId}
+          messages={messages}
+          canSend={false}
+          readOnly
+          backHref={listHref}
+          peerName={open.peerName}
+          peerPhoto={open.peerPhoto}
+          peerHref={
+            inbox.threads.find((row) => row.id === activeId)?.otherId
+              ? inspectHref(inbox.threads.find((row) => row.id === activeId)!.otherId)
+              : undefined
+          }
+          presence={open.frozen ? "Frozen · read only" : "Read only · staff review"}
+          online={false}
+        />
+      ) : (
+        <section className="wc-welcome" aria-label="No chat selected">
+          <div>
+            <span className="gz-emoji" aria-hidden>
+              💬
+            </span>
+            <h2>Their conversations</h2>
+            <p>Pick a thread to read it as this member sees it. You cannot send, edit, or delete. Nobody is notified.</p>
           </div>
-        )}
-      </section>
+        </section>
+      )}
     </div>
   );
 }

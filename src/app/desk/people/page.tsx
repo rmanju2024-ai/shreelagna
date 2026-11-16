@@ -45,11 +45,23 @@ function peopleHref(open: string, extra: Record<string, string | undefined> = {}
 export default async function DeskPeoplePage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; sort?: string; page?: string; open?: string; peek?: string; thread?: string; tab?: string; section?: string; saved?: string; error?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    sort?: string;
+    page?: string;
+    open?: string;
+    peek?: string;
+    thread?: string;
+    tab?: string;
+    section?: string;
+    view?: string;
+    saved?: string;
+    error?: string;
+  }>;
 }) {
   const desk = await requireDesk("/desk/people");
   if (!desk.allowed) return null;
-  const { q: raw, sort: sortRaw, page: pageRaw, open, peek, thread, tab, section, saved, error } = await searchParams;
+  const { q: raw, sort: sortRaw, page: pageRaw, open, peek, thread, tab, section, view, saved, error } = await searchParams;
   const q = String(raw ?? "").trim();
   const sort = parsePeopleSort(sortRaw);
   const spec = peopleSortSpec(sort);
@@ -100,6 +112,11 @@ export default async function DeskPeoplePage({
     ownerId = String(ownerRow?.created_by ?? "");
   }
   const fileHref = open ? peopleHref(open) : "/desk/people";
+  const inspectId = view && UUID.test(view) ? view : "";
+  const inboxHref = open
+    ? peopleHref(open, { peek: "inbox", tab, thread, section })
+    : fileHref;
+  const profileCloseHref = inspectId ? inboxHref : fileHref;
   const closeQs = listQuery().toString();
   const closeList = closeQs ? `/desk/people?${closeQs}` : "/desk/people";
 
@@ -157,17 +174,28 @@ export default async function DeskPeoplePage({
       <DeskPager path="/desk/people" page={page} count={total} extra={listExtra} />
 
       {open && !peek ? (
-        <DeskPeek title="Member file" kicker="Staff case · member file" closeHref={closeList}>
+        <DeskPeek title="Member file" kicker="Staff review · not your login" closeHref={closeList}>
           <MemberDossier db={db} id={open} fileHref={fileHref} />
         </DeskPeek>
       ) : null}
       {open && peek === "profile" ? (
-        <DeskPeek title="Profile preview" closeHref={fileHref}>
-          <BrowseProfileView params={Promise.resolve({ id: open })} searchParams={Promise.resolve({ from: "desk" })} />
+        <DeskPeek
+          title={inspectId && inspectId !== open ? "Other profile" : "This member's profile"}
+          kicker={
+            inspectId && inspectId !== open
+              ? "Staff review · not your login · another family's profile"
+              : "Staff review · not your login · this member's profile"
+          }
+          closeHref={profileCloseHref}
+        >
+          <BrowseProfileView
+            params={Promise.resolve({ id: inspectId || open })}
+            searchParams={Promise.resolve({ from: "desk", preview: "1" })}
+          />
         </DeskPeek>
       ) : null}
       {open && peek === "inbox" ? (
-        <DeskPeek title="Inbox preview" closeHref={fileHref}>
+        <DeskPeek title="This member's inbox" kicker="Staff review · not your login · read only" closeHref={fileHref}>
           <StaffInboxPreview
             db={db}
             profileId={open}

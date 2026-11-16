@@ -18,23 +18,29 @@ export type StaffInboxThread = {
 type ThreadRow = { id: string; profile_a: string; profile_b: string; frozen?: boolean; created_at: string };
 
 async function threadsOwnedBy(db: TicketClient, ids: string[]): Promise<ThreadRow[]> {
-  const cols = "id, profile_a, profile_b, frozen, created_at";
-  const hits = await Promise.all(
-    ids.flatMap((id) => [
-      db.from("threads").select(cols).eq("profile_a", id),
-      db.from("threads").select(cols).eq("profile_b", id),
-    ]),
-  );
+  if (!ids.length) return [];
+  const filter = ids.map((id) => `profile_a.eq.${id},profile_b.eq.${id}`).join(",");
+  const full = await db
+    .from("threads")
+    .select("id, profile_a, profile_b, frozen, created_at")
+    .or(filter)
+    .order("created_at", { ascending: false });
+  let rows = (full.data ?? []) as ThreadRow[];
+  if (full.error) {
+    const slim = await db
+      .from("threads")
+      .select("id, profile_a, profile_b, created_at")
+      .or(filter)
+      .order("created_at", { ascending: false });
+    rows = ((slim.data ?? []) as ThreadRow[]).map((row) => ({ ...row, frozen: false }));
+  }
   const seen = new Set<string>();
   const open: ThreadRow[] = [];
-  for (const hit of hits) {
-    for (const thread of (hit.data ?? []) as ThreadRow[]) {
-      if (!thread?.id || seen.has(thread.id)) continue;
-      seen.add(thread.id);
-      open.push(thread);
-    }
+  for (const thread of rows) {
+    if (!thread?.id || seen.has(thread.id)) continue;
+    seen.add(thread.id);
+    open.push(thread);
   }
-  open.sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
   return open;
 }
 

@@ -2,6 +2,7 @@ import type { InboxNote } from "@/app/app/interests/inbox-board";
 import { alertHeadline } from "@/lib/match/alert-copy";
 import { collapseNotices } from "@/lib/match/collapse-notices";
 import { pickPrimaryPhotoMap, publicMediaUrl } from "@/lib/match/inbox-card";
+import { isMissingColumnError } from "@/lib/profile/db-errors";
 import {
   effectiveInterestStatus,
   formatInboxWhen,
@@ -9,8 +10,6 @@ import {
   isHistoryStatus,
 } from "@/lib/match/interest-status";
 import { displayFirstName } from "@/lib/profile/options";
-import { isListedProfileStatus } from "@/lib/profile/visibility";
-
 type Db = { from: (table: string) => any };
 
 export type StaffAlert = {
@@ -18,6 +17,7 @@ export type StaffAlert = {
   kind: string;
   title: string | null;
   body: string | null;
+  href: string | null;
   created_at: string;
   read_at: string | null;
   match_profile_id: string | null;
@@ -65,7 +65,7 @@ export async function loadStaffLikes(db: Db, profileId: string): Promise<{
     (names ?? []).map((row: { id: string; subject_full_name?: string | null; status?: string | null }) => [row.id, row]),
   );
   const { data: photos } = otherIds.length
-    ? await db.from("media").select("profile_id, storage_path, is_primary").eq("kind", "photo").eq("status", "approved").in("profile_id", otherIds)
+    ? await db.from("media").select("profile_id, storage_path, is_primary").eq("kind", "photo").in("profile_id", otherIds)
     : { data: [] };
   const photoMap = pickPrimaryPhotoMap(photos ?? []);
 
@@ -82,13 +82,12 @@ export async function loadStaffLikes(db: Db, profileId: string): Promise<{
       when: formatInboxWhen(when),
       profileId,
       status,
-      photoUrl: row && isListedProfileStatus(row.status) ? publicMediaUrl(photoMap.get(profileId)) : null,
+      photoUrl: publicMediaUrl(photoMap.get(profileId)),
+      lastOnline: row?.status && row.status !== "active" ? row.status.replace(/_/g, " ") : undefined,
     };
   }
 
   function statusOf(row: { status?: string | null; created_at: string; from_profile_id: string; to_profile_id: string }) {
-    const who = nameMap.get(other(row.from_profile_id, row.to_profile_id));
-    if (!who || !isListedProfileStatus(who.status)) return "deleted" as const;
     return effectiveInterestStatus(row.status, row.created_at);
   }
 
@@ -127,18 +126,29 @@ export async function loadStaffAlerts(
   profileId?: string | null,
 ): Promise<{ alerts: StaffAlert[]; unread: number }> {
   if (!ownerId) return { alerts: [], unread: 0 };
-  const { data: notices } = await db
+  const full = await db
     .from("notices")
     .select("id, kind, title, body, href, created_at, read_at, match_profile_id, for_profile_id")
     .eq("user_id", ownerId)
     .neq("kind", "chat")
     .order("created_at", { ascending: false })
     .limit(80);
-  const rows = (notices ?? []) as {
+  const notices =
+    full.error && isMissingColumnError(full.error, "for_profile_id")
+      ? await db
+          .from("notices")
+          .select("id, kind, title, body, href, created_at, read_at, match_profile_id")
+          .eq("user_id", ownerId)
+          .neq("kind", "chat")
+          .order("created_at", { ascending: false })
+          .limit(80)
+      : full;
+  const rows = (notices.data ?? []) as {
     id: string;
     kind: string;
     title?: string | null;
     body?: string | null;
+    href?: string | null;
     created_at: string;
     read_at?: string | null;
     match_profile_id?: string | null;
@@ -163,6 +173,7 @@ export async function loadStaffAlerts(
       kind: String(row.kind ?? "general"),
       title: row.title ?? null,
       body: row.body ?? null,
+      href: row.href ?? null,
       created_at: String(row.created_at),
       read_at: row.read_at ?? null,
       match_profile_id: row.match_profile_id ?? null,

@@ -14,20 +14,30 @@ export type ChatThreadRow = {
   unread: string;
 };
 
-export function ChatThreadList({ threads }: { threads: ChatThreadRow[] }) {
+export function ChatThreadList({
+  threads,
+  hrefFor,
+  activeId,
+}: {
+  threads: ChatThreadRow[];
+  hrefFor?: (id: string) => string;
+  activeId?: string | null;
+}) {
   const path = usePathname();
   const router = useRouter();
 
   useEffect(() => {
+    if (hrefFor) return;
     for (const thread of threads.slice(0, 8)) {
       router.prefetch(`/app/chat/${thread.id}`);
     }
-  }, [router, threads]);
+  }, [router, threads, hrefFor]);
 
   return (
     <ul className="wc-list">
       {threads.map((thread) => {
-        const href = `/app/chat/${thread.id}`;
+        const href = hrefFor ? hrefFor(thread.id) : `/app/chat/${thread.id}`;
+        const on = hrefFor ? thread.id === activeId : path === href;
         const on = path === href;
         return (
           <li key={thread.id}>
