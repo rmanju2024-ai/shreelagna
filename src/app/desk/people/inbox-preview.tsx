@@ -2,12 +2,11 @@ import Link from "next/link";
 import { ChatAvatar } from "@/app/app/chat/chat-avatar";
 import { ChatThreadList } from "@/app/app/chat/chat-thread-list";
 import { ThreadView } from "@/app/app/chat/[id]/thread-view";
-import { InboxBoard } from "@/app/app/interests/inbox-board";
 import { type InboxTab } from "@/components/inbox-switcher";
 import { loadStaffInbox, loadStaffThread } from "@/lib/desk/member-inbox";
 import { alertHeadline, loadStaffAlerts, loadStaffLikes } from "@/lib/desk/staff-inbox-extras";
 import { alertWhen } from "@/lib/match/alert-copy";
-import { type SectionId } from "@/lib/match/likes-sections";
+import { SECTIONS, type SectionId } from "@/lib/match/likes-sections";
 
 function parseTab(raw?: string | null): InboxTab {
   if (raw === "likes" || raw === "alerts") return raw;
@@ -88,21 +87,7 @@ export async function StaffInboxPreview({
       ) : null}
 
       {active === "likes" ? (
-        <div className="desk-review-panel desk-review-likes-board">
-        <InboxBoard
-          readOnly
-          openFrom="desk"
-          inspectHref={inspectHref}
-          only={section as SectionId | undefined}
-          viewAllHref={(id) => withParams(baseHref, { peek: "inbox", tab: "likes", section: id, thread: undefined })}
-          received={likes.received}
-          sent={likes.sent}
-          accepted={likes.accepted}
-          history={likes.history}
-          viewed={likes.viewed}
-          visited={likes.visited}
-        />
-        </div>
+        <StaffLikesPane likes={likes} baseHref={baseHref} only={section} />
       ) : null}
 
       {active === "alerts" ? (
@@ -163,6 +148,95 @@ export async function StaffInboxPreview({
   );
 }
 
+const LIKES_PREVIEW = 8;
+
+function StaffLikesPane({
+  likes,
+  baseHref,
+  only,
+}: {
+  likes: Awaited<ReturnType<typeof loadStaffLikes>>;
+  baseHref: string;
+  only?: string | null;
+}) {
+  const wanted = SECTIONS.find((item) => item.id === only)?.id;
+  const sections = wanted ? SECTIONS.filter((item) => item.id === wanted) : SECTIONS;
+  const bags: Record<SectionId, { id: string; name?: string; when?: string; status?: string; profileId?: string; photoUrl?: string | null }[]> = {
+    received: likes.received ?? [],
+    sent: likes.sent ?? [],
+    accepted: likes.accepted ?? [],
+    viewed: likes.viewed ?? [],
+    visited: likes.visited ?? [],
+    history: likes.history ?? [],
+  };
+  return (
+    <div className="desk-review-panel desk-review-likes">
+      {wanted ? (
+        <p className="desk-review-empty">
+          <Link href={withParams(baseHref, { peek: "inbox", tab: "likes", section: undefined, thread: undefined })} scroll={false}>
+            ← All interest sections
+          </Link>
+        </p>
+      ) : null}
+      {sections.map((section) => {
+        const rows = bags[section.id];
+        const shown = wanted ? rows : rows.slice(0, LIKES_PREVIEW);
+        return (
+          <section key={section.id}>
+            <h4>
+              {section.label}
+              <b>{rows.length}</b>
+            </h4>
+            {shown.length ? (
+              <ul>
+                {shown.map((note) => {
+                  const href = note.profileId
+                    ? withParams(baseHref, { peek: "profile", view: note.profileId, tab: "likes", thread: undefined, section: wanted })
+                    : undefined;
+                  const inner = (
+                    <>
+                      <span className="desk-file-thumb" aria-hidden>
+                        {note.photoUrl ? <img src={note.photoUrl} alt="" /> : <em>{(note.name || "?").slice(0, 1)}</em>}
+                      </span>
+                      <span>
+                        <b>{note.name || "Removed profile"}</b>
+                        <small>{[note.status, note.when].filter(Boolean).join(" · ") || section.meaning}</small>
+                      </span>
+                    </>
+                  );
+                  return (
+                    <li key={note.id}>
+                      {href ? (
+                        <Link href={href} className="desk-review-like" scroll={false}>
+                          {inner}
+                        </Link>
+                      ) : (
+                        <div className="desk-review-like">{inner}</div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="desk-review-empty">{section.empty}</p>
+            )}
+            {!wanted && rows.length > LIKES_PREVIEW ? (
+              <p className="desk-review-empty">
+                <Link
+                  href={withParams(baseHref, { peek: "inbox", tab: "likes", section: section.id, thread: undefined })}
+                  scroll={false}
+                >
+                  View all {rows.length} →
+                </Link>
+              </p>
+            ) : null}
+          </section>
+        );
+      })}
+    </div>
+  );
+}
+
 function TabLink({ href, on, label, count }: { href: string; on: boolean; label: string; count: number }) {
   return (
     <Link href={href} className={on ? "is-on" : undefined} aria-current={on ? "page" : undefined} scroll={false}>
@@ -207,7 +281,7 @@ async function StaffChatPane({
               preview: thread.preview,
               unread: "",
             }))}
-            hrefFor={(id) => withParams(baseHref, { peek: "inbox", tab: "chats", thread: id, section: undefined })}
+            hrefBase={baseHref}
             activeId={activeId}
           />
         ) : (

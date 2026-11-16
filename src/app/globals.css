@@ -10080,6 +10080,15 @@ button.set-switch[aria-checked="true"]::after,
   color: inherit;
   text-decoration: none;
 }
+.desk-review-like .desk-file-thumb {
+  width: 2.4rem;
+  height: 2.4rem;
+}
+.desk-review-like .desk-file-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 .desk-review-like b,
 .desk-review-like small {
   display: block;
