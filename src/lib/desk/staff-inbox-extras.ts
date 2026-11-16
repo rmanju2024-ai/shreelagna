@@ -2,13 +2,16 @@ import type { InboxNote } from "@/app/app/interests/inbox-board";
 import { alertHeadline } from "@/lib/match/alert-copy";
 import { collapseNotices } from "@/lib/match/collapse-notices";
 import { pickPrimaryPhotoMap, publicMediaUrl } from "@/lib/match/inbox-card";
+import { yearsFromDob } from "@/lib/profile/completeness";
 import { isMissingColumnError } from "@/lib/profile/db-errors";
+import { nestedName } from "@/lib/desk/look-cards";
 import {
   effectiveInterestStatus,
   formatInboxWhen,
   interestStatusLabel,
   isHistoryStatus,
 } from "@/lib/match/interest-status";
+import { formatHeightImperial } from "@/lib/profile/match-compare";
 import { displayFirstName } from "@/lib/profile/options";
 type Db = { from: (table: string) => any };
 
@@ -58,16 +61,34 @@ export async function loadStaffLikes(db: Db, profileId: string): Promise<{
       ].filter(Boolean),
     ),
   ];
-  const { data: names } = otherIds.length
-    ? await db.from("profiles").select("id, subject_full_name, status").in("id", otherIds)
-    : { data: [] };
-  const nameMap = new Map<string, { subject_full_name?: string | null; status?: string | null }>(
-    (names ?? []).map((row: { id: string; subject_full_name?: string | null; status?: string | null }) => [row.id, row]),
+  const profileSelect =
+    "id, subject_full_name, status, date_of_birth, height_cm, current_city, current_state, native_state, qualification, occupation, religions(name), communities(name)";
+  let names: { data: Record<string, unknown>[] | null } = { data: [] };
+  if (otherIds.length) {
+    const full = await db.from("profiles").select(profileSelect).in("id", otherIds);
+    names =
+      full.error
+        ? await db
+            .from("profiles")
+            .select("id, subject_full_name, status, date_of_birth, height_cm, current_city, current_state, qualification, occupation")
+            .in("id", otherIds)
+        : full;
+  }
+  const nameMap = new Map<string, Record<string, unknown>>(
+    (names.data ?? []).map((row) => [String(row.id), row]),
   );
   const { data: photos } = otherIds.length
     ? await db.from("media").select("profile_id, storage_path, is_primary").eq("kind", "photo").in("profile_id", otherIds)
     : { data: [] };
   const photoMap = pickPrimaryPhotoMap(photos ?? []);
+  const photoLists = new Map<string, string[]>();
+  for (const row of photos ?? []) {
+    const path = String(row.storage_path ?? "").trim();
+    if (!path) continue;
+    const list = photoLists.get(row.profile_id) ?? [];
+    if (!list.includes(path)) list.push(path);
+    photoLists.set(row.profile_id, list);
+  }
 
   function note(
     id: string,
@@ -76,14 +97,29 @@ export async function loadStaffLikes(db: Db, profileId: string): Promise<{
     status?: string,
   ): InboxNote {
     const row = nameMap.get(profileId);
+    const age = typeof row?.date_of_birth === "string" ? yearsFromDob(row.date_of_birth) : null;
+    const height = typeof row?.height_cm === "number" ? formatHeightImperial(row.height_cm) : null;
+    const urls = (photoLists.get(profileId) ?? [])
+      .map((path) => publicMediaUrl(path))
+      .filter((url): url is string => Boolean(url));
+    const primary = publicMediaUrl(photoMap.get(profileId)) ?? urls[0] ?? null;
     return {
       id,
-      name: displayFirstName(row?.subject_full_name ?? "Removed profile"),
+      name: displayFirstName(String(row?.subject_full_name ?? "Removed profile")),
       when: formatInboxWhen(when),
       profileId,
       status,
-      photoUrl: publicMediaUrl(photoMap.get(profileId)),
-      lastOnline: row?.status && row.status !== "active" ? row.status.replace(/_/g, " ") : undefined,
+      photoUrl: primary,
+      photoUrls: urls.length ? urls : primary ? [primary] : [],
+      age: age != null ? `${age} yrs` : null,
+      height,
+      religion: nestedName(row?.religions),
+      community: nestedName(row?.communities),
+      city: typeof row?.current_city === "string" ? row.current_city : null,
+      state: typeof row?.current_state === "string" ? row.current_state : typeof row?.native_state === "string" ? row.native_state : null,
+      education: typeof row?.qualification === "string" ? row.qualification : null,
+      occupation: typeof row?.occupation === "string" ? row.occupation : null,
+      lastOnline: row?.status && row.status !== "active" ? String(row.status).replace(/_/g, " ") : undefined,
     };
   }
 

@@ -372,21 +372,33 @@ function CardFace({
     <>
       {album.length ? (
         <span className="sx-photo-album">
-          {album.map((src) => (
-            <Image
-              key={src}
-              src={src}
-              alt=""
-              fill
-              sizes="(max-width: 640px) 50vw, 264px"
-              quality={65}
-              className={src === shown ? "is-on" : undefined}
-              style={{ objectFit: "cover" }}
-            />
-          ))}
+          {album.map((src) =>
+            deskBaseHref ? (
+              // Staff peek: next/image host checks can crash the desk route.
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={src}
+                src={src}
+                alt=""
+                className={src === shown ? "is-on" : undefined}
+                style={{ objectFit: "cover", width: "100%", height: "100%", position: "absolute", inset: 0 }}
+              />
+            ) : (
+              <Image
+                key={src}
+                src={src}
+                alt=""
+                fill
+                sizes="(max-width: 640px) 50vw, 264px"
+                quality={65}
+                className={src === shown ? "is-on" : undefined}
+                style={{ objectFit: "cover" }}
+              />
+            ),
+          )}
         </span>
       ) : (
-        <span className="sx-initial">{note.name.slice(0, 1)}</span>
+        <span className="sx-initial">{(note.name || "?").slice(0, 1)}</span>
       )}
       {note.status ? <b className="sx-badge">{note.status}</b> : null}
       {album.length > 1 ? (

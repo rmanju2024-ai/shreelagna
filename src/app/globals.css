@@ -10025,20 +10025,21 @@ button.set-switch[aria-checked="true"]::after,
 }
 .desk-review-likes-board {
   overflow: auto;
+  min-width: 0;
 }
 .desk-review-likes-board .inbox-modern {
   margin: 0;
 }
-.desk-review-likes-board .sx-feed.is-board,
-.desk-review-likes-board .sx-feed.inbox-modern.is-board {
+.desk-peek-modal .sx-feed.inbox-modern.is-board {
   display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: none;
-  gap: 0.7rem;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: repeat(3, minmax(15.2rem, auto));
+  gap: 0.55rem;
 }
-.desk-review-likes-board .sx-feed-row {
-  min-height: 0;
+.desk-peek-modal .sx-feed.inbox-modern.is-board .sx-feed-row {
+  min-height: 15.2rem;
   height: auto;
+  padding: 0.32rem 0.4rem 0.38rem;
 }
 .desk-review-likes {
   padding: 0 0.75rem 0.85rem;
@@ -10328,6 +10329,16 @@ button.set-switch[aria-checked="true"]::after,
   .desk-review-chat:not(.has-thread) .desk-review-thread { display: none; }
   .desk-review-list ul { max-height: none; }
   .desk-review-stream { min-height: 22rem; }
+  .desk-peek-modal .sx-feed.inbox-modern.is-board {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+  }
+  .desk-peek-modal .sx-feed.inbox-modern.is-board .sx-feed-row {
+    min-height: 0;
+  }
+  .desk-peek-modal .sx-row-nav { display: none; }
+  .desk-peek-modal .sx-row-shell { grid-template-columns: minmax(0, 1fr); }
+  .desk-peek-modal .sx-feed .sx-row-clip { overflow-x: auto; }
   .desk-review-tabs {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     position: sticky;
