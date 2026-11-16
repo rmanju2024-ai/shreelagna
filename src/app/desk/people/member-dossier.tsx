@@ -1,3 +1,5 @@
+import { canReviewMemberProfile, isStaffRole } from "@/lib/desk/access";
+import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { safetyCategoryLabel } from "@/lib/desk/safety-cases";
 import { ticketStatusLabel } from "@/lib/desk/tickets";
 import { planByCode, WELCOME_PLAN_NAME } from "@/lib/membership/catalog";
@@ -65,7 +67,12 @@ export async function MemberDossier({
         .select("id, email, display_name, role, welcome_started_at, welcome_days, last_seen_at")
         .eq("id", ownerId)
         .maybeSingle()
-    : { data: null as { email?: string | null; last_seen_at?: string | null } | null };
+    : { data: null as { email?: string | null; last_seen_at?: string | null; role?: string | null; id?: string | null } | null };
+  const { user, supabase } = await getAuth();
+  const me = supabase && user ? await ensureAppUser(supabase, user) : null;
+  if (me && isStaffRole(me.role) && !canReviewMemberProfile(me, owner.data)) {
+    return <p className="desk-empty">Admin profiles are not available for staff review.</p>;
+  }
   const ticketOr = [
     profile.subject_mobile ? `mobile.eq.${profile.subject_mobile}` : "",
     owner.data?.email ? `email.eq.${owner.data.email}` : "",

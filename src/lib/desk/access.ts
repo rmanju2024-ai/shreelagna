@@ -29,6 +29,16 @@ export function canEditMemberProfile(
   return false;
 }
 
+/** Staff may open a member file / inbox / profile. Admin-owned profiles stay off limits. */
+export function canReviewMemberProfile(
+  actor: { id: string; role?: string | null },
+  owner: { id?: string | null; role?: string | null } | null,
+): boolean {
+  if (actor.role === "admin") return true;
+  if (actor.role === "service" && owner?.role && owner.role !== "admin") return true;
+  return false;
+}
+
 export async function requireDesk(next = "/desk/tickets") {
   const { supabase, user } = await getAuth();
   if (!supabase || !user) redirect(`/login?next=${next}`);

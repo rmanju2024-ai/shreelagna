@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { deskItemsFor } from "@/app/desk/desk-nav";
-import { canEditMemberProfile, isAdminRole, isStaffRole } from "./access";
+import { canEditMemberProfile, canReviewMemberProfile, isAdminRole, isStaffRole } from "./access";
 import { loadSafetyParties, safetyCategoryLabel, safetyStatusLabel } from "./safety-cases";
 import {
   isOpenTicket,
@@ -47,6 +47,14 @@ describe("who may amend a profile from the desk", () => {
     expect(canEditMemberProfile({ id: "desk", role: "service" }, { id: "them", role: "member" })).toBe(true);
     expect(canEditMemberProfile({ id: "desk", role: "service" }, { id: "boss", role: "admin" })).toBe(false);
     expect(canEditMemberProfile({ id: "desk", role: "service" }, null)).toBe(false);
+  });
+
+  it("keeps admin profiles out of staff review", () => {
+    expect(canReviewMemberProfile({ id: "desk", role: "service" }, { id: "them", role: "member" })).toBe(true);
+    expect(canReviewMemberProfile({ id: "desk", role: "service" }, { id: "boss", role: "admin" })).toBe(false);
+    expect(canReviewMemberProfile({ id: "desk", role: "service" }, { id: "desk", role: "service" })).toBe(true);
+    expect(canReviewMemberProfile({ id: "boss", role: "admin" }, { id: "boss", role: "admin" })).toBe(true);
+    expect(canReviewMemberProfile({ id: "desk", role: "service" }, null)).toBe(false);
   });
 });
 

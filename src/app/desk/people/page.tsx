@@ -4,7 +4,8 @@ import { DeskPeek } from "@/app/desk/people/desk-peek";
 import { StaffInboxPreview } from "@/app/desk/people/inbox-preview";
 import { MemberDossier } from "@/app/desk/people/member-dossier";
 import { StaffMemberEdit } from "@/app/desk/people/staff-edit";
-import { requireDesk } from "@/lib/desk/access";
+import { canReviewMemberProfile, requireDesk } from "@/lib/desk/access";
+import { fetchAdminUserIds } from "@/lib/desk/admin-ids";
 import { deskPage, deskRange } from "@/lib/desk/pager";
 import { parsePeopleSort, peopleSortSpec } from "@/lib/desk/people-sort";
 import { PeopleToolbar } from "@/app/desk/people/people-toolbar";
@@ -69,10 +70,14 @@ export default async function DeskPeoplePage({
   const { from, to } = deskRange(page);
   const db = createServiceClient() ?? desk.supabase;
 
+  const adminIds = desk.admin ? new Set<string>() : await fetchAdminUserIds(db as never);
   let query = db
     .from("profiles")
     .select(HIT_COLS, { count: "exact" })
     .order(spec.column, { ascending: spec.ascending, nullsFirst: false });
+  if (!desk.admin && adminIds.size) {
+    query = query.not("created_by", "in", `(${[...adminIds].join(",")})`);
+  }
   if (q && !UUID.test(q) && !isMemberCode(q)) {
     query = query.ilike("subject_full_name", `%${q}%`);
   } else if (q && isMemberCode(q)) {
@@ -107,26 +112,47 @@ export default async function DeskPeoplePage({
   const listExtra = Object.fromEntries(listQuery());
 
   let ownerId = "";
-  if (open && (peek === "inbox" || peek === "profile")) {
+  let openBlocked = false;
+  let inspectBlocked = false;
+  const inspectId = view && UUID.test(view) ? view : "";
+  if (open) {
     const { data: ownerRow } = await db.from("profiles").select("created_by").eq("id", open).maybeSingle();
     ownerId = String(ownerRow?.created_by ?? "");
+    const { data: owner } = ownerId
+      ? await db.from("app_users").select("id, role").eq("id", ownerId).maybeSingle()
+      : { data: null };
+    openBlocked = !canReviewMemberProfile(desk.me, owner);
+  }
+  if (inspectId && inspectId !== open) {
+    const { data: viewRow } = await db.from("profiles").select("created_by").eq("id", inspectId).maybeSingle();
+    const viewOwnerId = String(viewRow?.created_by ?? "");
+    const { data: viewOwner } = viewOwnerId
+      ? await db.from("app_users").select("id, role").eq("id", viewOwnerId).maybeSingle()
+      : { data: null };
+    inspectBlocked = !canReviewMemberProfile(desk.me, viewOwner);
   }
   const fileHref = open ? peopleHref(open) : "/desk/people";
-  const inspectId = view && UUID.test(view) ? view : "";
   const inboxHref = open
     ? peopleHref(open, { peek: "inbox", tab, thread, section })
     : fileHref;
   const profileCloseHref = inspectId ? inboxHref : fileHref;
   const closeQs = listQuery().toString();
   const closeList = closeQs ? `/desk/people?${closeQs}` : "/desk/people";
+  const sealed = (
+    <p className="desk-empty">Admin profiles are not available for staff review.</p>
+  );
 
   return (
-    <section className="desk-panel desk-file">
-      <header className="desk-panel-head">
+    <section className="desk-panel desk-file is-review">
+      <header className="desk-panel-head desk-file-hero">
+        <span className="desk-peek-seal" aria-hidden>
+          ✦
+        </span>
         <div>
-          <p className="browse-kicker">Members</p>
+          <p className="browse-kicker">Staff review · members</p>
           <h2>Directory</h2>
         </div>
+        <em className="desk-peek-mark">House review</em>
         <p>{total} on file</p>
       </header>
       <PeopleToolbar q={q} sort={sort} />
@@ -173,29 +199,46 @@ export default async function DeskPeoplePage({
       ) : null}
       <DeskPager path="/desk/people" page={page} count={total} extra={listExtra} />
 
-      {open && !peek ? (
+      {open && openBlocked ? (
+        <DeskPeek title="Not available" kicker="Staff review · admin profile" closeHref={closeList} wide>
+          {sealed}
+        </DeskPeek>
+      ) : null}
+      {open && !openBlocked && !peek ? (
         <DeskPeek title="Member file" kicker="Staff review · not your login" closeHref={closeList} wide>
           <MemberDossier db={db} id={open} fileHref={fileHref} />
         </DeskPeek>
       ) : null}
-      {open && peek === "profile" ? (
+      {open && !openBlocked && peek === "profile" ? (
         <DeskPeek
-          title={inspectId && inspectId !== open ? "Other profile" : "This member's profile"}
+          title={
+            inspectBlocked
+              ? "Not available"
+              : inspectId && inspectId !== open
+                ? "Other profile"
+                : "This member's profile"
+          }
           kicker={
-            inspectId && inspectId !== open
-              ? "Staff review · not your login · another family's profile"
-              : "Staff review · not your login · this member's profile"
+            inspectBlocked
+              ? "Staff review · admin profile"
+              : inspectId && inspectId !== open
+                ? "Staff review · not your login · another family's profile"
+                : "Staff review · not your login · this member's profile"
           }
           closeHref={profileCloseHref}
           wide
         >
-          <BrowseProfileView
-            params={Promise.resolve({ id: inspectId || open })}
-            searchParams={Promise.resolve({ from: "desk", preview: "1" })}
-          />
+          {inspectBlocked ? (
+            sealed
+          ) : (
+            <BrowseProfileView
+              params={Promise.resolve({ id: inspectId || open })}
+              searchParams={Promise.resolve({ from: "desk", preview: "1" })}
+            />
+          )}
         </DeskPeek>
       ) : null}
-      {open && peek === "inbox" ? (
+      {open && !openBlocked && peek === "inbox" ? (
         <DeskPeek title="This member's inbox" kicker="Staff review · not your login · read only" closeHref={fileHref} wide>
           <StaffInboxPreview
             db={db}
@@ -208,7 +251,7 @@ export default async function DeskPeoplePage({
           />
         </DeskPeek>
       ) : null}
-      {open && peek === "edit" ? (
+      {open && !openBlocked && peek === "edit" ? (
         <DeskPeek title="Edit member biodata" kicker="Staff edit · not your profile" closeHref={fileHref} wide>
           <StaffMemberEdit
             id={open}

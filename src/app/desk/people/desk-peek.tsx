@@ -43,24 +43,38 @@ export function DeskPeek({
 
   if (!mounted) return null;
   return createPortal(
-    <div className="desk-ticket-layer portrait-peek-layer" role="presentation" onClick={() => router.replace(closeHref)}>
+    <div className="desk-ticket-layer portrait-peek-layer desk-review-layer" role="presentation" onClick={() => router.replace(closeHref)}>
       <div
-        className={`desk-ticket-modal card-3d portrait-peek-modal desk-peek-modal${wide ? " is-wide" : ""}`}
+        className={`desk-ticket-modal card-3d portrait-peek-modal desk-peek-modal is-premium${wide ? " is-wide" : ""}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="desk-peek-title"
         onClick={(event) => event.stopPropagation()}
       >
+        <span className="desk-peek-glow" aria-hidden />
+        <span className="desk-peek-corner is-tl" aria-hidden />
+        <span className="desk-peek-corner is-tr" aria-hidden />
+        <span className="desk-peek-corner is-bl" aria-hidden />
+        <span className="desk-peek-corner is-br" aria-hidden />
         <div className="desk-peek-handle" aria-hidden />
         <header className="desk-peek-head">
-          <div>
+          <span className="desk-peek-seal" aria-hidden>
+            ✦
+          </span>
+          <div className="desk-peek-head-copy">
             <p className="browse-kicker">{kicker}</p>
             <h2 id="desk-peek-title">{title}</h2>
           </div>
+          <em className="desk-peek-mark">House review</em>
           <button type="button" className={`${btnGhost} desk-ticket-modal-close`} onClick={() => router.replace(closeHref)}>
             Close
           </button>
         </header>
+        <div className="desk-peek-bar" aria-hidden>
+          <i />
+          <i />
+          <i />
+        </div>
         <div className="desk-peek-body">{children}</div>
       </div>
     </div>,
