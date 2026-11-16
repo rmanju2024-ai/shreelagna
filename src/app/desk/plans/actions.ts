@@ -19,22 +19,7 @@ function addMonths(from: Date, months: number) {
 }
 
 type AnyDb = {
-  from: (table: string) => {
-    select: (cols: string) => {
-      eq: (col: string, value: string) => {
-        maybeSingle: () => Promise<{ data: Record<string, unknown> | null }>;
-      };
-    };
-    update: (row: Record<string, unknown>) => {
-      eq: (col: string, value: string) => PromiseLike<unknown> & {
-        eq: (col: string, value: string) => PromiseLike<unknown>;
-      };
-      neq: (col: string, value: string) => PromiseLike<unknown>;
-    };
-    insert: (row: Record<string, unknown>) => {
-      select: (cols: string) => { maybeSingle: () => Promise<{ data: Record<string, unknown> | null }> };
-    };
-  };
+  from: (table: string) => any;
 };
 
 function asDb(db: unknown): AnyDb {
@@ -50,11 +35,7 @@ async function activateRow(
   const starts = new Date();
   const ends = addMonths(starts, months);
   if (row.profile_id) {
-    await (db as { from: (t: string) => { update: (r: object) => { eq: (c: string, v: string) => { eq: (c: string, v: string) => PromiseLike<unknown> } } } })
-      .from("memberships")
-      .update({ status: "cancelled" })
-      .eq("profile_id", row.profile_id)
-      .eq("status", "active");
+    await db.from("memberships").update({ status: "cancelled" }).eq("profile_id", row.profile_id).eq("status", "active");
   } else {
     await db.from("memberships").update({ status: "cancelled" }).eq("user_id", row.user_id).eq("status", "active");
   }
@@ -155,17 +136,7 @@ export async function grantPlan(formData: FormData) {
   const { data: member } = await db.from("app_users").select("id, role, email").eq("email", email).maybeSingle();
   if (!member || member.role === "admin") return;
   const memberId = String(member.id ?? "");
-  const { data: firstProfile } = await (db as {
-    from: (t: string) => {
-      select: (c: string) => {
-        eq: (c: string, v: string) => {
-          order: (c: string, o: { ascending: boolean }) => {
-            limit: (n: number) => { maybeSingle: () => Promise<{ data: { id?: string } | null }> };
-          };
-        };
-      };
-    };
-  })
+  const { data: firstProfile } = await db
     .from("profiles")
     .select("id")
     .eq("created_by", memberId)
@@ -174,11 +145,7 @@ export async function grantPlan(formData: FormData) {
     .maybeSingle();
   const grantProfileId = firstProfile?.id ? String(firstProfile.id) : null;
   if (grantProfileId) {
-    await (db as { from: (t: string) => { update: (r: object) => { eq: (c: string, v: string) => { eq: (c: string, v: string) => PromiseLike<unknown> } } } })
-      .from("memberships")
-      .update({ status: "cancelled" })
-      .eq("profile_id", grantProfileId)
-      .eq("status", "pending");
+    await db.from("memberships").update({ status: "cancelled" }).eq("profile_id", grantProfileId).eq("status", "pending");
   } else {
     await db.from("memberships").update({ status: "cancelled" }).eq("user_id", memberId).eq("status", "pending");
   }

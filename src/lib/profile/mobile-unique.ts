@@ -22,27 +22,17 @@ export function sameIndiaMobile(a: string | null | undefined, b: string | null |
   return Boolean(left && right && left === right);
 }
 
-type ProfileClient = {
-  from: (table: string) => {
-    select: (cols: string) => {
-      in: (
-        col: string,
-        values: string[],
-      ) => PromiseLike<{ data: { id: string; subject_mobile?: string | null }[] | null }>;
-    };
-  };
-};
-
 export async function findProfileUsingMobile(
-  db: ProfileClient,
+  db: unknown,
   mobile: string,
   exceptProfileId?: string | null,
 ): Promise<{ id: string } | null> {
   const key = mobileKey(mobile);
   const variants = mobileLookupValues(mobile);
   if (!key || !variants.length) return null;
-  const { data } = await db.from("profiles").select("id, subject_mobile").in("subject_mobile", variants);
-  const hit = (data ?? []).find((row) => {
+  const client = db as { from: (table: string) => any };
+  const { data } = await client.from("profiles").select("id, subject_mobile").in("subject_mobile", variants);
+  const hit = ((data ?? []) as { id: string; subject_mobile?: string | null }[]).find((row) => {
     if (exceptProfileId && row.id === exceptProfileId) return false;
     return sameIndiaMobile(row.subject_mobile, key) || digitsOnly(row.subject_mobile).endsWith(key);
   });
