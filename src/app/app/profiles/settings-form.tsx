@@ -109,18 +109,6 @@ export function SettingsForm({
           hint="Alert me when interest is received, accepted, or declined."
           checked={values.notifyInterest}
         />
-        <Toggle
-          name="notify_whatsapp"
-          title="WhatsApp alerts"
-          hint="Interest, views and plan notes on WhatsApp. Confirm mobile on your profile first."
-          checked={values.notifyWhatsapp}
-        />
-        <Toggle
-          name="notify_match_email"
-          title="Email new match suggestions"
-          hint="Send a note when a complete profile fits your partner preference."
-          checked={values.notifyMatchEmail}
-        />
       </section>
 
       {values.paused ? (

@@ -222,16 +222,7 @@ export async function saveProfileSettings(formData: FormData) {
     const again = await supabase.from("profiles").update(payload).eq("id", profileId);
     error = again.error;
   }
-  const mail: Record<string, unknown> = {
-    notify_match_email: formData.get("notify_match_email") === "on",
-    notify_whatsapp: formData.get("notify_whatsapp") === "on",
-  };
-  let emailUpdate = await supabase.from("app_users").update(mail).eq("id", me.id);
-  while (emailUpdate.error && missingPayloadColumn(emailUpdate.error, mail)) {
-    delete mail[missingPayloadColumn(emailUpdate.error, mail)!];
-    emailUpdate = await supabase.from("app_users").update(mail).eq("id", me.id);
-  }
-  if (error || emailUpdate.error) redirect("/app/settings?error=save");
+  if (error) redirect("/app/settings?error=save");
   await writeAudit({
     actorUserId: me.id,
     actorRole: me.role,

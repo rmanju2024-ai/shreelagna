@@ -20,31 +20,17 @@ export default async function SettingsPage({
   const me = await ensureAppUser(supabase, user);
   if (!me) redirect("/login?error=account");
 
-  const [{ data: profiles }, accountResult] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("id, status, updated_at, hide_last_seen, hide_photo_until_accept, hide_details_until_accept, contact_release_mode, notify_profile_views, notify_interest")
-      .eq("created_by", me.id)
-      .order("updated_at", { ascending: false }),
-    supabase.from("app_users").select("notify_match_email, notify_whatsapp").eq("id", me.id).maybeSingle(),
-  ]);
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select(
+      "id, status, updated_at, hide_last_seen, hide_photo_until_accept, hide_details_until_accept, contact_release_mode, notify_profile_views, notify_interest",
+    )
+    .eq("created_by", me.id)
+    .order("updated_at", { ascending: false });
   const profile =
     profiles?.find((row) => row.id === me.active_profile_id) ??
     ((profiles?.length ?? 0) === 1 ? profiles?.[0] : undefined);
   if (!profile) redirect((profiles?.length ?? 0) > 1 ? "/?pick=1" : "/app");
-
-  let account = accountResult.data;
-  const accountError = accountResult.error;
-  if (accountError) {
-    const retry = await supabase
-      .from("app_users")
-      .select("notify_match_email")
-      .eq("id", me.id)
-      .maybeSingle();
-    account = retry.data
-      ? { notify_whatsapp: true, ...retry.data }
-      : retry.data;
-  }
 
   const scene = parseScene((await cookies()).get(SCENE_COOKIE)?.value);
 
@@ -58,7 +44,7 @@ export default async function SettingsPage({
           </p>
         ) : null}
         <ScenePicker initial={scene} />
-        <SettingsForm profileId={profile.id} values={readProfileSettings(profile, account)} canDelete={me.role !== "admin"} />
+        <SettingsForm profileId={profile.id} values={readProfileSettings(profile)} canDelete={me.role !== "admin"} />
       </div>
     </PageShell>
   );
