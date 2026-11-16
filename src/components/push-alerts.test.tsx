@@ -32,7 +32,7 @@ describe("Turn on alerts", () => {
       </InstallAppRoot>,
     );
     expect(screen.getByRole("region", { name: /device alerts/i })).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: /enable notifications/i }));
+    fireEvent.click(screen.getByRole("switch", { name: /device alerts/i }));
     expect((await screen.findAllByText(/push alerts are not set up/i)).length).toBeGreaterThan(0);
   });
 });

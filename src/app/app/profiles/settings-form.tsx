@@ -23,7 +23,14 @@ function Toggle({
         <b>{title}</b>
         <small>{hint}</small>
       </span>
-      <input type="checkbox" name={name} defaultChecked={checked} />
+      <input
+        type="checkbox"
+        className="set-switch"
+        name={name}
+        role="switch"
+        defaultChecked={checked}
+        aria-label={title}
+      />
     </label>
   );
 }

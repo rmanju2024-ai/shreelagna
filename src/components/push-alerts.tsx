@@ -168,21 +168,22 @@ export function PushAlertsControl({ compact = false }: { compact?: boolean }) {
     );
   }
 
+  const on = status === "granted";
   return (
-    <div className="push-alerts-card" role="region" aria-label="Device alerts">
+    <div className="set-row push-alerts-card" role="region" aria-label="Device alerts">
       <p>
         <b>Device alerts</b>
-        <span>{label}</span>
+        <small>{label}</small>
       </p>
-      {status === "granted" ? (
-        <button type="button" className="install-app-go" onClick={() => void disable()}>
-          Turn off
-        </button>
-      ) : (
-        <button type="button" className="install-app-go" onClick={() => void enable()} disabled={status === "saving"}>
-          {status === "saving" ? "Turning on…" : "Enable notifications"}
-        </button>
-      )}
+      <button
+        type="button"
+        className="set-switch"
+        role="switch"
+        aria-checked={on}
+        aria-label="Device alerts"
+        disabled={status === "saving" || status === "unsupported"}
+        onClick={() => void (on ? disable() : enable())}
+      />
       {note ? <p className="push-alerts-note">{note}</p> : null}
     </div>
   );
