@@ -24,7 +24,7 @@ export type StaffAlert = {
   photo: string | null;
 };
 
-export async function loadStaffLikes(db: Db, ownerId: string): Promise<{
+export async function loadStaffLikes(db: Db, profileId: string): Promise<{
   received: InboxNote[];
   sent: InboxNote[];
   accepted: InboxNote[];
@@ -34,9 +34,7 @@ export async function loadStaffLikes(db: Db, ownerId: string): Promise<{
   pendingCount: number;
 }> {
   const empty = { received: [], sent: [], accepted: [], history: [], viewed: [], visited: [], pendingCount: 0 };
-  if (!ownerId) return empty;
-  const { data: mine } = await db.from("profiles").select("id").eq("created_by", ownerId);
-  const ids = (mine ?? []).map((row: { id: string }) => String(row.id));
+  const ids = profileId ? [profileId] : [];
   if (!ids.length) return empty;
   const idSet = new Set(ids);
 
@@ -123,26 +121,33 @@ export async function loadStaffLikes(db: Db, ownerId: string): Promise<{
   };
 }
 
-export async function loadStaffAlerts(db: Db, ownerId: string): Promise<{ alerts: StaffAlert[]; unread: number }> {
+export async function loadStaffAlerts(
+  db: Db,
+  ownerId: string,
+  profileId?: string | null,
+): Promise<{ alerts: StaffAlert[]; unread: number }> {
   if (!ownerId) return { alerts: [], unread: 0 };
   const { data: notices } = await db
     .from("notices")
-    .select("id, kind, title, body, href, created_at, read_at, match_profile_id")
+    .select("id, kind, title, body, href, created_at, read_at, match_profile_id, for_profile_id")
     .eq("user_id", ownerId)
     .neq("kind", "chat")
     .order("created_at", { ascending: false })
-    .limit(50);
-  const collapsed = collapseNotices(
-    (notices ?? []) as {
-      id: string;
-      kind: string;
-      title?: string | null;
-      body?: string | null;
-      created_at: string;
-      read_at?: string | null;
-      match_profile_id?: string | null;
-    }[],
-  );
+    .limit(80);
+  const rows = (notices ?? []) as {
+    id: string;
+    kind: string;
+    title?: string | null;
+    body?: string | null;
+    created_at: string;
+    read_at?: string | null;
+    match_profile_id?: string | null;
+    for_profile_id?: string | null;
+  }[];
+  const scoped = profileId
+    ? rows.filter((row) => !row.for_profile_id || row.for_profile_id === profileId)
+    : rows;
+  const collapsed = collapseNotices(scoped);
   const profileIds = [...new Set(collapsed.map((row) => row.match_profile_id).filter(Boolean))] as string[];
   const { data: photos } = profileIds.length
     ? await db.from("media").select("profile_id, storage_path").eq("kind", "photo").eq("status", "approved").in("profile_id", profileIds)

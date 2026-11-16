@@ -168,7 +168,15 @@ export default async function DeskPeoplePage({
       ) : null}
       {open && peek === "inbox" ? (
         <DeskPeek title="Inbox preview" closeHref={fileHref}>
-          <StaffInboxPreview db={db} profileId={open} ownerId={ownerId} tab={tab} threadId={thread} baseHref={fileHref} />
+          <StaffInboxPreview
+            db={db}
+            profileId={open}
+            ownerId={ownerId}
+            tab={tab}
+            threadId={thread}
+            section={section}
+            baseHref={fileHref}
+          />
         </DeskPeek>
       ) : null}
       {open && peek === "edit" ? (

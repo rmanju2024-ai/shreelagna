@@ -175,7 +175,6 @@ export async function MemberDossier({
           )}
         </span>
         <div>
-          <p className="browse-kicker">Member file</p>
           <h2>{profile.subject_full_name || "Unnamed"}</h2>
           <p className="desk-file-sub">
             {kindLabel(profile.profile_type)} · {profile.member_code || "No member ID"}
@@ -217,14 +216,17 @@ export async function MemberDossier({
       </dl>
 
       <div className="desk-file-actions">
-        <Link href={join("peek=profile")} className={btnGhost} scroll={false}>
-          Preview profile
+        <Link href={join("peek=profile")} className={`${btnGhost} desk-file-act`} scroll={false}>
+          <span className="desk-act-long">Preview profile</span>
+          <span className="desk-act-short">Profile</span>
         </Link>
-        <Link href={join("peek=inbox")} className={btnGhost} scroll={false}>
-          Preview inbox
+        <Link href={join("peek=inbox")} className={`${btnGhost} desk-file-act`} scroll={false}>
+          <span className="desk-act-long">Preview inbox</span>
+          <span className="desk-act-short">Inbox</span>
         </Link>
-        <Link href={join("peek=edit")} className={btnGhost} scroll={false}>
-          Edit biodata
+        <Link href={join("peek=edit")} className={`${btnGhost} desk-file-act`} scroll={false}>
+          <span className="desk-act-long">Edit biodata</span>
+          <span className="desk-act-short">Edit</span>
         </Link>
       </div>
 

@@ -10,9 +10,14 @@ import { pageCount, pageItems, PROFILE_PAGE_SIZE } from "@/lib/match/inbox-card"
 import { btnGhost, btnPrimary } from "@/lib/ui/classes";
 import { withProfileFrom } from "@/lib/ui/dismiss";
 
-function profileHref(note: { href?: string; profileId?: string }): string | undefined {
+function profileHref(note: { href?: string; profileId?: string }, from: "likes" | "desk" = "likes"): string | undefined {
   const href = note.href ?? (note.profileId ? `/browse/${note.profileId}` : undefined);
-  return href ? withProfileFrom(href, "likes") : undefined;
+  if (!href) return undefined;
+  if (from === "desk") {
+    const join = href.includes("?") ? "&" : "?";
+    return `${href}${join}from=desk`;
+  }
+  return withProfileFrom(href, "likes");
 }
 
 export type InboxNote = {
@@ -51,9 +56,13 @@ export function InboxBoard({
   visited = [],
   only,
   readOnly = false,
+  viewAllHref,
+  openFrom = "likes",
 }: {
   only?: SectionId;
   readOnly?: boolean;
+  viewAllHref?: (section: SectionId) => string;
+  openFrom?: "likes" | "desk";
   received: InboxNote[];
   sent: InboxNote[];
   accepted: InboxNote[];
@@ -92,7 +101,7 @@ export function InboxBoard({
     if (section) {
       return (
         <article className="sx-board inbox-modern">
-          <NoteList empty={section.empty} notes={notes[only]} actions={actions[only]} />
+          <NoteList empty={section.empty} notes={notes[only]} actions={actions[only]} openFrom={openFrom} />
         </article>
       );
     }
@@ -101,7 +110,14 @@ export function InboxBoard({
   return (
     <article className="sx-feed inbox-modern is-board">
       {SECTIONS.map((section) => (
-        <LikesSection key={section.id} section={section} notes={notes[section.id]} actions={actions[section.id]} />
+        <LikesSection
+          key={section.id}
+          section={section}
+          notes={notes[section.id]}
+          actions={actions[section.id]}
+          viewAllHref={viewAllHref}
+          openFrom={openFrom}
+        />
       ))}
     </article>
   );
@@ -111,10 +127,14 @@ function LikesSection({
   section,
   notes,
   actions,
+  viewAllHref,
+  openFrom = "likes",
 }: {
   section: (typeof SECTIONS)[number];
   notes: InboxNote[];
   actions?: (note: InboxNote) => ReactNode;
+  viewAllHref?: (section: SectionId) => string;
+  openFrom?: "likes" | "desk";
 }) {
   const [start, setStart] = useState(0);
   const count = notes.length;
@@ -156,7 +176,7 @@ function LikesSection({
           <div className="sx-row-clip">
             <ul className="sx-row" data-start={String(start)}>
               {shown.map((note) => (
-                <PreviewCard key={note.id} note={note} actions={actions} />
+                <PreviewCard key={note.id} note={note} actions={actions} openFrom={openFrom} />
               ))}
             </ul>
           </div>
@@ -181,7 +201,7 @@ function LikesSection({
       )}
       <div className="sx-view-all-center">
         {count > LIKES_PREVIEW_LIMIT ? (
-          <a className="sx-view-all" href={`/app/interests/all?s=${section.id}`}>
+          <a className="sx-view-all" href={viewAllHref ? viewAllHref(section.id) : `/app/interests/all?s=${section.id}`}>
             View all {count} profiles <span aria-hidden>→</span>
           </a>
         ) : (
@@ -192,9 +212,17 @@ function LikesSection({
   );
 }
 
-function PreviewCard({ note, actions }: { note: InboxNote; actions?: (note: InboxNote) => ReactNode }) {
+function PreviewCard({
+  note,
+  actions,
+  openFrom = "likes",
+}: {
+  note: InboxNote;
+  actions?: (note: InboxNote) => ReactNode;
+  openFrom?: "likes" | "desk";
+}) {
   const router = useRouter();
-  const href = profileHref(note);
+  const href = profileHref(note, openFrom);
   return (
     <li
       className={`sx-card inbox-card inbox-profile${href ? " is-openable" : ""}`}
@@ -203,7 +231,7 @@ function PreviewCard({ note, actions }: { note: InboxNote; actions?: (note: Inbo
         router.push(href);
       }}
     >
-      <CardFace note={note} actions={actions ? actions(note) : null} />
+      <CardFace note={note} actions={actions ? actions(note) : null} openFrom={openFrom} />
     </li>
   );
 }
@@ -284,8 +312,16 @@ function cardChips(note: InboxNote): string[] {
   ].filter(Boolean);
 }
 
-function CardFace({ note, actions }: { note: InboxNote; actions?: ReactNode }) {
-  const href = profileHref(note);
+function CardFace({
+  note,
+  actions,
+  openFrom = "likes",
+}: {
+  note: InboxNote;
+  actions?: ReactNode;
+  openFrom?: "likes" | "desk";
+}) {
+  const href = profileHref(note, openFrom);
   const facts = [note.age, note.height].filter(Boolean).join(" · ");
   const place = [note.city, note.state].filter(Boolean).join(", ");
   const tags = [[note.religion, note.community].filter(Boolean).join(" · "), note.education ?? "", note.occupation ?? ""].filter(Boolean);
@@ -364,10 +400,12 @@ function NoteList({
   notes,
   empty,
   actions,
+  openFrom = "likes",
 }: {
   notes: InboxNote[];
   empty: string;
   actions?: (note: InboxNote) => ReactNode;
+  openFrom?: "likes" | "desk";
 }) {
   const router = useRouter();
   const [page, setPage] = useState(1);
@@ -387,14 +425,14 @@ function NoteList({
     <div>
       <ul className="sx-grid is-results-list inbox-list">
         {shown.map((note) => {
-          const href = profileHref(note);
+          const href = profileHref(note, openFrom);
           return (
           <li
             key={note.id}
             className={`sx-card inbox-card inbox-profile${href ? " is-openable" : ""}`}
             onClick={(event) => openProfile(event, href)}
           >
-            <CardFace note={note} actions={actions ? actions(note) : null} />
+            <CardFace note={note} actions={actions ? actions(note) : null} openFrom={openFrom} />
           </li>
           );
         })}

@@ -42,13 +42,7 @@ export async function loadStaffInbox(
   db: TicketClient,
   profileId: string,
 ): Promise<{ myIds: string[]; threads: StaffInboxThread[] }> {
-  const { data: profile } = await db.from("profiles").select("id, created_by").eq("id", profileId).maybeSingle();
-  if (!profile) return { myIds: [profileId], threads: [] };
-  const ownerId = String(profile.created_by ?? "");
-  const { data: mine } = ownerId
-    ? await db.from("profiles").select("id").eq("created_by", ownerId)
-    : { data: [{ id: profileId }] };
-  const myIds = [...new Set([profileId, ...(mine ?? []).map((row: { id: string }) => String(row.id)).filter(Boolean)])];
+  const myIds = [profileId];
   const open = await threadsOwnedBy(db, myIds);
   const otherIds = [
     ...new Set(

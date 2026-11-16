@@ -49,6 +49,7 @@ export function DeskPeek({
         aria-labelledby="desk-peek-title"
         onClick={(event) => event.stopPropagation()}
       >
+        <div className="desk-peek-handle" aria-hidden />
         <header className="desk-peek-head">
           <div>
             <p className="browse-kicker">{kicker}</p>

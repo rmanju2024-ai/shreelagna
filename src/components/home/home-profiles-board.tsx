@@ -176,25 +176,25 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
                 </p>
                 <dl>
                   <div>
-                    <dt title="Times families opened this profile">Views</dt>
+                    <dt title="Profile views">Views</dt>
                     <dd>{s.views}</dd>
                   </div>
                   <div>
-                    <dt title="Interests received">Received</dt>
+                    <dt title="Interests received">Interest in</dt>
                     <dd>{s.interestsIn}</dd>
                   </div>
                   <div>
-                    <dt title="Interests sent">Sent</dt>
+                    <dt title="Interests sent">Interest out</dt>
                     <dd>{s.interestsOut}</dd>
                   </div>
                   <div>
-                    <dt title="Open chats">Chats</dt>
+                    <dt title="Chat threads">Chats</dt>
                     <dd>{s.chats}</dd>
                   </div>
                 </dl>
                 {on ? (
                   <button type="button" className={btnPrimary} disabled>
-                    Selected
+                    In use
                   </button>
                 ) : (
                   <form action={setActiveProfile}>
