@@ -38,7 +38,6 @@ export function ChatThreadList({
       {threads.map((thread) => {
         const href = hrefFor ? hrefFor(thread.id) : `/app/chat/${thread.id}`;
         const on = hrefFor ? thread.id === activeId : path === href;
-        const on = path === href;
         return (
           <li key={thread.id}>
             <Link
