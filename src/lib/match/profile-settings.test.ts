@@ -18,6 +18,27 @@ describe("profile settings", () => {
     expect(settings.paused).toBe(false);
   });
 
+  it("keeps two profiles' settings independent", () => {
+    const bride = readProfileSettings({
+      hide_last_seen: true,
+      notify_interest: false,
+      hide_photo_until_accept: false,
+      status: "active",
+    });
+    const groom = readProfileSettings({
+      hide_last_seen: false,
+      notify_interest: true,
+      hide_photo_until_accept: true,
+      status: "hidden",
+    });
+    expect(bride.hideLastSeen).toBe(true);
+    expect(groom.hideLastSeen).toBe(false);
+    expect(bride.notifyInterest).toBe(false);
+    expect(groom.notifyInterest).toBe(true);
+    expect(bride.paused).toBe(false);
+    expect(groom.paused).toBe(true);
+  });
+
   it("reads pause", () => {
     expect(readProfileSettings({ status: "hidden", incognito_browse: true }).paused).toBe(true);
     expect(canAlertProfileView({ notify_profile_views: false })).toBe(false);

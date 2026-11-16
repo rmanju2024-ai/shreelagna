@@ -10,6 +10,7 @@ export const BROWSE_PROFILE_COLUMNS = [
   "status",
   "subject_full_name",
   "hide_last_seen",
+  "hide_photo_until_accept",
   "last_seen_at",
   "date_of_birth",
   "height_cm",

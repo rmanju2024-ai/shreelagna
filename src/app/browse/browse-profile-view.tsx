@@ -6,7 +6,8 @@ import { displayFirstName } from "@/lib/profile/options";
 import { parentSentence } from "@/lib/profile/parent-line";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { kundaliScore } from "@/lib/match/kundali";
-import { photosVisible } from "@/lib/match/photo-privacy";
+import { detailsVisible, photosVisible } from "@/lib/match/photo-privacy";
+import { workingProfileId } from "@/lib/profile/working-profile";
 import { publicMediaUrl } from "@/lib/match/inbox-card";
 import { lastOnlineLine } from "@/lib/profile/last-seen";
 import {
@@ -338,8 +339,12 @@ export async function BrowseProfileView({
   needPlan = !access.live;
   const owner = ownerRes.data;
   const mineList = (myProfilesRes.data ?? []) as Record<string, unknown>[];
+  const workingId = workingProfileId(
+    me.active_profile_id,
+    mineList.map((row) => String(row.id)),
+  );
   const mine =
-    mineList.find((row) => row.id === me.active_profile_id) ??
+    mineList.find((row) => row.id === workingId) ??
     (mineList.length === 1
       ? mineList.find((row) => isListedProfileStatus(typeof row.status === "string" ? row.status : null)) ??
         mineList[0]
@@ -757,6 +762,33 @@ export async function BrowseProfileView({
     },
   ].filter((group) => group.lines.length || group.items.length || group.note);
 
+  const showFullDetails = detailsVisible({
+    own,
+    staff: isStaff,
+    hideUntilAccept: profile.hide_details_until_accept as boolean | null | undefined,
+    accepted: accepted && pairLive,
+  });
+  const lockedDetails = showFullDetails
+    ? details
+    : [
+        {
+          icon: "✦",
+          title: "Personal",
+          wide: true,
+          lines: linesOf(
+            age != null ? `${who} is ${age} years old` : null,
+            liveNow ? `${who} now lives in ${liveNow}` : null,
+          ),
+          items: factsOf(
+            religion ? { k: "Religion", v: religion } : null,
+            community ? { k: "Community", v: community } : null,
+          ),
+          note:
+            about ||
+            "Introduction and basic identity only. Full education, family and kundali open after you accept their interest.",
+        },
+      ];
+
   const theyAsk =
     !own && mine
       ? hopeComparisons(
@@ -848,7 +880,7 @@ export async function BrowseProfileView({
     preview: staffPreview,
     editHref: staffPreview ? undefined : editHref,
     user,
-    kundali: staffPreview ? null : kundali,
+    kundali: staffPreview || !showFullDetails ? null : kundali,
     interestId: staffPreview ? null : interestId,
     thread: staffPreview ? "none" : thread,
     canSend: staffPreview ? false : canSend,
@@ -882,10 +914,10 @@ export async function BrowseProfileView({
       }),
       cases: verifyCasesRes.data ?? [],
     }),
-    details,
-    matches: staffPreview || own || !mine ? [] : matchBanner(mine, profile, kundali),
-    hope,
-    fitScore: staffPreview ? null : fitScore,
+    details: lockedDetails,
+    matches: staffPreview || own || !mine || !showFullDetails ? [] : matchBanner(mine, profile, kundali),
+    hope: showFullDetails ? hope : [],
+    fitScore: staffPreview || !showFullDetails ? null : fitScore,
     chat: staffPreview
       ? undefined
       : {

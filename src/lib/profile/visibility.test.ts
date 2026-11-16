@@ -36,12 +36,12 @@ describe("visibility", () => {
     ).toBe(false);
   });
 
-  it("lets draft and review members search, but not hidden ones", () => {
+  it("lets draft, review and paused members search, but not banned ones", () => {
     expect(canSearchFamilies("draft")).toBe(true);
     expect(canSearchFamilies("pending_review")).toBe(true);
     expect(canSearchFamilies("active")).toBe(true);
+    expect(canSearchFamilies("hidden")).toBe(true);
     expect(canSearchFamilies("on_hold")).toBe(false);
-    expect(canSearchFamilies("hidden")).toBe(false);
     expect(canSearchFamilies("banned")).toBe(false);
     expect(canSearchFamilies("married")).toBe(false);
   });
@@ -123,7 +123,7 @@ describe("visibility", () => {
     ).toBe(true);
   });
 
-  it("blocks hidden viewers from opening other profiles", () => {
+  it("lets a paused member still open Search profiles", () => {
     expect(
       canViewProfile({
         viewerType: "vara",
@@ -133,10 +133,10 @@ describe("visibility", () => {
         isOwner: false,
         isStaff: false,
       }),
-    ).toBe(false);
+    ).toBe(true);
   });
 
-  it("lets sent or received interest open an active profile", () => {
+  it("lets sent or received interest open a paused profile they already know", () => {
     expect(
       canViewProfile({
         viewerType: null,
@@ -158,7 +158,7 @@ describe("visibility", () => {
         isStaff: false,
         linkedByInterest: true,
       }),
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it("lets the owner open their own hidden profile", () => {

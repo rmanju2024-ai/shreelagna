@@ -72,11 +72,17 @@ function cardFromRow(
     id: String(row.id),
     href: profileOpenHref(String(row.id), "discover"),
     name: displayFirstName(typeof row.subject_full_name === "string" ? row.subject_full_name : "Profile"),
-    photoUrl: publicMediaUrl(photoMap.get(String(row.id)) ?? photoLists.get(String(row.id))?.[0]),
-    photoUrls: (photoLists.get(String(row.id)) ?? [])
-      .map((path) => publicMediaUrl(path))
-      .filter((url): url is string => Boolean(url))
-      .slice(0, row.status === "pending_review" ? 1 : 3),
+    photoUrl:
+      row.hide_photo_until_accept === true
+        ? null
+        : publicMediaUrl(photoMap.get(String(row.id)) ?? photoLists.get(String(row.id))?.[0]),
+    photoUrls:
+      row.hide_photo_until_accept === true
+        ? []
+        : (photoLists.get(String(row.id)) ?? [])
+            .map((path) => publicMediaUrl(path))
+            .filter((url): url is string => Boolean(url))
+            .slice(0, row.status === "pending_review" ? 1 : 3),
     lastOnline: inboxLastOnline(
       Boolean(row.hide_last_seen),
       typeof row.last_seen_at === "string" ? row.last_seen_at : null,
@@ -222,7 +228,7 @@ export async function BrowsePage({
       if (!mine) {
         notice = "Create a profile first, then search.";
       } else if (!canSearchFamilies(mine.status as string | undefined)) {
-        notice = "Hidden or inactive profiles cannot search other families.";
+        notice = "This profile cannot search other families right now.";
       } else {
         const want =
           mine.profile_type === "vadhu" || mine.profile_type === "vara"

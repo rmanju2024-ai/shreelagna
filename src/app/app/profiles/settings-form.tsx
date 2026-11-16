@@ -3,6 +3,7 @@
 import { saveProfileSettings } from "@/app/app/match/actions";
 import { ProfileDeleteControl } from "@/app/app/profiles/profile-delete-control";
 import { PushAlertsControl } from "@/components/push-alerts";
+import { Select3d } from "@/components/select3d";
 import type { ProfileSettings } from "@/lib/match/profile-settings";
 import { btnHero } from "@/lib/ui/classes";
 
@@ -37,20 +38,28 @@ function Toggle({
 
 export function SettingsForm({
   profileId,
+  profileLabel,
+  canPause = true,
   values,
   canDelete = true,
 }: {
   profileId: string;
+  profileLabel?: string;
+  canPause?: boolean;
   values: ProfileSettings;
   canDelete?: boolean;
 }) {
   return (
     <div className="set-panel">
-      <form action={saveProfileSettings}>
+      <form action={saveProfileSettings} key={profileId}>
       <input type="hidden" name="profile_id" value={profileId} />
       <p className="set-kicker">Premium settings</p>
       <h2>Privacy, discovery and alerts</h2>
-      <p className="set-lead">Control who sees you, and what reaches you. Changes apply at once.</p>
+      <p className="set-lead">
+        {profileLabel
+          ? `These choices apply only to ${profileLabel}. Switch the profile in use on Home to set another.`
+          : "Control who sees you, and what reaches you. Changes apply at once."}
+      </p>
 
       <section>
         <h3>Privacy</h3>
@@ -72,26 +81,34 @@ export function SettingsForm({
           hint="Show only the introduction and basic identity until you accept their interest."
           checked={values.hideDetailsUntilAccept}
         />
-        <label className="set-row">
+        <div className="set-row set-row-select">
           <span>
             <b>Contact release</b>
-            <small>Choose whether your mobile and email can be revealed after an accepted interest.</small>
+            <small>Choose when your mobile and email can be shown. Open the list — two options.</small>
           </span>
-          <select name="contact_release_mode" defaultValue={values.contactReleaseMode}>
-            <option value="accepted_interest">After accepted interest</option>
-            <option value="never">Keep private</option>
-          </select>
-        </label>
+          <Select3d
+            name="contact_release_mode"
+            defaultValue={values.contactReleaseMode}
+            aria-label="Contact release options"
+          >
+            <option value="accepted_interest">After you accept their interest</option>
+            <option value="never">Keep mobile and email private</option>
+          </Select3d>
+        </div>
       </section>
 
       <section>
         <h3>Discovery</h3>
-        <Toggle
-          name="pause_profile"
-          title="Pause my profile"
-          hint="Hide from Search until you turn this off. Inbox and chat stay with people you already know."
-          checked={values.paused}
-        />
+        {canPause ? (
+          <Toggle
+            name="pause_profile"
+            title="Pause my profile"
+            hint="Hide this profile from Search. Inbox and chat stay with families you already know. You can still Search."
+            checked={values.paused}
+          />
+        ) : (
+          <p className="set-note">Pause is available after this profile is live.</p>
+        )}
       </section>
 
       <section>
