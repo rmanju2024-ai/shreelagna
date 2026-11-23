@@ -1,4 +1,32 @@
 /* MarriageConnect — modern theme layer (loaded after globals.css, applies site-wide) */
+.first-gate {
+  margin: 0 0 1.25rem;
+  padding: 1rem 1.1rem 0.9rem;
+  border: 1px solid rgb(184 137 76 / 45%);
+  border-radius: 1.2rem;
+  background: #fffaf2;
+}
+.first-gate h2 { margin: 0.2rem 0 0.45rem; font-size: 1.35rem; }
+.first-gate > p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+.first-gate ul { margin: 0.8rem 0 0; padding: 0; list-style: none; display: grid; gap: 0.45rem; }
+.first-gate li {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.8rem;
+  background: #fff;
+}
+.first-gate li.is-asked { outline: 2px solid #6f1d1b; }
+.first-gate li span { color: var(--muted); font-size: 0.82rem; }
+.first-gate-next, .first-gate-go { margin: 0.75rem 0 0; }
+.first-gate-go {
+  display: inline-flex;
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  background: #6f1d1b;
+  color: #fffaf2;
+  font-weight: 650;
+}
 .opening-splash {
   position: fixed;
   inset: 0;

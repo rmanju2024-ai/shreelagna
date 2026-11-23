@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BannerGreeting } from "@/components/home/banner-greeting";
+import { FirstProfileGate } from "@/components/home/first-profile-gate";
 import { setActiveProfile } from "@/app/app/profiles/actions";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { publicMediaUrl } from "@/lib/match/inbox-card";
@@ -46,11 +47,7 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
     return (
       <div className="home-family">
         <BannerGreeting asMember />
-        <div className="home-invite-actions home-family-cta">
-          <Link href="/app/profiles/new" className={btnHero}>
-            Create your first profile
-          </Link>
-        </div>
+        <FirstProfileGate compact />
       </div>
     );
   }

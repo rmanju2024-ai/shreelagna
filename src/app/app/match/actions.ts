@@ -6,7 +6,7 @@ import { recordAndDeliverNotice } from "@/lib/notify/house-notice";
 import { missingPayloadColumn, isMissingColumnError } from "@/lib/profile/db-errors";
 import { chatReceivedCopy, interestAcceptedCopy, interestDeclinedCopy } from "@/lib/match/alert-copy";
 import { canAlertInterest, parseContactReleaseMode } from "@/lib/match/profile-settings";
-import { orderedProfilePair, pairCanChat, isStalePending, trimDeclineReason } from "@/lib/match/interest-status";
+import { orderedProfilePair, pairCanChat, hasAcceptedInterest, isStalePending, trimDeclineReason } from "@/lib/match/interest-status";
 import { loadMembership } from "@/lib/membership/load";
 import { canSearchFamilies } from "@/lib/profile/visibility";
 import { loadHouseReady, viewerEmailVerified } from "@/lib/profile/house-ready";
@@ -332,7 +332,8 @@ async function postChatMessage(formData: FormData) {
     .limit(8);
   if (!pairCanChat(interestRows ?? [], mine.id, other.id)) return { ok: false as const, bounce, threadId };
   const myAccess = await loadMembership(supabase, me, { id: mine.id });
-  if (!myAccess.live) return { ok: false as const, bounce, threadId };
+  const acceptedPair = hasAcceptedInterest(interestRows ?? [], mine.id, other.id);
+  if (!myAccess.live && !acceptedPair) return { ok: false as const, bounce, threadId };
   const text = body.slice(0, 4000);
   const inserted = await supabase.from("messages").insert({
     thread_id: threadId,

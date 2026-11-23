@@ -6,7 +6,7 @@ import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { publicMediaUrl } from "@/lib/match/inbox-card";
 import { isOnlineNow } from "@/lib/profile/last-seen";
 import { chatPresenceLine } from "@/lib/match/salon-thread";
-import { pairCanChat } from "@/lib/match/interest-status";
+import { hasAcceptedInterest, pairCanChat } from "@/lib/match/interest-status";
 import { loadMembership } from "@/lib/membership/load";
 import { displayFirstName } from "@/lib/profile/options";
 import { profileOpenHref } from "@/lib/ui/dismiss";
@@ -80,7 +80,8 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
         .order("created_at"),
     ]);
   if (!pairCanChat(interestRows ?? [], mine.id, otherId)) notFound();
-  const chatLive = myAccess.live;
+  const acceptedPair = hasAcceptedInterest(interestRows ?? [], mine.id, otherId);
+  const chatLive = myAccess.live || acceptedPair;
   const otherOpen = Boolean(other && other.status === "active");
   if (!otherOpen) notFound();
   const name =
@@ -110,7 +111,7 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
         presence={presence}
         online={online}
         needPlan={!thread.frozen && !chatLive}
-        planLapsed={myAccess.lapsed}
+        planLapsed={myAccess.lapsed && !acceptedPair}
         messages={[...(messages ?? [])].reverse().map((msg) => {
           const row = msg as typeof msg & { edited_at?: string | null; deleted_at?: string | null };
           return {

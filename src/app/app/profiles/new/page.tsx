@@ -5,14 +5,15 @@ import { canAddProfile } from "@/lib/profile/caps";
 import { listOwnProfiles } from "@/lib/profile/own-profile";
 import { loadFaithCatalog, loadFormLists } from "@/lib/profile/load-form-lists";
 import { redirect } from "next/navigation";
+import { FirstProfileGate, firstProfileFrom } from "@/components/home/first-profile-gate";
 import { ProfileForm } from "../profile-form";
 
 export default async function NewProfilePage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; from?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, from } = await searchParams;
   const { supabase, user } = await getAuth();
   if (!supabase || !user) redirect("/login?next=/app/profiles/new");
   const me = await ensureAppUser(supabase, user);
@@ -35,6 +36,7 @@ export default async function NewProfilePage({
           </div>
         </aside>
         <div>
+          {listed.length === 0 ? <FirstProfileGate from={firstProfileFrom(from)} /> : null}
           <ProfileForm
             error={error}
             loginEmail={me.email ?? user.email ?? ""}

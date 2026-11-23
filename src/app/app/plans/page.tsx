@@ -73,7 +73,7 @@ export default async function PlansPage({
             ) : (
               <p>
                 {access.lapsed
-                  ? "You can open a short profile only. Interest, chat, mobile and email stay closed until you renew."
+                  ? "You can open a short profile only, and you cannot send a new interest. You can still reply to an interest you received, and after you accept, that one profile and chat stay open."
                   : "Search remains open. A send request or contact view needs a plan."}
               </p>
             )}

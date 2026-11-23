@@ -436,7 +436,8 @@ export async function BrowseProfileView({
 
     const mode = parseContactReleaseMode(profile.contact_release_mode);
     const viewed = viewedRes.data;
-    const liveViewer = live || isStaff;
+    const openedByAccept = accepted;
+    const liveViewer = live || openedByAccept || isStaff;
     const eligible = isStaff || contactMayRelease(mode, { sentByMe, accepted });
     const revealed = eligible && (Boolean(viewed) || sentByMe || accepted || isStaff) && (complete || isStaff) && liveViewer;
     contact = {
@@ -447,7 +448,7 @@ export async function BrowseProfileView({
       accepted,
       needInterest: mode === "sent_interest" && !sentByMe && !accepted && !isStaff,
       needAccept: mode === "accepted_interest" && !accepted && !isStaff,
-      needPlan,
+      needPlan: needPlan && !accepted,
       needComplete: !complete && !isStaff,
       awaitingReview: complete && !live && !isStaff,
       counted: sentByMe || accepted || Boolean(viewed),
@@ -456,7 +457,7 @@ export async function BrowseProfileView({
         liveViewer &&
         !revealed &&
         eligible &&
-        !needPlan &&
+        (!needPlan || accepted) &&
         (quotaLeft === null || quotaLeft > 0 || sentByMe || accepted || Boolean(viewed) || isStaff),
       used: quotaUsed,
       left: quotaLeft,
@@ -584,8 +585,8 @@ export async function BrowseProfileView({
     own,
     staff: isStaff,
     hideUntilAccept: profile.hide_photo_until_accept as boolean | null | undefined,
-    accepted: accepted && pairLive,
-    interestReceived: Boolean(pairLive && ((interestStatus === "pending" && !sentByMe) || guestPass)),
+    accepted,
+    interestReceived: Boolean((interestStatus === "pending" && !sentByMe) || guestPass),
   });
   const sortedPhotos = mediaRows
     .filter((m) => m.kind === "photo")
@@ -774,7 +775,7 @@ export async function BrowseProfileView({
     own,
     staff: isStaff,
     hideUntilAccept: profile.hide_details_until_accept as boolean | null | undefined,
-    accepted: accepted && pairLive,
+    accepted,
   });
   const lockedDetails = showFullDetails
     ? details
@@ -892,8 +893,8 @@ export async function BrowseProfileView({
     interestId: staffPreview ? null : interestId,
     thread: staffPreview ? "none" : thread,
     canSend: staffPreview ? false : canSend,
-    needPlan,
-    planLapsed: access.lapsed,
+    needPlan: needPlan && !accepted,
+    planLapsed: access.lapsed && !accepted,
     needQuota,
     needDaily,
     quotaUsed,
@@ -933,7 +934,7 @@ export async function BrowseProfileView({
           myProfileId: myChatId,
           threadId: chatThreadId,
           notes: chatNotes,
-          live: access.live,
+          live: access.live || accepted,
           name: displayFirstName(typeof profile.subject_full_name === "string" ? profile.subject_full_name : "Match"),
           photo: photoUrls[0] ?? null,
           seen: lastSeen,
