@@ -82,6 +82,7 @@ export type ProfileData = {
   kundali?: { total?: number; max?: number; label?: string } | null;
   shortlisted: boolean;
   own: boolean;
+  listingStatus?: string | null;
   preview?: boolean;
   editHref?: string;
   user: unknown;
@@ -383,6 +384,26 @@ function PlanLock({
   );
 }
 
+function ListingStatus({ status }: { status?: string | null }) {
+  const key = status || "draft";
+  const copy: Record<string, { title: string; line: string }> = {
+    draft: { title: "Draft", line: "Still with you. Finish the must-haves and it goes to the house." },
+    pending_review: { title: "In review", line: "The house has this profile. Approval usually takes two to three days." },
+    active: { title: "Live", line: "Review is complete. Families can open this profile." },
+    hidden: { title: "Paused", line: "Hidden from Discover until you list it again." },
+    on_hold: { title: "On hold", line: "The house has paused this profile." },
+    married: { title: "Married", line: "This listing is closed." },
+    banned: { title: "Closed", line: "This profile is not listed." },
+  };
+  const item = copy[key] ?? { title: "Profile", line: "Status is on file with the house." };
+  return (
+    <p className={`pv-listing is-${key}`}>
+      <strong>{item.title}</strong>
+      <span>{item.line}</span>
+    </p>
+  );
+}
+
 function ReadyBanner({
   needComplete,
   needPlan,
@@ -605,6 +626,7 @@ export function ProfileRedesign(props: ProfileData) {
               </span>
             ) : null}
           </h1>
+          {props.own ? <ListingStatus status={props.listingStatus} /> : null}
           <p className="pv-meta">
             <span>
               {[props.age ? `${props.age} yrs` : null, props.place || null].filter(Boolean).join(" · ")}

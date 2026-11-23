@@ -895,6 +895,7 @@ export async function BrowseProfileView({
     house: owner?.role === "admin" ? "admin" : owner?.role === "service" ? "staff" : undefined,
     shortlisted: staffPreview ? false : shortlisted,
     own,
+    listingStatus: typeof profile.status === "string" ? profile.status : "draft",
     preview: staffPreview,
     editHref: staffPreview ? undefined : editHref,
     user,

@@ -925,6 +925,27 @@ table { max-width: 100%; }
   font-size: 0.86rem;
 }
 .profile-wizard-error { border: 1px solid #e7b4b0; background: #fff; color: #6f1d1b; }
+.pv-listing {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0.55rem 0 0.35rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 0.95rem;
+  border: 1px solid rgb(232 178 58 / 55%);
+  background: linear-gradient(180deg, #fffaf2, #f8ecd4);
+  max-width: 36rem;
+}
+.pv-listing strong {
+  font-family: var(--font-british), Georgia, serif;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: #6f1d1b;
+}
+.pv-listing span { color: #5c4636; font-size: 0.84rem; line-height: 1.35; }
+.pv-listing.is-active { border-color: rgb(31 138 50 / 35%); background: linear-gradient(180deg, #f4fbf4, #fffaf2); }
+.pv-listing.is-active strong { color: #1f6b32; }
+.pv-listing.is-pending_review strong { color: #8a5a18; }
 .media-progress {
   margin: 0 0 0.6rem;
   padding: 0.65rem 0.85rem;
