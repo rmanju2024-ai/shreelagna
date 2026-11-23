@@ -31,7 +31,7 @@ import { MobileOtpField } from "@/app/app/profiles/mobile-otp-field";
 import { ABOUT_MAX, ABOUT_MIN, FAMILY_NOTE_MAX } from "@/lib/profile/about-html";
 
 import type { ProfileFormValues } from "@/app/app/profiles/profile-form-types";
-import { Field, PlaceBlock, SaveButton, SiblingCounts } from "@/app/app/profiles/profile-form-parts";
+import { Field, PlaceBlock, SaveButton, SiblingCounts, WizardStepBar } from "@/app/app/profiles/profile-form-parts";
 import { useStudioTab } from "@/app/app/profiles/profile-studio";
 
 export type { ProfileFormValues };
@@ -1313,28 +1313,7 @@ export function ProfileForm({
       ) : null}
 
       {wizard ? (
-        <div className={`profile-wizard-actions${wizardStep === 1 ? " is-start" : ""}`}>
-          {wizardStep > 1 ? (
-            <button
-              type="button"
-              className={btnHeroGhost}
-              onClick={() => moveWizard(wizardStep - 1)}
-            >
-              ← Back
-            </button>
-          ) : (
-            <span className="profile-wizard-actions-spacer" aria-hidden="true" />
-          )}
-          <span>
-            Step {wizardStep} of {WIZARD_STEPS.length}
-            <small>Saved as you go</small>
-          </span>
-          {wizardStep < WIZARD_STEPS.length ? (
-            <button type="submit" name="save_intent" value="step" className={btnHero}>
-              Next
-            </button>
-          ) : null}
-        </div>
+        <WizardStepBar step={wizardStep} total={WIZARD_STEPS.length} onBack={() => moveWizard(wizardStep - 1)} />
       ) : null}
       {wizard && wizardStep === 5 ? (
         <div className="profile-readiness">

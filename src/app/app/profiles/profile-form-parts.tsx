@@ -7,7 +7,7 @@ import { FieldMark } from "@/app/app/profiles/field-mark";
 import { Select3d } from "@/components/select3d";
 import { citiesForState, type FormLists } from "@/lib/profile/form-lists";
 import { isIndiaNative } from "@/lib/profile/options";
-import { btnHero, inputClass } from "@/lib/ui/classes";
+import { btnHero, btnHeroGhost, inputClass } from "@/lib/ui/classes";
 
 export function PlaceBlock({
   title,
@@ -129,6 +129,45 @@ export function SaveButton() {
     <button type="submit" className={btnHero} disabled={pending}>
       {pending ? "Saving…" : "Save"}
     </button>
+  );
+}
+
+export function WizardStepBar({
+  step,
+  total,
+  onBack,
+}: {
+  step: number;
+  total: number;
+  onBack: () => void;
+}) {
+  const { pending } = useFormStatus();
+  return (
+    <>
+      {pending ? (
+        <p className="profile-wizard-saving" role="status">
+          Saving this page…
+        </p>
+      ) : null}
+      <div className={`profile-wizard-actions${step === 1 ? " is-start" : ""}${pending ? " is-saving" : ""}`}>
+        {step > 1 ? (
+          <button type="button" className={btnHeroGhost} onClick={onBack} disabled={pending}>
+            ← Back
+          </button>
+        ) : (
+          <span className="profile-wizard-actions-spacer" aria-hidden="true" />
+        )}
+        <span>
+          Step {step} of {total}
+          <small>{pending ? "Please wait" : "Saved as you go"}</small>
+        </span>
+        {step < total ? (
+          <button type="submit" name="save_intent" value="step" className={btnHero} disabled={pending} aria-busy={pending}>
+            {pending ? "Saving…" : "Next"}
+          </button>
+        ) : null}
+      </div>
+    </>
   );
 }
 
