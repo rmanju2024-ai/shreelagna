@@ -312,14 +312,28 @@ export async function BrowsePage({
               block.blocker_profile_id === mineId ? String(block.blocked_profile_id) : String(block.blocker_profile_id),
             ),
           );
-          const closedInterests = await db
-            .from("interests")
-            .select("from_profile_id, to_profile_id, status, created_at")
-            .or(`from_profile_id.eq.${mineId},to_profile_id.eq.${mineId}`)
-            .limit(200);
+          const [sentClosed, receivedClosed] = await Promise.all([
+            db
+              .from("interests")
+              .select("from_profile_id, to_profile_id, status, created_at")
+              .eq("from_profile_id", mineId)
+              .order("created_at", { ascending: false })
+              .limit(200),
+            db
+              .from("interests")
+              .select("from_profile_id, to_profile_id, status, created_at")
+              .eq("to_profile_id", mineId)
+              .order("created_at", { ascending: false })
+              .limit(200),
+          ]);
           const closedIds = new Set<string>();
-          for (const row of closedInterests.data ?? []) {
-            const status = effectiveInterestStatus(row.status, row.created_at);
+          for (const row of [...(sentClosed.data ?? []), ...(receivedClosed.data ?? [])] as {
+            from_profile_id?: string;
+            to_profile_id?: string;
+            status?: string;
+            created_at?: string;
+          }[]) {
+            const status = effectiveInterestStatus(row.status, row.created_at ?? "");
             if (!isHistoryStatus(status)) continue;
             const other = String(row.from_profile_id) === mineId ? row.to_profile_id : row.from_profile_id;
             if (other) closedIds.add(String(other));

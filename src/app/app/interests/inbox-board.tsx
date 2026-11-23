@@ -25,7 +25,7 @@ function isClosedHistory(note: { status?: string }) {
 }
 
 function profileHref(
-  note: { href?: string; profileId?: string },
+  note: { href?: string; profileId?: string; status?: string },
   from: "likes" | "desk" = "likes",
   deskBaseHref?: string,
 ): string | undefined {
