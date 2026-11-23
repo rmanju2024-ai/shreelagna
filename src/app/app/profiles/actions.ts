@@ -115,7 +115,7 @@ async function writeCompleteness(
     .select("id")
     .eq("profile_id", profileId)
     .eq("kind", "photo")
-    .eq("status", "approved")
+    .neq("status", "rejected")
     .limit(1);
 
   const { data: intros } = await supabase
@@ -123,7 +123,7 @@ async function writeCompleteness(
     .select("kind")
     .eq("profile_id", profileId)
     .in("kind", ["video", "audio"])
-    .eq("status", "approved");
+    .neq("status", "rejected");
 
   const { data: saved } = await supabase.from("profiles").select("*").eq("id", profileId).maybeSingle();
 

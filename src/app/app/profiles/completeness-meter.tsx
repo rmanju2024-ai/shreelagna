@@ -62,16 +62,16 @@ export function CompletenessMeter({
           ) : (
             <>
               <PendingGroup
-                title="House essentials still open"
+                title="1 · Must-have — required before review"
                 items={pendingMandatory}
                 profileId={profileId}
-                empty="All house essentials are filled."
+                empty="Every must-have is filled."
               />
               <PendingGroup
-                title="Polish details still empty"
+                title="2 · Full story — optional, not required"
                 items={pendingRecommended}
                 profileId={profileId}
-                empty="All polish details are filled."
+                empty="No optional details are waiting."
               />
             </>
           )}
