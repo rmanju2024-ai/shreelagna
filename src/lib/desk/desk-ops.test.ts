@@ -11,7 +11,7 @@ import {
 } from "./tickets";
 
 describe("staff vs admin desk", () => {
-  it("lets staff onto every desk except Verification", () => {
+  it("lets staff onto Verify as well as the rest of the desk", () => {
     const staff = deskItemsFor(false).map((item) => item.id);
     expect(staff).toContain("tickets");
     expect(staff).toContain("media");
@@ -19,12 +19,13 @@ describe("staff vs admin desk", () => {
     expect(staff).toContain("safety");
     expect(staff).toContain("look");
     expect(staff).toContain("plans");
-    expect(staff).not.toContain("verification");
+    expect(staff).toContain("verification");
+    expect(staff).not.toContain("staff");
     expect(isStaffRole("service")).toBe(true);
     expect(isAdminRole("service")).toBe(false);
   });
 
-  it("adds Verification for admin", () => {
+  it("keeps Staff appointments for admin", () => {
     const admin = deskItemsFor(true).map((item) => item.id);
     expect(admin).toContain("verification");
     expect(admin).toContain("staff");

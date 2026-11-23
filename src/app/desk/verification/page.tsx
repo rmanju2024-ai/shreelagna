@@ -73,7 +73,7 @@ export default async function DeskVerificationPage({
   return (
     <section className="desk-panel">
       <header className="desk-panel-head"><div><p className="browse-kicker">Verify</p><h2>Cases</h2></div><p>{cases?.length ?? 0} waiting</p></header>
-      <p className="desk-profile-queue-note">Only administrators can approve identity checks (name, age, date of birth). Documents are deleted as soon as review is complete; the profile keeps only the result.</p>
+      <p className="desk-profile-queue-note">Staff and administrators can approve identity checks (name, age, date of birth). Documents are deleted as soon as review is complete; the profile keeps only the result.</p>
       <QueueViewLinks path="/desk/verification" view={view} />
       {cases?.length ? <ul className="desk-ticket-list">{cases.map((item) => (
         <li key={item.id} className={`${cardClass} card-3d desk-ticket-row desk-profile-row`}>
@@ -81,15 +81,15 @@ export default async function DeskVerificationPage({
             <div className="desk-ticket-row-head"><b>{item.document_type} check</b><span className="desk-profile-chip">{item.status.replace(/_/g, " ")}</span></div>
             <span className="desk-ticket-meta">Profile {item.profile_id} · Requested {new Date(item.created_at).toLocaleDateString("en-IN")}</span>
             <SlaMark createdAt={item.created_at} dueAt={"due_at" in item ? String(item.due_at ?? "") : null} status={item.status} assignedTo={"assigned_to" in item ? String(item.assigned_to ?? "") : null} />
-            {desk.admin ? <AssignBar kind="verification" id={item.id} assignedTo={"assigned_to" in item ? String(item.assigned_to ?? "") : null} staff={staff} /> : null}
+            <AssignBar kind="verification" id={item.id} assignedTo={"assigned_to" in item ? String(item.assigned_to ?? "") : null} staff={staff} />
             {(links.get(item.id) ?? []).length ? <span className="desk-ticket-meta">Evidence: {(links.get(item.id) ?? []).map((f, i) => <a key={f.name} href={f.url} target="_blank" rel="noreferrer">File {i + 1}</a>).reduce<React.ReactNode[]>((acc, el, i) => (i ? [...acc, " · ", el] : [el]), [])}</span> : <span className="desk-ticket-meta">No document uploaded yet</span>}
           </div>
-          {desk.admin ? <form action={reviewVerificationCase} className="desk-profile-actions">
+          <form action={reviewVerificationCase} className="desk-profile-actions">
             <input type="hidden" name="id" value={item.id} />
             <select name="status" defaultValue="in_review"><option value="in_review">In review</option><option value="approved">Approve</option><option value="rejected">Reject</option><option value="expired">Expire</option></select>
             <input name="note" defaultValue={item.review_note ?? ""} maxLength={500} placeholder="Internal reason / decision note" />
             <button className={btnPrimary}>Save decision</button>
-          </form> : <span className="desk-profile-check">Admin decision required</span>}
+          </form>}
         </li>
       ))}</ul> : <p className="desk-empty">No verification cases are waiting.</p>}
     </section>

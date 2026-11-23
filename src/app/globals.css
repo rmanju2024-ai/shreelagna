@@ -7857,6 +7857,14 @@ a.inbox-name.inbox-open:focus-visible {
   cursor: pointer;
 }
 
+.inbox-card.inbox-profile.is-closed,
+.inbox-card-face.is-closed {
+  cursor: default;
+  filter: grayscale(1);
+  opacity: 0.62;
+  pointer-events: none;
+}
+
 .inbox-card-link,
 .inbox-card-face {
   color: inherit;

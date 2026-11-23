@@ -13,8 +13,8 @@ export const DESK_ITEMS = [
   { href: "/desk/audit", id: "audit", icon: "audit", label: "Audit", hint: "Staff and admin log" },
   { href: "/desk/profiles", id: "profiles", icon: "profile", label: "Review", hint: "Queue and ID search" },
   { href: "/desk/look", id: "look", icon: "look", label: "Browse", hint: "Filter bride and groom" },
-  { href: "/desk/verification", id: "verification", icon: "verify", label: "Verify", hint: "Identity cases", adminOnly: true },
-  { href: "/desk/staff", id: "staff", icon: "staff", label: "Staff", hint: "Appoint and remove" },
+  { href: "/desk/verification", id: "verification", icon: "verify", label: "Verify", hint: "Identity cases" },
+  { href: "/desk/staff", id: "staff", icon: "staff", label: "Staff", hint: "Appoint and remove", adminOnly: true },
   { href: "/desk/plans", id: "plans", icon: "plans", label: "Plans", hint: "Membership" },
 ] as const;
 

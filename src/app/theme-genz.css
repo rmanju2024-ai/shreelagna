@@ -4332,6 +4332,27 @@ html[data-scene="rain"] .home-greeting-role {
   .desk-review-likes-board { -webkit-overflow-scrolling: touch; }
 }
 
+/* Closed history cards: same gray, untappable treatment on laptop, Android, and iOS. */
+.sx-feed .sx-row .sx-card.inbox-profile.is-closed,
+.sx-grid .sx-card.inbox-profile.is-closed,
+.inbox-profile.is-closed,
+.inbox-profile.is-closed .inbox-card-face,
+.inbox-profile.is-closed .sx-card-link {
+  pointer-events: none !important;
+  cursor: default !important;
+  filter: grayscale(1);
+  opacity: 0.62;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transform: none !important;
+}
+.inbox-profile.is-closed .sx-card-link:hover,
+.inbox-profile.is-closed .sx-photo img {
+  transform: none !important;
+  box-shadow: none !important;
+  filter: none;
+}
+
 /* One header on every page: Home, Discover, Inbox, Account, Desk, and the rest. */
 .page-scene > header {
   width: 100%;

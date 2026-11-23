@@ -10,8 +10,7 @@ const STATES = ["in_review", "approved", "rejected", "expired"] as const;
 
 export async function reviewVerificationCase(formData: FormData) {
   const desk = await requireDesk("/desk/verification");
-  // Document-based approvals are restricted to admins, not general staff.
-  if (!desk.allowed || !desk.admin) return;
+  if (!desk.allowed) return;
   const id = String(formData.get("id") ?? "");
   const status = String(formData.get("status") ?? "");
   const note = String(formData.get("note") ?? "").trim().slice(0, 500);

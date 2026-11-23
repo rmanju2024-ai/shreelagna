@@ -16,11 +16,12 @@ afterEach(() => {
 });
 
 describe("Desk menu", () => {
-  it("hides Verify from staff and shows it to admin", () => {
+  it("shows Verify to staff and admin, and Staff only to admin", () => {
     const { rerender } = render(<DeskNav admin={false} />);
-    expect(screen.queryByRole("link", { name: "Verify" })).toBeNull();
-    rerender(<DeskNav admin />);
     expect(screen.getByRole("link", { name: "Verify" }).getAttribute("href")).toBe("/desk/verification");
+    expect(screen.queryByRole("link", { name: "Staff" })).toBeNull();
+    rerender(<DeskNav admin />);
+    expect(screen.getByRole("link", { name: "Staff" }).getAttribute("href")).toBe("/desk/staff");
   });
 
   it("stays a compact rail and highlights Tickets on the default desk", () => {

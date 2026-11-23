@@ -34,8 +34,8 @@ export default async function DeskLayout({ children }: { children: React.ReactNo
           <h1>House desk</h1>
           <p>
             {desk.admin
-              ? "Tickets and Safety first. Verify and Staff are admin only."
-              : "Tickets and Safety first. Verify is admin only."}
+              ? "Tickets and Safety first. Staff appointments stay with admin."
+              : "Tickets, Safety, and Verify. Staff appointments stay with admin."}
           </p>
         </header>
         <div className="browse-board desk-board is-menu">

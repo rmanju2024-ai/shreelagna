@@ -19,11 +19,17 @@ function deskHref(base: string, extra: Record<string, string | undefined>) {
   return `${base.split("?")[0]}?${q.toString()}`;
 }
 
+function isClosedHistory(note: { status?: string }) {
+  const status = (note.status ?? "").toLowerCase();
+  return status === "deleted" || status === "declined" || status === "expired";
+}
+
 function profileHref(
   note: { href?: string; profileId?: string },
   from: "likes" | "desk" = "likes",
   deskBaseHref?: string,
 ): string | undefined {
+  if (isClosedHistory(note)) return undefined;
   if (deskBaseHref && note.profileId) {
     return deskHref(deskBaseHref, { peek: "profile", view: note.profileId, tab: "likes", thread: undefined });
   }
@@ -257,7 +263,7 @@ function PreviewCard({
   const href = profileHref(note, openFrom, deskBaseHref);
   return (
     <li
-      className={`sx-card inbox-card inbox-profile${href ? " is-openable" : ""}`}
+      className={`sx-card inbox-card inbox-profile${isClosedHistory(note) ? " is-closed" : ""}${href ? " is-openable" : ""}`}
       onClick={(event) => {
         if (!href || (event.target as HTMLElement).closest(".inbox-actions, a.inbox-open")) return;
         router.push(href);
@@ -415,7 +421,7 @@ function CardFace({
     </>
   );
   return (
-    <div className="sx-card-link inbox-card-face">
+    <div className={`sx-card-link inbox-card-face${isClosedHistory(note) ? " is-closed" : ""}`}>
       {href ? (
         <a href={href} className="sx-photo inbox-photo inbox-open">
           {inner}
@@ -477,7 +483,7 @@ function NoteList({
           return (
           <li
             key={note.id}
-            className={`sx-card inbox-card inbox-profile${href ? " is-openable" : ""}`}
+            className={`sx-card inbox-card inbox-profile${isClosedHistory(note) ? " is-closed" : ""}${href ? " is-openable" : ""}`}
             onClick={(event) => openProfile(event, href)}
           >
             <CardFace note={note} actions={actions ? actions(note) : null} openFrom={openFrom} deskBaseHref={deskBaseHref} />

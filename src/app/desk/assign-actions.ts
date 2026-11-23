@@ -22,7 +22,6 @@ export async function assignDeskWork(formData: FormData) {
   const claim = String(formData.get("claim") ?? "") === "1";
   if (!id || !(kind in TABLES)) return;
   const target = TABLES[kind];
-  if (kind === "verification" && !desk.admin) return;
   const db = createServiceClient() ?? desk.supabase;
   const assignedTo = claim ? desk.me?.id ?? null : assigned || null;
   const payload: Record<string, unknown> = {

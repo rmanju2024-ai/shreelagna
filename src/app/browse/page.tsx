@@ -16,6 +16,7 @@ import {
 } from "@/lib/match/browse-match";
 import { kmApart, nearbyLabel, sameCommunity } from "@/lib/geo/city-distance";
 import { inboxLastOnline, publicMediaUrl } from "@/lib/match/inbox-card";
+import { effectiveInterestStatus, isHistoryStatus } from "@/lib/match/interest-status";
 import {
   BROWSE_LIST_LIMIT,
   BROWSE_PROFILE_SELECT,
@@ -311,11 +312,30 @@ export async function BrowsePage({
               block.blocker_profile_id === mineId ? String(block.blocked_profile_id) : String(block.blocker_profile_id),
             ),
           );
-          const keepHouse = (row: Record<string, unknown>) =>
+          const closedInterests = await db
+            .from("interests")
+            .select("from_profile_id, to_profile_id, status, created_at")
+            .or(`from_profile_id.eq.${mineId},to_profile_id.eq.${mineId}`)
+            .limit(200);
+          const closedIds = new Set<string>();
+          for (const row of closedInterests.data ?? []) {
+            const status = effectiveInterestStatus(row.status, row.created_at);
+            if (!isHistoryStatus(status)) continue;
+            const other = String(row.from_profile_id) === mineId ? row.to_profile_id : row.from_profile_id;
+            if (other) closedIds.add(String(other));
+          }
+          const keepHouse = (row: Record<string, unknown>) => {
+            const status = String(row.status ?? "");
+            const listed = !status || status === "active" || status === "pending_review";
+            return (
+            listed &&
             !blockedIds.has(String(row.id)) &&
+            !closedIds.has(String(row.id)) &&
             (me.role === "admin" ||
               String(row.created_by) === me.id ||
-              !(row.by_admin === true || adminIds.has(String(row.created_by))));
+              !(row.by_admin === true || adminIds.has(String(row.created_by))))
+            );
+          };
           const listed = rows.filter(keepHouse);
           const ownerIds = [...new Set(listed.map((row) => String(row.created_by ?? "")).filter(Boolean))];
           const paidRows =
