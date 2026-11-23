@@ -1,31 +1,85 @@
 /* MarriageConnect — modern theme layer (loaded after globals.css, applies site-wide) */
 .first-gate {
-  margin: 0 0 1.25rem;
-  padding: 1rem 1.1rem 0.9rem;
-  border: 1px solid rgb(184 137 76 / 45%);
-  border-radius: 1.2rem;
-  background: #fffaf2;
+  position: relative;
+  margin: 0 0 1.4rem;
+  overflow: hidden;
+  border-radius: 1.6rem;
+  background:
+    radial-gradient(120% 80% at 100% 0%, rgb(232 178 58 / 28%), transparent 46%),
+    linear-gradient(165deg, #6f1d1b 0%, #3f1210 58%, #2a0c0b 100%);
+  color: #fffaf2;
+  box-shadow: 0 22px 50px -28px rgb(63 14 13 / 70%);
 }
-.first-gate h2 { margin: 0.2rem 0 0.45rem; font-size: 1.35rem; }
-.first-gate > p { margin: 0; color: var(--muted); font-size: 0.92rem; }
-.first-gate ul { margin: 0.8rem 0 0; padding: 0; list-style: none; display: grid; gap: 0.45rem; }
-.first-gate li {
+.first-gate-veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgb(0 0 0 / 18%));
+  pointer-events: none;
+}
+.first-gate-body { position: relative; padding: 1.35rem 1.25rem 1.2rem; }
+.first-gate-kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  color: #f0d7a2;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.first-gate h2 {
+  margin: 0.55rem 0 0.35rem;
+  max-width: 16ch;
+  font-family: var(--font-british), Georgia, serif;
+  font-size: clamp(1.7rem, 4vw, 2.25rem);
+  font-weight: 500;
+  line-height: 1.05;
+  color: #fffaf2;
+}
+.first-gate-lead { margin: 0; max-width: 36rem; color: rgb(255 250 242 / 78%); font-size: 0.95rem; }
+.first-gate ol {
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
   display: grid;
-  gap: 0.1rem;
-  padding: 0.55rem 0.7rem;
-  border-radius: 0.8rem;
-  background: #fff;
+  gap: 0.55rem;
 }
-.first-gate li.is-asked { outline: 2px solid #6f1d1b; }
-.first-gate li span { color: var(--muted); font-size: 0.82rem; }
-.first-gate-next, .first-gate-go { margin: 0.75rem 0 0; }
+@media (min-width: 720px) {
+  .first-gate ol { grid-template-columns: repeat(3, 1fr); }
+}
+.first-gate li {
+  display: flex;
+  gap: 0.65rem;
+  min-height: 5.4rem;
+  padding: 0.75rem 0.8rem;
+  border: 1px solid rgb(240 215 162 / 22%);
+  border-radius: 1rem;
+  background: rgb(255 250 242 / 7%);
+}
+.first-gate li.is-asked {
+  border-color: #e8b23a;
+  background: rgb(232 178 58 / 16%);
+}
+.first-gate li em {
+  font-family: var(--font-british), Georgia, serif;
+  font-style: normal;
+  color: #e8b23a;
+  font-size: 0.85rem;
+}
+.first-gate li div { display: grid; gap: 0.15rem; }
+.first-gate li strong { font-size: 0.95rem; }
+.first-gate li span { color: rgb(255 250 242 / 72%); font-size: 0.78rem; line-height: 1.35; }
+.first-gate-next { margin: 0.9rem 0 0; color: #f0d7a2; font-size: 0.84rem; }
 .first-gate-go {
   display: inline-flex;
-  padding: 0.55rem 0.9rem;
+  margin-top: 1rem;
+  padding: 0.7rem 1.15rem;
   border-radius: 999px;
-  background: #6f1d1b;
-  color: #fffaf2;
-  font-weight: 650;
+  background: linear-gradient(180deg, #f3d48a, #e8b23a);
+  color: #3f1210;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  box-shadow: 0 10px 24px -14px rgb(232 178 58 / 90%);
 }
 .opening-splash {
   position: fixed;
