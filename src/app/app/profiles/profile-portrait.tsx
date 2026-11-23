@@ -13,7 +13,7 @@ import { VAGUE_EDUCATIONS } from "@/lib/profile/catalog";
 import { AlbumViewer } from "@/app/app/profiles/album-viewer";
 import { IntroStudio } from "@/app/app/profiles/media-studio";
 import { PortraitSheet } from "@/app/app/profiles/portrait-board";
-import { aboutPlainText } from "@/lib/profile/about-html";
+import { ABOUT_MIN, aboutPlainText } from "@/lib/profile/about-html";
 import { watermarkLine } from "@/lib/brand";
 import { StaffReviewTools } from "@/app/desk/profiles/review-tools";
 import {
@@ -368,14 +368,21 @@ export function ProfilePortrait({
     },
   ];
 
-  const mediaApproved = (row?: Media | null) => Boolean(row && row.status !== "rejected");
+  const mediaSubmitted = (row?: Media | null) => Boolean(row && row.status !== "rejected");
+  const mediaReady = (row?: Media | null) => Boolean(row && (row.status === "approved" || !row.status));
+  const aboutReady = aboutPlainText(typeof profile.about === "string" ? profile.about : "").length >= ABOUT_MIN;
   const completeness = readOnly
     ? null
     : completenessScore(
         completenessFromRecord(profile, {
-          hasApprovedPhoto: photos.some((row) => mediaApproved(row)),
-          hasVideo: mediaApproved(video),
-          hasAudio: mediaApproved(audio),
+          hasApprovedPhoto: photos.some((row) => mediaSubmitted(row)),
+          hasVideo: mediaSubmitted(video),
+          hasAudio: mediaSubmitted(audio),
+          photoInReview: photos.some((row) => mediaSubmitted(row)) && !photos.some((row) => mediaReady(row)),
+          introInReview:
+            !aboutReady &&
+            (mediaSubmitted(video) || mediaSubmitted(audio)) &&
+            !(mediaReady(video) || mediaReady(audio)),
           emailOtpVerified: Boolean(loginEmail?.trim()),
           smsOtpRequired: smsOtpRequiredFromEnv(),
         }),
@@ -394,6 +401,7 @@ export function ProfilePortrait({
           overallTotal={completeness.overallTotal}
           pendingMandatory={completeness.pendingMandatory}
           pendingRecommended={completeness.pendingRecommended}
+          withHouse={completeness.withHouse}
         />
       ) : null}
       {!readOnly &&

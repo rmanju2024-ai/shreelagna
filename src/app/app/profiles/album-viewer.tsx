@@ -35,6 +35,7 @@ export function AlbumViewer({
   const router = useRouter();
   const [index, setIndex] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState<string | null>(null);
   const [lit, setLit] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -83,6 +84,7 @@ export function AlbumViewer({
     }
     setBusy(true);
     setError(null);
+    setNote("Preparing your photograph…");
     try {
       const remaining = MAX_PHOTOS_PER_PROFILE - photos.length;
       for (const file of [...files].slice(0, remaining)) {
@@ -91,6 +93,7 @@ export function AlbumViewer({
           continue;
         }
         const stamped = watermark ? await stampPhotoFile(file, watermark) : file;
+        setNote("Uploading your photograph…");
         const path = `${userId}/${profileId}/photo-${crypto.randomUUID()}-${stamped.name.replace(/[^\w.-]+/g, "")}`;
         const up = await supabase.storage.from("profile-media").upload(path, stamped, {
           upsert: false,
@@ -114,10 +117,12 @@ export function AlbumViewer({
           break;
         }
       }
+      setNote("Saving your photograph…");
       await refreshProfileCompleteness(profileId);
       router.refresh();
     } finally {
       setBusy(false);
+      setNote(null);
     }
   }
 
@@ -130,8 +135,10 @@ export function AlbumViewer({
     }
     setBusy(true);
     setError(null);
+    setNote("Preparing your photograph…");
     try {
       const stamped = watermark ? await stampPhotoFile(file, watermark) : file;
+      setNote("Uploading your photograph…");
       const path = `${userId}/${profileId}/photo-${crypto.randomUUID()}-${stamped.name.replace(/[^\w.-]+/g, "")}`;
       const up = await supabase.storage.from("profile-media").upload(path, stamped, {
         upsert: false,
@@ -155,10 +162,12 @@ export function AlbumViewer({
         return;
       }
       await removeStaleMedia(supabase, [current]);
+      setNote("Saving your photograph…");
       await refreshProfileCompleteness(profileId);
       router.refresh();
     } finally {
       setBusy(false);
+      setNote(null);
     }
   }
 
@@ -210,6 +219,7 @@ export function AlbumViewer({
             </>
           ) : null}
         </figure>
+        {note ? <p className="media-progress" role="status">{note}</p> : null}
       ) : locked ? (
         <div className="album-stage album-empty">
           <span className="album-lock" aria-hidden>🔒</span>

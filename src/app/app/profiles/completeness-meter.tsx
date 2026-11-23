@@ -15,6 +15,7 @@ export function CompletenessMeter({
   overallTotal,
   pendingMandatory,
   pendingRecommended,
+  withHouse = [],
 }: {
   profileId: string;
   mandatoryPct: number;
@@ -25,6 +26,7 @@ export function CompletenessMeter({
   overallTotal: number;
   pendingMandatory: CompletenessItem[];
   pendingRecommended: CompletenessItem[];
+  withHouse?: CompletenessItem[];
 }) {
   const [open, setOpen] = useState(false);
   const pending = pendingMandatory.length + pendingRecommended.length;
@@ -66,6 +68,13 @@ export function CompletenessMeter({
                 items={pendingMandatory}
                 profileId={profileId}
                 empty="Every must-have is filled."
+              />
+              <PendingGroup
+                title="Uploaded — with the house for review"
+                items={withHouse}
+                profileId={profileId}
+                empty=""
+                hideEmpty
               />
               <PendingGroup
                 title="2 · Full story — optional, not required"
@@ -113,12 +122,15 @@ function PendingGroup({
   items,
   profileId,
   empty,
+  hideEmpty = false,
 }: {
   title: string;
   items: CompletenessItem[];
   profileId: string;
   empty: string;
+  hideEmpty?: boolean;
 }) {
+  if (hideEmpty && items.length === 0) return null;
   return (
     <section>
       <h3>{title}</h3>

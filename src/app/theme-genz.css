@@ -925,6 +925,14 @@ table { max-width: 100%; }
   font-size: 0.86rem;
 }
 .profile-wizard-error { border: 1px solid #e7b4b0; background: #fff; color: #6f1d1b; }
+.media-progress {
+  margin: 0 0 0.6rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 0.85rem;
+  background: #6f1d1b;
+  color: #fffaf2;
+  font-size: 0.9rem;
+}
 .profile-wizard-saving {
   margin: 0 0 0.55rem;
   padding: 0.55rem 0.8rem;

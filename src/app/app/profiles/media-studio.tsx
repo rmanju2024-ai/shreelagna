@@ -164,6 +164,7 @@ export function IntroStudio({
   const streamRef = useRef<MediaStream | null>(null);
   const tickRef = useRef<number | null>(null);
   const [recording, setRecording] = useState(false);
+  const [note, setNote] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
 
   useEffect(() => {
@@ -242,6 +243,7 @@ export function IntroStudio({
     if (!editable || !userId) return;
     setBusy(true);
     setError(null);
+    setNote(kind === "audio" ? "Uploading your voice note…" : "Uploading your video…");
     const previous = kind === "audio" ? clipAudio : clipVideo;
     const localUrl = URL.createObjectURL(file);
     setPreview((prev) => {
@@ -313,6 +315,7 @@ export function IntroStudio({
       void refreshProfileCompleteness(profileId);
     } finally {
       setBusy(false);
+      setNote(null);
     }
   }
 
@@ -348,6 +351,8 @@ export function IntroStudio({
         const blob = new Blob(chunksRef.current, { type });
         stopTracks();
         if (blob.size < 800) {
+          setBusy(false);
+          setNote(null);
           setError("Nothing was captured. Please try again, or upload a file.");
           return;
         }
@@ -377,6 +382,8 @@ export function IntroStudio({
     }
     const rec = recRef.current;
     setRecording(false);
+    setBusy(true);
+    setNote("Saving your voice note…");
     if (rec && rec.state !== "inactive") rec.stop();
     recRef.current = null;
   }
@@ -422,6 +429,11 @@ export function IntroStudio({
 
   return (
     <div className="album-intros">
+      {note ? (
+        <p className="media-progress" role="status">
+          {note}
+        </p>
+      ) : null}
       {showVideo ? (
       <div className={`${cardClass} album-video`}>
         <p className="album-kicker">Video</p>

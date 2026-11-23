@@ -17,6 +17,9 @@ export type CompletenessInput = {
   hasApprovedPhoto: boolean;
   hasVideo?: boolean;
   hasAudio?: boolean;
+  /** Saved, not yet approved. Counts as uploaded, and is listed as with the house. */
+  photoInReview?: boolean;
+  introInReview?: boolean;
   emailOtpVerified: boolean;
   subjectMobile: string | null;
   phoneOtpVerified: boolean;
@@ -258,12 +261,12 @@ export function completenessChecks(p: CompletenessInput): CompletenessItem[] {
     },
     {
       key: "intro",
-      label: "Add an introduction: About, a short video, or a voice note",
+      label: "Introduction is not uploaded yet. Add About, a short video, or a voice note.",
       section: "about",
       mandatory: true,
       filled: introChoiceCount(p) >= 1,
     },
-    { key: "photo", label: "A photograph", section: "album", mandatory: true, filled: p.hasApprovedPhoto },
+    { key: "photo", label: "Photograph is not uploaded yet", section: "album", mandatory: true, filled: p.hasApprovedPhoto },
     { key: "email", label: "Gmail sign-in", section: "personal", mandatory: true, filled: p.emailOtpVerified },
     { key: "mobile", label: "Mobile number", section: "personal", mandatory: true, filled: mobileOk },
   );
@@ -350,6 +353,14 @@ export function completenessScore(p: CompletenessInput) {
     overallPct: pct(overallFilled, checks.length),
     pendingMandatory: pending.filter((c) => c.mandatory),
     pendingRecommended: pending.filter((c) => !c.mandatory),
+    withHouse: [
+      ...(p.photoInReview
+        ? [{ key: "photo-review", label: "Photograph is uploaded. The house is reviewing it.", section: "album" as const, mandatory: true, filled: true }]
+        : []),
+      ...(p.introInReview
+        ? [{ key: "intro-review", label: "Introduction is uploaded. The house is reviewing it.", section: "about" as const, mandatory: true, filled: true }]
+        : []),
+    ],
   };
 }
 
@@ -457,6 +468,8 @@ export function completenessFromRecord(
     emailOtpVerified: boolean;
     hasVideo?: boolean;
     hasAudio?: boolean;
+    photoInReview?: boolean;
+    introInReview?: boolean;
     smsOtpRequired?: boolean;
   },
 ): CompletenessInput {
@@ -495,6 +508,8 @@ export function completenessFromRecord(
     hasApprovedPhoto: extras.hasApprovedPhoto,
     hasVideo: extras.hasVideo,
     hasAudio: extras.hasAudio,
+    photoInReview: extras.photoInReview,
+    introInReview: extras.introInReview,
     emailOtpVerified: extras.emailOtpVerified,
     subjectMobile: asText(row.subject_mobile),
     phoneOtpVerified: Boolean(row.phone_otp_verified_at),

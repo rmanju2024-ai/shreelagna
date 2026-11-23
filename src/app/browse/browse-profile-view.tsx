@@ -35,7 +35,7 @@ import { viewerEmailVerified } from "@/lib/profile/house-ready";
 import { verificationMarks } from "@/lib/verification/marks";
 import { maritalLabel, NATIVE_COUNTRIES, HOPE_ANY, MOTHER_TONGUES } from "@/lib/profile/options";
 import { asStringList, hopeDisplay, hopeValues, languagesKnown } from "@/lib/profile/multi-values";
-import { aboutPlainText } from "@/lib/profile/about-html";
+import { ABOUT_MIN, aboutPlainText } from "@/lib/profile/about-html";
 import { hopeComparisons, matchSelfFromProfile, preferenceFitScore } from "@/lib/profile/match-compare";
 
 function nestedName(value: unknown): string | undefined {
@@ -853,14 +853,23 @@ export async function BrowseProfileView({
   const voiceUrls = voices.map((v) => publicMediaUrl(v.storage_path)).filter((url): url is string => Boolean(url));
 
   const headline = profileHeadline(profile.subject_full_name, profile.surname);
-  const mediaApproved = (row?: { status?: string | null } | null) =>
+  const mediaSubmitted = (row?: { status?: string | null } | null) =>
+    Boolean(row && row.status !== "rejected");
+  const mediaReady = (row?: { status?: string | null } | null) =>
     Boolean(row && (row.status === "approved" || !row.status));
+  const aboutReady = aboutPlainText(typeof profile.about === "string" ? profile.about : "").length >= ABOUT_MIN;
   const readiness = own
     ? completenessScore(
         completenessFromRecord(profile as Record<string, unknown>, {
-          hasApprovedPhoto: sortedPhotos.some((row) => mediaApproved(row)),
-          hasVideo: videos.some((row) => mediaApproved(row)),
-          hasAudio: voices.some((row) => mediaApproved(row)),
+          hasApprovedPhoto: sortedPhotos.some((row) => mediaSubmitted(row)),
+          hasVideo: videos.some((row) => mediaSubmitted(row)),
+          hasAudio: voices.some((row) => mediaSubmitted(row)),
+          photoInReview:
+            sortedPhotos.some((row) => mediaSubmitted(row)) && !sortedPhotos.some((row) => mediaReady(row)),
+          introInReview:
+            !aboutReady &&
+            [...videos, ...voices].some((row) => mediaSubmitted(row)) &&
+            ![...videos, ...voices].some((row) => mediaReady(row)),
           emailOtpVerified: Boolean(me.email_otp_verified_at || me.email),
           smsOtpRequired: smsOtpRequiredFromEnv(),
         }),

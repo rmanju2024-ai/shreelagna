@@ -140,6 +140,7 @@ export type ProfileData = {
     overallTotal: number;
     pendingMandatory: CompletenessItem[];
     pendingRecommended: CompletenessItem[];
+    withHouse?: CompletenessItem[];
   } | null;
   verify?: Array<{ id: string; label: string; on: boolean }>;
   closeHref?: string;
@@ -793,6 +794,7 @@ export function ProfileRedesign(props: ProfileData) {
                 overallTotal={props.readiness.overallTotal}
                 pendingMandatory={props.readiness.pendingMandatory}
                 pendingRecommended={props.readiness.pendingRecommended}
+                withHouse={props.readiness.withHouse}
               />
             </div>
           ) : null}
