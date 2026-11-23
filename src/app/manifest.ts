@@ -3,7 +3,7 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Marriage Connect.in",
-    short_name: "Marriage.in",
+    short_name: "Marriage Connect.in",
     description: "Love Begins Here",
     start_url: "/",
     scope: "/",
