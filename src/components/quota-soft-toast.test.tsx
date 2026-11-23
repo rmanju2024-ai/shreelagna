@@ -11,20 +11,22 @@ describe("plan status popup", () => {
     render(<QuotaSoftHost />);
     emitQuotaSoft({
       kind: "status",
-      title: "Dear Jayesh,",
-      body: "Welcome gift · 11 days left",
-      points: ["Welcome gift", "Expires 4 Dec 2026", "Usage: 3 of 20 families"],
+      title: "Welcome gift",
+      who: "Jayesh",
+      body: "Welcome gift · Jayesh · Expires 4 Dec 2026",
+      points: ["Expires 4 Dec 2026", "3 of 20 families used", "5 new families a day"],
       holdMs: 1000,
     });
 
-    const dialog = await screen.findByRole("dialog", { name: "Dear Jayesh," });
+    const dialog = await screen.findByRole("dialog", { name: "Welcome gift" });
     expect(dialog.className).toContain("quota-soft");
     expect(dialog.parentElement?.className).toContain("quota-soft-layer");
     expect(dialog.parentElement?.className).toContain("is-on");
     expect(dialog.querySelector(".quota-soft-brand .site-name")).toBeTruthy();
     expect(dialog.querySelector(".quota-soft-brand .site-name-word.is-connect")?.textContent).toBe("Connect");
     expect(dialog.textContent).toContain("Your plan");
-    expect(screen.getByText("Usage: 3 of 20 families").closest("ul")?.className).toContain("quota-soft-points");
+    expect(screen.getByText("Jayesh").className).toContain("quota-soft-who");
+    expect(screen.getByText("3 of 20 families used").closest("ul")?.className).toContain("quota-soft-points");
     expect(screen.getByRole("link", { name: "View plan" }).getAttribute("href")).toBe("/app/plans");
   });
 
@@ -32,7 +34,8 @@ describe("plan status popup", () => {
     render(<QuotaSoftHost />);
     emitQuotaSoft({
       kind: "warn",
-      title: "Dear Jayesh,",
+      title: "Welcome gift",
+      who: "Jayesh",
       body: "Five families remain.",
       points: ["Five families remain."],
       holdMs: 1000,

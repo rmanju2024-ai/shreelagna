@@ -97,6 +97,7 @@ export function QuotaSoftHost() {
         </div>
         <p className="quota-soft-kicker">Your plan</p>
         <p id="quota-soft-title">{notice.title}</p>
+        {notice.who ? <p className="quota-soft-who">{notice.who}</p> : null}
         {notice.points?.length ? (
           <ul id="quota-soft-body" className="quota-soft-points">
             {notice.points.map((point) => (

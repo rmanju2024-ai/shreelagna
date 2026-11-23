@@ -7,7 +7,10 @@ export type QuotaSoftKind = "status" | "warn" | "daily" | "capped";
 
 export type QuotaSoftNotice = {
   kind: QuotaSoftKind;
+  /** Plan name. Shown under “Your plan”. */
   title: string;
+  /** Member first name, shown under the plan. */
+  who: string;
   /** One-line summary for notifications. */
   body: string;
   /** Short lines shown in the plan dialog. */
@@ -38,12 +41,12 @@ function expiryPoint(access: { daysLeft: number; until?: Date | string | null })
 function usagePoint(quota: InterestQuota) {
   if (quota.limit == null) return "";
   const used = Math.max(0, quota.used);
-  return `Usage: ${used} of ${quota.limit} families`;
+  return `${used} of ${quota.limit} families used`;
 }
 
-function notice(kind: QuotaSoftKind, title: string, points: string[], holdMs: number): QuotaSoftNotice {
+function notice(kind: QuotaSoftKind, title: string, who: string, points: string[], holdMs: number): QuotaSoftNotice {
   const lines = points.filter(Boolean);
-  return { kind, title, points: lines, body: lines.join(" · "), holdMs };
+  return { kind, title, who, points: lines, body: [title, who, ...lines].join(" · "), holdMs };
 }
 
 export function buildQuotaSoftNotice(
@@ -57,27 +60,25 @@ export function buildQuotaSoftNotice(
 ): QuotaSoftNotice | null {
   if (!access.live || access.kind === "house") return null;
 
-  const dear = `Dear ${firstName(who?.name)},`;
+  const member = firstName(who?.name);
   const plan = planName(access);
+  const pace = `${DAILY_NEW_FAMILY_CAP} new families a day`;
 
   if (reason === "daily" || (quota.dailyLeft === 0 && quota.left !== 0)) {
     return notice(
       "daily",
-      dear,
-      [
-        plan,
-        expiryPoint(access),
-        usagePoint(quota),
-        `Today's ${DAILY_NEW_FAMILY_CAP} new contacts are used`,
-      ],
+      plan,
+      member,
+      [expiryPoint(access), usagePoint(quota), `Today's ${DAILY_NEW_FAMILY_CAP} new families are used`],
       7000,
     );
   }
   if (reason === "quota" || quota.left === 0) {
     return notice(
       "capped",
-      dear,
-      [plan, expiryPoint(access), usagePoint(quota), "Existing chats stay open"],
+      plan,
+      member,
+      [expiryPoint(access), usagePoint(quota), "Existing chats stay open"],
       8000,
     );
   }
@@ -85,8 +86,9 @@ export function buildQuotaSoftNotice(
     const warn = periodWarns(quota);
     return notice(
       warn ? "warn" : "status",
-      dear,
-      [plan, expiryPoint(access), usagePoint(quota)],
+      plan,
+      member,
+      [expiryPoint(access), usagePoint(quota), pace],
       warn ? 7500 : 6500,
     );
   }

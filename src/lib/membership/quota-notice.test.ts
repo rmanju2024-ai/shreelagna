@@ -17,11 +17,12 @@ describe("quota soft notice", () => {
       { name: "Jayesh Kumar" },
     );
     expect(note?.kind).toBe("warn");
-    expect(note?.title).toBe("Dear Jayesh,");
+    expect(note?.title).toBe("Welcome gift");
+    expect(note?.who).toBe("Jayesh");
     expect(note?.points).toEqual([
-      "Welcome gift",
       "Expires 3 Jan 2027",
-      "Usage: 15 of 20 families",
+      "15 of 20 families used",
+      "5 new families a day",
     ]);
   });
 
@@ -33,9 +34,9 @@ describe("quota soft notice", () => {
       { name: "Jayesh" },
     );
     expect(note?.kind).toBe("daily");
-    expect(note?.title).toBe("Dear Jayesh,");
-    expect(note?.points).toContain("Welcome gift");
-    expect(note?.points).toContain("Usage: 8 of 20 families");
-    expect(note?.points).toContain("Today's 5 new contacts are used");
+    expect(note?.title).toBe("Welcome gift");
+    expect(note?.who).toBe("Jayesh");
+    expect(note?.points).toContain("8 of 20 families used");
+    expect(note?.points).toContain("Today's 5 new families are used");
   });
 });
