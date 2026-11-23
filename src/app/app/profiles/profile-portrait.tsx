@@ -368,7 +368,7 @@ export function ProfilePortrait({
     },
   ];
 
-  const mediaApproved = (row?: Media | null) => Boolean(row && (row.status === "approved" || !row.status));
+  const mediaApproved = (row?: Media | null) => Boolean(row && row.status !== "rejected");
   const completeness = readOnly
     ? null
     : completenessScore(

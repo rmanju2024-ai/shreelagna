@@ -361,6 +361,12 @@ export function mediaRowApproved(row?: { kind?: string; status?: string | null }
   return Boolean(row && (row.status === "approved" || !row.status));
 }
 
+/** Uploaded and waiting for the house, or already approved. Rejected files do not count. */
+export function mediaRowSubmitted(row?: { kind?: string; status?: string | null } | null): boolean {
+  if (!row) return false;
+  return row.status !== "rejected";
+}
+
 export function isMandatoryReadyFromRecord(
   row: Record<string, unknown>,
   extras: {
@@ -380,9 +386,9 @@ export function extrasFromMedia(
   smsOtpRequired = smsOtpRequiredFromEnv(),
 ) {
   return {
-    hasApprovedPhoto: rows.some((row) => row.kind === "photo" && mediaRowApproved(row)),
-    hasVideo: rows.some((row) => row.kind === "video" && mediaRowApproved(row)),
-    hasAudio: rows.some((row) => row.kind === "audio" && mediaRowApproved(row)),
+    hasApprovedPhoto: rows.some((row) => row.kind === "photo" && mediaRowSubmitted(row)),
+    hasVideo: rows.some((row) => row.kind === "video" && mediaRowSubmitted(row)),
+    hasAudio: rows.some((row) => row.kind === "audio" && mediaRowSubmitted(row)),
     emailOtpVerified,
     smsOtpRequired,
   };

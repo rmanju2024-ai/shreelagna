@@ -1001,7 +1001,7 @@ export async function saveIntroChoice(
     .select("id")
     .eq("profile_id", profileId)
     .eq("kind", shown)
-    .eq("status", "approved")
+    .neq("status", "rejected")
     .limit(1);
   if (clipError) return { ok: false, error: "We could not check this introduction just now. Please try again." };
   if (!clips?.length) {
