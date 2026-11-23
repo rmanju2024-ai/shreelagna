@@ -7,8 +7,7 @@ import { publicMediaUrl } from "@/lib/match/inbox-card";
 import { isOnlineNow } from "@/lib/profile/last-seen";
 import { chatPresenceLine } from "@/lib/match/salon-thread";
 import { pairCanChat } from "@/lib/match/interest-status";
-import { pairPlanLive } from "@/lib/membership/access";
-import { loadMembership, loadMembershipForProfile } from "@/lib/membership/load";
+import { loadMembership } from "@/lib/membership/load";
 import { displayFirstName } from "@/lib/profile/options";
 import { profileOpenHref } from "@/lib/ui/dismiss";
 import { canSearchFamilies } from "@/lib/profile/visibility";
@@ -41,7 +40,7 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
   if (!mine || !canSearchFamilies(mine.status)) notFound();
 
   const otherId = mine.id === thread.profile_a ? thread.profile_b : thread.profile_a;
-  const [{ data: interestRows }, myAccess, otherAccess, { data: other }, { data: messages }, { data: photos }] =
+  const [{ data: interestRows }, myAccess, { data: other }, { data: messages }, { data: photos }] =
     await Promise.all([
       supabase
         .from("interests")
@@ -51,7 +50,6 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
         )
         .limit(8),
       loadMembership(db, me, { id: mine.id }),
-      loadMembershipForProfile(db, otherId),
       supabase
         .from("profiles")
         .select("id, subject_full_name, status, last_seen_at, hide_last_seen")
@@ -82,7 +80,7 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
         .order("created_at"),
     ]);
   if (!pairCanChat(interestRows ?? [], mine.id, otherId)) notFound();
-  const chatLive = pairPlanLive(myAccess.live, otherAccess.live);
+  const chatLive = myAccess.live;
   const otherOpen = Boolean(other && other.status === "active");
   if (!otherOpen) notFound();
   const name =
@@ -112,6 +110,7 @@ export default async function ChatThreadPage({ params }: { params: Promise<{ id:
         presence={presence}
         online={online}
         needPlan={!thread.frozen && !chatLive}
+        planLapsed={myAccess.lapsed}
         messages={[...(messages ?? [])].reverse().map((msg) => {
           const row = msg as typeof msg & { edited_at?: string | null; deleted_at?: string | null };
           return {

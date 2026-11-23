@@ -41,6 +41,7 @@ const CHIRPS: Record<string, string[]> = {
   accepted: ["You are connected. Open chat and keep it kind.", "The request was accepted. A short hello goes a long way."],
   closed: ["You can send a fresh request if this still feels right."],
   plan: ["A live plan unlocks sending a request on this profile."],
+  lapsed: ["Your licence has ended. This is a short profile. Renew to send interest or a message."],
   quota: ["These families are used on this cover. Five more adds five extra introductions."],
   daily: ["Five new families a day. Tomorrow IST midnight opens five more."],
   finish: ["Complete your own profile first, then you can send a request."],
@@ -51,12 +52,13 @@ const CHIRPS: Record<string, string[]> = {
 function chirpPool(
   thread: InterestThread,
   needPlan: boolean,
+  planLapsed = false,
   needQuota: boolean,
   needDaily: boolean,
   canSend: boolean,
   awaitingReview: boolean,
 ) {
-  if (thread === "none" && needPlan) return CHIRPS.plan;
+  if (thread === "none" && needPlan) return planLapsed ? CHIRPS.lapsed : CHIRPS.plan;
   if (thread === "none" && needDaily) return CHIRPS.daily;
   if (thread === "none" && needQuota) return CHIRPS.quota;
   if (thread === "none" && awaitingReview) return CHIRPS.review;
@@ -132,6 +134,7 @@ export function BirdDock({
   thread,
   canSend,
   needPlan,
+  planLapsed = false,
   needQuota,
   needDaily = false,
   awaitingReview = false,
@@ -150,6 +153,7 @@ export function BirdDock({
   thread: InterestThread;
   canSend: boolean;
   needPlan: boolean;
+  planLapsed?: boolean;
   needQuota: boolean;
   needDaily?: boolean;
   awaitingReview?: boolean;
@@ -191,7 +195,7 @@ export function BirdDock({
   const openedAt = useRef(0);
   const [host, setHost] = useState<HTMLElement | null>(null);
   const showChat = localThread === "sent" || localThread === "received" || localThread === "accepted";
-  const pool = phase === "peck" ? CHIRPS.peck : chirpPool(localThread, needPlan, needQuota, needDaily, canSend, awaitingReview);
+  const pool = phase === "peck" ? CHIRPS.peck : chirpPool(localThread, needPlan, planLapsed, needQuota, needDaily, canSend, awaitingReview);
   const chirp = pool[line % pool.length];
   const name = chat?.name ?? "Match";
   const [liveNotes, setLiveNotes] = useState<PeekChatNote[]>([]);
@@ -469,7 +473,9 @@ export function BirdDock({
           : localThread === "received"
             ? "Reply now"
             : needPlan
-              ? "Unlock & send"
+              ? planLapsed
+                ? "Renew licence"
+                : "Unlock & send"
               : needDaily
                 ? "Tomorrow"
                 : needQuota
@@ -550,7 +556,10 @@ export function BirdDock({
           </div>
           {chat?.live === false ? (
             <p className="bird-wa-lock">
-              A live plan keeps this chat open. <Link href="/app/plans">Open plans</Link>
+              {planLapsed
+                ? "Your licence has ended. Renew to send a message. "
+                : "A live licence is required before you can send a message. "}
+              <Link href="/app/plans">{planLapsed ? "Renew licence" : "See plans"}</Link>
             </p>
           ) : (
             <form onSubmit={onSend} className="bird-wa-composer">

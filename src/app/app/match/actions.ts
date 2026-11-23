@@ -7,8 +7,7 @@ import { missingPayloadColumn, isMissingColumnError } from "@/lib/profile/db-err
 import { chatReceivedCopy, interestAcceptedCopy, interestDeclinedCopy } from "@/lib/match/alert-copy";
 import { canAlertInterest, parseContactReleaseMode } from "@/lib/match/profile-settings";
 import { orderedProfilePair, pairCanChat, isStalePending, trimDeclineReason } from "@/lib/match/interest-status";
-import { pairPlanLive } from "@/lib/membership/access";
-import { loadMembership, loadMembershipForProfile } from "@/lib/membership/load";
+import { loadMembership } from "@/lib/membership/load";
 import { canSearchFamilies } from "@/lib/profile/visibility";
 import { loadHouseReady, viewerEmailVerified } from "@/lib/profile/house-ready";
 import { displayFirstName } from "@/lib/profile/options";
@@ -333,8 +332,7 @@ async function postChatMessage(formData: FormData) {
     .limit(8);
   if (!pairCanChat(interestRows ?? [], mine.id, other.id)) return { ok: false as const, bounce, threadId };
   const myAccess = await loadMembership(supabase, me, { id: mine.id });
-  const otherAccess = await loadMembershipForProfile(supabase, other.id);
-  if (!pairPlanLive(myAccess.live, otherAccess.live)) return { ok: false as const, bounce, threadId };
+  if (!myAccess.live) return { ok: false as const, bounce, threadId };
   const text = body.slice(0, 4000);
   const inserted = await supabase.from("messages").insert({
     thread_id: threadId,

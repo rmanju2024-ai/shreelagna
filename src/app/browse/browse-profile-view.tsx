@@ -339,6 +339,7 @@ export async function BrowseProfileView({
   needPlan = !access.live;
   const owner = ownerRes.data;
   const mineList = (myProfilesRes.data ?? []) as Record<string, unknown>[];
+  if (!own && !isStaff && mineList.length === 0) redirect("/app/profiles/new");
   const workingId = workingProfileId(
     me.active_profile_id,
     mineList.map((row) => String(row.id)),
@@ -892,6 +893,7 @@ export async function BrowseProfileView({
     thread: staffPreview ? "none" : thread,
     canSend: staffPreview ? false : canSend,
     needPlan,
+    planLapsed: access.lapsed,
     needQuota,
     needDaily,
     quotaUsed,
@@ -931,7 +933,7 @@ export async function BrowseProfileView({
           myProfileId: myChatId,
           threadId: chatThreadId,
           notes: chatNotes,
-          live: pairLive,
+          live: access.live,
           name: displayFirstName(typeof profile.subject_full_name === "string" ? profile.subject_full_name : "Match"),
           photo: photoUrls[0] ?? null,
           seen: lastSeen,

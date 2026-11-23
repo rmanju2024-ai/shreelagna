@@ -398,7 +398,15 @@ export function ProfilePortrait({
       ) : null}
       {!readOnly &&
       (profile.status === "pending_review" || (profile.is_complete && (profile.status === "draft" || !profile.status))) ? (
-        <p className="portrait-review-note">Awaiting house review. Search opens after Staff approve.</p>
+        <div className="portrait-review-note">
+          <p>The house is reviewing this profile. This usually takes two to three days.</p>
+          <ul>
+            <li>Required details and the photograph must be approved.</li>
+            <li>A video or voice note, if you added one, is approved with them.</li>
+            <li>You cannot send an interest until this profile is live.</li>
+            <li>You cannot see a mobile number or email until this profile is live.</li>
+          </ul>
+        </div>
       ) : null}
       {!readOnly && !deskReview && contactAlerts.length ? (
         <p className="portrait-flag-note">{MEMBER_CONTACT_WARNING}</p>

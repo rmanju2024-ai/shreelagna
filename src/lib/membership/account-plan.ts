@@ -20,7 +20,9 @@ export function planHeaderMarks(input: {
     access.kind === "welcome"
       ? WELCOME_PLAN_NAME
       : access.kind === "none"
-        ? "No plan"
+        ? access.label === "Licence ended"
+          ? "Ended"
+          : "No plan"
         : access.kind === "house"
           ? /admin/i.test(access.label)
             ? "Admin"

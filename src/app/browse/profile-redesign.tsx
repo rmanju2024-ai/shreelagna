@@ -89,6 +89,7 @@ export type ProfileData = {
   thread: InterestThread;
   canSend: boolean;
   needPlan: boolean;
+  planLapsed?: boolean;
   needQuota: boolean;
   needDaily?: boolean;
   awaitingReview?: boolean;
@@ -384,6 +385,7 @@ function PlanLock({
 function ReadyBanner({
   needComplete,
   needPlan,
+  planLapsed = false,
   targetAwaitingReview,
   pct,
   pending,
@@ -391,6 +393,7 @@ function ReadyBanner({
 }: {
   needComplete: boolean;
   needPlan: boolean;
+  planLapsed?: boolean;
   targetAwaitingReview?: boolean;
   pct: number;
   pending: number;
@@ -407,12 +410,20 @@ function ReadyBanner({
   }
   const left = Math.max(0, pending);
   const both = needComplete && needPlan;
-  const kicker = both ? "Profile and plan open this house" : needComplete ? "Your biodata opens this house" : "A live plan opens this house";
+  const kicker = both
+    ? "Profile and plan open this house"
+    : needComplete
+      ? "Your biodata opens this house"
+      : planLapsed
+        ? "Your licence has ended"
+        : "A live plan opens this house";
   const title = both
     ? "Complete your must-haves and keep a live plan to unlock education, family, kundali and contact."
     : needComplete
       ? "Finish your must-haves to unlock education, family, kundali and contact."
-      : "Start a live plan to unlock education, family, kundali, extra photos and contact.";
+      : planLapsed
+        ? "You can see a short profile only. Renew to send interest, chat, and open education, family, kundali, extra photos and contact."
+        : "Start a live plan to unlock education, family, kundali, extra photos and contact.";
   const body = both
     ? `Must-have is at ${pct}%, with ${left} house ${left === 1 ? "essential" : "essentials"} still open, and there is no live plan on this account yet. Finish both, then this family's full story opens.`
     : needComplete
@@ -423,7 +434,9 @@ function ReadyBanner({
               : `${left} house ${left === 1 ? "essential still waits" : "essentials still wait"} for your hand.`
           }`
         : "Complete your own profile first. Then this family's details, extra photos, and contact will open."
-      : "A live plan keeps the house open: full details, extra photos, video, voice, requests and contact.";
+      : planLapsed
+        ? "Interest, chat and contact stay closed until this profile has a live licence again."
+        : "A live plan keeps the house open: full details, extra photos, video, voice, requests and contact.";
   return (
     <aside className="pv-ready-banner" role="status">
       <p className="pv-ready-kicker">{kicker}</p>
@@ -433,7 +446,7 @@ function ReadyBanner({
         {needComplete ? <Link href={finishHref}>Complete my profile</Link> : null}
         {needPlan ? (
           <Link href="/app/plans" className={needComplete ? "is-soft" : undefined}>
-            See plans
+            {planLapsed ? "Renew licence" : "See plans"}
           </Link>
         ) : null}
       </div>
@@ -461,14 +474,22 @@ export function ProfileRedesign(props: ProfileData) {
   const visiblePhotos = gate ? photos.slice(0, 1) : photos;
   const locked = gate;
   const lockHref = props.needComplete ? props.finishHref : props.targetAwaitingReview ? props.finishHref : "/app/plans";
-  const lockCta = props.needComplete ? "Complete my profile" : props.targetAwaitingReview ? "Awaiting review" : "See plans";
+  const lockCta = props.needComplete
+    ? "Complete my profile"
+    : props.targetAwaitingReview
+      ? "Awaiting review"
+      : props.planLapsed
+        ? "Renew licence"
+        : "See plans";
   const lockMessage = props.needComplete
     ? props.needPlan
       ? "Complete your biodata and keep a live plan to open this chapter of their story."
       : "Complete your biodata to open this chapter of their story."
     : props.targetAwaitingReview
       ? "The house is still reviewing this profile. Full details open when it goes live."
-    : "A live plan unlocks the full profile, extra photos, video and voice.";
+      : props.planLapsed
+        ? "Your licence has ended. This is a short view. Renew to send interest and open the full profile."
+        : "A live plan unlocks the full profile, extra photos, video and voice.";
   const personalDetails = (props.details ?? []).filter((group) => group.title === "Personal");
   const closedDetails = (props.details ?? []).filter((group) => group.title !== "Personal");
   const spark = !props.preview && !props.own && props.user ? (
@@ -479,6 +500,7 @@ export function ProfileRedesign(props: ProfileData) {
       thread={props.thread}
       canSend={props.canSend}
       needPlan={props.needPlan}
+      planLapsed={props.planLapsed}
       needQuota={props.needQuota}
       needDaily={props.needDaily}
       awaitingReview={props.awaitingReview}

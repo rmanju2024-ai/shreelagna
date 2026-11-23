@@ -1,4 +1,31 @@
 /* MarriageConnect — modern theme layer (loaded after globals.css, applies site-wide) */
+.opening-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  background: #fffaf2;
+  text-align: center;
+}
+.opening-splash-name {
+  margin: 0.6rem 0 0;
+  color: #6f1d1b;
+  font-family: var(--font-british), Georgia, serif;
+  font-size: 1.7rem;
+  line-height: 1.15;
+}
+.opening-splash-name span { color: #1f8a32; }
+.opening-splash-line {
+  margin: 0;
+  color: #8a5a18;
+  font-family: var(--font-british), Georgia, serif;
+  font-size: 1rem;
+  font-style: italic;
+}
 :root {
   --pop: #ff5d8f;
   --violet: #7c5cff;

@@ -1312,15 +1312,13 @@ export function ProfileForm({
         <div className="profile-readiness">
           <span aria-hidden>💡</span>
           <div>
-            <h3>Save now, activate when ready</h3>
-            <p>
-              Your profile is saved as a draft until the required details, approved photo and verification
-              are complete. Draft profiles cannot send interests, chat, or reveal contact details.
-            </p>
+            <h3>After you save</h3>
             <ul>
-              <li>Missing fields will be shown clearly on your Profile page.</li>
-              <li>You can return and improve every section later.</li>
-              <li>When everything required is ready, the profile goes for house review.</li>
+              <li>Every required field must be filled, including a photograph.</li>
+              <li>The house then reviews the profile, the photo, and any video or voice note.</li>
+              <li>This usually takes two to three days.</li>
+              <li>Until that approval, you cannot send an interest.</li>
+              <li>Until that approval, you cannot see anyone’s mobile number or email.</li>
             </ul>
           </div>
         </div>

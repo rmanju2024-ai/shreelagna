@@ -15,6 +15,8 @@ export type MembershipKind = "house" | "welcome" | "paid" | "none";
 export type Membership = {
   kind: MembershipKind;
   live: boolean;
+  /** A welcome gift or paid licence has already ended. */
+  lapsed: boolean;
   label: string;
   until: Date | null;
   daysLeft: number;
@@ -46,10 +48,10 @@ export function resolveMembership(input: {
 }): Membership {
   const now = input.now ?? new Date();
   if (input.role === "admin") {
-    return { kind: "house", live: true, label: "Admin house access", until: null, daysLeft: 0, planCode: null };
+    return { kind: "house", live: true, lapsed: false, label: "Admin house access", until: null, daysLeft: 0, planCode: null };
   }
   if (input.role === "service") {
-    return { kind: "house", live: true, label: "Staff house access", until: null, daysLeft: 0, planCode: null };
+    return { kind: "house", live: true, lapsed: false, label: "Staff house access", until: null, daysLeft: 0, planCode: null };
   }
 
   const paidUntil = parseInstant(input.paid?.ends_at ?? null);
@@ -61,6 +63,7 @@ export function resolveMembership(input: {
     return {
       kind: "paid",
       live: true,
+      lapsed: false,
       label: name ? `${name} plan` : "Paid plan",
       until: paidUntil,
       daysLeft: daysLeft(paidUntil, now),
@@ -73,6 +76,7 @@ export function resolveMembership(input: {
     return {
       kind: "welcome",
       live: true,
+      lapsed: false,
       label: WELCOME_PLAN_NAME,
       until: giftUntil,
       daysLeft: daysLeft(giftUntil, now),
@@ -80,13 +84,16 @@ export function resolveMembership(input: {
     };
   }
 
+  const hadPaid = Boolean(input.paid?.plan_code || input.paid?.ends_at);
+  const welcomeEnded = Boolean(input.welcomeStartedAt && giftUntil && giftUntil.getTime() <= now.getTime());
   return {
     kind: "none",
     live: false,
-    label: "Plan needed",
-    until: giftUntil,
+    lapsed: hadPaid || welcomeEnded,
+    label: hadPaid || welcomeEnded ? "Licence ended" : "Plan needed",
+    until: hadPaid ? paidUntil : giftUntil,
     daysLeft: 0,
-    planCode: null,
+    planCode: hadPaid ? input.paid?.plan_code ?? null : null,
   };
 }
 

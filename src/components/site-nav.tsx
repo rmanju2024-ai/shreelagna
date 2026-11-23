@@ -176,6 +176,7 @@ export function HeaderNav({
   overlay,
   user,
   staff,
+  needsProfile = false,
   chatUnread = 0,
   alertUnread = 0,
   likesPending = 0,
@@ -183,6 +184,7 @@ export function HeaderNav({
   overlay: boolean;
   user: boolean;
   staff: boolean;
+  needsProfile?: boolean;
   chatUnread?: number;
   alertUnread?: number;
   likesPending?: number;
@@ -247,11 +249,11 @@ export function HeaderNav({
     >
       <div className="site-nav-row">
         <NavChip item={{ href: "/", label: "Home", icon: "home" }} overlay={overlay} current={pathMatches(pathname, "/", tab)} />
-        <NavChip item={{ href: "/browse", label: "Discover", icon: "browse" }} overlay={overlay} current={pathMatches(pathname, "/browse", tab)} />
+        <NavChip item={{ href: needsProfile ? "/app/profiles/new" : "/browse", label: "Discover", icon: "browse" }} overlay={overlay} current={!needsProfile && pathMatches(pathname, "/browse", tab)} />
         {user ? (
           <NavChip
             item={{
-              href: "/app/chat",
+              href: needsProfile ? "/app/profiles/new" : "/app/chat",
               label: "Inbox",
               icon: "inbox",
               badge: chatUnread + alertUnread + likesPending,
@@ -266,7 +268,7 @@ export function HeaderNav({
         ) : null}
         {user ? (
           <NavChip
-            item={{ href: "/app/account", label: "Account", icon: "account" }}
+            item={{ href: needsProfile ? "/app/profiles/new" : "/app/account", label: "Account", icon: "account" }}
             overlay={overlay}
             current={pathMatches(pathname, "/app/account", tab)}
           />

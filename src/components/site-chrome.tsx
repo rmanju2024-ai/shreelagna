@@ -13,6 +13,7 @@ import { SceneLayer } from "@/components/scene-layer";
 import { ThemeQuickPicker } from "@/components/theme-quick-picker";
 import { NavigationFeedback } from "@/components/navigation-feedback";
 import { unreadNoticeBadge } from "@/lib/notices/unread-badge";
+import { listOwnProfiles } from "@/lib/profile/own-profile";
 import { SyncSession } from "@/components/sync-session";
 import { parseScene, SCENE_COOKIE } from "@/lib/ui/scenes";
 
@@ -28,11 +29,13 @@ async function HeaderNavWithBadges({
   user,
   staff,
   userId,
+  needsProfile = false,
 }: {
   overlay: boolean;
   user: boolean;
   staff: boolean;
   userId: string;
+  needsProfile?: boolean;
 }) {
   const badge = await unreadNoticeBadge(userId).catch(() => ({
     chatUnread: 0,
@@ -47,6 +50,7 @@ async function HeaderNavWithBadges({
       chatUnread={badge.chatUnread}
       alertUnread={badge.alertUnread}
       likesPending={badge.likesPending}
+      needsProfile={needsProfile}
     />
   );
 }
@@ -55,13 +59,18 @@ export async function SiteHeader({ overlay = false, glass = false }: { overlay?:
   const { user, supabase } = await getAuth();
   let staff = false;
   let userId: string | null = null;
+  let needsProfile = false;
   if (user && supabase) {
     const me = await ensureAppUser(supabase, user);
     staff = me?.role === "service" || me?.role === "admin";
     userId = me?.id ?? null;
+    if (me && !staff) {
+      const listed = await listOwnProfiles(supabase, me.id);
+      needsProfile = listed.length === 0;
+    }
   }
   const nav = (
-    <HeaderNav overlay={overlay} user={Boolean(user)} staff={staff} chatUnread={0} alertUnread={0} likesPending={0} />
+    <HeaderNav overlay={overlay} user={Boolean(user)} staff={staff} needsProfile={needsProfile} chatUnread={0} alertUnread={0} likesPending={0} />
   );
 
   return (
@@ -82,7 +91,7 @@ export async function SiteHeader({ overlay = false, glass = false }: { overlay?:
         <SyncSession guest={!user} />
         {userId ? (
           <Suspense fallback={nav}>
-            <HeaderNavWithBadges overlay={overlay} user staff={staff} userId={userId} />
+            <HeaderNavWithBadges overlay={overlay} user staff={staff} userId={userId} needsProfile={needsProfile} />
           </Suspense>
         ) : (
           nav

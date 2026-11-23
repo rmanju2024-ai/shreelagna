@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal-page";
 
-export const metadata: Metadata = { title: "Refund Policy", description: "Refund terms for MarriageConnect plans." };
+export const metadata: Metadata = { title: "Refund Policy", description: "MarriageConnect subscription fees are not refunded." };
 
 export default function RefundsPage() {
   return <LegalPage
-    kicker="Straight answers on plans"
+    kicker="Read this before you pay"
     title="Refund Policy"
-    summary="This policy will apply when paid subscriptions are introduced. Free access does not require a refund."
+    summary="Subscription fees are not refunded. The fee is kept small. Think carefully before you take a plan."
     sections={[
-      { title: "Before paid plans launch", body: ["MarriageConnect is currently offering free access. No subscription payment is being collected through the service, so there is no paid-plan refund process at this time."] },
-      { title: "When subscriptions begin", body: ["Before accepting a payment, we will show the plan price, duration, included features, renewal terms, cancellation method, and applicable refund conditions. The version of this policy available at checkout will apply to that purchase.", "We will not silently convert free access into a paid plan. Any paid renewal or recurring charge will require clear member consent."] },
-      { title: "How to ask for help", body: ["If a payment issue occurs after paid plans launch, contact the Support Centre with the account email, payment date, plan name, and transaction reference. Do not post payment details in chat or public profile fields."] },
+      { title: "No refunds", body: ["A plan fee, once paid, is not refunded. This includes a change of mind, unused days, fewer contacts than you expected, a match that did not proceed, or closing your profile before the plan ends.", "The subscription fee is kept minimal so a family can begin without a heavy payment. Because the fee is already small, we do not offer refunds, partial refunds, or credits."] },
+      { title: "Think before you avail the service", body: ["Read the plan, the number of families you may contact, the daily limit, and the end date before you pay. Take the plan only if you intend to use it.", "A welcome or complimentary period, where offered, is not a paid subscription and does not create a refund."] },
+      { title: "What we can still help with", body: ["If a payment failed but money left your account, or the same plan was charged twice by mistake, write to the Support Centre with the account email, payment date, plan name, and transaction reference. We will look into a duplicate or failed charge. That review is not a refund of a successful subscription.", "Do not post payment details in chat or on a public profile."] },
     ]}
   />;
 }

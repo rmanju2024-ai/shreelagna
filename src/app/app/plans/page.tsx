@@ -56,7 +56,7 @@ export default async function PlansPage({
 
         <div className={`plans-status is-${access.kind}`}>
           <div>
-            <span className="plans-label">{access.live ? "Current plan" : "No plan"}</span>
+            <span className="plans-label">{access.live ? "Current plan" : access.lapsed ? "Licence ended" : "No plan"}</span>
             <h2>{access.label}</h2>
             {access.until ? (
               <p>
@@ -71,7 +71,11 @@ export default async function PlansPage({
             ) : access.live ? (
               <p>This profile used: {quota.used} (unique families viewed or sent interest)</p>
             ) : (
-              <p>Search remains open. A send request or contact view needs a plan.</p>
+              <p>
+                {access.lapsed
+                  ? "You can open a short profile only. Interest, chat, mobile and email stay closed until you renew."
+                  : "Search remains open. A send request or contact view needs a plan."}
+              </p>
             )}
           </div>
           {access.live && quota.limit !== null ? (

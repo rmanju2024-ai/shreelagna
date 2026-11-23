@@ -21,7 +21,7 @@ function emptyStats(): Stats {
 function planLine(access: Membership) {
   const name = access.label.replace(/ plan$/i, "");
   if (!access.live) {
-    return { name: name || "No plan", expiry: "Expired — renew to search" };
+    return { name: access.lapsed ? "Licence ended" : name || "No plan", expiry: "Renew to send and open full profiles" };
   }
   if (!access.until) {
     return { name, expiry: "No expiry" };

@@ -50,6 +50,8 @@ describe("membership access", () => {
     });
     expect(none.kind).toBe("none");
     expect(none.live).toBe(false);
+    expect(none.lapsed).toBe(true);
+    expect(none.label).toBe("Licence ended");
     expect(daysLeft(none.until, new Date("2026-04-01T00:00:00.000Z"))).toBe(0);
   });
 

@@ -56,7 +56,19 @@ export async function fetchPaidMembership(
   userId: string,
   profileId?: string | null,
 ): Promise<PaidRow | null> {
-  return membershipRow(db, userId, "active", profileId);
+  const live = await membershipRow(db, userId, "active", profileId);
+  if (live) return live;
+  try {
+    let query = asDb(db)
+      .from("memberships")
+      .select("plan_code, status, starts_at, ends_at, profile_id")
+      .eq("user_id", userId);
+    if (profileId) query = query.eq("profile_id", profileId);
+    const { data } = await query.order("ends_at", { ascending: false }).limit(1).maybeSingle();
+    return (data as PaidRow | null) ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export async function fetchPendingPlanCode(
@@ -174,12 +186,15 @@ export async function loadMembership(
   profile?: { id?: string | null; created_at?: string | null } | null,
 ): Promise<Membership> {
   const profileId = profile?.id ?? null;
+  if (me.role !== "admin" && me.role !== "service" && !profileId) {
+    return NO_PLAN;
+  }
   const paid =
     me.role === "admin" || me.role === "service" ? null : await fetchPaidMembership(db, me.id, profileId);
   const named = paid?.plan_code ? await fetchPlanByCode(db, paid.plan_code) : null;
   return resolveMembership({
     role: me.role,
-    welcomeStartedAt: profile?.created_at ?? me.welcome_started_at,
+    welcomeStartedAt: profile?.created_at ?? null,
     welcomeDays: me.welcome_days,
     paid,
     planName: named?.name,
@@ -210,6 +225,7 @@ export async function loadWorkingMembership(
 const NO_PLAN: Membership = {
   kind: "none",
   live: false,
+  lapsed: false,
   label: "Plan needed",
   until: null,
   daysLeft: 0,

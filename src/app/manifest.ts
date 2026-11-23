@@ -3,7 +3,7 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Marriage Connect.in",
-    short_name: "Connect.in",
+    short_name: "Marriage.in",
     description: "Love Begins Here",
     start_url: "/",
     scope: "/",
@@ -12,9 +12,8 @@ export default function manifest(): MetadataRoute.Manifest {
     background_color: "#fffaf2",
     theme_color: "#fffaf2",
     icons: [
-      { src: "/pwa/192", sizes: "192x192", type: "image/png", purpose: "any" },
-      { src: "/pwa/192", sizes: "192x192", type: "image/png", purpose: "maskable" },
-      { src: "/pwa/512", sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: "/pwa/512?v=4", sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: "/pwa/192?v=4", sizes: "192x192", type: "image/png", purpose: "any" },
     ],
   };
 }

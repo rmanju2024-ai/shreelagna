@@ -21,6 +21,7 @@ export function ThreadView({
   presence,
   online,
   needPlan = false,
+  planLapsed = false,
   closedNote,
   readOnly = false,
   backHref = "/app/chat",
@@ -35,6 +36,7 @@ export function ThreadView({
   presence: string;
   online: boolean;
   needPlan?: boolean;
+  planLapsed?: boolean;
   closedNote?: ReactNode;
   readOnly?: boolean;
   backHref?: string;
@@ -236,9 +238,13 @@ export function ThreadView({
       </header>
       {needPlan ? (
         <div className="salon-plan">
-          <p>Keep a live plan to continue this conversation</p>
+          <p>
+            {planLapsed
+              ? "Your licence has ended. Renew it to send a message. You can still read this chat."
+              : "A live licence is required before you can send a message."}
+          </p>
           <Link href="/app/plans" className="salon-plan-go">
-            See plans
+            {planLapsed ? "Renew licence" : "See plans"}
           </Link>
         </div>
       ) : null}

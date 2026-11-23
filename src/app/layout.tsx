@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Playfair_Display, Source_Serif_4 } from "next/font/google";
 import { ChromeLayout } from "@/components/chrome-layout";
+import { OpeningSplash } from "@/components/opening-splash";
 import { WebVitals } from "@/components/web-vitals";
 import { Butterflies } from "@/components/butterflies";
 import { SITE_BRAND } from "@/lib/brand";
@@ -58,6 +59,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${sourceSerif.variable} ${playfair.variable} h-full antialiased`}
     >
       <body className="min-h-dvh w-full overflow-x-clip">
+        <OpeningSplash />
         <ChromeLayout>{children}</ChromeLayout>
         <Butterflies />
         <WebVitals />
