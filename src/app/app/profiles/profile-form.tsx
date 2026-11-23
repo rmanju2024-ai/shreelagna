@@ -854,6 +854,7 @@ export function ProfileForm({
               name="rashi"
               defaultValue={values?.rashi ?? ""}
               prefer={[NOT_APPLICABLE, DONT_KNOW]}
+              keepOrder
               className={inputClass}
             >
               <option value="">Not mentioned</option>
@@ -869,6 +870,7 @@ export function ProfileForm({
               name="lagna"
               defaultValue={values?.lagna ?? ""}
               prefer={[NOT_APPLICABLE, DONT_KNOW]}
+              keepOrder
               className={inputClass}
             >
               <option value="">Not mentioned</option>
@@ -884,6 +886,7 @@ export function ProfileForm({
               name="nakshatra"
               defaultValue={values?.nakshatra ?? ""}
               prefer={[NOT_APPLICABLE, DONT_KNOW]}
+              keepOrder
               className={inputClass}
             >
               <option value="">Not mentioned</option>

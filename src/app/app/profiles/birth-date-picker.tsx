@@ -97,6 +97,7 @@ export function BirthDatePicker({
           aria-label="Birth month"
           className={inputClass}
           required
+          keepOrder
           value={month}
           onChange={(e) => pick(year, e.target.value, day)}
         >
