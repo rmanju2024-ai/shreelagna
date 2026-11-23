@@ -185,6 +185,7 @@ export function AlbumViewer({
     <div className={framed ? `${cardClass} album-book` : "album-book"}>
       <p className="album-kicker">Photographs (required)</p>
       {current ? (
+        <>
         <figure className={`album-stage${extraGated ? " is-gated" : ""}`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -220,6 +221,7 @@ export function AlbumViewer({
           ) : null}
         </figure>
         {note ? <p className="media-progress" role="status">{note}</p> : null}
+        </>
       ) : locked ? (
         <div className="album-stage album-empty">
           <span className="album-lock" aria-hidden>🔒</span>
