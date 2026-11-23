@@ -4,7 +4,7 @@ import { after } from "next/server";
 import { ChatAvatar } from "@/app/app/chat/chat-avatar";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { alertHeadline, alertWhen } from "@/lib/match/alert-copy";
-import { collapseNotices, noticesForWorkingProfile } from "@/lib/match/collapse-notices";
+import { noticesForWorkingProfile } from "@/lib/match/collapse-notices";
 import { noticeProfileListed } from "@/lib/notify/house-notice";
 import { publicMediaUrl } from "@/lib/match/inbox-card";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -36,10 +36,10 @@ export async function AlertsFeed() {
     .eq("user_id", me.id)
     .neq("kind", "chat")
     .order("created_at", { ascending: false })
-    .limit(80);
+    .limit(200);
   const scoped = noticesForWorkingProfile(notices ?? [], working.id, working.listed.length);
-  const collapsed = collapseNotices(scoped);
-  const profileIds = [...new Set(collapsed.map((row) => row.match_profile_id).filter(Boolean))] as string[];
+  const listed = [...scoped].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+  const profileIds = [...new Set(listed.map((row) => row.match_profile_id).filter(Boolean))] as string[];
   // Independent lookups run together instead of one after another.
   const [{ data: visibleProfiles }, { data: photos }] = profileIds.length
     ? await Promise.all([
@@ -53,7 +53,7 @@ export async function AlertsFeed() {
       .filter((row) => !noticeProfileListed((row as { status?: string }).status) || blocked.has(row.id))
       .map((row) => row.id),
   );
-  const alerts = collapsed.filter((row) => !row.match_profile_id || !hidden.has(row.match_profile_id));
+  const alerts = listed.filter((row) => !row.match_profile_id || !hidden.has(row.match_profile_id));
   const photoMap = new Map<string, string>();
   for (const row of photos ?? []) if (!photoMap.has(row.profile_id) && row.storage_path) photoMap.set(row.profile_id, row.storage_path);
   const readAt = new Date().toISOString();
@@ -80,7 +80,7 @@ export async function AlertsFeed() {
           return <li key={note.id}>{openHref ? <Link href={openHref} className={`alert-card${unread ? " is-new" : ""}`}>{inner}</Link> : <div className={`alert-card${unread ? " is-new" : ""}`}>{inner}</div>}</li>;
         })}
       </ul>
-      {!shownAlerts.length ? <div className="sx-empty alerts-genz-empty"><span aria-hidden>✨</span><div><h3>You’re all caught up</h3><p>New matches and profile activity will show up here.</p></div></div> : null}
+      {!shownAlerts.length ? <div className="sx-empty alerts-genz-empty"><span aria-hidden>✨</span><div><h3>No alerts yet</h3><p>Saved alerts stay here, newest first. Your phone is told only when a new one arrives.</p></div></div> : null}
     </div>
   );
 }
