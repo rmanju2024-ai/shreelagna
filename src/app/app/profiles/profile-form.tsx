@@ -63,6 +63,7 @@ export function ProfileForm({
   omitAbout = false,
   allowMobileOtp = true,
   another = false,
+  startStep = 1,
 }: {
   values?: ProfileFormValues;
   religions: { id: string; name: string }[];
@@ -79,6 +80,7 @@ export function ProfileForm({
   omitAbout?: boolean;
   allowMobileOtp?: boolean;
   another?: boolean;
+  startStep?: number;
 }) {
   const d = PROFILE_FORM_DEFAULTS;
   const roles = creatorRolesForForm(values?.creator_relationship);
@@ -152,7 +154,7 @@ export function ProfileForm({
     (!omitAbout || id !== "about") && (!activeSection || activeSection === id);
   const wizard = mode === "create" && !section && !studio;
   const paged = wizard;
-  const [wizardStep, setWizardStep] = useState(1);
+  const [wizardStep, setWizardStep] = useState(Math.min(5, Math.max(1, startStep)));
   const page = wizardStep;
   const panelClass = (step: number) =>
     `form-3d-panel${paged ? ` wizard-panel${page === step ? " is-current" : ""}` : ""}`;
@@ -171,7 +173,12 @@ export function ProfileForm({
       onSubmit={(event) => {
         if (!paged) return;
         const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
-        if (submitter?.value === "draft") return;
+        if (submitter?.value === "step" || submitter?.value === "draft") {
+          event.currentTarget
+            .querySelectorAll<HTMLElement>(".wizard-panel:not(.is-current) [required]")
+            .forEach((field) => field.removeAttribute("required"));
+        }
+        if (submitter?.value === "draft" || submitter?.value === "step") return;
         const invalid = event.currentTarget.querySelector<HTMLElement>(":invalid");
         if (!invalid) return;
         event.preventDefault();
@@ -185,6 +192,7 @@ export function ProfileForm({
       }}
     >
       {values?.id ? <input type="hidden" name="id" value={values.id} /> : null}
+      {wizard ? <input type="hidden" name="wizard_step" value={wizardStep} /> : null}
       {nextHref ? <input type="hidden" name="next" value={nextHref} /> : null}
       {values?.member_code ? <input type="hidden" name="member_code" value={values.member_code} /> : null}
       {activeSection ? <input type="hidden" name="section" value={activeSection} /> : null}
@@ -1316,10 +1324,11 @@ export function ProfileForm({
           )}
           <span>
             Step {wizardStep} of {WIZARD_STEPS.length}
+            <small>Saved as you go</small>
           </span>
           {wizardStep < WIZARD_STEPS.length ? (
-            <button type="button" className={btnHero} onClick={() => moveWizard(wizardStep + 1)}>
-              Next →
+            <button type="submit" name="save_intent" value="step" className={btnHero}>
+              Next
             </button>
           ) : null}
         </div>
@@ -1338,6 +1347,9 @@ export function ProfileForm({
             </ul>
           </div>
         </div>
+      ) : null}
+      {wizard && error && wizardStep < 5 ? (
+        <p className="profile-wizard-error">{error}</p>
       ) : null}
       {!wizard || wizardStep === 5 ? (
         <div className="form-3d-actions">

@@ -229,7 +229,9 @@ export async function saveProfile(formData: FormData) {
   const sectionRaw = String(formData.get("section") ?? "");
   const section = isProfileEditSection(sectionRaw) ? sectionRaw : undefined;
   const bounceId = String(formData.get("id") ?? "");
-  const saveDraft = !bounceId && !section && formData.get("save_intent") === "draft";
+  const saveIntent = String(formData.get("save_intent") ?? "");
+  const wizardStep = Number(formData.get("wizard_step") ?? 1);
+  const saveDraft = !section && (saveIntent === "draft" || saveIntent === "step");
 
   const raw: Record<string, unknown> = {
     id: bounceId,
@@ -329,6 +331,11 @@ export async function saveProfile(formData: FormData) {
         })
       : null;
     if (desk) redirect(desk);
+    if (saveDraft || formData.get("wizard_step")) {
+      const step = Number.isFinite(wizardStep) ? Math.min(5, Math.max(1, wizardStep)) : 1;
+      const id = bounceId ? `&draft=${bounceId}` : "";
+      redirect(`/app/profiles/new?step=${step}${id}&error=${encodeURIComponent(parsed.error)}`);
+    }
     const path = bounceId ? `/app/profiles/${bounceId}` : "/app/profiles/new";
     const extra = bounceId && section ? `&edit=1&section=${section}` : bounceId ? "&edit=1" : "";
     redirect(`${path}?error=${encodeURIComponent(parsed.error)}${extra}`);
@@ -392,12 +399,19 @@ export async function saveProfile(formData: FormData) {
           : "vadhu",
   });
   const payload = pickSaveRow(fullPayload, section, Boolean(editingId));
+  if (saveDraft) payload.status = "draft";
 
   const bounceSave = (error: string): never => {
     const desk = bounceId
       ? deskPeopleEditReturn(formData, bounceId, { error, section })
       : null;
     if (desk) redirect(desk);
+    if (saveDraft || formData.get("wizard_step")) {
+      const step = Number.isFinite(wizardStep) ? Math.min(5, Math.max(1, wizardStep)) : 1;
+      const kept = bounceId || editingId || "";
+      const id = kept ? `draft=${kept}&` : "";
+      redirect(`/app/profiles/new?${id}step=${step}&error=${encodeURIComponent(error)}`);
+    }
     const path = bounceId ? `/app/profiles/${bounceId}` : "/app/profiles/new";
     const extra = bounceId && section ? `&edit=1&section=${section}` : bounceId ? "&edit=1" : "";
     redirect(`${path}?error=${encodeURIComponent(error)}${extra}`);
@@ -446,23 +460,11 @@ export async function saveProfile(formData: FormData) {
         continue;
       }
       await recordSaveError(error);
-      redirect(
-        deskPeopleEditReturn(formData, editingId, {
-          error: saveErrorMessage(error),
-          section,
-        }) ??
-          `/app/profiles/${editingId}?error=${encodeURIComponent(saveErrorMessage(error))}&edit=1${section ? `&section=${section}` : ""}`,
-      );
+      bounceSave(saveErrorMessage(error));
     }
     if (!saved) {
       await recordSaveError(lastError);
-      redirect(
-        deskPeopleEditReturn(formData, editingId, {
-          error: saveErrorMessage(lastError),
-          section,
-        }) ??
-          `/app/profiles/${editingId}?error=${encodeURIComponent(saveErrorMessage(lastError))}&edit=1${section ? `&section=${section}` : ""}`,
-      );
+      bounceSave(saveErrorMessage(lastError));
     }
   } else {
     const { allocateMemberCode } = await import("@/lib/profile/member-code");
@@ -478,7 +480,9 @@ export async function saveProfile(formData: FormData) {
         const created = after[after.length - 1];
         if (created?.id) redirect(`/app/profiles/${created.id}`);
       }
-      redirect(`/app/profiles/new?error=${encodeURIComponent(saveErrorMessage(inserted.error))}`);
+      redirect(
+        `/app/profiles/new?step=${Number.isFinite(wizardStep) ? wizardStep : 1}&error=${encodeURIComponent(saveErrorMessage(inserted.error))}`,
+      );
     }
     profileId = inserted.id;
   }
@@ -510,6 +514,13 @@ export async function saveProfile(formData: FormData) {
       entityId: profileId,
       metadata: { section: section ?? "full" },
     });
+  }
+
+  if (saveIntent === "step" || saveIntent === "draft") {
+    const step = Number.isFinite(wizardStep) ? Math.min(5, Math.max(1, wizardStep)) : 1;
+    const next = saveIntent === "step" ? Math.min(5, step + 1) : step;
+    revalidatePath("/app/profiles/new");
+    redirect(`/app/profiles/new?draft=${profileId}&step=${next}${saveIntent === "draft" ? "&saved=1" : ""}`);
   }
 
   revalidatePath(`/app/profiles/${profileId}`);

@@ -7,21 +7,28 @@ import { loadFaithCatalog, loadFormLists } from "@/lib/profile/load-form-lists";
 import { redirect } from "next/navigation";
 import { FirstProfileGate, firstProfileFrom } from "@/components/home/first-profile-gate";
 import { ProfileForm } from "../profile-form";
+import type { ProfileFormValues } from "../profile-form-types";
 
 export default async function NewProfilePage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; from?: string }>;
+  searchParams: Promise<{ error?: string; from?: string; draft?: string; step?: string; saved?: string }>;
 }) {
-  const { error, from } = await searchParams;
+  const { error, from, draft, step, saved } = await searchParams;
   const { supabase, user } = await getAuth();
   if (!supabase || !user) redirect("/login?next=/app/profiles/new");
   const me = await ensureAppUser(supabase, user);
   if (!me) redirect("/login?error=account");
 
   const listed = await listOwnProfiles(supabase, me.id);
-  if (!canAddProfile(listed.length)) {
+  const draftRow = draft ? listed.find((row) => row.id === draft) : undefined;
+  if (!draftRow && !canAddProfile(listed.length)) {
     redirect(listed[0]?.id ? `/app/profiles/${listed[0].id}` : "/");
+  }
+  let draftValues: Record<string, unknown> | undefined;
+  if (draftRow) {
+    const { data } = await supabase.from("profiles").select("*").eq("id", draftRow.id).maybeSingle();
+    draftValues = (data as Record<string, unknown> | null) ?? undefined;
   }
 
   const [{ religions, communities }, lists] = await Promise.all([loadFaithCatalog(), loadFormLists()]);
@@ -37,8 +44,11 @@ export default async function NewProfilePage({
         </aside>
         <div>
           {listed.length === 0 ? <FirstProfileGate from={firstProfileFrom(from)} /> : null}
+          {saved ? <p className="profile-wizard-saved">This step is saved. You can leave and come back.</p> : null}
           <ProfileForm
             error={error}
+            values={draftValues as ProfileFormValues | undefined}
+            startStep={Number(step) || 1}
             loginEmail={me.email ?? user.email ?? ""}
             religions={religions ?? []}
             communities={communities ?? []}

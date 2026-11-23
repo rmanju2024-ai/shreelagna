@@ -189,8 +189,7 @@ export function parseProfileForm(
     if (!d.subject_full_name || d.subject_full_name.trim().length < 2) {
       return { ok: false, error: "Enter the full name before saving a draft." };
     }
-    if (!d.date_of_birth) return { ok: false, error: "Choose the adult date of birth before saving a draft." };
-    if (!isAdult(d.date_of_birth)) {
+    if (d.date_of_birth && !isAdult(d.date_of_birth)) {
       return { ok: false, error: "Bride or groom must be at least 21 years old." };
     }
     return { ok: true, data: d as ProfileFormInput };
