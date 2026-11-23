@@ -7,7 +7,6 @@ import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from
 import { NavGlyph } from "@/components/nav-icons";
 import { SignOutButton } from "@/components/sign-out-button";
 import { InstallAppMenuItem } from "@/components/install-app";
-import { PushAlertsMenuItem } from "@/components/push-alerts";
 import { unreadLabel } from "@/lib/match/chat-ui";
 import { placeMoreMenu } from "@/lib/ui/place-float";
 
@@ -294,7 +293,6 @@ export function HeaderNav({
         >
           {more.map((item) => <MenuLink key={item.href} item={item} current={pathMatches(pathname, item.href, tab)} />)}
           <InstallAppMenuItem />
-          {user ? <PushAlertsMenuItem /> : null}
           {user ? <SignOutButton className="nav-menu-item" icon /> : null}
         </NavGroup>
       </div>

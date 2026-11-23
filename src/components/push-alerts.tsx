@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { createPortal } from "react-dom";
 import { dropPushSubscription, getPushClientConfig, savePushSubscription } from "@/app/app/alerts/push-actions";
-import { NavGlyph } from "@/components/nav-icons";
 import { useInstallApp } from "@/components/install-app";
 
 function vapidBytes(publicKey: string): Uint8Array {
@@ -23,7 +21,7 @@ function permissionState(): NotificationPermission | "unsupported" {
 
 const SETUP_HINT = "Push alerts are not set up on this site yet. Add the VAPID public and private keys, then reload.";
 
-export function PushAlertsControl({ compact = false }: { compact?: boolean }) {
+export function PushAlertsControl() {
   const install = useInstallApp();
   const [publicKey, setPublicKey] = useState("");
   const [ready, setReady] = useState(false);
@@ -134,40 +132,6 @@ export function PushAlertsControl({ compact = false }: { compact?: boolean }) {
     }
   }
 
-  const toast =
-    compact && note && typeof document !== "undefined"
-      ? createPortal(
-          <div className="push-alerts-toast" role="status">
-            {note}
-          </div>,
-          document.body,
-        )
-      : null;
-
-  if (compact) {
-    return (
-      <>
-        <button
-          type="button"
-          role="menuitem"
-          className="nav-menu-item"
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            if (status === "granted") void disable();
-            else void enable();
-          }}
-        >
-          <span className="nav-3d-ico">
-            <NavGlyph name="alerts" />
-          </span>
-          <span>{status === "granted" ? "Device alerts on" : "Turn on alerts"}</span>
-        </button>
-        {toast}
-      </>
-    );
-  }
-
   const on = status === "granted";
   return (
     <div className="set-row push-alerts-card" role="region" aria-label="Device alerts">
@@ -187,8 +151,4 @@ export function PushAlertsControl({ compact = false }: { compact?: boolean }) {
       {note ? <p className="push-alerts-note">{note}</p> : null}
     </div>
   );
-}
-
-export function PushAlertsMenuItem() {
-  return <PushAlertsControl compact />;
 }

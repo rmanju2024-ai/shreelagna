@@ -8,7 +8,6 @@ export default function Loading() {
       <div className="inbox-unified is-alerts">
         <InboxSwitcherNav active="alerts" />
         <section className="inbox-alerts-panel" aria-busy="true" aria-live="polite">
-          <header><p>Your private inbox</p><h1>Updates</h1></header>
           <div className="app-route-loading-card" />
           <div className="app-route-loading-card" />
           <div className="app-route-loading-card" />

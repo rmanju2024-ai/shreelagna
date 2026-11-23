@@ -8,7 +8,6 @@ export default function AlertsPage() {
       <div className="inbox-unified is-alerts">
         <InboxSwitcher active="alerts" />
         <section className="inbox-alerts-panel" aria-label="Alerts">
-          <header><p>Your private inbox</p><h1>Updates</h1></header>
           <AlertsFeed />
         </section>
       </div>
