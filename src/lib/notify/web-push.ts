@@ -32,7 +32,9 @@ export async function sendWebPushesToUser(userId: string, notice: PushNoticeInpu
   const { data: rows } = await db
     .from("push_subscriptions")
     .select("id, endpoint, p256dh, auth")
-    .eq("user_id", userId);
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(1);
   let sent = 0;
   for (const row of (rows ?? []) as PushRow[]) {
     const status = await sendOnePush(row, payload);

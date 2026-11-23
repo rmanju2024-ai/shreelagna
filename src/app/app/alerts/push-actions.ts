@@ -48,6 +48,8 @@ export async function savePushSubscription(input: PushKeys): Promise<PushActionR
     { onConflict: "endpoint" },
   );
   if (error) return { ok: false, error: "Could not save this device. Try again in a moment." };
+  // One place per member: the installed app and the browser must not both ring.
+  await db.from("push_subscriptions").delete().eq("user_id", auth.me.id).neq("endpoint", endpoint);
   return { ok: true };
 }
 
