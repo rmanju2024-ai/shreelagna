@@ -46,6 +46,7 @@ export default async function NewProfilePage({
           {listed.length === 0 ? <FirstProfileGate from={firstProfileFrom(from)} /> : null}
           {saved ? <p className="profile-wizard-saved">This step is saved. You can leave and come back.</p> : null}
           <ProfileForm
+            key={`${draftRow?.id ?? "new"}-${step ?? "1"}`}
             error={error}
             values={draftValues as ProfileFormValues | undefined}
             startStep={Number(step) || 1}

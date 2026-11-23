@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { saveProfile } from "@/app/app/profiles/actions";
 import { BirthDatePicker, BirthTimePicker } from "@/app/app/profiles/birth-date-picker";
 import {
@@ -155,6 +155,9 @@ export function ProfileForm({
   const wizard = mode === "create" && !section && !studio;
   const paged = wizard;
   const [wizardStep, setWizardStep] = useState(Math.min(5, Math.max(1, startStep)));
+  useEffect(() => {
+    setWizardStep(Math.min(5, Math.max(1, startStep)));
+  }, [startStep]);
   const page = wizardStep;
   const panelClass = (step: number) =>
     `form-3d-panel${paged ? ` wizard-panel${page === step ? " is-current" : ""}` : ""}`;
