@@ -1,13 +1,17 @@
 import type { Membership } from "@/lib/membership/access";
 import { WELCOME_PLAN_NAME } from "@/lib/membership/catalog";
 import { DAILY_NEW_FAMILY_CAP, periodWarns, type InterestQuota } from "@/lib/membership/quota";
+import { formatIstDate } from "@/lib/time/ist";
 
 export type QuotaSoftKind = "status" | "warn" | "daily" | "capped";
 
 export type QuotaSoftNotice = {
   kind: QuotaSoftKind;
   title: string;
+  /** One-line summary for notifications. */
   body: string;
+  /** Short lines shown in the plan dialog. */
+  points: string[];
   holdMs: number;
 };
 
@@ -23,36 +27,30 @@ function planName(access: Pick<Membership, "kind"> & { label?: string | null }) 
   return label.replace(/\s+plan$/i, "");
 }
 
-function daysPhrase(daysLeft: number) {
-  if (daysLeft <= 0) return "the plan ends today";
-  if (daysLeft === 1) return "1 day left on this plan";
-  return `${daysLeft} days left on this plan`;
+function expiryPoint(access: { daysLeft: number; until?: Date | string | null }) {
+  const until = access.until instanceof Date ? access.until : access.until ? new Date(access.until) : null;
+  if (until && !Number.isNaN(until.getTime())) return `Expires ${formatIstDate(until)}`;
+  if (access.daysLeft <= 0) return "Expires today";
+  if (access.daysLeft === 1) return "Expires in 1 day";
+  return `Expires in ${access.daysLeft} days`;
 }
 
-function planBalance(quota: InterestQuota) {
-  if (quota.left == null || quota.limit == null) return "";
-  if (quota.left === 0) return "No families are left on this plan.";
-  if (quota.left === 1) return `This plan still has 1 of ${quota.limit} families available.`;
-  return `This plan still has ${quota.left} of ${quota.limit} families available.`;
+function usagePoint(quota: InterestQuota) {
+  if (quota.limit == null) return "";
+  const used = Math.max(0, quota.used);
+  return `Usage: ${used} of ${quota.limit} families`;
 }
 
-function dailyPace(quota: InterestQuota) {
-  const cap = DAILY_NEW_FAMILY_CAP;
-  if (quota.dailyLeft == null) return "";
-  if (quota.dailyLeft === 0) {
-    return `Each day you may contact up to ${cap} new families. Today's ${cap} are used.`;
-  }
-  if (quota.dailyLeft === 1) {
-    return `Each day you may contact up to ${cap} new families. You have 1 of today's ${cap} remaining.`;
-  }
-  if (quota.dailyLeft === cap) {
-    return `Each day you may contact up to ${cap} new families. Today's ${cap} are still unused.`;
-  }
-  return `Each day you may contact up to ${cap} new families. You have ${quota.dailyLeft} of today's ${cap} remaining.`;
+function notice(kind: QuotaSoftKind, title: string, points: string[], holdMs: number): QuotaSoftNotice {
+  const lines = points.filter(Boolean);
+  return { kind, title, points: lines, body: lines.join(" · "), holdMs };
 }
 
 export function buildQuotaSoftNotice(
-  access: Pick<Membership, "kind" | "live" | "daysLeft"> & { label?: string | null },
+  access: Pick<Membership, "kind" | "live" | "daysLeft"> & {
+    label?: string | null;
+    until?: Date | string | null;
+  },
   quota: InterestQuota,
   reason?: "daily" | "quota" | "send" | "visit",
   who?: { name?: string | null },
@@ -63,36 +61,34 @@ export function buildQuotaSoftNotice(
   const plan = planName(access);
 
   if (reason === "daily" || (quota.dailyLeft === 0 && quota.left !== 0)) {
-    return {
-      kind: "daily",
-      title: dear,
-      body: `You are on the ${plan} plan. This is not the end of your plan — it is only today's pace. Each day you may contact up to ${DAILY_NEW_FAMILY_CAP} new families. Today's ${DAILY_NEW_FAMILY_CAP} are used. You may contact more after midnight IST, until the families on your plan are finished.`,
-      holdMs: 7000,
-    };
+    return notice(
+      "daily",
+      dear,
+      [
+        plan,
+        expiryPoint(access),
+        usagePoint(quota),
+        `Today's ${DAILY_NEW_FAMILY_CAP} new contacts are used`,
+      ],
+      7000,
+    );
   }
   if (reason === "quota" || quota.left === 0) {
-    return {
-      kind: "capped",
-      title: dear,
-      body: `You are on the ${plan} plan. The family limit for this plan has been reached. You may continue chatting with families you have already contacted.`,
-      holdMs: 8000,
-    };
+    return notice(
+      "capped",
+      dear,
+      [plan, expiryPoint(access), usagePoint(quota), "Existing chats stay open"],
+      8000,
+    );
   }
   if (periodWarns(quota) || reason === "send" || reason === "visit") {
     const warn = periodWarns(quota);
-    const body = [
-      `You are on the ${plan} plan (${daysPhrase(access.daysLeft)}).`,
-      planBalance(quota),
-      dailyPace(quota),
-    ]
-      .filter(Boolean)
-      .join(" ");
-    return {
-      kind: warn ? "warn" : "status",
-      title: dear,
-      body,
-      holdMs: warn ? 7500 : 6500,
-    };
+    return notice(
+      warn ? "warn" : "status",
+      dear,
+      [plan, expiryPoint(access), usagePoint(quota)],
+      warn ? 7500 : 6500,
+    );
   }
   return null;
 }

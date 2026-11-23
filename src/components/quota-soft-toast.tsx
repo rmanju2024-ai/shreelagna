@@ -97,9 +97,17 @@ export function QuotaSoftHost() {
         </div>
         <p className="quota-soft-kicker">Your plan</p>
         <p id="quota-soft-title">{notice.title}</p>
-        <p id="quota-soft-body" className="quota-soft-body">
-          {notice.body}
-        </p>
+        {notice.points?.length ? (
+          <ul id="quota-soft-body" className="quota-soft-points">
+            {notice.points.map((point) => (
+              <li key={point}>{point}</li>
+            ))}
+          </ul>
+        ) : (
+          <p id="quota-soft-body" className="quota-soft-body">
+            {notice.body}
+          </p>
+        )}
         <div className="quota-soft-actions">
           <Link href="/app/plans" className="quota-soft-primary" onClick={close}>
             View plan

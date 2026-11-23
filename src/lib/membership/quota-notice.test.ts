@@ -11,17 +11,18 @@ describe("quota soft notice", () => {
 
   it("warns when five families remain", () => {
     const note = buildQuotaSoftNotice(
-      { kind: "welcome", live: true, daysLeft: 40, label: "Welcome gift" },
+      { kind: "welcome", live: true, daysLeft: 40, label: "Welcome gift", until: new Date("2027-01-02T18:30:00.000Z") },
       resolveQuota(20, 15, [], 1),
       "visit",
       { name: "Jayesh Kumar" },
     );
     expect(note?.kind).toBe("warn");
     expect(note?.title).toBe("Dear Jayesh,");
-    expect(note?.body).toContain("Welcome gift");
-    expect(note?.body).toContain("5 of 20 families available");
-    expect(note?.body).toContain("40 days left");
-    expect(note?.body).toContain("up to 5 new families");
+    expect(note?.points).toEqual([
+      "Welcome gift",
+      "Expires 3 Jan 2027",
+      "Usage: 15 of 20 families",
+    ]);
   });
 
   it("explains the daily five", () => {
@@ -33,7 +34,8 @@ describe("quota soft notice", () => {
     );
     expect(note?.kind).toBe("daily");
     expect(note?.title).toBe("Dear Jayesh,");
-    expect(note?.body).toContain("Welcome gift");
-    expect(note?.body).toMatch(/today'?s 5 are used/i);
+    expect(note?.points).toContain("Welcome gift");
+    expect(note?.points).toContain("Usage: 8 of 20 families");
+    expect(note?.points).toContain("Today's 5 new contacts are used");
   });
 });

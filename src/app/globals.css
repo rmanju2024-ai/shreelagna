@@ -8655,11 +8655,29 @@ a.inbox-name.inbox-open:focus-visible {
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 22%);
 }
 .live-clock {
-  display: block;
-  min-width: 7.5rem;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  min-width: 0;
+  line-height: 1.15;
 }
-@media (min-width: 1024px) {
-  .live-clock { min-width: 13.75rem; }
+.live-clock-date,
+.live-clock-time {
+  margin: 0;
+  white-space: nowrap;
+}
+.live-clock-short { display: none; }
+.live-clock-time {
+  margin-top: 0.15rem;
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 1180px) {
+  .live-clock-long { display: none; }
+  .live-clock-short { display: inline; }
+  .live-clock-time { font-size: 1.2rem; }
 }
 @media (max-width: 720px) {
   .header-profile-chip {

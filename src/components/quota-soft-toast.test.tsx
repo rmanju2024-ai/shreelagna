@@ -12,7 +12,8 @@ describe("plan status popup", () => {
     emitQuotaSoft({
       kind: "status",
       title: "Dear Jayesh,",
-      body: "You are on the Welcome gift plan.",
+      body: "Welcome gift · 11 days left",
+      points: ["Welcome gift", "Expires 4 Dec 2026", "Usage: 3 of 20 families"],
       holdMs: 1000,
     });
 
@@ -23,7 +24,7 @@ describe("plan status popup", () => {
     expect(dialog.querySelector(".quota-soft-brand .site-name")).toBeTruthy();
     expect(dialog.querySelector(".quota-soft-brand .site-name-word.is-connect")?.textContent).toBe("Connect");
     expect(dialog.textContent).toContain("Your plan");
-    expect(screen.getByText("You are on the Welcome gift plan.").className).toContain("quota-soft-body");
+    expect(screen.getByText("Usage: 3 of 20 families").closest("ul")?.className).toContain("quota-soft-points");
     expect(screen.getByRole("link", { name: "View plan" }).getAttribute("href")).toBe("/app/plans");
   });
 
@@ -33,6 +34,7 @@ describe("plan status popup", () => {
       kind: "warn",
       title: "Dear Jayesh,",
       body: "Five families remain.",
+      points: ["Five families remain."],
       holdMs: 1000,
     });
     fireEvent.click(await screen.findByRole("button", { name: "Close" }));
