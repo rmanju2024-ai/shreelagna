@@ -89,7 +89,7 @@ export default async function DeskVerificationPage({
             <select name="status" defaultValue="in_review"><option value="in_review">In review</option><option value="approved">Approve</option><option value="rejected">Reject</option><option value="expired">Expire</option></select>
             <input name="note" defaultValue={item.review_note ?? ""} maxLength={500} placeholder="Internal reason / decision note" />
             <button className={btnPrimary}>Save decision</button>
-          </form>}
+          </form>
         </li>
       ))}</ul> : <p className="desk-empty">No verification cases are waiting.</p>}
     </section>
