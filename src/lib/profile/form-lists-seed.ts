@@ -81,7 +81,7 @@ export function enrichFormLists(loaded: FormLists): FormLists {
     cities,
     educations: sortLabels(educations),
     occupations: take(loaded.occupations, seed.occupations, "alpha"),
-    tongues: take(loaded.tongues, seed.tongues, "alpha"),
+    tongues: sortLabels([...new Set([...(loaded.tongues ?? []), ...seed.tongues])]),
     diets: take(loaded.diets, seed.diets, "alpha"),
     heights: [...(loaded.heights.length ? loaded.heights : seed.heights)].sort((a, b) => a - b),
     marital: loaded.marital.length ? loaded.marital : seed.marital,
