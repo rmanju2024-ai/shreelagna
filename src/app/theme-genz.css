@@ -3554,10 +3554,23 @@ button.field-help-btn,
   box-shadow: 0 16px 30px -20px color-mix(in srgb, var(--theme-accent, #c45c6a) 80%, transparent);
 }
 .desk-menu.is-rail {
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.15rem 0 0.1rem;
+}
+.desk-menu-group { display: grid; gap: 0.35rem; min-width: 0; }
+.desk-menu-group-label {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9a6b28;
+}
+.desk-menu-group-row {
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem;
-  padding: 0.15rem 0 0.1rem;
 }
 .desk-menu-chip {
   grid-auto-flow: column;

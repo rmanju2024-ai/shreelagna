@@ -13,6 +13,7 @@ import {
 describe("staff vs admin desk", () => {
   it("lets staff onto Verify as well as the rest of the desk", () => {
     const staff = deskItemsFor(false).map((item) => item.id);
+    expect(staff.slice(0, 5)).toEqual(["profiles", "media", "tickets", "safety", "verification"]);
     expect(staff).toContain("tickets");
     expect(staff).toContain("media");
     expect(staff).toContain("people");

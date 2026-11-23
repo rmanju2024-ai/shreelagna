@@ -33,9 +33,7 @@ export default async function DeskLayout({ children }: { children: React.ReactNo
           <p className="browse-kicker">{desk.admin ? "Admin" : "Staff"}</p>
           <h1>House desk</h1>
           <p>
-            {desk.admin
-              ? "Tickets and Safety first. Staff appointments stay with admin."
-              : "Tickets, Safety, and Verify. Staff appointments stay with admin."}
+            Review first, then Analytics. Staff appointments stay with admin.
           </p>
         </header>
         <div className="browse-board desk-board is-menu">
