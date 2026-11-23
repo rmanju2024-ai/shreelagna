@@ -47,7 +47,7 @@ describe("house notice", () => {
             existing = { id: "n1" };
           },
           update() {
-            return { eq: async () => ({}) };
+            return { eq: () => ({ is: async () => ({}) }) };
           },
         };
       },

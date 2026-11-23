@@ -4,7 +4,7 @@ import { after } from "next/server";
 import { ChatAvatar } from "@/app/app/chat/chat-avatar";
 import { ensureAppUser, getAuth } from "@/lib/auth/session";
 import { alertHeadline, alertWhen } from "@/lib/match/alert-copy";
-import { collapseNotices, noticesForActiveProfiles, noticesForWorkingProfile } from "@/lib/match/collapse-notices";
+import { collapseNotices, noticesForWorkingProfile } from "@/lib/match/collapse-notices";
 import { noticeProfileListed } from "@/lib/notify/house-notice";
 import { publicMediaUrl } from "@/lib/match/inbox-card";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -29,23 +29,17 @@ export async function AlertsFeed() {
   const me = await ensureAppUser(supabase, user);
   if (!me) redirect("/login?error=account");
   const working = await requireWorkingProfile(supabase, me);
-  if (working.id) {
-    // Scanning for new matches is slow; do it after the page is sent so Alerts opens at once.
-    const profileId = working.id;
-    after(async () => {
-      try {
-        const { recordMatchNotices } = await import("@/lib/match/notices");
-        await recordMatchNotices(supabase, profileId, me.id);
-      } catch {
-        /* a missed scan is retried on the next visit */
-      }
-    });
-  }
-  const { data: notices } = await supabase.from("notices").select("id, kind, title, body, href, created_at, read_at, match_profile_id, for_profile_id").eq("user_id", me.id).neq("kind", "chat").order("created_at", { ascending: false }).limit(80);
+  const media = createServiceClient() ?? supabase;
+  const { data: notices } = await media
+    .from("notices")
+    .select("id, kind, title, body, href, created_at, read_at, match_profile_id, for_profile_id")
+    .eq("user_id", me.id)
+    .neq("kind", "chat")
+    .order("created_at", { ascending: false })
+    .limit(80);
   const scoped = noticesForWorkingProfile(notices ?? [], working.id, working.listed.length);
   const collapsed = collapseNotices(scoped);
   const profileIds = [...new Set(collapsed.map((row) => row.match_profile_id).filter(Boolean))] as string[];
-  const media = createServiceClient() ?? supabase;
   // Independent lookups run together instead of one after another.
   const [{ data: visibleProfiles }, { data: photos }] = profileIds.length
     ? await Promise.all([
@@ -54,14 +48,12 @@ export async function AlertsFeed() {
       ])
     : [{ data: [] as { id: string }[] }, { data: [] as { profile_id: string; storage_path: string | null }[] }];
   const blocked = await loadBlockedProfileIds(media, [working.id]);
-  const alerts = noticesForActiveProfiles(
-    collapsed,
-    new Set(
-      (visibleProfiles ?? [])
-        .filter((row) => noticeProfileListed((row as { status?: string }).status) && !blocked.has(row.id))
-        .map((row) => row.id),
-    ),
+  const hidden = new Set(
+    (visibleProfiles ?? [])
+      .filter((row) => !noticeProfileListed((row as { status?: string }).status) || blocked.has(row.id))
+      .map((row) => row.id),
   );
+  const alerts = collapsed.filter((row) => !row.match_profile_id || !hidden.has(row.match_profile_id));
   const photoMap = new Map<string, string>();
   for (const row of photos ?? []) if (!photoMap.has(row.profile_id) && row.storage_path) photoMap.set(row.profile_id, row.storage_path);
   const readAt = new Date().toISOString();

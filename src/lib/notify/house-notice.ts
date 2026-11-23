@@ -2,14 +2,6 @@ import { deliverHouseNotice } from "@/lib/notify/deliver";
 
 type NoticeClient = { from: (table: string) => unknown };
 
-const ONCE_KINDS = new Set([
-  "profile_view",
-  "contact_view",
-  "shortlist",
-  "match",
-  "interest_received",
-]);
-
 export async function recordCollapsibleNotice(
   supabase: NoticeClient,
   input: {
@@ -38,21 +30,20 @@ export async function recordCollapsibleNotice(
     const row = await found.order("created_at", { ascending: false }).limit(1).maybeSingle();
     existing = row.data ?? null;
   }
-  const now = new Date().toISOString();
   if (existing?.id) {
+    // Keep the first alert. Do not mark it unread again or send another phone or laptop notice.
     await client
       .from("notices")
       .update({
-        created_at: now,
-        read_at: null,
         title: input.title,
         body: input.body,
         href: input.href,
       })
-      .eq("id", existing.id);
+      .eq("id", existing.id)
+      .is("read_at", null);
     return { created: false };
   }
-  await client.from("notices").insert({
+  const inserted = await client.from("notices").insert({
     user_id: input.userId,
     kind: input.kind,
     title: input.title,
@@ -61,6 +52,9 @@ export async function recordCollapsibleNotice(
     match_profile_id: matchId,
     for_profile_id: forId,
   });
+  if (inserted && typeof inserted === "object" && "error" in inserted && inserted.error) {
+    return { created: false };
+  }
   return { created: true };
 }
 
@@ -78,7 +72,7 @@ export async function recordAndDeliverNotice(
   },
 ): Promise<void> {
   const { created } = await recordCollapsibleNotice(supabase, input);
-  if (!created && ONCE_KINDS.has(input.kind)) return;
+  if (!created) return;
   await deliverHouseNotice({
     userId: input.userId,
     kind: input.kind,
