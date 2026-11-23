@@ -4315,3 +4315,57 @@ html[data-scene="rain"] .home-greeting-role {
   .desk-review-likes-board { -webkit-overflow-scrolling: touch; }
 }
 
+/* One header on every page: Home, Discover, Inbox, Account, Desk, and the rest. */
+.page-scene > header {
+  width: 100%;
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+@media (min-width: 821px) {
+  .page-scene > header .site-head-inner {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: nowrap !important;
+    gap: 0.85rem;
+    width: 100%;
+  }
+  .page-scene > header .site-head-brand {
+    display: flex !important;
+    flex: 1 1 auto;
+    align-items: center;
+    min-width: 0;
+  }
+  .page-scene > header .live-clock {
+    display: flex !important;
+    flex: 0 0 auto;
+  }
+  .page-scene > header .site-head-inner > .site-nav {
+    position: static !important;
+    inset: auto !important;
+    width: auto !important;
+    max-width: none !important;
+    flex: 0 0 auto;
+    margin: 0 !important;
+    transform: none !important;
+  }
+  .page-scene > header .site-nav-row {
+    width: auto;
+    justify-content: flex-end;
+    align-items: stretch;
+    gap: 0.4rem;
+  }
+  .page-scene > header .site-nav-row > .nav-3d,
+  .page-scene > header .site-nav-row > .nav-group {
+    flex: 0 0 5.15rem !important;
+    width: 5.15rem !important;
+    min-width: 5.15rem;
+  }
+  .page-scene > header .site-nav-row > .nav-group > .nav-3d,
+  .page-scene > header .site-nav-row > .nav-3d {
+    height: 3.85rem;
+    min-height: 3.85rem;
+  }
+}
+
