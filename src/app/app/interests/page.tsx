@@ -291,8 +291,8 @@ export async function InterestsView({ only }: { only?: SectionId } = {}) {
 
   return (
     <PageShell>
-      <div className="sx-stage">
       <div className="inbox-unified"><InboxSwitcher active="likes" /></div>
+      <div className="sx-stage">
       <header className="sx-hero is-inbox is-house">
         <div className="sx-hero-copy">
           <p className="sx-eyebrow">Inbox</p>

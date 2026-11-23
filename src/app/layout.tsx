@@ -34,10 +34,10 @@ export const metadata: Metadata = {
   },
   description:
     "Where hearts unite and families bloom.",
-  applicationName: SITE_BRAND,
+  applicationName: "Marriage Connect",
   appleWebApp: {
     capable: true,
-    title: SITE_BRAND,
+    title: "Marriage Connect",
     statusBarStyle: "default",
   },
   formatDetection: { telephone: false },
