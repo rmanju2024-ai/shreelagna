@@ -430,6 +430,13 @@ export function parseProfileForm(
     HOPE_ANY.employed,
   );
   parsed.data.pref_managed = listedHope(d.pref_managed ?? [], lists.prefManaged, HOPE_ANY.managed);
+  const countries = parsed.data.pref_countries ?? [];
+  const indiaPlace =
+    countries.length === 0 || countries.includes(HOPE_ANY.country) || countries.includes("India");
+  if (!indiaPlace) {
+    parsed.data.pref_states = [HOPE_ANY.state];
+    parsed.data.pref_cities = [HOPE_ANY.city];
+  }
   parsed.data.pref_country = parsed.data.pref_countries?.[0];
   parsed.data.pref_education = parsed.data.pref_educations?.[0];
   parsed.data.pref_occupation = parsed.data.pref_occupations?.[0];

@@ -118,6 +118,14 @@ export function ProfileForm({
     const cCity = values.current_city || nCity;
     return nCountry === cCountry && nState === cState && nCity === cCity;
   });
+  const initialPrefCountries = hopeValues(values, "pref_countries", "pref_country");
+  const [prefCountries, setPrefCountries] = useState(
+    initialPrefCountries.length ? initialPrefCountries : [HOPE_ANY.country],
+  );
+  const indiaPlace =
+    prefCountries.length === 0 ||
+    prefCountries.includes(HOPE_ANY.country) ||
+    prefCountries.includes("India");
   const initialPrefStates = hopeValues(values, "pref_states", "pref_state");
   const [prefStates, setPrefStates] = useState(
     initialPrefStates.length ? initialPrefStates : [HOPE_ANY.state],
@@ -1196,33 +1204,41 @@ export function ProfileForm({
             anyValue={HOPE_ANY.country}
             options={lists.hopeCountries}
             prefer={[currentCountry, nativeCountry]}
-            selected={hopeValues(values, "pref_countries", "pref_country")}
+            selected={prefCountries}
+            onChange={setPrefCountries}
           />
           <HopePicker
+            key={indiaPlace ? "state-india" : "state-abroad"}
             label="State living in"
             name="pref_states"
             anyValue={HOPE_ANY.state}
             options={lists.states}
             prefer={[currentState, nativeState]}
-            selected={prefStates}
+            selected={indiaPlace ? prefStates : [HOPE_ANY.state]}
             onChange={setPrefStates}
+            disabled={!indiaPlace}
+            disabledHint="State is used only when India is one of the countries. A country outside India does not need a state."
           />
           <HopePicker
-            key={anyPrefState ? "city-any-state" : `city-${[...prefStates].sort().join("|")}`}
+            key={!indiaPlace ? "city-abroad" : anyPrefState ? "city-any-state" : `city-${[...prefStates].sort().join("|")}`}
             label="City / district"
             name="pref_cities"
             anyValue={HOPE_ANY.city}
             options={prefCityOptions}
             prefer={[currentCity, nativeCity]}
             selected={
-              anyPrefState
+              !indiaPlace || anyPrefState
                 ? [HOPE_ANY.city]
                 : hopeValues(values, "pref_cities").filter(
                     (c) => c === HOPE_ANY.city || prefCityOptions.includes(c),
                   )
             }
-            disabled={anyPrefState}
-            disabledHint="City is locked when Any state is chosen. Pick one or more states to choose cities from those states only."
+            disabled={!indiaPlace || anyPrefState}
+            disabledHint={
+              !indiaPlace
+                ? "City is used only when India is one of the countries."
+                : "City is locked when Any state is chosen. Pick one or more states to choose cities from those states only."
+            }
           />
           <Field
             label="Is horoscopic match preferred?"
