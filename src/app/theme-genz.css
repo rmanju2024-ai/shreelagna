@@ -3332,6 +3332,36 @@ button.field-help-btn,
   color: #6f1d1b;
   background: rgb(255 220 210 / 75%);
 }
+.home-family-grid.is-solo {
+  grid-template-columns: minmax(0, 1fr);
+}
+.home-profile-status {
+  display: inline-flex;
+  width: fit-content;
+  margin: 0.15rem 0 0.2rem;
+  padding: 0.08rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6b4a16;
+  background: rgb(244 220 168 / 70%);
+}
+.home-profile-status.is-active {
+  color: #1f5a32;
+  background: rgb(196 230 196 / 75%);
+}
+.home-profile-status.is-pending_review,
+.home-profile-status.is-on_hold {
+  color: #7a3e08;
+  background: rgb(255 214 160 / 80%);
+}
+.home-profile-status.is-hidden,
+.home-profile-status.is-banned,
+.home-profile-status.is-married {
+  color: #5c4033;
+  background: rgb(220 210 198 / 80%);
+}
 .home-profile-kind.is-groom {
   color: #1d3a6f;
   background: rgb(210 225 255 / 75%);

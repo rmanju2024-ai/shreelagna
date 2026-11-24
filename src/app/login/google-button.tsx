@@ -15,7 +15,7 @@ export function GoogleSignIn({
   label = "Continue with Gmail",
   tone = "maroon",
   size = "md",
-  next = "/app",
+  next = "/",
 }: {
   label?: string;
   tone?: "maroon" | "ivory";

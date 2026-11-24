@@ -179,8 +179,8 @@ describe("Login bounce and junk paths", () => {
   });
 
   it("drops protocol-relative phishing", () => {
-    expect(safeNextPath("/\\evil")).toBe("/app");
-    expect(safeNextPath("\t/browse")).toBe("/app");
+    expect(safeNextPath("/\\evil")).toBe("/");
+    expect(safeNextPath("\t/browse")).toBe("/");
   });
 });
 

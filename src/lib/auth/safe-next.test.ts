@@ -7,7 +7,7 @@ describe("safeNextPath", () => {
   });
 
   it("rejects an external redirect", () => {
-    expect(safeNextPath("//evil.example")).toBe("/app");
-    expect(safeNextPath("https://evil.example")).toBe("/app");
+    expect(safeNextPath("//evil.example")).toBe("/");
+    expect(safeNextPath("https://evil.example")).toBe("/");
   });
 });

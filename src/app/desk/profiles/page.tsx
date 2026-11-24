@@ -1,5 +1,5 @@
 import { DeskPager } from "@/app/desk/desk-pager";
-import { setProfileStatus, setProfileTrustTier } from "@/app/desk/profiles/actions";
+import { setProfileStatus } from "@/app/desk/profiles/actions";
 import { fetchAdminUserIds } from "@/lib/desk/admin-ids";
 import { requireDesk } from "@/lib/desk/access";
 import { deskPage, deskRange } from "@/lib/desk/pager";
@@ -9,8 +9,6 @@ import { formatIstDateTime } from "@/lib/time/ist";
 import { btnGhost, btnPrimary, cardClass, inputClass } from "@/lib/ui/classes";
 import Link from "next/link";
 import { profileOpenHref } from "@/lib/ui/dismiss";
-import { ProfileDeleteControl } from "@/app/app/profiles/profile-delete-control";
-
 const SELECT =
   "id, member_code, subject_full_name, status, is_complete, profile_type, created_by, created_at, about, trust_tier";
 const UUID =
@@ -74,15 +72,12 @@ function ProfileDeskRow({ row, queue }: { row: DeskProfile; queue: QueueView }) 
         <Link href={profileOpenHref(row.id, "desk")} className={btnGhost}>
           Preview
         </Link>
-        <Link href={`/app/profiles/${row.id}`} className={btnGhost}>
-          Edit
-        </Link>
-        {status !== "active" ? (
+        {review && status !== "active" ? (
           <form action={setProfileStatus}>
             <input type="hidden" name="id" value={row.id} />
             <input type="hidden" name="status" value="active" />
-            <button className={btnGhost} type="submit">
-              {review ? "Approve" : "Live"}
+            <button className={btnPrimary} type="submit">
+              Approve
             </button>
           </form>
         ) : null}
@@ -91,30 +86,10 @@ function ProfileDeskRow({ row, queue }: { row: DeskProfile; queue: QueueView }) 
             <input type="hidden" name="id" value={row.id} />
             <input type="hidden" name="status" value="on_hold" />
             <button className={btnGhost} type="submit">
-              Pause
+              Hold
             </button>
           </form>
         ) : null}
-        {status !== "hidden" ? (
-          <form action={setProfileStatus}>
-            <input type="hidden" name="id" value={row.id} />
-            <input type="hidden" name="status" value="hidden" />
-            <button className={btnGhost} type="submit">
-              Hide
-            </button>
-          </form>
-        ) : null}
-        <form action={setProfileTrustTier}>
-          <input type="hidden" name="id" value={row.id} />
-          <label className="sr-only" htmlFor={`trust-${row.id}`}>Trust tier</label>
-          <select id={`trust-${row.id}`} name="trust_tier" defaultValue={row.trust_tier ?? "submitted"} aria-label="Trust tier">
-            <option value="submitted">Submitted</option>
-            <option value="mobile_confirmed">Mobile confirmed</option>
-            <option value="details_reviewed">Details reviewed</option>
-          </select>
-          <button className={btnGhost} type="submit">Set trust</button>
-        </form>
-        <ProfileDeleteControl profileId={row.id} staff compact />
       </div>
     </li>
   );

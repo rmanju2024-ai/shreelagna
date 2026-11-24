@@ -19,6 +19,25 @@ function emptyStats(): Stats {
   return { views: 0, interestsIn: 0, interestsOut: 0, chats: 0 };
 }
 
+function listingTitle(status: string | null | undefined) {
+  switch (status) {
+    case "pending_review":
+      return "In review";
+    case "active":
+      return "Live";
+    case "hidden":
+      return "Paused";
+    case "on_hold":
+      return "On hold";
+    case "married":
+      return "Married";
+    case "banned":
+      return "Closed";
+    default:
+      return "Draft";
+  }
+}
+
 function planLine(access: Membership) {
   const name = access.label.replace(/ plan$/i, "");
   if (!access.live) {
@@ -52,28 +71,7 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
     );
   }
 
-  if (listed.length === 1) {
-    const only = listed[0];
-    return (
-      <div className="home-family">
-        <BannerGreeting asMember />
-        <div className="home-invite-actions home-family-cta">
-          <Link href={`/app/profiles/${only.id}`} className={btnHero}>
-            Open profile
-          </Link>
-          <Link href="/browse" className={btnHeroGhost}>
-            Find a match
-          </Link>
-          {room ? (
-            <Link href="/app/profiles/new" className={btnGhost}>
-              Add another
-            </Link>
-          ) : null}
-        </div>
-      </div>
-    );
-  }
-
+  const solo = listed.length === 1;
   const stats = new Map<string, Stats>();
   for (const id of ids) stats.set(id, emptyStats());
   const db = createServiceClient() ?? supabase;
@@ -131,7 +129,7 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
       {needPick || pick ? (
         <p className="home-invite-line home-invite-pick">Choose a bride or groom</p>
       ) : null}
-      <ul className="home-family-grid">
+      <ul className={`home-family-grid${solo ? " is-solo" : ""}`}>
         {listed.map((row) => {
           const s = stats.get(row.id) ?? emptyStats();
           const on = row.id === working;
@@ -159,6 +157,9 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
               <div className="home-family-meta">
                 <span className={`home-profile-kind is-${bride ? "bride" : "groom"}`}>
                   {profileKindLabel(row.profile_type)}
+                </span>
+                <span className={`home-profile-status is-${row.status || "draft"}`}>
+                  {listingTitle(row.status)}
                 </span>
                 <Link href={`/app/profiles/${row.id}`} className="home-family-name">
                   {name}
@@ -189,7 +190,7 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
                     <dd>{s.chats}</dd>
                   </div>
                 </dl>
-                {on ? (
+                {solo ? null : on ? (
                   <button type="button" className={btnPrimary} disabled>
                     In use
                   </button>
@@ -207,6 +208,21 @@ export async function HomeProfilesBoard({ pick }: { pick?: boolean }) {
           );
         })}
       </ul>
+      {solo ? (
+        <div className="home-invite-actions home-family-cta">
+          <Link href={`/app/profiles/${listed[0].id}`} className={btnHero}>
+            Open profile
+          </Link>
+          <Link href="/browse" className={btnHeroGhost}>
+            Find a match
+          </Link>
+          {room ? (
+            <Link href="/app/profiles/new" className={btnGhost}>
+              Add another
+            </Link>
+          ) : null}
+        </div>
+      ) : null}
       <p className="home-family-cap">
         {listed.length} of {MAX_PROFILES_PER_ACCOUNT} profiles
         {room ? (
