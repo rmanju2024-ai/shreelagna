@@ -17,7 +17,7 @@ function formatVoiceTime(seconds: number) {
   return `${m}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 }
 
-function VoicePlayer({ src }: { src: string }) {
+export function VoicePlayer({ src }: { src: string }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const probingRef = useRef(false);
   const [current, setCurrent] = useState(0);

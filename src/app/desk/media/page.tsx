@@ -1,3 +1,4 @@
+import { VoicePlayer } from "@/app/app/profiles/media-studio";
 import { reviewMediaItem } from "@/app/desk/media/actions";
 import { requireDesk } from "@/lib/desk/access";
 import { MEDIA_REJECT_REASONS, mediaRejectLabel } from "@/lib/desk/media-review";
@@ -7,6 +8,13 @@ import { formatIstDateTime } from "@/lib/time/ist";
 import { btnGhost, btnPrimary, cardClass, inputClass } from "@/lib/ui/classes";
 import Link from "next/link";
 import { profileOpenHref } from "@/lib/ui/dismiss";
+
+function mediaKindLabel(kind: string) {
+  if (kind === "audio") return "Voice";
+  if (kind === "video") return "Video";
+  if (kind === "photo") return "Photo";
+  return kind;
+}
 
 type MediaRow = {
   id: string;
@@ -33,10 +41,17 @@ export default async function DeskMediaPage() {
   const { data: people } = profileIds.length
     ? await db
         .from("profiles")
-        .select("id, subject_full_name, member_code, profile_type, status")
+        .select("id, subject_full_name, member_code, profile_type, status, is_complete")
         .in("id", profileIds)
-    : { data: [] as { id: string; subject_full_name?: string | null; member_code?: string | null; profile_type?: string | null; status?: string | null }[] };
+    : { data: [] as { id: string; subject_full_name?: string | null; member_code?: string | null; profile_type?: string | null; status?: string | null; is_complete?: boolean | null }[] };
   const byId = new Map((people ?? []).map((row) => [row.id, row]));
+  const changed = rows.filter((row) => {
+    const person = byId.get(row.profile_id);
+    if (!person) return true;
+    const status = person.status ?? "";
+    const newProfile = status === "pending_review" || (status === "draft" && Boolean(person.is_complete));
+    return !newProfile;
+  });
 
   return (
     <section className="desk-panel">
@@ -45,14 +60,14 @@ export default async function DeskMediaPage() {
           <p className="browse-kicker">Media</p>
           <h2>Queue</h2>
         </div>
-        <p>{rows.length} pending</p>
+        <p>{changed.length} pending</p>
       </header>
       <p className="desk-profile-queue-note">
-        Approve a photograph, or reject one file without taking the whole profile down. Hold video or voice on its own.
+        Voice, video, or a photograph changed on a live profile. New profiles stay on the profile review queue.
       </p>
-      {rows.length ? (
+      {changed.length ? (
         <ul className="desk-media-grid">
-          {rows.map((row) => {
+          {changed.map((row) => {
             const person = byId.get(row.profile_id);
             const url = publicMediaUrl(row.storage_path);
             return (
@@ -63,13 +78,13 @@ export default async function DeskMediaPage() {
                 ) : url && row.kind === "video" ? (
                   <video src={url} controls className="desk-media-shot" />
                 ) : url && row.kind === "audio" ? (
-                  <audio src={url} controls className="desk-media-audio" />
+                  <VoicePlayer src={url} />
                 ) : (
                   <p className="desk-empty">No preview</p>
                 )}
                 <p className="desk-ticket-name">{person?.subject_full_name || "Unnamed"}</p>
                 <p className="desk-ticket-meta">
-                  {person?.member_code || row.profile_id} · {row.kind} · {formatIstDateTime(row.created_at)}
+                  {person?.member_code || row.profile_id} · {mediaKindLabel(row.kind)} · {formatIstDateTime(row.created_at)}
                 </p>
                 {row.review_reason ? <p className="desk-ticket-flags">{mediaRejectLabel(row.review_reason)}</p> : null}
                 <form action={reviewMediaItem} className="desk-media-tools">
@@ -106,7 +121,7 @@ export default async function DeskMediaPage() {
           })}
         </ul>
       ) : (
-        <p className="desk-empty">No photographs or intros are waiting. New member uploads land here as pending.</p>
+        <p className="desk-empty">No changed voice, video, or photographs are waiting. New profiles stay on the profile review queue.</p>
       )}
     </section>
   );
