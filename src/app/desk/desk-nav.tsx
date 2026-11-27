@@ -6,7 +6,7 @@ import { NavGlyph } from "@/components/nav-icons";
 
 export const DESK_ITEMS = [
   { href: "/desk/profiles", id: "profiles", icon: "profile", label: "Review", hint: "Queue and ID search", group: "review" },
-  { href: "/desk/media", id: "media", icon: "look", label: "Media", hint: "Photos and intros", group: "review" },
+  { href: "/desk/media", id: "media", icon: "look", label: "Media", hint: "Changes on live profiles", group: "review" },
   { href: "/desk/tickets", id: "tickets", icon: "tickets", label: "Tickets", hint: "Family requests", group: "review" },
   { href: "/desk/safety", id: "safety", icon: "safety", label: "Safety", hint: "Reports and blocks", group: "review" },
   { href: "/desk/verification", id: "verification", icon: "verify", label: "Verify", hint: "Identity cases", group: "review" },

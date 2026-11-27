@@ -1,8 +1,6 @@
-import { VoicePlayer } from "@/app/app/profiles/media-studio";
 import { reviewMediaItem } from "@/app/desk/media/actions";
 import { requireDesk } from "@/lib/desk/access";
 import { MEDIA_REJECT_REASONS, mediaRejectLabel } from "@/lib/desk/media-review";
-import { publicMediaUrl } from "@/lib/match/inbox-card";
 import { createServiceClient } from "@/lib/supabase/server";
 import { formatIstDateTime } from "@/lib/time/ist";
 import { btnGhost, btnPrimary, cardClass, inputClass } from "@/lib/ui/classes";
@@ -13,7 +11,7 @@ function mediaKindLabel(kind: string) {
   if (kind === "audio") return "Voice";
   if (kind === "video") return "Video";
   if (kind === "photo") return "Photo";
-  return kind;
+  return "File";
 }
 
 type MediaRow = {
@@ -24,6 +22,13 @@ type MediaRow = {
   storage_path: string;
   review_reason?: string | null;
   created_at: string;
+};
+
+type Person = {
+  id: string;
+  subject_full_name?: string | null;
+  member_code?: string | null;
+  status?: string | null;
 };
 
 export default async function DeskMediaPage() {
@@ -38,53 +43,38 @@ export default async function DeskMediaPage() {
     .limit(80);
   const rows = ((pending.error ? [] : pending.data) ?? []) as MediaRow[];
   const profileIds = [...new Set(rows.map((row) => row.profile_id))];
-  const { data: people } = profileIds.length
-    ? await db
-        .from("profiles")
-        .select("id, subject_full_name, member_code, profile_type, status, is_complete")
-        .in("id", profileIds)
-    : { data: [] as { id: string; subject_full_name?: string | null; member_code?: string | null; profile_type?: string | null; status?: string | null; is_complete?: boolean | null }[] };
-  const byId = new Map((people ?? []).map((row) => [row.id, row]));
-  const changed = rows.filter((row) => {
-    const person = byId.get(row.profile_id);
-    if (!person) return true;
-    const status = person.status ?? "";
-    const newProfile = status === "pending_review" || (status === "draft" && Boolean(person.is_complete));
-    return !newProfile;
-  });
+  const peopleResult = profileIds.length
+    ? await db.from("profiles").select("id, subject_full_name, member_code, status").in("id", profileIds)
+    : { data: [] as Person[], error: null };
+  const people = ((peopleResult.error ? [] : peopleResult.data) ?? []) as Person[];
+  const byId = new Map(people.map((row) => [row.id, row]));
+  const changed = peopleResult.error
+    ? []
+    : rows.filter((row) => byId.get(row.profile_id)?.status === "active");
 
   return (
     <section className="desk-panel">
       <header className="desk-panel-head">
         <div>
           <p className="browse-kicker">Media</p>
-          <h2>Queue</h2>
+          <h2>Changes</h2>
         </div>
         <p>{changed.length} pending</p>
       </header>
       <p className="desk-profile-queue-note">
-        Voice, video, or a photograph changed on a live profile. New profiles stay on the profile review queue.
+        A live profile sent a new photo, voice, or video after the first review. New profiles stay on the profile queue.
       </p>
       {changed.length ? (
         <ul className="desk-media-grid">
           {changed.map((row) => {
             const person = byId.get(row.profile_id);
-            const url = publicMediaUrl(row.storage_path);
+            const kind = mediaKindLabel(row.kind);
             return (
               <li key={row.id} className={`${cardClass} desk-media-card`}>
-                {row.kind === "photo" && url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={url} alt="" className="desk-media-shot" />
-                ) : url && row.kind === "video" ? (
-                  <video src={url} controls className="desk-media-shot" />
-                ) : url && row.kind === "audio" ? (
-                  <VoicePlayer src={url} />
-                ) : (
-                  <p className="desk-empty">No preview</p>
-                )}
+                <p className="desk-media-change">{kind} came for review</p>
                 <p className="desk-ticket-name">{person?.subject_full_name || "Unnamed"}</p>
                 <p className="desk-ticket-meta">
-                  {person?.member_code || row.profile_id} · {mediaKindLabel(row.kind)} · {formatIstDateTime(row.created_at)}
+                  {person?.member_code || row.profile_id} · {formatIstDateTime(row.created_at)}
                 </p>
                 {row.review_reason ? <p className="desk-ticket-flags">{mediaRejectLabel(row.review_reason)}</p> : null}
                 <form action={reviewMediaItem} className="desk-media-tools">
@@ -99,29 +89,29 @@ export default async function DeskMediaPage() {
                       ))}
                     </select>
                   </label>
-                  <span className="plans-desk-actions">
+                  <span className="desk-media-actions">
                     <button name="decision" value="approved" className={btnPrimary}>
                       Approve
                     </button>
                     <button name="decision" value="rejected" className={btnGhost}>
                       Reject
                     </button>
-                    {row.kind !== "photo" ? (
-                      <button name="decision" value="pending" className={btnGhost}>
-                        Keep on hold
-                      </button>
-                    ) : null}
                   </span>
+                  {row.kind !== "photo" ? (
+                    <button name="decision" value="pending" className={`${btnGhost} desk-media-hold`}>
+                      Keep on hold
+                    </button>
+                  ) : null}
                 </form>
-                <Link href={profileOpenHref(row.profile_id, "desk")} className={btnGhost}>
-                  Preview
+                <Link href={profileOpenHref(row.profile_id, "desk")} className="desk-media-preview">
+                  Open profile to check the {kind.toLowerCase()}
                 </Link>
               </li>
             );
           })}
         </ul>
       ) : (
-        <p className="desk-empty">No changed voice, video, or photographs are waiting. New profiles stay on the profile review queue.</p>
+        <p className="desk-empty">No changes from live profiles. New profiles stay on the profile queue.</p>
       )}
     </section>
   );
