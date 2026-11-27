@@ -12,7 +12,7 @@ import { EVIDENCE_RETENTION_NOTICE } from "@/lib/verification/copy";
 import { visibleVerificationMarks } from "@/lib/verification/marks";
 import { otherProfileLocked } from "@/lib/profile/view-gate";
 import { BackLink } from "@/components/back-link";
-import { VoicePlayer } from "@/app/app/profiles/media-studio";
+import { VideoPlayer, VoicePlayer } from "@/app/app/profiles/media-studio";
 import type { CompletenessItem } from "@/lib/profile/completeness";
 import type { InterestThread } from "@/lib/match/interest-status";
 import { emitQuotaSoft } from "@/components/quota-soft-toast";
@@ -870,7 +870,7 @@ export function ProfileRedesign(props: ProfileData) {
             <PlanLock on={locked} href={lockHref} cta={lockCta} message={lockMessage}>
               <>
                 {props.videoUrls?.map((src, i) => (
-                  <video key={src} className="pv-video" controls src={src} aria-label={`Video ${i + 1}`} />
+                  <VideoPlayer key={src} src={src} />
                 ))}
                 {props.voiceUrls?.map((src) => (
                   <VoicePlayer key={src} src={src} />

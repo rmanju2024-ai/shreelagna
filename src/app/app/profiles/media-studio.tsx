@@ -21,6 +21,22 @@ function readableDuration(value: number) {
   return Number.isFinite(value) && value > 0 && value < 1e5 ? value : 0;
 }
 
+function PlayGlyph({ playing }: { playing?: boolean }) {
+  if (playing) {
+    return (
+      <svg viewBox="0 0 16 16" aria-hidden="true">
+        <rect x="3" y="2" width="3.2" height="12" rx="0.6" />
+        <rect x="9.8" y="2" width="3.2" height="12" rx="0.6" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M4.2 2.4v11.2L13.4 8 4.2 2.4z" />
+    </svg>
+  );
+}
+
 export function VoicePlayer({ src }: { src: string }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const probingRef = useRef(false);
@@ -126,29 +142,156 @@ export function VoicePlayer({ src }: { src: string }) {
           else el.pause();
         }}
       >
+        <PlayGlyph playing={playing} />
+      </button>
+      <span className="voice-meta">
+        <span className="voice-time">
+          {formatVoiceTime(current)} / {formatVoiceTime(duration)}
+        </span>
+        <span className="voice-track" aria-hidden="true">
+          <span className="voice-fill" style={{ width: `${ratio * 100}%` }} />
+        </span>
+        <input
+          type="range"
+          className="voice-seek"
+          min={0}
+          max={duration > 0 ? duration : 1}
+          step={0.1}
+          value={duration > 0 ? Math.min(current, duration) : 0}
+          aria-label="Voice progress"
+          onChange={(e) => {
+            const next = Number(e.target.value);
+            const el = audioRef.current;
+            if (el && Number.isFinite(next)) el.currentTime = next;
+            setCurrent(next);
+          }}
+        />
+      </span>
+    </div>
+  );
+}
+
+export function VideoPlayer({ src, autoPlay = false }: { src: string; autoPlay?: boolean }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const probingRef = useRef(false);
+  const [current, setCurrent] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [playing, setPlaying] = useState(autoPlay);
+
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el) return;
+    let alive = true;
+    setCurrent(0);
+    setDuration(0);
+    probingRef.current = false;
+
+    const applyDuration = () => {
+      const next = readableDuration(el.duration);
+      if (next > 0) setDuration(next);
+      return next;
+    };
+    const finishProbe = () => {
+      if (!probingRef.current) return;
+      const next = applyDuration();
+      if (next <= 0) return;
+      probingRef.current = false;
+      if (el.paused && el.currentTime > 0) el.currentTime = 0;
+    };
+    const probeDuration = () => {
+      if (applyDuration() > 0 || probingRef.current) return;
+      probingRef.current = true;
+      el.addEventListener("durationchange", finishProbe);
+      el.addEventListener("seeked", finishProbe);
+      window.setTimeout(() => {
+        finishProbe();
+        probingRef.current = false;
+      }, 1500);
+      try {
+        el.currentTime = 1e101;
+      } catch {
+        probingRef.current = false;
+      }
+    };
+    let frame = 0;
+    const tick = () => {
+      if (!alive) return;
+      if (!probingRef.current) {
+        setCurrent(el.currentTime || 0);
+        applyDuration();
+      }
+      if (!el.paused && !el.ended) frame = window.requestAnimationFrame(tick);
+    };
+    const onPlay = () => {
+      setPlaying(true);
+      probeDuration();
+      frame = window.requestAnimationFrame(tick);
+    };
+    const onPause = () => {
+      setPlaying(false);
+      if (!probingRef.current) setCurrent(el.currentTime || 0);
+    };
+    const onEnded = () => {
+      setPlaying(false);
+      setCurrent(applyDuration() || el.currentTime || 0);
+    };
+    el.addEventListener("loadedmetadata", probeDuration);
+    el.addEventListener("durationchange", applyDuration);
+    el.addEventListener("play", onPlay);
+    el.addEventListener("pause", onPause);
+    el.addEventListener("ended", onEnded);
+    if (el.readyState >= 1) probeDuration();
+    return () => {
+      alive = false;
+      window.cancelAnimationFrame(frame);
+      el.removeEventListener("loadedmetadata", probeDuration);
+      el.removeEventListener("durationchange", applyDuration);
+      el.removeEventListener("play", onPlay);
+      el.removeEventListener("pause", onPause);
+      el.removeEventListener("ended", onEnded);
+    };
+  }, [src]);
+
+  function toggle() {
+    const el = videoRef.current;
+    if (!el) return;
+    if (el.paused) void el.play();
+    else el.pause();
+  }
+
+  const ratio = duration > 0 ? Math.min(1, current / duration) : 0;
+
+  return (
+    <div className="clip-video">
+      <video ref={videoRef} src={src} playsInline preload="auto" autoPlay={autoPlay} onClick={toggle} />
+      <button type="button" className="clip-video-play" aria-label={playing ? "Pause" : "Play"} onClick={toggle}>
         {playing ? "❚❚" : "▶"}
       </button>
-      <span className="voice-time">
-        {formatVoiceTime(current)} / {formatVoiceTime(duration)}
-      </span>
-      <span className="voice-track" aria-hidden="true">
-        <span className="voice-fill" style={{ width: `${ratio * 100}%` }} />
-      </span>
-      <input
-        type="range"
-        className="voice-seek"
-        min={0}
-        max={duration > 0 ? duration : 1}
-        step={0.1}
-        value={duration > 0 ? Math.min(current, duration) : 0}
-        aria-label="Voice progress"
-        onChange={(e) => {
-          const next = Number(e.target.value);
-          const el = audioRef.current;
-          if (el && Number.isFinite(next)) el.currentTime = next;
-          setCurrent(next);
-        }}
-      />
+      <div className="clip-video-bar">
+        <span className="voice-time">
+          {formatVoiceTime(current)} / {formatVoiceTime(duration)}
+        </span>
+        <span className="voice-meta">
+          <span className="voice-track" aria-hidden="true">
+            <span className="voice-fill" style={{ width: `${ratio * 100}%` }} />
+          </span>
+          <input
+            type="range"
+            className="voice-seek"
+            min={0}
+            max={duration > 0 ? duration : 1}
+            step={0.1}
+            value={duration > 0 ? Math.min(current, duration) : 0}
+            aria-label="Video progress"
+            onChange={(e) => {
+              const next = Number(e.target.value);
+              const el = videoRef.current;
+              if (el && Number.isFinite(next)) el.currentTime = next;
+              setCurrent(next);
+            }}
+          />
+        </span>
+      </div>
     </div>
   );
 }
@@ -464,12 +607,7 @@ export function IntroStudio({
         <p className="album-kicker">Video</p>
         {clipVideo ? (
           <div className="media-preview">
-            <video
-              controls
-              playsInline
-              preload="metadata"
-              src={videoSrc}
-            />
+            <VideoPlayer src={videoSrc} />
             <MediaMark line={watermark} />
             {busy ? <p className="album-kicker">Saving…</p> : null}
           </div>
@@ -554,7 +692,7 @@ export function IntroStudio({
             ) : (
               <>
                 <div className="voice-player voice-player-empty">
-                  <span className="voice-play">▶</span>
+                  <span className="voice-play"><PlayGlyph /></span>
                   <span className="voice-time">0:00</span>
                   <input type="range" className="voice-seek" min={0} max={1} value={0} disabled aria-hidden />
                   <span className="voice-time">0:00</span>
@@ -577,7 +715,7 @@ export function IntroStudio({
         ) : (
           <div className="voice-row">
             <div className="voice-player voice-player-empty">
-              <span className="voice-play">▶</span>
+              <span className="voice-play"><PlayGlyph /></span>
               <span className="voice-time">0:00</span>
               <input type="range" className="voice-seek" min={0} max={1} value={0} disabled aria-label="Voice progress" />
               <span className="voice-time">0:00</span>
@@ -595,7 +733,7 @@ export function IntroStudio({
               </button>
               <div className="media-lightbox-stage">
                 <div className="media-lightbox-frame">
-                  <video controls autoPlay src={videoSrc} />
+                  <VideoPlayer src={videoSrc} autoPlay />
                   <MediaMark line={watermark} />
                 </div>
               </div>

@@ -4810,12 +4810,12 @@ a.card-premium:hover,
   position: relative;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.55rem;
   flex: 1 1 12rem;
   min-width: 0;
-  height: 2.85rem;
-  padding: 0 0.7rem 0.45rem 0.35rem;
-  border-radius: 999px;
+  min-height: 3.1rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 1rem;
   background: #f3f5f7;
 }
 
@@ -4828,16 +4828,39 @@ a.card-premium:hover,
 }
 
 .voice-play {
-  flex: none;
-  width: 1.7rem;
-  height: 1.7rem;
+  position: relative;
+  z-index: 3;
+  flex: 0 0 2.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
   border: 0;
   padding: 0;
-  background: transparent;
-  color: #1f2933;
-  font-size: 0.78rem;
+  border-radius: 999px;
+  background: #6f1d1b;
+  color: #fff;
+  font-size: 0.85rem;
   line-height: 1;
   cursor: pointer;
+}
+
+.voice-play svg {
+  display: block;
+  width: 0.85rem;
+  height: 0.85rem;
+  fill: currentColor;
+}
+
+.voice-meta {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  display: grid;
+  gap: 0.28rem;
 }
 
 .voice-time {
@@ -4849,11 +4872,9 @@ a.card-premium:hover,
 }
 
 .voice-track {
-  position: absolute;
-  left: 0.35rem;
-  right: 0.7rem;
-  bottom: 0.28rem;
-  height: 0.22rem;
+  position: relative;
+  display: block;
+  height: 0.28rem;
   border-radius: 999px;
   background: #cfd6dc;
   overflow: hidden;
@@ -4868,15 +4889,64 @@ a.card-premium:hover,
 
 .voice-seek {
   position: absolute;
-  left: 0.35rem;
-  right: 0.7rem;
-  bottom: 0.1rem;
-  width: auto;
-  height: 0.7rem;
+  left: 0;
+  right: 0;
+  bottom: -0.15rem;
+  z-index: 2;
+  width: 100%;
+  height: 1rem;
+  min-height: 0;
   margin: 0;
+  padding: 0;
   appearance: none;
   cursor: pointer;
   background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.clip-video {
+  position: relative;
+  width: 100%;
+  background: #1c0d0a;
+  border-radius: 0.7rem;
+  overflow: hidden;
+}
+
+.clip-video video {
+  display: block;
+  width: 100%;
+  max-height: 18rem;
+  background: #1c0d0a;
+}
+
+.clip-video-play {
+  position: absolute;
+  left: 0.6rem;
+  bottom: 2.7rem;
+  z-index: 2;
+  width: 2.4rem;
+  height: 2.4rem;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  color: #1c0d0a;
+  font-size: 0.9rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.clip-video-bar {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.55rem;
+  align-items: center;
+  padding: 0.45rem 0.7rem 0.55rem;
+  background: #1c0d0a;
+}
+
+.clip-video-bar .voice-time {
+  color: #fff;
 }
 
 .voice-seek::-webkit-slider-runnable-track {
