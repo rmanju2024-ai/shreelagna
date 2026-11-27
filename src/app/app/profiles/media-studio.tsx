@@ -17,6 +17,10 @@ function formatVoiceTime(seconds: number) {
   return `${m}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 }
 
+function readableDuration(value: number) {
+  return Number.isFinite(value) && value > 0 && value < 1e5 ? value : 0;
+}
+
 export function VoicePlayer({ src }: { src: string }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const probingRef = useRef(false);
@@ -27,31 +31,35 @@ export function VoicePlayer({ src }: { src: string }) {
   useEffect(() => {
     const el = audioRef.current;
     if (!el) return;
+    let alive = true;
     setCurrent(0);
     setDuration(0);
     setPlaying(false);
     probingRef.current = false;
 
-    const applyDuration = (value: number) => {
-      if (Number.isFinite(value) && value > 0) setDuration(value);
+    const applyDuration = () => {
+      const next = readableDuration(el.duration);
+      if (next > 0) setDuration(next);
+      return next;
+    };
+
+    const finishProbe = () => {
+      if (!probingRef.current) return;
+      const next = applyDuration();
+      if (next <= 0) return;
+      probingRef.current = false;
+      if (el.paused && el.currentTime > 0) el.currentTime = 0;
     };
 
     const probeDuration = () => {
-      if (Number.isFinite(el.duration) && el.duration > 0) {
-        applyDuration(el.duration);
-        return;
-      }
-      if (probingRef.current) return;
+      if (applyDuration() > 0 || probingRef.current) return;
       probingRef.current = true;
-      const finish = () => {
-        el.removeEventListener("timeupdate", finish);
-        el.removeEventListener("seeked", finish);
-        applyDuration(el.duration);
-        el.currentTime = 0;
+      el.addEventListener("durationchange", finishProbe);
+      el.addEventListener("seeked", finishProbe);
+      window.setTimeout(() => {
+        finishProbe();
         probingRef.current = false;
-      };
-      el.addEventListener("timeupdate", finish);
-      el.addEventListener("seeked", finish);
+      }, 1500);
       try {
         el.currentTime = 1e101;
       } catch {
@@ -59,28 +67,43 @@ export function VoicePlayer({ src }: { src: string }) {
       }
     };
 
-    const onTime = () => {
-      if (probingRef.current) return;
-      setCurrent(el.currentTime || 0);
-      applyDuration(el.duration);
+    let frame = 0;
+    const tick = () => {
+      if (!alive) return;
+      if (!probingRef.current) {
+        setCurrent(el.currentTime || 0);
+        applyDuration();
+      }
+      if (!el.paused && !el.ended) frame = window.requestAnimationFrame(tick);
     };
-    const onPlay = () => setPlaying(true);
-    const onPause = () => setPlaying(false);
+
+    const onPlay = () => {
+      setPlaying(true);
+      probeDuration();
+      frame = window.requestAnimationFrame(tick);
+    };
+    const onPause = () => {
+      setPlaying(false);
+      if (!probingRef.current) setCurrent(el.currentTime || 0);
+    };
     const onEnded = () => {
       setPlaying(false);
-      if (Number.isFinite(el.duration) && el.duration > 0) setCurrent(el.duration);
+      const next = applyDuration();
+      setCurrent(next || el.currentTime || 0);
     };
 
     el.addEventListener("loadedmetadata", probeDuration);
-    el.addEventListener("timeupdate", onTime);
+    el.addEventListener("durationchange", applyDuration);
     el.addEventListener("play", onPlay);
     el.addEventListener("pause", onPause);
     el.addEventListener("ended", onEnded);
     if (el.readyState >= 1) probeDuration();
 
     return () => {
+      alive = false;
+      window.cancelAnimationFrame(frame);
       el.removeEventListener("loadedmetadata", probeDuration);
-      el.removeEventListener("timeupdate", onTime);
+      el.removeEventListener("durationchange", applyDuration);
       el.removeEventListener("play", onPlay);
       el.removeEventListener("pause", onPause);
       el.removeEventListener("ended", onEnded);
@@ -105,17 +128,20 @@ export function VoicePlayer({ src }: { src: string }) {
       >
         {playing ? "❚❚" : "▶"}
       </button>
-      <span className="voice-time">{formatVoiceTime(current)}</span>
+      <span className="voice-time">
+        {formatVoiceTime(current)} / {formatVoiceTime(duration)}
+      </span>
+      <span className="voice-track" aria-hidden="true">
+        <span className="voice-fill" style={{ width: `${ratio * 100}%` }} />
+      </span>
       <input
         type="range"
         className="voice-seek"
         min={0}
         max={duration > 0 ? duration : 1}
-        step={0.05}
+        step={0.1}
         value={duration > 0 ? Math.min(current, duration) : 0}
-        disabled={duration <= 0}
         aria-label="Voice progress"
-        style={{ ["--voice-progress" as string]: `${ratio * 100}%` }}
         onChange={(e) => {
           const next = Number(e.target.value);
           const el = audioRef.current;
@@ -123,7 +149,6 @@ export function VoicePlayer({ src }: { src: string }) {
           setCurrent(next);
         }}
       />
-      <span className="voice-time">{duration > 0 ? formatVoiceTime(duration) : "--:--"}</span>
     </div>
   );
 }

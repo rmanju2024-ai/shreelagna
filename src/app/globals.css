@@ -4813,8 +4813,8 @@ a.card-premium:hover,
   gap: 0.5rem;
   flex: 1 1 12rem;
   min-width: 0;
-  height: 2.45rem;
-  padding: 0 0.7rem 0 0.35rem;
+  height: 2.85rem;
+  padding: 0 0.7rem 0.45rem 0.35rem;
   border-radius: 999px;
   background: #f3f5f7;
 }
@@ -4848,24 +4848,39 @@ a.card-premium:hover,
   font-variant-numeric: tabular-nums;
 }
 
+.voice-track {
+  position: absolute;
+  left: 0.35rem;
+  right: 0.7rem;
+  bottom: 0.28rem;
+  height: 0.22rem;
+  border-radius: 999px;
+  background: #cfd6dc;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.voice-fill {
+  display: block;
+  height: 100%;
+  background: #6f1d1b;
+}
+
 .voice-seek {
-  flex: 1 1 auto;
-  min-width: 0;
-  height: 0.28rem;
+  position: absolute;
+  left: 0.35rem;
+  right: 0.7rem;
+  bottom: 0.1rem;
+  width: auto;
+  height: 0.7rem;
   margin: 0;
   appearance: none;
   cursor: pointer;
-  border-radius: 999px;
-  background: linear-gradient(
-    to right,
-    #6f1d1b var(--voice-progress, 0%),
-    #cfd6dc var(--voice-progress, 0%)
-  );
+  background: transparent;
 }
 
 .voice-seek::-webkit-slider-runnable-track {
-  height: 0.28rem;
-  border-radius: 999px;
+  height: 0.22rem;
   background: transparent;
 }
 
@@ -4880,10 +4895,9 @@ a.card-premium:hover,
 }
 
 .voice-seek::-moz-range-track {
-  height: 0.28rem;
+  height: 0.22rem;
   border: 0;
-  border-radius: 999px;
-  background: #cfd6dc;
+  background: transparent;
 }
 
 .voice-seek::-moz-range-progress {
